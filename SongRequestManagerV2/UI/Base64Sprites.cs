@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-namespace SongRequestManager.UI
+namespace SongRequestManagerV2.UI
 {
     class Base64Sprites
     {

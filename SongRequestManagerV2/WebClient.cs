@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     internal class WebResponse
     {
@@ -46,7 +46,7 @@ namespace SongRequestManager
         internal WebClient()
         {
             _client = new HttpClient();
-            _client.DefaultRequestHeaders.UserAgent.TryParseAdd($"SongRequestManager/{Plugin.Version}");
+            _client.DefaultRequestHeaders.UserAgent.TryParseAdd($"SongRequestManagerV2/{Plugin.Version}");
         }
 
         ~WebClient()

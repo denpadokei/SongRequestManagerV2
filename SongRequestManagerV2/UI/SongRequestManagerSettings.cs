@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SongRequestManager.UI
+namespace SongRequestManagerV2.UI
 {
     public class SongRequestManagerSettings : PersistentSingleton<SongRequestManagerSettings>
     {

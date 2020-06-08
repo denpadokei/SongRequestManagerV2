@@ -6,13 +6,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Image = UnityEngine.UI.Image;
-using SongRequestManager.UI;
+using SongRequestManagerV2.UI;
 using IPA.Utilities;
 using BeatSaberMarkupLanguage;
 using Utilities = StreamCore.Utils.Utilities;
 using System.Threading.Tasks;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
 
     public class RequestBotListViewController : ViewController, TableView.IDataSource

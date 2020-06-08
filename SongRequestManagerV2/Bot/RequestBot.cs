@@ -20,7 +20,7 @@ using SongCore;
 using StreamCore;
 //using StreamCore.Twitch;
 using IPA.Utilities;
-using SongRequestManager.UI;
+using SongRequestManagerV2.UI;
 using BeatSaberMarkupLanguage;
 using Utilities = StreamCore.Utils.Utilities;
 using System.Threading.Tasks;
@@ -34,7 +34,7 @@ using ChatCore.Services.Twitch;
 using ChatCore.Services.Mixer;
 using System.Runtime.CompilerServices;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     public partial class RequestBot : MonoBehaviour, ITwitchIntegration
     {

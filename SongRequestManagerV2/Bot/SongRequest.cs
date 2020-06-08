@@ -1,11 +1,11 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Models.Twitch;
-using SongRequestManager.Extentions;
+using SongRequestManagerV2.Extentions;
 using StreamCore.SimpleJSON;
 using System;
-using static SongRequestManager.RequestBot;
+using static SongRequestManagerV2.RequestBot;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     public class SongRequest
     {

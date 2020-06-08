@@ -8,10 +8,10 @@ using UnityEngine.UI;
 using HMUI;
 using Image = UnityEngine.UI.Image;
 using BeatSaberMarkupLanguage;
-using SongRequestManager.UI;
+using SongRequestManagerV2.UI;
 using ChatCore.Interfaces;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     // Experimental chat console
     public class KEYBOARD

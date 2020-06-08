@@ -4,7 +4,7 @@ using System;
 using UnityEngine;
 using System.Collections;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     internal class Dispatcher : MonoBehaviour
     {

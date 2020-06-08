@@ -10,7 +10,7 @@ using StreamCore.Twitch;
 using System.Threading.Tasks;
 using ChatCore.Interfaces;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     public partial class RequestBot : MonoBehaviour
     {

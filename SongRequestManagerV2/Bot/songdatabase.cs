@@ -16,7 +16,7 @@ using StreamCore.Twitch;
 // Feature requests: Add Reason for being banned to banlist
 //  
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     public partial class RequestBot : MonoBehaviour
     {

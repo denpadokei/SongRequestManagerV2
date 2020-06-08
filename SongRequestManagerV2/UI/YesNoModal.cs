@@ -5,7 +5,7 @@ using System;
 using System.Reflection;
 using TMPro;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     public class YesNoModal : PersistentSingleton<YesNoModal>
     {
@@ -50,7 +50,7 @@ namespace SongRequestManager
 
         internal void Setup()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "SongRequestManager.Views.YesNoModal.bsml"), RequestBotListViewController.Instance.gameObject, this);
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "SongRequestManagerV2.Views.YesNoModal.bsml"), RequestBotListViewController.Instance.gameObject, this);
         }
     }
 }

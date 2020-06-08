@@ -13,7 +13,7 @@ using ChatCore.Services.Mixer;
 using ChatCore.Models.Twitch;
 // Feature requests: Add Reason for being banned to banlist
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     public partial class RequestBot : MonoBehaviour
     {

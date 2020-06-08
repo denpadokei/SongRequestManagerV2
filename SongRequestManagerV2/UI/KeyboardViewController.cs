@@ -1,7 +1,7 @@
 ﻿using HMUI;
 using UnityEngine;
 
-namespace SongRequestManager.UI
+namespace SongRequestManagerV2.UI
 {
     public class KeyboardViewController : ViewController
     {

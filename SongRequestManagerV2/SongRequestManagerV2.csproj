@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;UNRELEASEDX</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -26,11 +26,15 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;UNRELEASEDX</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="StreamCore, Version=2.2.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\StreamCore.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
@@ -74,9 +78,6 @@
     <Reference Include="SongCore, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\SongCore.dll</HintPath>
-    </Reference>
-    <Reference Include="StreamCore">
-      <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\StreamCore.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ProBuilder">
       <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\Unity.ProBuilder.dll</HintPath>
@@ -154,10 +155,12 @@
     <Compile Include="UI\UIHelper.cs" />
     <Compile Include="UI\YesNoModal.cs" />
     <Compile Include="WebClient.cs" />
+    <EmbeddedResource Include="Views\SongRequestManagerSettings.bsml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Views\SongRequestManagerSettings.bsml" />
-    <None Include="Views\YesNoModal.bsml" />
+    <EmbeddedResource Include="manifest.json" />
+    <None Include="packages.config" />
+    <EmbeddedResource Include="Views\YesNoModal.bsml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -9,7 +9,7 @@ using IPA.Utilities;
 using IPA.Loader;
 using SongCore;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     class SongListUtils
     {

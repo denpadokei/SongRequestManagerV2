@@ -1,11 +1,11 @@
 ﻿using BeatSaberMarkupLanguage;
 using HMUI;
 using IPA.Utilities;
-using SongRequestManager.UI;
+using SongRequestManagerV2.UI;
 using System.Linq;
 using UnityEngine;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     public class RequestFlowCoordinator : FlowCoordinator
     {

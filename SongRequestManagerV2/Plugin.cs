@@ -3,20 +3,25 @@ using IPALogger = IPA.Logging.Logger;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using SongRequestManager.UI;
+using SongRequestManagerV2.UI;
 using BeatSaberMarkupLanguage.Settings;
 using IPA.Utilities;
 using ChatCore.Interfaces;
 using ChatCore;
 using ChatCore.Services;
+using IPA.Loader;
+using System.Reflection;
+using BS_Utils.Utilities;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     [Plugin(RuntimeOptions.SingleStartInit)]
     public class Plugin
     {
-        public string Name => "Song Request Manager";
-        public static SemVer.Version Version => IPA.Loader.PluginManager.GetPluginFromId("SongRequestManager").Version;
+        public string Name => "Song Request ManagerV2";
+        public static string Version => _meta.Version.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+        private static PluginMetadata _meta;
 
         public static IPALogger Logger { get; internal set; }
 
@@ -31,13 +36,16 @@ namespace SongRequestManager
 
         private readonly RequestBotConfig RequestBotConfig = new RequestBotConfig();
 
-        public static string DataPath = Path.Combine(Environment.CurrentDirectory, "UserData", "StreamCore");
+        public static string DataPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "UserData", "StreamCore");
         public static bool SongBrowserPluginPresent;
 
         [Init]
-        public void Init(IPALogger log)
+        public void Init(IPALogger log, PluginMetadata meta)
         {
+            Instance = this;
+            _meta = meta;
             Logger = log;
+            Logger.Debug("Logger initialized.");
         }
 
         public static void Log(string text,
@@ -45,7 +53,7 @@ namespace SongRequestManager
                         [CallerMemberName] string member = "",
                         [CallerLineNumber] int line = 0)
         {
-            Logger.Info($"[SongRequestManager] {Path.GetFileName(file)}->{member}({line}): {text}");
+            Logger.Info($"[SongRequestManagerV2] {Path.GetFileName(file)}->{member}({line}): {text}");
         }
 
         [OnStart]
@@ -53,8 +61,8 @@ namespace SongRequestManager
         {
             this.CoreInstance = ChatCoreInstance.Current;
             this.MultiplexerInstance = this.CoreInstance.RunAllServices();
-            if (Instance != null) return;
-            Instance = this;
+            //if (Instance != null) return;
+            //Instance = this;
 
             Dispatcher.Initialize();
 
@@ -64,12 +72,12 @@ namespace SongRequestManager
             SongBrowserPluginPresent = IPA.Loader.PluginManager.GetPlugin("Song Browser") != null;
 
             // setup handle for fresh menu scene changes
-            BS_Utils.Utilities.BSEvents.OnLoad();
-            BS_Utils.Utilities.BSEvents.menuSceneLoadedFresh += OnMenuSceneLoadedFresh;
+            BSEvents.OnLoad();
+            BSEvents.menuSceneLoadedFresh += OnMenuSceneLoadedFresh;
 
             // keep track of active scene
-            BS_Utils.Utilities.BSEvents.menuSceneActive += () => { IsAtMainMenu = true; };
-            BS_Utils.Utilities.BSEvents.gameSceneActive += () => { IsAtMainMenu = false; };
+            BSEvents.menuSceneActive += () => { IsAtMainMenu = true; };
+            BSEvents.gameSceneActive += () => { IsAtMainMenu = false; };
 
             // init sprites
             Base64Sprites.Init();
@@ -78,7 +86,7 @@ namespace SongRequestManager
         private void OnMenuSceneLoadedFresh()
         {
             // setup settings ui
-            BSMLSettings.instance.AddSettingsMenu("SRM", "SongRequestManager.Views.SongRequestManagerSettings.bsml", SongRequestManagerSettings.instance);
+            BSMLSettings.instance.AddSettingsMenu("SRM", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", SongRequestManagerSettings.instance);
 
             // main load point
             RequestBot.OnLoad();

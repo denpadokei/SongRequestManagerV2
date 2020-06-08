@@ -2,7 +2,7 @@
 using StreamCore.Twitch;
 using System;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     public class RequestInfo
     {

@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     public partial class RequestBot : MonoBehaviour
     {

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using IPA.Utilities;
 using BeatSaberMarkupLanguage;
 
-namespace SongRequestManager.UI
+namespace SongRequestManagerV2.UI
 {
     internal class UIHelper : MonoBehaviour
     {

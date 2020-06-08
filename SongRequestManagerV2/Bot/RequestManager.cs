@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace SongRequestManager
+namespace SongRequestManagerV2
 {
     public class RequestManager
     {
