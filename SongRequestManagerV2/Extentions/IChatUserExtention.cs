@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SongRequestManager.Extentions
 {
-    public static class TwitchUserExtention
+    public static class IChatuserExtention
     {
         public static JSONObject ToJson(this IChatUser chatUser)
         {

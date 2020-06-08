@@ -227,7 +227,7 @@ namespace SongRequestManager
             RequestBot._refreshQueue = true;
         }
 
-        private void Awake()
+        private async void Awake()
         {
             DontDestroyOnLoad(gameObject);
             //Instance = this;
@@ -334,11 +334,11 @@ namespace SongRequestManager
 
                 }
 
-                if (RequestBotConfig.Instance.PPSearch) GetPPData(); // Start loading PP data
+                if (RequestBotConfig.Instance.PPSearch) await GetPPData(); // Start loading PP data
 
                 MapDatabase.LoadDatabase();
 
-                if (RequestBotConfig.Instance.LocalSearch) MapDatabase.LoadCustomSongs(); // This is a background process
+                if (RequestBotConfig.Instance.LocalSearch) await MapDatabase.LoadCustomSongs(); // This is a background process
 
                 RequestQueue.Read(); // Might added the timespan check for this too. To be decided later.
                 RequestHistory.Read();

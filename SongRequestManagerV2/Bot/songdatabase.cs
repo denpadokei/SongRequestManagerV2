@@ -894,7 +894,14 @@ namespace SongRequestManager
                 }
             }
 
-            COMMAND.Parse(TwitchWebSocketClient.OurIChatUser, "!deck pp", RequestBot.CmdFlags.Local);
+            if (Plugin.Instance.MultiplexerInstance.GetTwitchService().LoggedInUser != null) {
+                COMMAND.Parse(Plugin.Instance.MultiplexerInstance.GetTwitchService().LoggedInUser, "!deck pp", RequestBot.CmdFlags.Local);
+            }
+            else {
+                COMMAND.Parse(Plugin.Instance.MultiplexerInstance.GetMixerService().LoginUser, "!deck pp", RequestBot.CmdFlags.Local);
+            }
+
+            
             Instance.QueueChatMessage("PP Data indexed");
             pploading = false;
         }

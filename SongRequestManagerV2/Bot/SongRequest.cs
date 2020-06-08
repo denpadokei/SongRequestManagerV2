@@ -10,7 +10,7 @@ namespace SongRequestManager
     public class SongRequest
     {
         public JSONObject song;
-        public IChatUser requestor = new IChatUser();
+        public IChatUser requestor = new TwitchUser();
         public DateTime requestTime;
         public RequestStatus status;
         public string requestInfo; // Contains extra song info, Like : Sub/Donation request, Deck pick, Empty Queue pick,Mapper request, etc.
@@ -31,17 +31,15 @@ namespace SongRequestManager
             obj.Add("status", new JSONString(status.ToString()));
             obj.Add("requestInfo", new JSONString(requestInfo));
             obj.Add("time", new JSONString(requestTime.ToFileTime().ToString()));
-            if (requestor is IChatUser IChatUser) {
-                obj.Add("requestor", IChatUser.ConvertToJsonFromTwitchUser());
-            }
+            obj.Add("requestor", requestor.ToJson());
             obj.Add("song", song);
             return obj;
         }
 
         public SongRequest FromJson(JSONObject obj)
         {
-            if (requestor is IChatUser IChatUser) {
-                IChatUser.ConvertToTwitchUserFromJson(obj["requestor"].AsObject);
+            if (requestor is IChatUser user) {
+                user.FromJson(obj["requestor"].AsObject);
                 requestTime = DateTime.FromFileTime(long.Parse(obj["time"].Value));
                 status = (RequestStatus)Enum.Parse(typeof(RequestStatus), obj["status"].Value);
                 song = obj["song"].AsObject;
