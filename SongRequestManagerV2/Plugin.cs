@@ -6,7 +6,9 @@ using System.Runtime.CompilerServices;
 using SongRequestManager.UI;
 using BeatSaberMarkupLanguage.Settings;
 using IPA.Utilities;
-using System.Net;
+using ChatCore.Interfaces;
+using ChatCore;
+using ChatCore.Services;
 
 namespace SongRequestManager
 {
@@ -17,6 +19,9 @@ namespace SongRequestManager
         public static SemVer.Version Version => IPA.Loader.PluginManager.GetPluginFromId("SongRequestManager").Version;
 
         public static IPALogger Logger { get; internal set; }
+
+        public ICoreInstance CoreInstance { get; internal set; }
+        public ChatServiceMultiplexer MultiplexerInstance { get; internal set; }
 
         internal static WebClient WebClient;
 
@@ -46,6 +51,8 @@ namespace SongRequestManager
         [OnStart]
         public void OnStart()
         {
+            this.CoreInstance = ChatCoreInstance.Current;
+            this.MultiplexerInstance = this.CoreInstance.RunAllServices();
             if (Instance != null) return;
             Instance = this;
 

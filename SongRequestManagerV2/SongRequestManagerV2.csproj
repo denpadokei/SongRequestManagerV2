@@ -33,6 +33,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -126,9 +128,39 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bot\ChatCommands.cs" />
+    <Compile Include="Bot\commands.cs" />
+    <Compile Include="Bot\Keyboard.cs" />
+    <Compile Include="Bot\ListManager.cs" />
+    <Compile Include="Bot\RequestBot.cs" />
+    <Compile Include="Bot\RequestBotListViewController.cs" />
+    <Compile Include="Bot\RequestFlowCoordinator.cs" />
+    <Compile Include="Bot\RequestInfo.cs" />
+    <Compile Include="Bot\RequestManager.cs" />
+    <Compile Include="Bot\RequestUserTracker.cs" />
+    <Compile Include="Bot\songdatabase.cs" />
+    <Compile Include="Bot\SongLibrary.cs" />
+    <Compile Include="Bot\SongRequest.cs" />
+    <Compile Include="Bot\UnreleasedCode.cs" />
+    <Compile Include="Bot\util.cs" />
+    <Compile Include="Config\RequestBotConfig.cs" />
+    <Compile Include="Extentions\IChatUserExtention.cs" />
+    <Compile Include="Extentions\TwitchUserExtention.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Dispatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\Base64Sprites.cs" />
+    <Compile Include="UI\KeyboardViewController.cs" />
+    <Compile Include="UI\Settings.cs" />
+    <Compile Include="UI\SongListUtils.cs" />
+    <Compile Include="UI\SongRequestManagerSettings.cs" />
+    <Compile Include="UI\UIHelper.cs" />
+    <Compile Include="UI\YesNoModal.cs" />
+    <Compile Include="WebClient.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Views\SongRequestManagerSettings.bsml" />
+    <None Include="Views\YesNoModal.bsml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
