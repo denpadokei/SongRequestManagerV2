@@ -39,7 +39,7 @@ namespace SongRequestManager
         public bool SendNextSongBeingPlayedtoChat = true; // Enable chat message when you hit play
         public bool UpdateQueueStatusFiles = true; // Create and update queue list and open/close status files for OBS *IMPLEMENTED*, needs UI
         public int MaximumQueueTextEntries = 8;
-        public string BotPrefix ="";
+        public string BotPrefix { get; set; } = "";
 
         public bool ModFullRights = false; // Allow moderator full broadcaster rights. Use at own risk!
 

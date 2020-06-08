@@ -32,7 +32,7 @@ namespace SongRequestManager
             obj.Add("requestInfo", new JSONString(requestInfo));
             obj.Add("time", new JSONString(requestTime.ToFileTime().ToString()));
             if (requestor is IChatUser IChatUser) {
-                obj.Add("requestor", IChatUser.ConvertToJsonFromIChatUser());
+                obj.Add("requestor", IChatUser.ConvertToJsonFromTwitchUser());
             }
             obj.Add("song", song);
             return obj;
@@ -41,7 +41,7 @@ namespace SongRequestManager
         public SongRequest FromJson(JSONObject obj)
         {
             if (requestor is IChatUser IChatUser) {
-                IChatUser.ConvertToIChatUserFromJson(obj["requestor"].AsObject);
+                IChatUser.ConvertToTwitchUserFromJson(obj["requestor"].AsObject);
                 requestTime = DateTime.FromFileTime(long.Parse(obj["time"].Value));
                 status = (RequestStatus)Enum.Parse(typeof(RequestStatus), obj["status"].Value);
                 song = obj["song"].AsObject;

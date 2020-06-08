@@ -29,6 +29,10 @@ using ChatCore.Models.Twitch;
 using ChatCore.Interfaces;
 using ChatCore.Services;
 using ChatCore;
+using ChatCore.Models.Mixer;
+using ChatCore.Services.Twitch;
+using ChatCore.Services.Mixer;
+using System.Runtime.CompilerServices;
 
 namespace SongRequestManager
 {
@@ -76,6 +80,8 @@ namespace SongRequestManager
         private static string banlist = "banlist.unique"; // BUG: Name of the list, needs to use a different interface for this.
         private static string _whitelist = "whitelist.unique"; // BUG: Name of the list, needs to use a different interface for this.
         private static string _blockeduser = "blockeduser.unique";
+        private static TwitchService _twitchService;
+        private static MixerService _mixerService;
 
         private static Dictionary<string, string> songremap = new Dictionary<string, string>();
         public static Dictionary<string, string> deck = new Dictionary<string, string>(); // deck name/content
@@ -134,6 +140,9 @@ namespace SongRequestManager
             WriteQueueSummaryToFile();
             WriteQueueStatusToFile(QueueMessage(RequestBotConfig.Instance.RequestQueueOpen));
 
+            _twitchService = Plugin.Instance.MultiplexerInstance.GetTwitchService();
+            _mixerService = Plugin.Instance.MultiplexerInstance.GetMixerService();
+
             // Yes, this is disabled on purpose. StreamCore will init this class for you now, so don't uncomment this! -Brian
             //if (Instance) return;
             //new GameObject("SongRequestManager").AddComponent<RequestBot>();
@@ -155,7 +164,13 @@ namespace SongRequestManager
         public static void Newest(KEYBOARD.KEY key)
         {
             ClearSearches();
-            RequestBot.COMMAND.Parse(TwitchWebSocketClient.OurIChatUser, $"!addnew/top",CmdFlags.Local);
+            if (_twitchService.LoggedInUser != null) {
+                RequestBot.COMMAND.Parse(_twitchService.LoggedInUser, $"!addnew/top", CmdFlags.Local);
+            }
+            else {
+                RequestBot.COMMAND.Parse(_mixerService.LoginUser, $"!addnew/top", CmdFlags.Local);
+            }
+            
         }
 
         public static void Search(KEYBOARD.KEY key)
@@ -165,7 +180,7 @@ namespace SongRequestManager
                 key.kb.Enter(key);
             }
             ClearSearches();
-            RequestBot.COMMAND.Parse(TwitchWebSocketClient.OurIChatUser, $"!addsongs/top {key.kb.KeyboardText.text}",CmdFlags.Local);
+            RequestBot.COMMAND.Parse(SerchCreateChatUser(), $"!addsongs/top {key.kb.KeyboardText.text}",CmdFlags.Local);
             key.kb.Clear(key);
         }
 
@@ -176,7 +191,7 @@ namespace SongRequestManager
                 key.kb.Enter(key);
             }
             ClearSearches();
-            RequestBot.COMMAND.Parse(TwitchWebSocketClient.OurIChatUser, $"!makesearchdeck {key.kb.KeyboardText.text}", CmdFlags.Local);
+            RequestBot.COMMAND.Parse(SerchCreateChatUser(), $"!makesearchdeck {key.kb.KeyboardText.text}", CmdFlags.Local);
             key.kb.Clear(key);
         }
 
@@ -187,7 +202,7 @@ namespace SongRequestManager
                 key.kb.Enter(key);
             }
             ClearSearches();
-            RequestBot.COMMAND.Parse(TwitchWebSocketClient.OurIChatUser, $"!addsongs/top/mod {key.kb.KeyboardText.text}",CmdFlags.Local);
+            RequestBot.COMMAND.Parse(SerchCreateChatUser(), $"!addsongs/top/mod {key.kb.KeyboardText.text}",CmdFlags.Local);
             key.kb.Clear(key);
         }
 
@@ -434,29 +449,29 @@ namespace SongRequestManager
 
         public static void ScheduledCommand(string command, System.Timers.ElapsedEventArgs e)
         {
-            COMMAND.Parse(TwitchWebSocketClient.OurIChatUser, command);
+            COMMAND.Parse(SerchCreateChatUser(), command);
         }
 
         private void RunStartupScripts()
         {
             ReadRemapList(); // BUG: This should use list manager
 
-            MapperBanList(TwitchWebSocketClient.OurIChatUser, "mapperban.list");
-            WhiteList(TwitchWebSocketClient.OurIChatUser, "whitelist.unique");
-            BlockedUserList(TwitchWebSocketClient.OurIChatUser, "blockeduser.unique");
+            MapperBanList(SerchCreateChatUser(), "mapperban.list");
+            WhiteList(SerchCreateChatUser(), "whitelist.unique");
+            BlockedUserList(SerchCreateChatUser(), "blockeduser.unique");
             accesslist("whitelist.unique");
             accesslist("blockeduser.unique");
             accesslist("mapperban.list");
 
 #if UNRELEASED
-            OpenList(TwitchWebSocketClient.OurIChatUser, "mapper.list"); // Open mapper list so we can get new songs filtered by our favorite mappers.
-            MapperAllowList(TwitchWebSocketClient.OurIChatUser, "mapper.list");
+            OpenList(SerchCreateChatUser(), "mapper.list"); // Open mapper list so we can get new songs filtered by our favorite mappers.
+            MapperAllowList(SerchCreateChatUser(), "mapper.list");
             accesslist("mapper.list");
 
-            loaddecks(TwitchWebSocketClient.OurIChatUser, ""); // Load our default deck collection
+            loaddecks(SerchCreateChatUser(), ""); // Load our default deck collection
             // BUG: Command failure observed once, no permission to use /chatcommand. Possible cause: OurIChatUser isn't authenticated yet.
 
-            RunScript(TwitchWebSocketClient.OurIChatUser, "startup.script"); // Run startup script. This can include any bot commands.
+            RunScript(SerchCreateChatUser(), "startup.script"); // Run startup script. This can include any bot commands.
 #endif
         }
 
@@ -485,11 +500,10 @@ namespace SongRequestManager
             try
             {
                 Plugin.Log($"Sending message: \"{message}\"");
-                //TwitchWebSocketClient.SendMessage($"PRIVMSG #{TwitchLoginConfig.Instance.TwitchChannelName} :{message}");
-                TwitchWebSocketClient.SendMessage(message);
-                TwitchMessage tmpMessage = new ChatCore.Models.Twitch.TwitchMessage();
-                tmpMessage.Sender = TwitchWebSocketClient.OurIChatUser;
-                //MessageParser.Parse(new ChatMessage(message, tmpMessage)); // This call is obsolete, when sending a message through TwitchWebSocketClient, the message should automatically appear in chat.
+                var mixer = this._chatService.GetMixerService();
+                mixer?.SendTextMessage($"{message}", null);
+                var twitch = this._chatService.GetTwitchService();
+                twitch?.SendTextMessage($"{message}", new TwitchChannel().Id);
             }
             catch (Exception e)
             {
@@ -506,7 +520,7 @@ namespace SongRequestManager
                 twitch?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", new TwitchChannel().Id);
             }
             catch (Exception e) {
-                Debug.Log(e.Message);
+                Plugin.Log($"Exception was caught when trying to send bot message. {e.ToString()}");
             }
         }
 
@@ -658,7 +672,7 @@ namespace SongRequestManager
                 else if (!autopick && songs.Count > 1 && songs.Count < 4)
                 {
                     var msg = new QueueLongMessage(1, 5);
-                    msg.Header($"@{requestor.displayName}, please choose: ");
+                    msg.Header($"@{requestor.Name}, please choose: ");
                     foreach (var eachsong in songs) msg.Add(new DynamicText().AddSong(eachsong).Parse(BsrSongDetail), ", ");
                     msg.end("...", $"No matching songs for for {request}");
                     return;
@@ -706,7 +720,7 @@ namespace SongRequestManager
 
                 //}
 
-            RequestTracker[requestor.id].numRequests++;
+            RequestTracker[requestor.Id].numRequests++;
                 listcollection.add(duplicatelist, song["id"].Value);
                 if ((requestInfo.flags.HasFlag(CmdFlags.MoveToTop)))
                     RequestQueue.Songs.Insert(0, new SongRequest(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo));
@@ -1076,25 +1090,25 @@ namespace SongRequestManager
                     return success;
                 }
 
-                if (!RequestTracker.ContainsKey(state.user.id))
-                    RequestTracker.Add(state.user.id, new RequestUserTracker());
+                if (!RequestTracker.ContainsKey(state.user.Id))
+                    RequestTracker.Add(state.user.Id, new RequestUserTracker());
 
                 int limit = RequestBotConfig.Instance.UserRequestLimit;
-                if (state.user.isSub) limit = Math.Max(limit, RequestBotConfig.Instance.SubRequestLimit);
-                if (state.user.isMod) limit = Math.Max(limit, RequestBotConfig.Instance.ModRequestLimit);
-                if (state.user.isVip) limit += RequestBotConfig.Instance.VipBonusRequests; // Current idea is to give VIP's a bonus over their base subscription class, you can set this to 0 if you like
+                //if (state.user.isSub) limit = Math.Max(limit, RequestBotConfig.Instance.SubRequestLimit);
+                if (state.user.IsModerator) limit = Math.Max(limit, RequestBotConfig.Instance.ModRequestLimit);
+                //if (state.user.isVip) limit += RequestBotConfig.Instance.VipBonusRequests; // Current idea is to give VIP's a bonus over their base subscription class, you can set this to 0 if you like
 
-                if (!state.user.isBroadcaster)
+                if (!state.user.IsBroadcaster)
                 {
-                    if (RequestTracker[state.user.id].numRequests >= limit)
+                    if (RequestTracker[state.user.Id].numRequests >= limit)
                     {
                         if (RequestBotConfig.Instance.LimitUserRequestsToSession)
                         {
-                            new DynamicText().Add("Requests", RequestTracker[state.user.id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You've already used %Requests% requests this stream. Subscribers are limited to %RequestLimit%.");
+                            new DynamicText().Add("Requests", RequestTracker[state.user.Id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You've already used %Requests% requests this stream. Subscribers are limited to %RequestLimit%.");
                         }
                         else
                         {
-                            new DynamicText().Add("Requests", RequestTracker[state.user.id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You already have %Requests% on the queue. You can add another once one is played. Subscribers are limited to %RequestLimit%.");
+                            new DynamicText().Add("Requests", RequestTracker[state.user.Id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You already have %Requests% on the queue. You can add another once one is played. Subscribers are limited to %RequestLimit%.");
                         }
 
                         return success;
@@ -1120,6 +1134,15 @@ namespace SongRequestManager
         return success;
         }
 
+        private static IChatUser SerchCreateChatUser()
+        {
+            if (_twitchService != null) {
+                return _twitchService.LoggedInUser;
+            }
+            else {
+                return _mixerService.LoginUser;
+            }
+        }
  
     }
 }

@@ -4,17 +4,28 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using StreamCore.Twitch;
+//using StreamCore.Twitch;
 using HMUI;
 using Image = UnityEngine.UI.Image;
 using BeatSaberMarkupLanguage;
 using SongRequestManager.UI;
+using ChatCore.Interfaces;
 
 namespace SongRequestManager
 {
     // Experimental chat console
     public class KEYBOARD
     {
+        private IChatUser GetLoginUser()
+        {
+            if (Plugin.Instance.MultiplexerInstance.GetTwitchService().LoggedInUser != null) {
+                return Plugin.Instance.MultiplexerInstance.GetTwitchService().LoggedInUser;
+            }
+            else {
+                return Plugin.Instance.MultiplexerInstance.GetMixerService().LoginUser;
+            }
+        }
+
         public List<KEY> keys = new List<KEY>();
 
         bool SabotageState = false;
@@ -381,7 +392,7 @@ namespace SongRequestManager
             ClearSearches();
             
 
-            RequestBot.COMMAND.Parse(TwitchWebSocketClient.OurIChatUser, $"!addnew/top",RequestBot.CmdFlags.Local);
+            RequestBot.COMMAND.Parse(GetLoginUser(), $"!addnew/top",RequestBot.CmdFlags.Local);
         }
 
         void Search(KEY key)
@@ -393,7 +404,7 @@ namespace SongRequestManager
 
 #if UNRELEASED
             ClearSearches();
-            RequestBot.COMMAND.Parse(TwitchWebSocketClient.OurIChatUser, $"!addsongs/top {key.kb.KeyboardText.text}",RequestBot.CmdFlags.Local);
+            RequestBot.COMMAND.Parse(GetLoginUser(), $"!addsongs/top {key.kb.KeyboardText.text}",RequestBot.CmdFlags.Local);
             Clear(key);
 #endif
         }
@@ -431,11 +442,12 @@ namespace SongRequestManager
             {
                 if (RequestBot.COMMAND.aliaslist.ContainsKey(RequestBot.ParseState.GetCommand(ref typedtext)))
                 {
-                    RequestBot.COMMAND.Parse(TwitchWebSocketClient.OurIChatUser, typedtext,RequestBot.CmdFlags.Local);
+                    RequestBot.COMMAND.Parse(GetLoginUser(), typedtext,RequestBot.CmdFlags.Local);
                 }
                 else
                 {
-                    TwitchWebSocketClient.SendCommand(typedtext);
+                    //ToDo
+                    //TwitchWebSocketClient.SendCommand(typedtext);
                 }
 
                 key.kb.KeyboardText.text = "";
@@ -474,7 +486,7 @@ namespace SongRequestManager
             SabotageState = !SabotageState;
             key.mybutton.GetComponentInChildren<Image>().color = SabotageState ? Color.green : Color.red;
             string text = "!sabotage "+ ( SabotageState ? "on" : "off");
-            RequestBot.COMMAND.Parse(TwitchWebSocketClient.OurIChatUser, text, RequestBot.CmdFlags.Local);
+            RequestBot.COMMAND.Parse(GetLoginUser(), text, RequestBot.CmdFlags.Local);
         }
 
         void DrawCursor()

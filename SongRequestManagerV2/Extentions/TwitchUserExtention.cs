@@ -8,33 +8,33 @@ using System.Threading.Tasks;
 
 namespace SongRequestManager.Extentions
 {
-    public static class IChatUserExtention
+    public static class TwitchUserExtention
     {
-        public static JSONObject ConvertToJsonFromIChatUser(this IChatUser IChatUser)
+        public static JSONObject ConvertToJsonFromTwitchUser(this TwitchUser twitchUser)
         {
             JSONObject obj = new JSONObject();
-            obj.Add("displayName", new JSONString(IChatUser.Name));
-            obj.Add("id", new JSONString(IChatUser.Id));
-            obj.Add("color", new JSONString(IChatUser.Color));
+            obj.Add("displayName", new JSONString(twitchUser.Name));
+            obj.Add("id", new JSONString(twitchUser.Id));
+            obj.Add("color", new JSONString(twitchUser.Color));
             //obj.Add("badges", new JSONString(badges));
-            obj.Add("isBroadcaster", new JSONBool(IChatUser.IsBroadcaster));
-            obj.Add("isMod", new JSONBool(IChatUser.IsModerator));
-            obj.Add("isSub", new JSONBool(IChatUser.IsSubscriber));
-            obj.Add("isTurbo", new JSONBool(IChatUser.IsTurbo));
-            obj.Add("isVip", new JSONBool(IChatUser.IsVip));
+            obj.Add("isBroadcaster", new JSONBool(twitchUser.IsBroadcaster));
+            obj.Add("isMod", new JSONBool(twitchUser.IsModerator));
+            obj.Add("isSub", new JSONBool(twitchUser.IsSubscriber));
+            obj.Add("isTurbo", new JSONBool(twitchUser.IsTurbo));
+            obj.Add("isVip", new JSONBool(twitchUser.IsVip));
             return obj;
         }
 
-        public static void ConvertToIChatUserFromJson(this IChatUser IChatUser, JSONObject obj)
+        public static void ConvertToTwitchUserFromJson(this TwitchUser twitchUser, JSONObject obj)
         {
-            IChatUser.Name = obj["displayName"].Value;
-            IChatUser.Id = obj["id"].Value;
-            IChatUser.Color = obj["color"].Value;
-            IChatUser.IsBroadcaster = obj["isBroadcaster"].AsBool;
-            IChatUser.IsModerator = obj["isMod"].AsBool;
-            IChatUser.IsSubscriber = obj["isSub"].AsBool;
-            IChatUser.IsTurbo = obj["isTurbo"].AsBool;
-            IChatUser.IsVip = obj["isVip"].AsBool;
+            twitchUser.Name = obj["displayName"].Value;
+            twitchUser.Id = obj["id"].Value;
+            twitchUser.Color = obj["color"].Value;
+            twitchUser.IsBroadcaster = obj["isBroadcaster"].AsBool;
+            twitchUser.IsModerator = obj["isMod"].AsBool;
+            twitchUser.IsSubscriber = obj["isSub"].AsBool;
+            twitchUser.IsTurbo = obj["isTurbo"].AsBool;
+            twitchUser.IsVip = obj["isVip"].AsBool;
         }
     }
 }
