@@ -607,7 +607,7 @@ namespace SongRequestManagerV2
             public static StringBuilder commandsummary = new StringBuilder();
             public static bool Loading = false;
 
-            public static Dictionary<string, COMMAND> aliaslist = new Dictionary<string, COMMAND>(); // There can be only one (static)!
+            public static Dictionary<string, COMMAND> aliaslist { get; set; } = new Dictionary<string, COMMAND>(); // There can be only one (static)!
 
             // BUG: Extra methods will be removed after the offending code is migrated, There will likely always be 2-3.
             private Action<IChatUser, string> Method = null;  // Method to call
@@ -778,9 +778,15 @@ namespace SongRequestManagerV2
 
             public static void Parse(IChatUser user, string request, CmdFlags flags = 0, string info = "")
             {
-                if (!Instance || request.Length == 0) return;
+                if (string.IsNullOrEmpty(request)) {
+                    Plugin.Logger.Info($"request strings is null : {request}");
+                    return;
+                }
 
-                if (listcollection.contains(ref _blockeduser, user.Name.ToLower())) return;
+                if (!string.IsNullOrEmpty(user.Name) && listcollection.contains(ref _blockeduser, user.Name.ToLower())) {
+                    Plugin.Logger.Info($"Sender is contain blacklist : {user.Name}");
+                    return;
+                }
 
                 // This will be used for all parsing type operations, allowing subcommands efficient access to parse state logic
                 ParseState parse = new ParseState(ref user, ref request, flags, ref info).ParseCommand();
@@ -961,6 +967,7 @@ namespace SongRequestManagerV2
 
             public string ExecuteSubcommand() // BUG: Only one supported for now (till I finalize the parse logic) ,we'll make it all work eventually
             {
+                Plugin.Log("Execute SubCommand");
                 int commandstart = 0;
 
                 if (parameter.Length < 2) return notsubcommand;
@@ -1030,7 +1037,10 @@ namespace SongRequestManagerV2
             static string done = "X";
             public async void ExecuteCommand()
             {
-                if (!COMMAND.aliaslist.TryGetValue(command, out botcmd)) return; // Unknown command
+                if (!COMMAND.aliaslist.TryGetValue(command, out botcmd)) {
+                    Plugin.Logger.Info("Unknown command");
+                    return; // Unknown command
+                } 
 
                 // Permissions for these sub commands will always be by Broadcaster,or the (BUG: Future feature) user list of the EnhancedTwitchBot command. Note command behaviour that alters with permission should treat userlist as an escalation to Broadcaster.
                 // Since these are never meant for an end user, they are not going to be configurable.
@@ -1111,6 +1121,9 @@ namespace SongRequestManagerV2
 
             public ParseState ParseCommand()
             {
+                Plugin.Logger.Info("Start ParceCommand in ParseCommand()");
+                Plugin.Logger.Info($"request : {this.request}");
+                
                 // Notes for later.
                 //var match = Regex.Match(request, "^!(?<command>[^ ^/]*?<parameter>.*)");
                 //string username = match.Success ? match.Groups["command"].Value : null;
@@ -1125,10 +1138,13 @@ namespace SongRequestManagerV2
                 if (commandlength == 0) return this;
 
                 command = request.Substring(commandstart, commandlength).ToLower();
+                Plugin.Logger.Info($"command : {this.command}");
                 if (COMMAND.aliaslist.ContainsKey(command)) {
+                    Plugin.Logger.Info("Contain ailias commad");
                     parameter = request.Substring(parameterstart);
 
                     try {
+                        Plugin.Log("Start command");
                         ExecuteCommand();
                     }
                     catch (Exception ex) {

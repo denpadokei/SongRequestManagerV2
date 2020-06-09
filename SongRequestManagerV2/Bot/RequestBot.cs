@@ -33,6 +33,7 @@ using ChatCore.Models.Mixer;
 using ChatCore.Services.Twitch;
 using ChatCore.Services.Mixer;
 using System.Runtime.CompilerServices;
+using System.Reflection;
 
 namespace SongRequestManagerV2
 {
@@ -50,7 +51,8 @@ namespace SongRequestManagerV2
             SongSearch,
         }
 
-        public static RequestBot Instance { get; } = new RequestBot();
+        private static readonly RequestBot _instance = new RequestBot();
+        public static RequestBot Instance => _instance;
         public static ConcurrentQueue<RequestInfo> UnverifiedRequestQueue = new ConcurrentQueue<RequestInfo>();
         public static Dictionary<string, RequestUserTracker> RequestTracker = new Dictionary<string, RequestUserTracker>();
         private ChatServiceMultiplexer _chatService { get; set; }
@@ -58,6 +60,11 @@ namespace SongRequestManagerV2
         //SpeechSynthesizer synthesizer = new SpeechSynthesizer();
         //synthesizer.Volume = 100;  // 0...100
           //  synthesizer.Rate = -2;     // -10...10
+
+        private RequestBot()
+        {
+
+        }
 
         private static Button _requestButton;
         public static bool _refreshQueue = false;
@@ -230,9 +237,10 @@ namespace SongRequestManagerV2
         private async void Awake()
         {
             DontDestroyOnLoad(gameObject);
+            this._chatService = Plugin.Instance.MultiplexerInstance;
+            this._chatService.OnTextMessageReceived += RecievedMessages;
             //Instance = this;
-
-            #if UNRELEASED
+#if UNRELEASED
             var startingmem = GC.GetTotalMemory(true);
 
             //var folder = Path.Combine(Environment.CurrentDirectory, "userdata","streamcore");
@@ -357,25 +365,27 @@ namespace SongRequestManagerV2
 
                 //EnhancedStreamChat.ChatHandler.ChatMessageFilters += MyChatMessageHandler; // TODO: Reimplement this filter maybe? Or maybe we put it directly into EnhancedStreamChat
 
+                try {
+                    COMMAND.CommandConfiguration();
+                    RunStartupScripts();
 
-                COMMAND.CommandConfiguration();
-                RunStartupScripts();
 
-
-                ProcessRequestQueue();
-
-                this._chatService = Plugin.Instance.MultiplexerInstance;
-                this._chatService.OnTextMessageReceived += PRIVMSG;
-
+                    ProcessRequestQueue();
+                }
+                catch (Exception e) {
+                    Plugin.Log(e.ToString());
+                }
+                
                 //TwitchMessageHandlers.PRIVMSG += PRIVMSG;
 
                 RequestBotConfig.Instance.ConfigChangedEvent += OnConfigChangedEvent;
+                
                 IsPluginReady = true;
+                Plugin.Log("Awake finished!");
             }
-        catch (Exception ex)
-            {
-            Plugin.Log(ex.ToString());
-            Instance.QueueChatMessage(ex.ToString());
+            catch (Exception ex) {
+                Plugin.Log(ex.ToString());
+                Instance.QueueChatMessage(ex.ToString());
             }
         }
 
@@ -385,8 +395,9 @@ namespace SongRequestManagerV2
             return RequestBot.Instance && RequestBot.listcollection.contains(ref excludefilename, msg.Sender.Name.ToLower(), RequestBot.ListFlags.Uncached);
         }
 
-        private void PRIVMSG(IChatService srv, IChatMessage msg)
+        private void RecievedMessages(IChatService srv, IChatMessage msg)
         {
+            Plugin.Log($"Received Message : {msg.Message}");
             RequestBot.COMMAND.Parse(msg.Sender, msg.Message);
         }
 
@@ -514,10 +525,10 @@ namespace SongRequestManagerV2
         public void QueueChatMessage(string message)
         {
             try {
-                var mixer = this._chatService.GetMixerService();
-                mixer?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", null);
-                var twitch = this._chatService.GetTwitchService();
-                twitch?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", new TwitchChannel().Id);
+                var mixer = this._chatService?.GetMixerService();
+                mixer?.SendTextMessage(Assembly.GetCallingAssembly(), $"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}");
+                //var twitch = this._chatService?.GetTwitchService();
+                //twitch?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", new TwitchChannel().Id);
             }
             catch (Exception e) {
                 Plugin.Log($"Exception was caught when trying to send bot message. {e.ToString()}");
@@ -1136,11 +1147,14 @@ namespace SongRequestManagerV2
 
         private static IChatUser SerchCreateChatUser()
         {
-            if (_twitchService != null) {
-                return _twitchService.LoggedInUser;
+            if (_twitchService?.LoggedInUser != null) {
+                return _twitchService?.LoggedInUser;
+            }
+            else if (_mixerService?.LoginUser != null) {
+                return _mixerService?.LoginUser;
             }
             else {
-                return _mixerService.LoginUser;
+                return new MixerUser();
             }
         }
  
