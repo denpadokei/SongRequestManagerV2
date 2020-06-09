@@ -7,7 +7,7 @@ You need to StreamCore and ChatCore
 https://github.com/brian91292/StreamCore
 https://github.com/denpadokei/ChatCore
 
-~~Song Request Manager is an integrated, fully Customizable song request bot and Console for BeatSaber. It started life as an extensive rewrite of the built in song request bot in https://github.com/brian91292/BeatSaber-EnhancedTwitchChat, but quickly grew in scope and features. Its now a separate but dependent module. This mod and its companions, EnhancedStreamChat and StreamCore, are direct upgrades from the original EnhancedTwitchChat release, by the original authors. ~~
+~~Song Request Manager is an integrated, fully Customizable song request bot and Console for BeatSaber. It started life as an extensive rewrite of the built in song request bot in https://github.com/brian91292/BeatSaber-EnhancedTwitchChat, but quickly grew in scope and features. Its now a separate but dependent module. This mod and its companions, EnhancedStreamChat and StreamCore, are direct upgrades from the original EnhancedTwitchChat release, by the original authors.~~
 
 This mod has been in use for many months, and is constantly updated. While this is a first official release as a standalone mod, its been in continuous use for months now, and is extensively tested. The bot is compatible with release 0.13.1. 
 
