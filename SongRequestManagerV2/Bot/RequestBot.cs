@@ -22,7 +22,7 @@ using SongCore;
 using IPA.Utilities;
 using SongRequestManagerV2.UI;
 using BeatSaberMarkupLanguage;
-using Utilities = StreamCore.Utils.Utilities;
+using Utilities = SongRequestManagerV2.Utils.Utilities;
 using JSONObject = ChatCore.SimpleJSON.JSONObject;
 using System.Threading.Tasks;
 using System.IO.Compression;
@@ -39,7 +39,7 @@ using ChatCore.SimpleJSON;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot : MonoBehaviour//, ITwitchIntegration
+    public partial class RequestBot// : MonoBehaviour//, ITwitchIntegration
     {
         [Flags]
         public enum RequestStatus
@@ -52,22 +52,22 @@ namespace SongRequestManagerV2
             Wrongsong,
             SongSearch,
         }
-
-        private static readonly RequestBot _instance = new RequestBot();
-        public static RequestBot Instance => _instance;
-        public static ConcurrentQueue<RequestInfo> UnverifiedRequestQueue = new ConcurrentQueue<RequestInfo>();
-        public static Dictionary<string, RequestUserTracker> RequestTracker = new Dictionary<string, RequestUserTracker>();
-        private ChatServiceMultiplexer _chatService { get; set; }
-
-        //SpeechSynthesizer synthesizer = new SpeechSynthesizer();
-        //synthesizer.Volume = 100;  // 0...100
-          //  synthesizer.Rate = -2;     // -10...10
-
+        public static RequestBot Instance { get; } = new RequestBot();
         private RequestBot()
         {
 
         }
 
+
+        public static ConcurrentQueue<RequestInfo> UnverifiedRequestQueue = new ConcurrentQueue<RequestInfo>();
+        public static Dictionary<string, RequestUserTracker> RequestTracker = new Dictionary<string, RequestUserTracker>();
+        //private ChatServiceMultiplexer _chatService { get; set; }
+
+        //SpeechSynthesizer synthesizer = new SpeechSynthesizer();
+        //synthesizer.Volume = 100;  // 0...100
+          //  synthesizer.Rate = -2;     // -10...10
+
+        
         private static Button _requestButton;
         public static bool _refreshQueue = false;
 
@@ -89,8 +89,8 @@ namespace SongRequestManagerV2
         private static string banlist = "banlist.unique"; // BUG: Name of the list, needs to use a different interface for this.
         private static string _whitelist = "whitelist.unique"; // BUG: Name of the list, needs to use a different interface for this.
         private static string _blockeduser = "blockeduser.unique";
-        private static TwitchService _twitchService;
-        private static MixerService _mixerService;
+        //private static TwitchService _twitchService;
+        //private static MixerService _mixerService;
 
         private static Dictionary<string, string> songremap = new Dictionary<string, string>();
         public static Dictionary<string, string> deck = new Dictionary<string, string>(); // deck name/content
@@ -99,7 +99,7 @@ namespace SongRequestManagerV2
 
         public static string playedfilename = "";
 
-        public bool IsPluginReady { get; set; } = false;
+        //public bool IsPluginReady { get; set; } = false;
 
         internal static void SRMButtonPressed()
         {
@@ -148,10 +148,6 @@ namespace SongRequestManagerV2
 
             WriteQueueSummaryToFile();
             WriteQueueStatusToFile(QueueMessage(RequestBotConfig.Instance.RequestQueueOpen));
-
-            _twitchService = Plugin.Instance.MultiplexerInstance.GetTwitchService();
-            _mixerService = Plugin.Instance.MultiplexerInstance.GetMixerService();
-
             // Yes, this is disabled on purpose. StreamCore will init this class for you now, so don't uncomment this! -Brian
             //if (Instance) return;
             //new GameObject("SongRequestManager").AddComponent<RequestBot>();
@@ -230,13 +226,12 @@ namespace SongRequestManagerV2
             RequestBot._refreshQueue = true;
         }
 
-        private async void Awake()
+        public async void Awake()
         {
-            DontDestroyOnLoad(gameObject);
-            this._chatService = Plugin.Instance.MultiplexerInstance;
-            //Instance = this;
+            Plugin.Log("Awake start!");
+            //DontDestroyOnLoad(this.gameObject);
 #if UNRELEASED
-            var startingmem = GC.GetTotalMemory(true);
+            //var startingmem = GC.GetTotalMemory(true);
 
             //var folder = Path.Combine(Environment.CurrentDirectory, "userdata","streamcore");
 
@@ -300,13 +295,14 @@ namespace SongRequestManagerV2
 #endif
 
             playedfilename = Path.Combine(Plugin.DataPath, "played.dat"); // Record of all the songs played in the current session
-
+            Plugin.Log("create playd path");
             try
             {
                 string filesToDelete = Path.Combine(Environment.CurrentDirectory, "FilesToDelete");
-                if (Directory.Exists(filesToDelete))
+                if (Directory.Exists(filesToDelete)) {
+                    Plugin.Log("files delete");
                     Utilities.EmptyDirectory(filesToDelete);
-
+                }
 
                 try
                 {
@@ -315,7 +311,9 @@ namespace SongRequestManagerV2
                     TimeSpan TimeSinceBackup = DateTime.Now - LastBackup;
                     if (TimeSinceBackup > TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours))
                     {
+                        Plugin.Log("try buck up");
                         Backup();
+                        Plugin.Log("end buck up");
                     }
                 }
                 catch(Exception ex)
@@ -339,7 +337,9 @@ namespace SongRequestManagerV2
 
                 if (RequestBotConfig.Instance.PPSearch) await GetPPData(); // Start loading PP data
 
+                Plugin.Log("try load database");
                 MapDatabase.LoadDatabase();
+                Plugin.Log("end load database");
 
                 if (RequestBotConfig.Instance.LocalSearch) await MapDatabase.LoadCustomSongs(); // This is a background process
 
@@ -375,7 +375,7 @@ namespace SongRequestManagerV2
 
                 RequestBotConfig.Instance.ConfigChangedEvent += OnConfigChangedEvent;
                 
-                IsPluginReady = true;
+                //IsPluginReady = true;
                 Plugin.Log("Awake finished!");
             }
             catch (Exception ex) {
@@ -520,7 +520,7 @@ namespace SongRequestManagerV2
         public void QueueChatMessage(string message)
         {
             try {
-                var mixer = this._chatService?.GetMixerService();
+                var mixer = Plugin.Instance.MixerService;
                 mixer?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", Plugin.Instance.MixerChannel);
                 //var twitch = this._chatService?.GetTwitchService();
                 //twitch?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", new TwitchChannel().Id);
@@ -1142,8 +1142,8 @@ namespace SongRequestManagerV2
 
         private static IChatUser SerchCreateChatUser()
         {
-            if (_twitchService?.LoggedInUser != null) {
-                return _twitchService?.LoggedInUser;
+            if (Plugin.Instance.TwitchService?.LoggedInUser != null) {
+                return Plugin.Instance.TwitchService?.LoggedInUser;
             }
             else {
                 var obj = new

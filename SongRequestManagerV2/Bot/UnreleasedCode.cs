@@ -1,5 +1,5 @@
 using System.Runtime;
-using StreamCore.Twitch;
+//using StreamCore.Twitch;
 using ChatCore.SimpleJSON;
 using System;
 using System.Collections;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-using StreamCore.Utils;
+//using StreamCore.Utils;
 using TMPro;
 using System.Threading.Tasks;
 

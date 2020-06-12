@@ -9,7 +9,7 @@ using Image = UnityEngine.UI.Image;
 using SongRequestManagerV2.UI;
 using IPA.Utilities;
 using BeatSaberMarkupLanguage;
-using Utilities = StreamCore.Utils.Utilities;
+using Utilities = SongRequestManagerV2.Utils.Utilities;
 using System.Threading.Tasks;
 
 namespace SongRequestManagerV2

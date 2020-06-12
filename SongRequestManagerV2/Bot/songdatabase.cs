@@ -818,7 +818,10 @@ namespace SongRequestManagerV2
 
         public async Task GetPPData()
         {
-            if (pploading) return;
+            if (pploading) {
+                Plugin.Log("PPloaded");
+                return;
+            } 
 
             pploading = true;
 

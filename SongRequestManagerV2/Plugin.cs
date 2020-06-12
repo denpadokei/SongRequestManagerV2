@@ -72,6 +72,7 @@ namespace SongRequestManagerV2
             this.MultiplexerInstance.OnLogin += this.MultiplexerInstance_OnLogin;
             this.MultiplexerInstance.OnJoinChannel += this.MultiplexerInstance_OnJoinChannel;
             this.MultiplexerInstance.OnTextMessageReceived += RequestBot.Instance.RecievedMessages;
+            RequestBot.Instance.Awake();
             //if (Instance != null) return;
             //Instance = this;
 

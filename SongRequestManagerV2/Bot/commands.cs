@@ -111,6 +111,8 @@ namespace SongRequestManagerV2
 
         private void InitializeCommands()
         {
+            Plugin.Log("Start InitializeCommands()");
+
             #region Command declarations
             /*
                 *VERY IMPORTANT*
@@ -315,6 +317,8 @@ namespace SongRequestManagerV2
 
             COMMAND.InitializeCommands(); // BUG: Currently empty
             COMMAND.SummarizeCommands(); // Save original command states string.
+
+            Plugin.Log("End InitializeCommands()");
         }
 
         public string SaveCommands(ParseState state)
@@ -752,10 +756,10 @@ namespace SongRequestManagerV2
                 return this;
             }
 
-            //  public COMMAND Action(Func<COMMAND, IChatUser, string, CmdFlags, string, string> action)
+            //public COMMAND Action(Func<COMMAND, IChatUser, string, CmdFlags, string, string> action)
             //{
             //    Method3 = action;
-            //  return this;
+            //    return this;
             //}
 
             public COMMAND Action(Action<IChatUser, string, CmdFlags, string> action)
@@ -1150,6 +1154,9 @@ namespace SongRequestManagerV2
                     catch (Exception ex) {
                         Plugin.Log(ex.ToString());
                     }
+                }
+                else {
+                    Plugin.Logger.Info("Not Contain ailias commad");
                 }
 
                 return this;

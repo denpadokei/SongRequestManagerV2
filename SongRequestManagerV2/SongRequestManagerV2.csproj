@@ -31,8 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="StreamCore">
-      <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\StreamCore.dll</HintPath>
+    <Reference Include="SongCore, Version=2.9.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\SongCore.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -73,10 +74,6 @@
     </Reference>
     <Reference Include="SongBrowser">
       <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\SongBrowser.dll</HintPath>
-    </Reference>
-    <Reference Include="SongCore, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\SongCore.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ProBuilder">
       <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\Unity.ProBuilder.dll</HintPath>
@@ -153,6 +150,7 @@
     <Compile Include="UI\SongRequestManagerSettings.cs" />
     <Compile Include="UI\UIHelper.cs" />
     <Compile Include="UI\YesNoModal.cs" />
+    <Compile Include="Utils\Utilities.cs" />
     <Compile Include="WebClient.cs" />
     <EmbeddedResource Include="Views\SongRequestManagerSettings.bsml" />
   </ItemGroup>
