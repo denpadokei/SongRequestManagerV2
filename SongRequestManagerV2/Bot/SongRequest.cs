@@ -1,8 +1,11 @@
 ﻿using ChatCore.Interfaces;
+using ChatCore.Models.Mixer;
 using ChatCore.Models.Twitch;
+using ChatCore.SimpleJSON;
 using SongRequestManagerV2.Extentions;
-using StreamCore.SimpleJSON;
+//using ChatCore.SimpleJSON;
 using System;
+using UnityEngine;
 using static SongRequestManagerV2.RequestBot;
 
 namespace SongRequestManagerV2
@@ -38,13 +41,16 @@ namespace SongRequestManagerV2
 
         public SongRequest FromJson(JSONObject obj)
         {
-            if (requestor is IChatUser user) {
-                user.FromJson(obj["requestor"].AsObject);
-                requestTime = DateTime.FromFileTime(long.Parse(obj["time"].Value));
-                status = (RequestStatus)Enum.Parse(typeof(RequestStatus), obj["status"].Value);
-                song = obj["song"].AsObject;
-                requestInfo = obj["requestInfo"].Value;
+            if (requestor is TwitchUser twitchUser) {
+                requestor = new TwitchUser(JsonUtility.ToJson(twitchUser));
             }
+            else if (requestor is MixerUser mixerUser) {
+                requestor = new MixerUser(JsonUtility.ToJson(mixerUser));
+            }
+            requestTime = DateTime.FromFileTime(long.Parse(obj["time"].Value));
+            status = (RequestStatus)Enum.Parse(typeof(RequestStatus), obj["status"].Value);
+            song = obj["song"].AsObject;
+            requestInfo = obj["requestInfo"].Value;
             return this;
         }
     }

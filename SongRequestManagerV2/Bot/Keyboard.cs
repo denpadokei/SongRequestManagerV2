@@ -10,6 +10,7 @@ using Image = UnityEngine.UI.Image;
 using BeatSaberMarkupLanguage;
 using SongRequestManagerV2.UI;
 using ChatCore.Interfaces;
+using ChatCore.Models.Mixer;
 
 namespace SongRequestManagerV2
 {
@@ -18,11 +19,24 @@ namespace SongRequestManagerV2
     {
         private IChatUser GetLoginUser()
         {
-            if (Plugin.Instance.MultiplexerInstance.GetTwitchService().LoggedInUser != null) {
-                return Plugin.Instance.MultiplexerInstance.GetTwitchService().LoggedInUser;
+            if (Plugin.Instance.TwitchService?.LoggedInUser != null) {
+                return Plugin.Instance.TwitchService?.LoggedInUser;
             }
             else {
-                return Plugin.Instance.MultiplexerInstance.GetMixerService().LoginUser;
+                var obj = new
+                {
+                    Id = "",
+                    UserName = RequestBotConfig.Instance.MixerUserName,
+                    DisplayName = RequestBotConfig.Instance.MixerUserName,
+                    Color = "#FFFFFFFF",
+                    IsBroadcaster = true,
+                    IsModerator = false,
+                    IsSubscriber = false,
+                    IsPro = false,
+                    IsStaff = false,
+                    Badges = new IChatBadge[0]
+                };
+                return new MixerUser(JsonUtility.ToJson(obj));
             }
         }
 
@@ -470,7 +484,7 @@ namespace SongRequestManagerV2
                 //if (key.kb.Caps) x = k.value.ToUpper();
                 if (k.shifted!="") k.mybutton.SetButtonText(x);
 
-                if (k.name=="SHIFT") k.mybutton.GetComponentInChildren<Image>().color = key.kb.Shift ? Color.green : Color.white;
+                if (k.name == "SHIFT") k.mybutton.GetComponentInChildren<Image>().color = key.kb.Shift ? Color.green : Color.white;
             }
         }
 

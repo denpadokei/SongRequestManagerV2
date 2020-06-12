@@ -66,6 +66,8 @@ namespace SongRequestManagerV2
         public string additionalsongpath { get; set; } = "";
         public string songdownloadpath { get; set; } = "";
 
+        public string MixerUserName {get;set;} = "";
+
         public event Action<RequestBotConfig> ConfigChangedEvent;
         public event PropertyChangedEventHandler PropertyChanged;
 

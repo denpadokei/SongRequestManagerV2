@@ -1,4 +1,4 @@
-﻿using StreamCore.SimpleJSON;
+﻿//using ChatCore.SimpleJSON;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,9 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using StreamCore.Twitch;
+//using StreamCore.Twitch;
 using System.Threading.Tasks;
 using ChatCore.Interfaces;
+using ChatCore.SimpleJSON;
 
 namespace SongRequestManagerV2
 {
@@ -386,7 +387,7 @@ namespace SongRequestManagerV2
                 var song = RequestQueue.Songs[i].song;
 
                 if (songId == "") {
-                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["version"].Value, RequestQueue.Songs[i].requestor.Name };
+                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["version"].Value, RequestQueue.Songs[i].requestor.UserName };
 
                     if (DoesContainTerms(state.parameter, ref terms))
                         dequeueSong = true;
@@ -464,20 +465,20 @@ namespace SongRequestManagerV2
                 var song = entry.song;
 
                 if (songId == "") {
-                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, entry.requestor.Name };
+                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, entry.requestor.UserName };
 
                     if (DoesContainTerms(request, ref terms)) {
                         result = entry;
 
-                        if (lastuser != result.requestor.Name) qm.Add($"{result.requestor.Name}: ");
+                        if (lastuser != result.requestor.UserName) qm.Add($"{result.requestor.UserName}: ");
                         qm.Add($"{result.song["songName"].Value} ({result.song["version"].Value})", ",");
-                        lastuser = result.requestor.Name;
+                        lastuser = result.requestor.UserName;
                     }
                 }
                 else {
                     if (song["id"].Value == songId) {
                         result = entry;
-                        qm.Add($"{result.requestor.Name}: {result.song["songName"].Value} ({result.song["version"].Value})");
+                        qm.Add($"{result.requestor.UserName}: {result.song["songName"].Value} ({result.song["version"].Value})");
                         return entry;
                     }
                 }
@@ -564,7 +565,8 @@ namespace SongRequestManagerV2
             if (_WobbleInstalled) {
                 string wobblestate = "off";
                 if (state.parameter == "enable") wobblestate = "on";
-                TwitchWebSocketClient.SendCommand($"!wadmin toggle {wobblestate} ");
+                Plugin.Instance.MixerService.SendTextMessage($"!wadmin toggle {wobblestate} ", Plugin.Instance.MixerChannel);
+                //TwitchWebSocketClient.SendCommand($"!wadmin toggle {wobblestate} ");
 
 
             }
@@ -776,7 +778,7 @@ namespace SongRequestManagerV2
 
                 bool moveRequest = false;
                 if (moveId == "") {
-                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, RequestQueue.Songs[i].requestor.Name };
+                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, RequestQueue.Songs[i].requestor.UserName };
                     if (DoesContainTerms(request, ref terms))
                         moveRequest = true;
                 }
@@ -1264,7 +1266,7 @@ namespace SongRequestManagerV2
             public DynamicText AddUser(ref IChatUser user)
             {
                 try {
-                    Add("user", user.Name);
+                    Add("user", user.UserName);
                 }
                 catch {
                     // Don't care. Twitch user doesn't HAVE to be defined.

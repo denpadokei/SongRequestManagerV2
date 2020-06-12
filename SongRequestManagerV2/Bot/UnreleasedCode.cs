@@ -1,6 +1,6 @@
 using System.Runtime;
 using StreamCore.Twitch;
-using StreamCore.SimpleJSON;
+using ChatCore.SimpleJSON;
 using System;
 using System.Collections;
 using System.Collections.Generic;

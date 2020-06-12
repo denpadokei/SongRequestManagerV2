@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime;
-using StreamCore.SimpleJSON;
+//using ChatCore.SimpleJSON;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +12,8 @@ using UnityEngine;
 using System.Collections.Concurrent;
 
 using System.Security.Cryptography;
-using StreamCore.Twitch;
+//using StreamCore.Twitch;
+using ChatCore.SimpleJSON;
 // Feature requests: Add Reason for being banned to banlist
 //  
 
@@ -893,15 +894,8 @@ namespace SongRequestManagerV2
                     }
                 }
             }
+            COMMAND.Parse(SerchCreateChatUser(), "!deck pp", RequestBot.CmdFlags.Local);
 
-            if (Plugin.Instance.MultiplexerInstance.GetTwitchService().LoggedInUser != null) {
-                COMMAND.Parse(Plugin.Instance.MultiplexerInstance.GetTwitchService().LoggedInUser, "!deck pp", RequestBot.CmdFlags.Local);
-            }
-            else {
-                COMMAND.Parse(Plugin.Instance.MultiplexerInstance.GetMixerService().LoginUser, "!deck pp", RequestBot.CmdFlags.Local);
-            }
-
-            
             Instance.QueueChatMessage("PP Data indexed");
             pploading = false;
         }

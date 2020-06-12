@@ -31,8 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="StreamCore, Version=2.2.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="StreamCore">
       <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\StreamCore.dll</HintPath>
     </Reference>
     <Reference Include="System" />

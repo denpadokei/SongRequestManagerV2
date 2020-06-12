@@ -783,8 +783,8 @@ namespace SongRequestManagerV2
                     return;
                 }
 
-                if (!string.IsNullOrEmpty(user.Name) && listcollection.contains(ref _blockeduser, user.Name.ToLower())) {
-                    Plugin.Logger.Info($"Sender is contain blacklist : {user.Name}");
+                if (!string.IsNullOrEmpty(user.UserName) && listcollection.contains(ref _blockeduser, user.UserName.ToLower())) {
+                    Plugin.Logger.Info($"Sender is contain blacklist : {user.UserName}");
                     return;
                 }
 
@@ -905,7 +905,7 @@ namespace SongRequestManagerV2
                             // MAGICALLY configure the customized commands 
                             var service = Plugin.Instance.CoreInstance.RunAllServices();
                             var mixerservice = service.GetMixerService();
-                            COMMAND.Parse(mixerservice.LoginUser, line, CmdFlags.SilentResult | CmdFlags.Local);
+                            COMMAND.Parse(SerchCreateChatUser(), line, CmdFlags.SilentResult | CmdFlags.Local);
                         }
                         sr.Close();
                     }

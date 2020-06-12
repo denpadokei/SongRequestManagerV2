@@ -1,6 +1,7 @@
 using ChatCore.Interfaces;
-using StreamCore.SimpleJSON;
-using StreamCore.Twitch;
+using ChatCore.SimpleJSON;
+//using ChatCore.SimpleJSON;
+//using StreamCore.Twitch;
 using System;
 using System.Collections.Generic;
 using System.IO;

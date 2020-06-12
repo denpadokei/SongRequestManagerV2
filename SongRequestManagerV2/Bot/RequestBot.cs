@@ -1,5 +1,5 @@
-﻿using StreamCore.Chat;
-using StreamCore.SimpleJSON;
+﻿//using StreamCore.Chat;
+//using ChatCore.SimpleJSON;
 
 using System;
 using System.Collections;
@@ -17,12 +17,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using Image = UnityEngine.UI.Image;
 using SongCore;
-using StreamCore;
+//using StreamCore;
 //using StreamCore.Twitch;
 using IPA.Utilities;
 using SongRequestManagerV2.UI;
 using BeatSaberMarkupLanguage;
 using Utilities = StreamCore.Utils.Utilities;
+using JSONObject = ChatCore.SimpleJSON.JSONObject;
 using System.Threading.Tasks;
 using System.IO.Compression;
 using ChatCore.Models.Twitch;
@@ -34,10 +35,11 @@ using ChatCore.Services.Twitch;
 using ChatCore.Services.Mixer;
 using System.Runtime.CompilerServices;
 using System.Reflection;
+using ChatCore.SimpleJSON;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot : MonoBehaviour, ITwitchIntegration
+    public partial class RequestBot : MonoBehaviour//, ITwitchIntegration
     {
         [Flags]
         public enum RequestStatus
@@ -171,13 +173,7 @@ namespace SongRequestManagerV2
         public static void Newest(KEYBOARD.KEY key)
         {
             ClearSearches();
-            if (_twitchService.LoggedInUser != null) {
-                RequestBot.COMMAND.Parse(_twitchService.LoggedInUser, $"!addnew/top", CmdFlags.Local);
-            }
-            else {
-                RequestBot.COMMAND.Parse(_mixerService.LoginUser, $"!addnew/top", CmdFlags.Local);
-            }
-            
+            RequestBot.COMMAND.Parse(SerchCreateChatUser(), $"!addnew/top", CmdFlags.Local);
         }
 
         public static void Search(KEYBOARD.KEY key)
@@ -238,7 +234,6 @@ namespace SongRequestManagerV2
         {
             DontDestroyOnLoad(gameObject);
             this._chatService = Plugin.Instance.MultiplexerInstance;
-            this._chatService.OnTextMessageReceived += RecievedMessages;
             //Instance = this;
 #if UNRELEASED
             var startingmem = GC.GetTotalMemory(true);
@@ -282,7 +277,7 @@ namespace SongRequestManagerV2
             //    {
             //        foreach (FileInfo f in dir.GetFiles(searchPattern))
             //        {
-            //            var List = listcollection.OpenList(f.Name).list;
+            //            var List = listcollection.OpenList(f.UserName).list;
             //            for (int i=0;i<List.Count;i++)
             //                {
             //                if (remap.ContainsKey(List[i]))
@@ -291,7 +286,7 @@ namespace SongRequestManagerV2
             //                    List[i] = remap[List[i]];
             //                }    
             //                }
-            //            listcollection.OpenList(f.Name).Writefile(f.Name);
+            //            listcollection.OpenList(f.UserName).Writefile(f.UserName);
             //        }
             //    }
             //    catch
@@ -392,10 +387,10 @@ namespace SongRequestManagerV2
         public bool MyChatMessageHandler(IChatMessage msg)
         {
             string excludefilename = "chatexclude.users";
-            return RequestBot.Instance && RequestBot.listcollection.contains(ref excludefilename, msg.Sender.Name.ToLower(), RequestBot.ListFlags.Uncached);
+            return RequestBot.Instance && RequestBot.listcollection.contains(ref excludefilename, msg.Sender.UserName.ToLower(), RequestBot.ListFlags.Uncached);
         }
 
-        private void RecievedMessages(IChatService srv, IChatMessage msg)
+        internal void RecievedMessages(IChatService srv, IChatMessage msg)
         {
             Plugin.Log($"Received Message : {msg.Message}");
             RequestBot.COMMAND.Parse(msg.Sender, msg.Message);
@@ -511,10 +506,10 @@ namespace SongRequestManagerV2
             try
             {
                 Plugin.Log($"Sending message: \"{message}\"");
-                var mixer = this._chatService.GetMixerService();
-                mixer?.SendTextMessage($"{message}", null);
-                var twitch = this._chatService.GetTwitchService();
-                twitch?.SendTextMessage($"{message}", new TwitchChannel().Id);
+                var mixer = Plugin.Instance.MixerService;
+                mixer?.SendTextMessage($"{message}", Plugin.Instance.MixerChannel);
+                var twitch = Plugin.Instance.TwitchService;
+                twitch?.SendTextMessage($"{message}", Plugin.Instance.TwitchChannel);
             }
             catch (Exception e)
             {
@@ -526,7 +521,7 @@ namespace SongRequestManagerV2
         {
             try {
                 var mixer = this._chatService?.GetMixerService();
-                mixer?.SendTextMessage(Assembly.GetCallingAssembly(), $"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}");
+                mixer?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", Plugin.Instance.MixerChannel);
                 //var twitch = this._chatService?.GetTwitchService();
                 //twitch?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", new TwitchChannel().Id);
             }
@@ -683,7 +678,7 @@ namespace SongRequestManagerV2
                 else if (!autopick && songs.Count > 1 && songs.Count < 4)
                 {
                     var msg = new QueueLongMessage(1, 5);
-                    msg.Header($"@{requestor.Name}, please choose: ");
+                    msg.Header($"@{requestor.UserName}, please choose: ");
                     foreach (var eachsong in songs) msg.Add(new DynamicText().AddSong(eachsong).Parse(BsrSongDetail), ", ");
                     msg.end("...", $"No matching songs for for {request}");
                     return;
@@ -1150,11 +1145,21 @@ namespace SongRequestManagerV2
             if (_twitchService?.LoggedInUser != null) {
                 return _twitchService?.LoggedInUser;
             }
-            else if (_mixerService?.LoginUser != null) {
-                return _mixerService?.LoginUser;
-            }
             else {
-                return new MixerUser();
+                var obj = new
+                {
+                    Id = "",
+                    UserName = RequestBotConfig.Instance.MixerUserName,
+                    DisplayName = RequestBotConfig.Instance.MixerUserName,
+                    Color = "#FFFFFFFF",
+                    IsBroadcaster = true,
+                    IsModerator = false,
+                    IsSubscriber = false,
+                    IsPro = false,
+                    IsStaff = false,
+                    Badges = new IChatBadge[0]
+                };
+                return new MixerUser(JsonUtility.ToJson(obj));
             }
         }
  

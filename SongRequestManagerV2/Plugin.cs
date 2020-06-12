@@ -12,6 +12,10 @@ using ChatCore.Services;
 using IPA.Loader;
 using System.Reflection;
 using BS_Utils.Utilities;
+using ChatCore.Services.Mixer;
+using ChatCore.Services.Twitch;
+using ChatCore.Models.Mixer;
+using ChatCore.Models.Twitch;
 
 namespace SongRequestManagerV2
 {
@@ -25,8 +29,12 @@ namespace SongRequestManagerV2
 
         public static IPALogger Logger { get; internal set; }
 
-        public ICoreInstance CoreInstance { get; internal set; }
+        public ChatCoreInstance CoreInstance { get; internal set; }
         public ChatServiceMultiplexer MultiplexerInstance { get; internal set; }
+        public TwitchService TwitchService { get; internal set; }
+        public TwitchChannel TwitchChannel { get; internal set; }
+        public MixerService MixerService { get; internal set; }
+        public MixerChannel MixerChannel { get; internal set; }
 
         internal static WebClient WebClient;
 
@@ -59,8 +67,11 @@ namespace SongRequestManagerV2
         [OnStart]
         public void OnStart()
         {
-            this.CoreInstance = ChatCoreInstance.Current;
+            this.CoreInstance = ChatCoreInstance.Create();
             this.MultiplexerInstance = this.CoreInstance.RunAllServices();
+            this.MultiplexerInstance.OnLogin += this.MultiplexerInstance_OnLogin;
+            this.MultiplexerInstance.OnJoinChannel += this.MultiplexerInstance_OnJoinChannel;
+            this.MultiplexerInstance.OnTextMessageReceived += RequestBot.Instance.RecievedMessages;
             //if (Instance != null) return;
             //Instance = this;
 
@@ -81,6 +92,28 @@ namespace SongRequestManagerV2
 
             // init sprites
             Base64Sprites.Init();
+        }
+
+        private void MultiplexerInstance_OnJoinChannel(IChatService arg1, IChatChannel arg2)
+        {
+            if (arg1 is MixerService mixerService) {
+                this.MixerChannel = arg2 as MixerChannel;
+                
+            }
+            else if (arg1 is TwitchService twitchService) {
+                this.TwitchChannel = arg2 as TwitchChannel;
+            }
+            
+        }
+
+        private void MultiplexerInstance_OnLogin(IChatService obj)
+        {
+            if (obj is MixerService mixerService) {
+                this.MixerService = mixerService;
+            }
+            else if (obj is TwitchService twitchService) {
+                this.TwitchService = twitchService;
+            }
         }
 
         private void OnMenuSceneLoadedFresh()
