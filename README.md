@@ -3,8 +3,8 @@ ChatCoreに対応したリクエストマネージャー
 
 
 # Mod Info
-You need to StreamCore and ChatCore  
-~~https://github.com/brian91292/StreamCore~~  
+~~You need to StreamCore and ChatCore  
+https://github.com/brian91292/StreamCore~~  
 You need ChatCore Only!  
 https://github.com/brian91292/ChatCore  
 
