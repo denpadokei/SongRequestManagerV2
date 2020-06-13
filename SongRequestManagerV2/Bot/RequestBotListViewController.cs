@@ -11,6 +11,7 @@ using IPA.Utilities;
 using BeatSaberMarkupLanguage;
 using Utilities = SongRequestManagerV2.Utils.Utilities;
 using System.Threading.Tasks;
+using SongCore;
 
 namespace SongRequestManagerV2
 {
@@ -107,7 +108,7 @@ namespace SongRequestManagerV2
         {
             if (firstActivation)
             {
-                if (!SongCore.Loader.AreSongsLoaded)
+                if (!Loader.AreSongsLoaded)
                 {
                     SongCore.Loader.SongsLoadedEvent += SongLoader_SongsLoadedEvent;
                 }

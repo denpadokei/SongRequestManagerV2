@@ -19,37 +19,37 @@ namespace SongRequestManagerV2
 
             set => this.SetProperty(ref this._requestQueueOpen, value);
         }
-        public bool PersistentRequestQueue { get; set; } = true;
+        public bool PersistentRequestQueue  = true;
 
-        public bool AutoplaySong { get; set; } = false; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
-        public bool ClearNoFail { get; set; } = true; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
+        public bool AutoplaySong  = false; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
+        public bool ClearNoFail  = true; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
 
-        public int RequestHistoryLimit { get; set; } = 40;
-        public int UserRequestLimit { get; set; } = 2;
-        public int SubRequestLimit { get; set; } = 5;
-        public int ModRequestLimit { get; set; } = 10;
-        public int VipBonusRequests { get; set; } = 1; // VIP's get bonus requests in addition to their base limit *IMPLEMENTED*
-        public int SessionResetAfterXHours { get; set; } = 6; // Number of hours before persistent session properties are reset (ie: Queue, Played , Duplicate List)
-        public bool LimitUserRequestsToSession { get; set; } = false; // Request limits do not reset after a song is played.  
+        public int RequestHistoryLimit = 40;
+        public int UserRequestLimit = 2;
+        public int SubRequestLimit = 5;
+        public int ModRequestLimit = 10;
+        public int VipBonusRequests = 1; // VIP's get bonus requests in addition to their base limit *IMPLEMENTED*
+        public int SessionResetAfterXHours = 6; // Number of hours before persistent session properties are reset (ie: Queue, Played , Duplicate List)
+        public bool LimitUserRequestsToSession = false; // Request limits do not reset after a song is played.  
 
-        public float LowestAllowedRating { get; set; } = 0; // Lowest allowed song rating to be played 0-100 *IMPLEMENTED*, needs UI
-        public float MaximumSongLength { get; set; } = 180; // Maximum song length in minutes
-        public float MinimumNJS { get; set; } = 0;
+        public float LowestAllowedRating = 0; // Lowest allowed song rating to be played 0-100 *IMPLEMENTED*, needs UI
+        public float MaximumSongLength = 180; // Maximum song length in minutes
+        public float MinimumNJS = 0;
 
-        public int MaxiumScanRange { get; set; } = 5; // How far down the list to scan for new songs
+        public int MaxiumScanRange = 5; // How far down the list to scan for new songs
 
-        public int PPDeckMiniumumPP { get; set; } = 150; // Minimum PP to add to pp deck
+        public int PPDeckMiniumumPP = 150; // Minimum PP to add to pp deck
 
-        public string DeckList { get; set; } = "fun hard brutal dance chill";
+        public string DeckList = "fun hard brutal dance chill";
 
-        public bool AutopickFirstSong { get; set; } = false; // Pick the first song that !bsr finds instead of showing a short list. *IMPLEMENTED*, needs UI
-        public bool AllowModAddClosedQueue { get; set; } = true; // Allow moderator to add songs while queue is closed 
-        public bool SendNextSongBeingPlayedtoChat { get; set; } = true; // Enable chat message when you hit play
-        public bool UpdateQueueStatusFiles { get; set; } = true; // Create and update queue list and open/close status files for OBS *IMPLEMENTED*, needs UI
-        public int MaximumQueueTextEntries { get; set; } = 8;
-        public string BotPrefix { get; set; } = "";
+        public bool AutopickFirstSong = false; // Pick the first song that !bsr finds instead of showing a short list. *IMPLEMENTED*, needs UI
+        public bool AllowModAddClosedQueue = true; // Allow moderator to add songs while queue is closed 
+        public bool SendNextSongBeingPlayedtoChat = true; // Enable chat message when you hit play
+        public bool UpdateQueueStatusFiles = true; // Create and update queue list and open/close status files for OBS *IMPLEMENTED*, needs UI
+        public int MaximumQueueTextEntries = 8;
+        public string BotPrefix = "";
 
-        public bool ModFullRights { get; set; } = false; // Allow moderator full broadcaster rights. Use at own risk!
+        public bool ModFullRights = false; // Allow moderator full broadcaster rights. Use at own risk!
 
         public int maximumqueuemessages { get; set; } = 1;
         public int maximumlookupmessages { get; set; } = 1;
@@ -57,16 +57,17 @@ namespace SongRequestManagerV2
         public string LastBackup { get; set; } = DateTime.MinValue.ToString();
         public string backuppath { get; set; } = Path.Combine(Environment.CurrentDirectory, "userdata", "backup");
 
-        public bool OfflineMode { get; set; } = false;
+        public bool OfflineMode = false;
         public bool SavedatabaseOnNewest { get; set; } = false;
-        public string offlinepath { get; set; } = "d:\\customsongs";
+        public string offlinepath = "d:\\customsongs";
 
-        public bool LocalSearch { get; set; } = false;
-        public bool PPSearch { get; set; } = false;
+        public bool LocalSearch = false;
+        public bool PPSearch = false;
         public string additionalsongpath { get; set; } = "";
         public string songdownloadpath { get; set; } = "";
 
-        public string MixerUserName {get;set;} = "";
+        public string MixerUserName = "";
+        public string MixerChannelKey = "";
 
         public event Action<RequestBotConfig> ConfigChangedEvent;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -74,25 +75,12 @@ namespace SongRequestManagerV2
         private readonly FileSystemWatcher _configWatcher;
         private bool _saving;
 
-        private static RequestBotConfig _instance = null;
-        public static RequestBotConfig Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new RequestBotConfig();
-                return _instance;
-            }
+        private static RequestBotConfig _instance = new RequestBotConfig();
+        public static RequestBotConfig Instance => _instance;
 
-            private set
-            {
-                _instance = value;
-            }
-        }
-
-        public RequestBotConfig()
+        private RequestBotConfig()
         {
-            Instance = this;
+            //Instance = this;
 
             _configWatcher = new FileSystemWatcher();
 
@@ -132,9 +120,14 @@ namespace SongRequestManagerV2
 
         public void Save(bool callback = false)
         {
-            if (!callback)
-                _saving = true;
-            ConfigSerializer.SaveConfig(this, FilePath);
+            try {
+                if (!callback)
+                    _saving = true;
+                ConfigSerializer.SaveConfig(this, FilePath);
+            }
+            catch (Exception e) {
+                Plugin.Log($"faild to save : {e}\r\n{e.Message}");
+            }
         }
 
         private void ConfigWatcherOnChanged(object sender, FileSystemEventArgs fileSystemEventArgs)

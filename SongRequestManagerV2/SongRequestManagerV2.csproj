@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SongCore, Version=2.9.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\SongCore.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
@@ -74,6 +70,10 @@
     </Reference>
     <Reference Include="SongBrowser">
       <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\SongBrowser.dll</HintPath>
+    </Reference>
+    <Reference Include="SongCore, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\SongCore.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ProBuilder">
       <HintPath>D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\Unity.ProBuilder.dll</HintPath>
@@ -139,7 +139,7 @@
     <Compile Include="Bot\util.cs" />
     <Compile Include="Config\RequestBotConfig.cs" />
     <Compile Include="Extentions\IChatUserExtention.cs" />
-    <Compile Include="Extentions\TwitchUserExtention.cs" />
+    <Compile Include="Extentions\TaskExtention.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Dispatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

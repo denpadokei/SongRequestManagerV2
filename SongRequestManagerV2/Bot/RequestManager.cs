@@ -1,7 +1,9 @@
 ﻿//using ChatCore.SimpleJSON;
 using ChatCore.SimpleJSON;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SongRequestManagerV2
 {
@@ -24,14 +26,29 @@ namespace SongRequestManagerV2
 
         public static void Write(string path, ref List<SongRequest> songs)
         {
-            if (!Directory.Exists(Path.GetDirectoryName(path)))
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            Plugin.Log($"Start write");
+            try {
+                if (!Directory.Exists(Path.GetDirectoryName(path)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
 
-            JSONArray arr = new JSONArray();
-            foreach (SongRequest song in songs)
-                arr.Add(song.ToJson());
-
-            File.WriteAllText(path, arr.ToString());
+                JSONArray arr = new JSONArray();
+                foreach (SongRequest song in songs.Where(x => x != null)) {
+                    try {
+                        arr.Add(song.ToJson());
+                        Plugin.Log($"Added {song.song}");
+                    }
+                    catch (Exception ex) {
+                        Plugin.Log($"{ex}\r\n{song}");
+                    }
+                }
+                File.WriteAllText(path, arr.ToString());
+            }
+            catch (Exception ex) {
+                Plugin.Log($"{ex}");
+            }
+            finally {
+                Plugin.Log($"End write");
+            }
         }
     }
 

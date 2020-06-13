@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Security.Cryptography;
 //using StreamCore.Twitch;
 using ChatCore.SimpleJSON;
+using SongRequestManagerV2.Extentions;
 // Feature requests: Add Reason for being banned to banlist
 //  
 
@@ -217,7 +218,7 @@ namespace SongRequestManagerV2
             {
                 if (!DatabaseImported && RequestBotConfig.Instance.LocalSearch )
                 {
-                    LoadCustomSongs();                  
+                    LoadCustomSongs().Await(null, null, null);
                 }
 
                 List<SongMap> result = new List<SongMap>();
@@ -696,15 +697,13 @@ namespace SongRequestManagerV2
 
         public IEnumerator RefreshSongs(ParseState state)
         {
-           
-            MapDatabase.LoadCustomSongs();
 
+            MapDatabase.LoadCustomSongs().Await(null, null, null);
             yield break;
         }
 
         public string GetGCCount(ParseState state)
         {
-
             state.msg($"Gc0:{GC.CollectionCount(0)} GC1:{GC.CollectionCount(1)} GC2:{GC.CollectionCount(2)}");
             state.msg($"{GC.GetTotalMemory(false)}");
             return success;     

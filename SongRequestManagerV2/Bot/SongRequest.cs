@@ -13,7 +13,7 @@ namespace SongRequestManagerV2
     public class SongRequest
     {
         public JSONObject song;
-        public IChatUser requestor = new TwitchUser();
+        public IChatUser requestor;
         public DateTime requestTime;
         public RequestStatus status;
         public string requestInfo; // Contains extra song info, Like : Sub/Donation request, Deck pick, Empty Queue pick,Mapper request, etc.
@@ -30,13 +30,19 @@ namespace SongRequestManagerV2
 
         public JSONObject ToJson()
         {
-            JSONObject obj = new JSONObject();
-            obj.Add("status", new JSONString(status.ToString()));
-            obj.Add("requestInfo", new JSONString(requestInfo));
-            obj.Add("time", new JSONString(requestTime.ToFileTime().ToString()));
-            obj.Add("requestor", requestor.ToJson());
-            obj.Add("song", song);
-            return obj;
+            try {
+                JSONObject obj = new JSONObject();
+                obj.Add("status", new JSONString(status.ToString()));
+                obj.Add("requestInfo", new JSONString(requestInfo));
+                obj.Add("time", new JSONString(requestTime.ToFileTime().ToString()));
+                obj.Add("requestor", requestor.ToJson());
+                obj.Add("song", song);
+                return obj;
+            }
+            catch (Exception ex) {
+                Plugin.Log($"{ex}\r\n{ex.Message}");
+                return null;
+            }
         }
 
         public SongRequest FromJson(JSONObject obj)
