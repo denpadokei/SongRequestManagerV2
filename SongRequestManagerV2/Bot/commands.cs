@@ -1055,6 +1055,7 @@ namespace SongRequestManagerV2
                 //
                 while (true) {
                     string errormsg = ExecuteSubcommand();
+                    Plugin.Log($"errormsg : {errormsg}");
                     if (errormsg == notsubcommand) break;
                     if (errormsg != "") {
                         if (errormsg == done) {
@@ -1082,7 +1083,7 @@ namespace SongRequestManagerV2
 
 
                 // Num is Nani?
-                if (!allow && !botcmd.Flags.HasFlag(CmdFlags.BypassRights) && !listcollection.contains(ref botcmd.permittedusers, user.Id.ToLower())) {
+                if (!allow && !botcmd.Flags.HasFlag(CmdFlags.BypassRights) && !listcollection.contains(ref botcmd.permittedusers, user.UserName.ToLower())) {
                     CmdFlags twitchpermission = botcmd.Flags & CmdFlags.TwitchLevel;
                     if (!botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) Instance?.QueueChatMessage($"{command} is restricted to {twitchpermission.ToString()}");
                     return;

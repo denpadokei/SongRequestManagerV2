@@ -36,10 +36,11 @@ using ChatCore.Services.Mixer;
 using System.Runtime.CompilerServices;
 using System.Reflection;
 using ChatCore.SimpleJSON;
+using SongRequestManagerV2.Extentions;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot// : MonoBehaviour//, ITwitchIntegration
+    public partial class RequestBot// : MonoBehaviour, ITwitchIntegration
     {
         [Flags]
         public enum RequestStatus
@@ -59,7 +60,7 @@ namespace SongRequestManagerV2
         }
 
 
-        public static ConcurrentQueue<RequestInfo> UnverifiedRequestQueue = new ConcurrentQueue<RequestInfo>();
+        public static ConcurrentQueue<RequestInfo> UnverifiedRequestQueue { get; } = new ConcurrentQueue<RequestInfo>();
         public static Dictionary<string, RequestUserTracker> RequestTracker = new Dictionary<string, RequestUserTracker>();
         //private ChatServiceMultiplexer _chatService { get; set; }
 
@@ -231,7 +232,7 @@ namespace SongRequestManagerV2
             Plugin.Log("Awake start!");
             //DontDestroyOnLoad(this.gameObject);
 #if UNRELEASED
-            //var startingmem = GC.GetTotalMemory(true);
+            var startingmem = GC.GetTotalMemory(true);
 
             //var folder = Path.Combine(Environment.CurrentDirectory, "userdata","streamcore");
 
@@ -522,8 +523,8 @@ namespace SongRequestManagerV2
             try {
                 var mixer = Plugin.Instance.MixerService;
                 mixer?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", Plugin.Instance.MixerChannel);
-                //var twitch = this._chatService?.GetTwitchService();
-                //twitch?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", new TwitchChannel().Id);
+                var twitch = Plugin.Instance.TwitchService;
+                twitch?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", Plugin.Instance.TwitchChannel);
             }
             catch (Exception e) {
                 Plugin.Log($"Exception was caught when trying to send bot message. {e.ToString()}");
@@ -534,9 +535,7 @@ namespace SongRequestManagerV2
         {
             while (!Plugin.Instance.IsApplicationExiting)
             {
-                await Task.Run(async () => {
-                    while (UnverifiedRequestQueue.Count == 0) await Task.Delay(25);
-                });
+                while (UnverifiedRequestQueue.Count == 0) await Task.Delay(25);
 
                 if (UnverifiedRequestQueue.TryDequeue(out var requestInfo))
                     await CheckRequest(requestInfo);
@@ -749,13 +748,14 @@ namespace SongRequestManagerV2
             });
         }
 
-        private static async void ProcessSongRequest(int index, bool fromHistory = false)
+        private static void ProcessSongRequest(int index, bool fromHistory = false)
         {
             if ((RequestQueue.Songs.Count > 0 && !fromHistory) || (RequestHistory.Songs.Count > 0 && fromHistory))
             {
                 SongRequest request = null;
                 if (!fromHistory)
                 {
+                    Plugin.Log("Set status to request");
                     SetRequestStatus(index, RequestStatus.Played);
                     request = DequeueRequest(index);
                 }
@@ -857,81 +857,77 @@ namespace SongRequestManagerV2
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #else
-                    var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None);
+                    Plugin.WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None).Await(async result =>
+                    {
+                        var songZip = result;
+
+                        using (var zipStream = new MemoryStream(songZip))
+                        using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
+                            try {
+                                // open zip archive from memory stream
+                                archive.ExtractToDirectory(currentSongDirectory);
+                            }
+                            catch (Exception e) {
+                                Plugin.Log($"Unable to extract ZIP! Exception: {e}");
+                                return;
+                            }
+                            zipStream.Close();
+                        }
+
+                        //Stream zipStream = new MemoryStream(songZip);
+                        //zipStream.Close();
+                        //here:
+
+                        while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
+
+                        Loader.Instance.RefreshSongs();
+
+                        while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
+
+                        Utilities.EmptyDirectory(".requestcache", true);
+                        //levels = SongLoader.CustomLevels.Where(l => l.levelID.StartsWith(songHash)).ToArray();
+
+                        // Dismiss the song request viewcontroller now
+                        //_songRequestMenu.Dismiss();
+                        _flowCoordinator.Dismiss();
+
+                        if (true) {
+                            //Plugin.Log($"Scrolling to level {levels[0].levelID}");
+
+                            bool success = false;
+
+                            Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
+
+                            // Redownload the song if we failed to scroll to it
+                        }
+                        else {
+                            Plugin.Log("Failed to find new level!");
+                        }
+
+                        if (!request.song.IsNull) new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString()); // Display next song message
+
+#if UNRELEASED
+                        if (!request.song.IsNull) // Experimental!
+                        {
+                        TwitchWebSocketClient.SendCommand("/marker "+ new DynamicText().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
+                        }
 #endif
 
-                    Stream zipStream = new MemoryStream(songZip);
-                    try
-                    {
-                        // open zip archive from memory stream
-                        ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
-                        archive.ExtractToDirectory(currentSongDirectory);
-                        archive.Dispose();
-                    }
-                    catch (Exception e)
-                    {
-                        Plugin.Log($"Unable to extract ZIP! Exception: {e}");
-                        return;
-                    }
-                    zipStream.Close();
-
-                here:
-
-                    await Task.Run(async () =>
-                    {
-                        while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
-                    });
-
-                    Loader.Instance.RefreshSongs();
-
-                    await Task.Run(async () =>
-                    {
-                        while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
-                    });
-
-                    Utilities.EmptyDirectory(".requestcache", true);
-                    //levels = SongLoader.CustomLevels.Where(l => l.levelID.StartsWith(songHash)).ToArray();
+                    }, null, null, true);
+#endif              
                 }
                 else
                 {
                     //Instance.QueueChatMessage($"Directory exists: {currentSongDirectory}");
-
                     Plugin.Log($"Song {songName} already exists!");
                 }
-
-                // Dismiss the song request viewcontroller now
-                //_songRequestMenu.Dismiss();
-                _flowCoordinator.Dismiss();
-
-                if (true)
-                {
-                    //Plugin.Log($"Scrolling to level {levels[0].levelID}");
-
-                    bool success = false;
-
-                    Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
-
-                    // Redownload the song if we failed to scroll to it
-                }
-                else
-                {
-                    Plugin.Log("Failed to find new level!");
-                }
-
-                if (!request.song.IsNull) new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString()); // Display next song message
-
-                #if UNRELEASED
-                if (!request.song.IsNull) // Experimental!
-                {
-                    TwitchWebSocketClient.SendCommand("/marker "+ new DynamicText().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
-                }
-                #endif
             }
         }
 
 
         public static void UpdateRequestUI(bool writeSummary = true)
         {
+            Plugin.Log("start updateUI");
             try
             {
                 if (writeSummary)
@@ -955,33 +951,42 @@ namespace SongRequestManagerV2
             {
                 Plugin.Log(ex.ToString());
             }
+            finally {
+                Plugin.Log("end update UI");
+            }
         }
 
 
         public static void DequeueRequest(SongRequest request, bool updateUI = true)
         {
-            if (request.status!=RequestStatus.Wrongsong && request.status!=RequestStatus.SongSearch) RequestHistory.Songs.Insert(0, request); // Wrong song requests are not logged into history, is it possible that other status states shouldn't be moved either?
+            Plugin.Log("start to deque request");
+            try {
+                if (request.status != RequestStatus.Wrongsong && request.status != RequestStatus.SongSearch) RequestHistory.Songs.Insert(0, request); // Wrong song requests are not logged into history, is it possible that other status states shouldn't be moved either?
 
-            if (RequestHistory.Songs.Count > RequestBotConfig.Instance.RequestHistoryLimit)
-            {
-                int diff = RequestHistory.Songs.Count - RequestBotConfig.Instance.RequestHistoryLimit;
-                RequestHistory.Songs.RemoveRange(RequestHistory.Songs.Count - diff - 1, diff);
+                if (RequestHistory.Songs.Count > RequestBotConfig.Instance.RequestHistoryLimit) {
+                    int diff = RequestHistory.Songs.Count - RequestBotConfig.Instance.RequestHistoryLimit;
+                    RequestHistory.Songs.RemoveRange(RequestHistory.Songs.Count - diff - 1, diff);
+                }
+                RequestQueue.Songs.Remove(request);
+                RequestHistory.Write();
+                RequestQueue.Write();
+
+                // Decrement the requestors request count, since their request is now out of the queue
+
+                if (!RequestBotConfig.Instance.LimitUserRequestsToSession) {
+                    if (RequestTracker.ContainsKey(request.requestor.Id)) RequestTracker[request.requestor.Id].numRequests--;
+                }
+
+                if (updateUI == false) return;
             }
-            RequestQueue.Songs.Remove(request);
-            RequestHistory.Write();
-            RequestQueue.Write();
-
-            // Decrement the requestors request count, since their request is now out of the queue
-
-            if (!RequestBotConfig.Instance.LimitUserRequestsToSession)
-            {
-                if (RequestTracker.ContainsKey(request.requestor.Id)) RequestTracker[request.requestor.Id].numRequests--;
+            catch (Exception e) {
+                Plugin.Log($"{e}");
             }
-
-            if (updateUI == false) return;
-
-            UpdateRequestUI();
-            _refreshQueue = true;
+            finally {
+                UpdateRequestUI();
+                _refreshQueue = true;
+                Plugin.Log("end Deque");
+            }
         }
 
         public static SongRequest DequeueRequest(int index, bool updateUI = true)
@@ -1137,7 +1142,7 @@ namespace SongRequestManagerV2
                 Plugin.Log(ex.ToString());
 
             }
-        return success;
+            return success;
         }
 
         private static IChatUser SerchCreateChatUser()

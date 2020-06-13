@@ -42,7 +42,7 @@ namespace SongRequestManagerV2
         public bool IsApplicationExiting = false;
         public static Plugin Instance { get; private set; }
 
-        private readonly RequestBotConfig RequestBotConfig = new RequestBotConfig();
+        private RequestBotConfig RequestBotConfig { get; } = RequestBotConfig.Instance;
 
         public static string DataPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "UserData", "StreamCore");
         public static bool SongBrowserPluginPresent;
@@ -97,6 +97,7 @@ namespace SongRequestManagerV2
 
         private void MultiplexerInstance_OnJoinChannel(IChatService arg1, IChatChannel arg2)
         {
+            Log($"Joined! : [{arg1.DisplayName}][{arg2.Name}]");
             if (arg1 is MixerService mixerService) {
                 this.MixerChannel = arg2 as MixerChannel;
                 
@@ -109,22 +110,46 @@ namespace SongRequestManagerV2
 
         private void MultiplexerInstance_OnLogin(IChatService obj)
         {
+            Log($"Loged in! : [{obj.DisplayName}]");
             if (obj is MixerService mixerService) {
                 this.MixerService = mixerService;
+                if (this.MixerService.Channels.TryGetValue(RequestBotConfig.MixerUserName, out var channel)) {
+                    this.MixerChannel = channel.AsMixerChannel();
+                }
             }
             else if (obj is TwitchService twitchService) {
                 this.TwitchService = twitchService;
+            }
+
+            if (this.MixerService == null) {
+                var service = this.MultiplexerInstance.GetMixerService();
+                Log($"mixer user name : {RequestBotConfig.MixerUserName}");
+                foreach (var item in service.Channels) {
+                    Log($"key : {item.Key}, value : {item.Value}");
+                }
+                if (service != null && service.Channels.TryGetValue(RequestBotConfig.MixerChannelKey, out var channel)) {
+                    Log("get Mixer service");
+                    this.MixerService = service;
+                    this.MixerChannel = channel.AsMixerChannel();
+                }
             }
         }
 
         private void OnMenuSceneLoadedFresh()
         {
+            Log("Menu Scene Loaded Fresh!");
             // setup settings ui
             BSMLSettings.instance.AddSettingsMenu("SRM", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", SongRequestManagerSettings.instance);
 
-            // main load point
-            RequestBot.OnLoad();
+            try {
+                // main load point
+                RequestBot.OnLoad();
+            }
+            catch (Exception e) {
+                Log($"{e}");
+            }
             RequestBotConfig.Save(true);
+            Log("end Menu Scene Loaded Fresh!");
         }
 
         public static void SongBrowserCancelFilter()
