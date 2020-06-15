@@ -67,22 +67,12 @@ namespace SongRequestManagerV2
         [OnStart]
         public void OnStart()
         {
-            this.CoreInstance = ChatCoreInstance.Create();
-            this.MultiplexerInstance = this.CoreInstance.RunAllServices();
-            this.MultiplexerInstance.OnLogin += this.MultiplexerInstance_OnLogin;
-            this.MultiplexerInstance.OnJoinChannel += this.MultiplexerInstance_OnJoinChannel;
-            this.MultiplexerInstance.OnTextMessageReceived += RequestBot.Instance.RecievedMessages;
-            RequestBot.Instance.Awake();
             //if (Instance != null) return;
             //Instance = this;
-
             Dispatcher.Initialize();
-
             // create our internal webclient
             WebClient = new WebClient();
-
-            SongBrowserPluginPresent = IPA.Loader.PluginManager.GetPlugin("Song Browser") != null;
-
+            SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
             // setup handle for fresh menu scene changes
             BSEvents.OnLoad();
             BSEvents.menuSceneLoadedFresh += OnMenuSceneLoadedFresh;
@@ -138,6 +128,12 @@ namespace SongRequestManagerV2
         private void OnMenuSceneLoadedFresh()
         {
             Log("Menu Scene Loaded Fresh!");
+            this.CoreInstance = ChatCoreInstance.Create();
+            this.MultiplexerInstance = this.CoreInstance.RunAllServices();
+            this.MultiplexerInstance.OnLogin += this.MultiplexerInstance_OnLogin;
+            this.MultiplexerInstance.OnJoinChannel += this.MultiplexerInstance_OnJoinChannel;
+            this.MultiplexerInstance.OnTextMessageReceived += RequestBot.Instance.RecievedMessages;
+            RequestBot.Instance.Awake();
             // setup settings ui
             BSMLSettings.instance.AddSettingsMenu("SRM", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", SongRequestManagerSettings.instance);
 
