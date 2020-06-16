@@ -32,9 +32,7 @@ namespace SongRequestManagerV2
         public ChatCoreInstance CoreInstance { get; internal set; }
         public ChatServiceMultiplexer MultiplexerInstance { get; internal set; }
         public TwitchService TwitchService { get; internal set; }
-        public TwitchChannel TwitchChannel { get; internal set; }
         public MixerService MixerService { get; internal set; }
-        public MixerChannel MixerChannel { get; internal set; }
 
         internal static WebClient WebClient;
 
@@ -67,6 +65,7 @@ namespace SongRequestManagerV2
         [OnStart]
         public void OnStart()
         {
+            this.CoreInstance = ChatCoreInstance.Create();
             //if (Instance != null) return;
             //Instance = this;
             Dispatcher.Initialize();
@@ -89,11 +88,11 @@ namespace SongRequestManagerV2
         {
             Log($"Joined! : [{arg1.DisplayName}][{arg2.Name}]");
             if (arg1 is MixerService mixerService) {
-                this.MixerChannel = arg2 as MixerChannel;
+                this.MixerService = mixerService;
                 
             }
             else if (arg1 is TwitchService twitchService) {
-                this.TwitchChannel = arg2 as TwitchChannel;
+                this.TwitchService = twitchService;
             }
             
         }
@@ -103,36 +102,24 @@ namespace SongRequestManagerV2
             Log($"Loged in! : [{obj.DisplayName}]");
             if (obj is MixerService mixerService) {
                 this.MixerService = mixerService;
-                if (this.MixerService.Channels.TryGetValue(RequestBotConfig.MixerUserName, out var channel)) {
-                    this.MixerChannel = channel.AsMixerChannel();
-                }
             }
             else if (obj is TwitchService twitchService) {
                 this.TwitchService = twitchService;
-            }
-
-            if (this.MixerService == null) {
-                var service = this.MultiplexerInstance.GetMixerService();
-                Log($"mixer user name : {RequestBotConfig.MixerUserName}");
-                foreach (var item in service.Channels) {
-                    Log($"key : {item.Key}, value : {item.Value}");
-                }
-                if (service != null && service.Channels.TryGetValue(RequestBotConfig.MixerChannelKey, out var channel)) {
-                    Log("get Mixer service");
-                    this.MixerService = service;
-                    this.MixerChannel = channel.AsMixerChannel();
-                }
             }
         }
 
         private void OnMenuSceneLoadedFresh()
         {
             Log("Menu Scene Loaded Fresh!");
-            this.CoreInstance = ChatCoreInstance.Create();
             this.MultiplexerInstance = this.CoreInstance.RunAllServices();
+            this.MultiplexerInstance.OnLogin -= this.MultiplexerInstance_OnLogin;
             this.MultiplexerInstance.OnLogin += this.MultiplexerInstance_OnLogin;
+            this.MultiplexerInstance.OnJoinChannel -= this.MultiplexerInstance_OnJoinChannel;
             this.MultiplexerInstance.OnJoinChannel += this.MultiplexerInstance_OnJoinChannel;
+            this.MultiplexerInstance.OnTextMessageReceived -= RequestBot.Instance.RecievedMessages;
             this.MultiplexerInstance.OnTextMessageReceived += RequestBot.Instance.RecievedMessages;
+            this.MixerService = this.MultiplexerInstance.GetMixerService();
+            this.TwitchService = this.MultiplexerInstance.GetTwitchService();
             RequestBot.Instance.Awake();
             // setup settings ui
             BSMLSettings.instance.AddSettingsMenu("SRM", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", SongRequestManagerSettings.instance);

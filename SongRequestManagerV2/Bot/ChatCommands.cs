@@ -565,10 +565,7 @@ namespace SongRequestManagerV2
             if (_WobbleInstalled) {
                 string wobblestate = "off";
                 if (state.parameter == "enable") wobblestate = "on";
-                Plugin.Instance.MixerService.SendTextMessage($"!wadmin toggle {wobblestate} ", Plugin.Instance.MixerChannel);
-                //TwitchWebSocketClient.SendCommand($"!wadmin toggle {wobblestate} ");
-
-
+                SendMessage($"!wadmin toggle {wobblestate} ");
             }
 
             state.msg($"The !bomb command is now {state.parameter}d.");

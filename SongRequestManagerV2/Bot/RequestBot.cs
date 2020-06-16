@@ -504,31 +504,45 @@ namespace SongRequestManagerV2
 // if (!silence) QueueChatMessage($"{request.Key.song["songName"].Value}/{request.Key.song["authorName"].Value} ({songId}) added to the blacklist.");
         private void SendChatMessage(string message)
         {
-            try
+            Task.Run(() =>
             {
                 Plugin.Log($"Sending message: \"{message}\"");
-                var mixer = Plugin.Instance.MixerService;
-                mixer?.SendTextMessage($"{message}", Plugin.Instance.MixerChannel);
-                var twitch = Plugin.Instance.TwitchService;
-                twitch?.SendTextMessage($"{message}", Plugin.Instance.TwitchChannel);
-            }
-            catch (Exception e)
+                if (Plugin.Instance.MixerService != null) {
+                    foreach (var channel in Plugin.Instance.MixerService.Channels) {
+                        Plugin.Instance.MixerService?.SendTextMessage($"{message}", channel.Value);
+                    }
+                }
+                if (Plugin.Instance.TwitchService != null) {
+                    foreach (var channel in Plugin.Instance.TwitchService.Channels) {
+                        Plugin.Instance.TwitchService.SendTextMessage($"{message}", channel.Value);
+                    }
+                }
+            }).Await(() => { Plugin.Log("Finish send chat message"); },
+            e =>
             {
-                Plugin.Log($"Exception was caught when trying to send bot message. {e.ToString()}");
-            }
+                Plugin.Log($"Exception was caught when trying to send bot message. {e}");
+            }, null);
         }
 
         public void QueueChatMessage(string message)
         {
-            try {
-                var mixer = Plugin.Instance.MixerService;
-                mixer?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", Plugin.Instance.MixerChannel);
-                var twitch = Plugin.Instance.TwitchService;
-                twitch?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", Plugin.Instance.TwitchChannel);
-            }
-            catch (Exception e) {
-                Plugin.Log($"Exception was caught when trying to send bot message. {e.ToString()}");
-            }
+            Task.Run(() =>
+            {
+                if (Plugin.Instance.MixerService != null) {
+                    foreach (var channel in Plugin.Instance.MixerService.Channels) {
+                        Plugin.Instance.MixerService?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", channel.Value);
+                    }
+                }
+                if (Plugin.Instance.TwitchService != null) {
+                    foreach (var channel in Plugin.Instance.TwitchService.Channels) {
+                        Plugin.Instance.TwitchService.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", channel.Value);
+                    }
+                }
+            }).Await(() => { Plugin.Log("Finish Quere chat message"); },
+            e =>
+            {
+                Plugin.Log($"Exception was caught when trying to send bot message. {e}");
+            }, null);
         }
 
         private async void ProcessRequestQueue()
