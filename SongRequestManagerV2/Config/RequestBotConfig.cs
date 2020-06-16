@@ -54,7 +54,7 @@ namespace SongRequestManagerV2
         public int maximumqueuemessages { get; set; } = 1;
         public int maximumlookupmessages { get; set; } = 1;
 
-        public string LastBackup { get; set; } = DateTime.MinValue.ToString();
+        public string LastBackup = DateTime.MinValue.ToString();
         public string backuppath { get; set; } = Path.Combine(Environment.CurrentDirectory, "userdata", "backup");
 
         public bool OfflineMode = false;
@@ -65,9 +65,7 @@ namespace SongRequestManagerV2
         public bool PPSearch = false;
         public string additionalsongpath { get; set; } = "";
         public string songdownloadpath { get; set; } = "";
-
         public string MixerUserName = "";
-        public string MixerChannelKey = "";
 
         public event Action<RequestBotConfig> ConfigChangedEvent;
         public event PropertyChangedEventHandler PropertyChanged;

@@ -66,6 +66,8 @@ namespace SongRequestManagerV2
         public void OnStart()
         {
             this.CoreInstance = ChatCoreInstance.Create();
+            this.MultiplexerInstance = this.CoreInstance.RunAllServices();
+            RequestBot.Instance.Awake();
             //if (Instance != null) return;
             //Instance = this;
             Dispatcher.Initialize();
@@ -74,7 +76,7 @@ namespace SongRequestManagerV2
             SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
             // setup handle for fresh menu scene changes
             BSEvents.OnLoad();
-            BSEvents.menuSceneLoadedFresh += OnMenuSceneLoadedFresh;
+            BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
 
             // keep track of active scene
             BSEvents.menuSceneActive += () => { IsAtMainMenu = true; };
@@ -108,10 +110,9 @@ namespace SongRequestManagerV2
             }
         }
 
-        private void OnMenuSceneLoadedFresh()
+        private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenes)
         {
             Log("Menu Scene Loaded Fresh!");
-            this.MultiplexerInstance = this.CoreInstance.RunAllServices();
             this.MultiplexerInstance.OnLogin -= this.MultiplexerInstance_OnLogin;
             this.MultiplexerInstance.OnLogin += this.MultiplexerInstance_OnLogin;
             this.MultiplexerInstance.OnJoinChannel -= this.MultiplexerInstance_OnJoinChannel;
@@ -120,7 +121,7 @@ namespace SongRequestManagerV2
             this.MultiplexerInstance.OnTextMessageReceived += RequestBot.Instance.RecievedMessages;
             this.MixerService = this.MultiplexerInstance.GetMixerService();
             this.TwitchService = this.MultiplexerInstance.GetTwitchService();
-            RequestBot.Instance.Awake();
+
             // setup settings ui
             BSMLSettings.instance.AddSettingsMenu("SRM", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", SongRequestManagerSettings.instance);
 

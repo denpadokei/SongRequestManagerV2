@@ -1,4 +1,5 @@
 ﻿using ChatCore.Interfaces;
+using ChatCore.Models;
 using ChatCore.Models.Mixer;
 using ChatCore.Models.Twitch;
 using ChatCore.SimpleJSON;
@@ -31,7 +32,7 @@ namespace SongRequestManagerV2
         public JSONObject ToJson()
         {
             try {
-                JSONObject obj = new JSONObject();
+                var obj = new JSONObject();
                 obj.Add("status", new JSONString(status.ToString()));
                 obj.Add("requestInfo", new JSONString(requestInfo));
                 obj.Add("time", new JSONString(requestTime.ToFileTime().ToString()));
@@ -45,18 +46,13 @@ namespace SongRequestManagerV2
             }
         }
 
-        public SongRequest FromJson(JSONObject obj)
+        public SongRequest FromJson(JSONNode node)
         {
-            if (requestor is TwitchUser twitchUser) {
-                requestor = new TwitchUser(JsonUtility.ToJson(twitchUser));
-            }
-            else if (requestor is MixerUser mixerUser) {
-                requestor = new MixerUser(JsonUtility.ToJson(mixerUser));
-            }
-            requestTime = DateTime.FromFileTime(long.Parse(obj["time"].Value));
-            status = (RequestStatus)Enum.Parse(typeof(RequestStatus), obj["status"].Value);
-            song = obj["song"].AsObject;
-            requestInfo = obj["requestInfo"].Value;
+            requestor = new UnknownChatUser(node["requestor"].Value);
+            requestTime = DateTime.FromFileTime(long.Parse(node["time"].Value));
+            status = (RequestStatus)Enum.Parse(typeof(RequestStatus), node["status"].Value);
+            song = node["song"].AsObject;
+            requestInfo = node["requestInfo"].Value;
             return this;
         }
     }

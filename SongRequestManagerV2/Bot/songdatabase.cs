@@ -313,22 +313,13 @@ namespace SongRequestManagerV2
 
             public static void LoadDatabase()
             {
-
-
-                try
-                {
-
+                try {
                     DateTime start = DateTime.Now;
                     string path = Path.Combine(Plugin.DataPath, "SongDatabase.dat");
 
-                    if (File.Exists(path))
-                    {
-   
+                    if (File.Exists(path)) {
                         JSONNode json = JSON.Parse(File.ReadAllText(path));
-                        if (!json.IsNull)
-                        {
-                            
-
+                        if (!json.IsNull) {
                             int Count = json.Count;
 
                             //foreach (JSONObject j in json.AsArray)
@@ -337,9 +328,8 @@ namespace SongRequestManagerV2
                             //}
 
 
-                            foreach (KeyValuePair<string, JSONNode> kvp in json)
-                            {
-                                new SongMap((JSONObject) kvp.Value);
+                            foreach (KeyValuePair<string, JSONNode> kvp in json) {
+                                new SongMap((JSONObject)kvp.Value);
                             }
 
 
@@ -347,24 +337,21 @@ namespace SongRequestManagerV2
 
                             Instance.QueueChatMessage($"Finished reading {Count} in {(DateTime.Now - start).Seconds} secs.");
                         }
+                    }
                 }
-                }
-            catch (Exception ex)
-                {
+                catch (Exception ex) {
+
                     Plugin.Log(ex.ToString());
-                    Instance.QueueChatMessage($"{ex.ToString()}");
+                    Instance.QueueChatMessage($"{ex}");
                 }
-
-
             }
 
  
             public static void ImportLoaderDatabase()
             {
-                //foreach (var level in SongLoader.CustomLevels)
-                {
-                    //new SongMap(level.customSongInfo.path);
-                }
+                //foreach (var level in SongLoader.CustomLevels) {
+                //    new SongMap(level.customSongInfo.path);
+                //}
             }
 
             public static string readzipjson(ZipArchive archive,string filename="info.json")

@@ -14,11 +14,19 @@ namespace SongRequestManagerV2
             List<SongRequest> songs = new List<SongRequest>();
             if (File.Exists(path))
             {
-                JSONNode json = JSON.Parse(File.ReadAllText(path));
+                var json = JSON.Parse(File.ReadAllText(path));
                 if (!json.IsNull)
                 {
-                    foreach (JSONObject j in json.AsArray)
-                        songs.Add(new SongRequest().FromJson(j));
+                    foreach (var j in json.AsArray) {
+                        try {
+                            var songobj = j.Value;
+                            //Plugin.Log($"{songobj}");
+                            songs.Add(new SongRequest().FromJson(songobj));
+                        }
+                        catch (Exception e) {
+                            Plugin.Log($"{e}");
+                        }
+                    }   
                 }
             }
             return songs;
@@ -31,8 +39,8 @@ namespace SongRequestManagerV2
                 if (!Directory.Exists(Path.GetDirectoryName(path)))
                     Directory.CreateDirectory(Path.GetDirectoryName(path));
 
-                JSONArray arr = new JSONArray();
-                foreach (SongRequest song in songs.Where(x => x != null)) {
+                var arr = new JSONArray();
+                foreach (var song in songs.Where(x => x != null)) {
                     try {
                         arr.Add(song.ToJson());
                         Plugin.Log($"Added {song.song}");
@@ -62,8 +70,9 @@ namespace SongRequestManagerV2
             {
                 Songs = RequestManager.Read(requestsPath);
             }
-            catch
+            catch (Exception e)
             {
+                Plugin.Log($"{e}");
                 RequestBot.Instance.QueueChatMessage("There was an error reading the request queue.");
             }
 

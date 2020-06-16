@@ -805,7 +805,7 @@ namespace SongRequestManagerV2
                 bool mapexists = (rat.Count>0) && (rat[0] != "");
                 
 
-                if (!SongCore.Loader.CustomLevels.ContainsKey(currentSongDirectory) && !mapexists)
+                if (!Loader.CustomLevels.ContainsKey(currentSongDirectory) && !mapexists)
                 {
 
 
@@ -904,36 +904,42 @@ namespace SongRequestManagerV2
                         // Dismiss the song request viewcontroller now
                         //_songRequestMenu.Dismiss();
                         _flowCoordinator.Dismiss();
+                        bool success = false;
 
-                        if (true) {
-                            //Plugin.Log($"Scrolling to level {levels[0].levelID}");
+                        Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
 
-                            bool success = false;
 
-                            Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
-
-                            // Redownload the song if we failed to scroll to it
+                        if (!request.song.IsNull) {
+                            new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString()); // Display next song message
                         }
-                        else {
-                            Plugin.Log("Failed to find new level!");
-                        }
-
-                        if (!request.song.IsNull) new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString()); // Display next song message
 
 #if UNRELEASED
-                        if (!request.song.IsNull) // Experimental!
-                        {
-                        TwitchWebSocketClient.SendCommand("/marker "+ new DynamicText().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
-                        }
+                        //if (!request.song.IsNull) // Experimental!
+                        //{
+                        //TwitchWebSocketClient.SendCommand("/marker "+ new DynamicText().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
+                        //}
 #endif
 
-                    }, null, null, true);
+                    },
+                    e =>
+                    {
+                        Plugin.Log($"{e}");
+                    }, null, true);
 #endif              
                 }
                 else
                 {
                     //Instance.QueueChatMessage($"Directory exists: {currentSongDirectory}");
                     Plugin.Log($"Song {songName} already exists!");
+                    _flowCoordinator.Dismiss();
+                    bool success = false;
+
+                    Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
+
+                    if (!request.song.IsNull) {
+                        // Display next song message
+                        new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString());
+                    }
                 }
             }
         }
