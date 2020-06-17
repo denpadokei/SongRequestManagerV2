@@ -36,7 +36,7 @@ namespace SongRequestManagerV2
                 obj.Add("status", new JSONString(status.ToString()));
                 obj.Add("requestInfo", new JSONString(requestInfo));
                 obj.Add("time", new JSONString(requestTime.ToFileTime().ToString()));
-                obj.Add("requestor", requestor.ToJson());
+                obj.Add("requestor", requestor.CustomToJson());
                 obj.Add("song", song);
                 return obj;
             }

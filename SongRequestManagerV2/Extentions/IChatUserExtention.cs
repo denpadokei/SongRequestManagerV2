@@ -1,6 +1,7 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Models.Twitch;
 using ChatCore.SimpleJSON;
+using JSONArray = ChatCore.SimpleJSON.JSONArray;
 //using ChatCore.SimpleJSON;
 using System;
 using System.Collections.Generic;
@@ -12,16 +13,24 @@ namespace SongRequestManagerV2.Extentions
 {
     public static class IChatuserExtention
     {
-        //public static JSONObject ToJson(this IChatUser chatUser)
-        //{
-        //    JSONObject obj = new JSONObject();
-        //    obj.Add("displayName", new JSONString(chatUser.DisplayName));
-        //    obj.Add("id", new JSONString(chatUser.Id));
-        //    obj.Add("color", new JSONString(chatUser.Color));
-        //    obj.Add("isBroadcaster", new JSONBool(chatUser.IsBroadcaster));
-        //    obj.Add("isMod", new JSONBool(chatUser.IsModerator));
-        //    return obj;
-        //}
+        public static JSONObject CustomToJson(this IChatUser chatUser)
+        {
+            JSONObject obj = new JSONObject();
+            obj.Add("Id", new JSONString(chatUser.Id ?? ""));
+            obj.Add("UserName", new JSONString(chatUser.UserName ?? ""));
+            obj.Add("DisplayName", new JSONString(chatUser.DisplayName ?? ""));
+            obj.Add("Color", new JSONString(chatUser.Color ?? ""));
+            obj.Add("IsBroadcaster", new JSONBool(chatUser.IsBroadcaster));
+            obj.Add("IsModerator", new JSONBool(chatUser.IsModerator));
+            var badges = new JSONArray();
+            if (chatUser.Badges != null) {
+                foreach (var badge in chatUser.Badges) {
+                    badges.Add(badge.ToJson());
+                }
+                obj.Add("Badges", badges);
+            }
+            return obj;
+        }
 
         //public static void FromJson(this IChatUser chatUser, JSONObject obj)
         //{

@@ -19,9 +19,11 @@ namespace SongRequestManagerV2
                 {
                     foreach (var j in json.AsArray) {
                         try {
-                            var songobj = j.Value;
-                            //Plugin.Log($"{songobj}");
-                            songs.Add(new SongRequest().FromJson(songobj));
+                            if (!j.Value.IsNull) {
+                                var songobj = j.Value;
+                                //Plugin.Log($"{songobj}");
+                                songs.Add(new SongRequest().FromJson(songobj));
+                            }
                         }
                         catch (Exception e) {
                             Plugin.Log($"{e}");
