@@ -40,7 +40,7 @@ using SongRequestManagerV2.Extentions;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot// : MonoBehaviour, ITwitchIntegration
+    public partial class RequestBot : MonoBehaviour//, ITwitchIntegration
     {
         [Flags]
         public enum RequestStatus
@@ -58,7 +58,6 @@ namespace SongRequestManagerV2
         {
 
         }
-
 
         public static ConcurrentQueue<RequestInfo> UnverifiedRequestQueue { get; } = new ConcurrentQueue<RequestInfo>();
         public static Dictionary<string, RequestUserTracker> RequestTracker = new Dictionary<string, RequestUserTracker>();
@@ -871,7 +870,7 @@ namespace SongRequestManagerV2
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #else
-                    Plugin.WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None).Await(async result =>
+                    Plugin.WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None).Await(result =>
                     {
                         var songZip = result;
 
@@ -887,31 +886,23 @@ namespace SongRequestManagerV2
                             }
                             zipStream.Close();
                         }
-
-                        //Stream zipStream = new MemoryStream(songZip);
-                        //zipStream.Close();
-                        //here:
-
-                        while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
-
-                        Loader.Instance.RefreshSongs();
-
-                        while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
-
-                        Utilities.EmptyDirectory(".requestcache", true);
-                        //levels = SongLoader.CustomLevels.Where(l => l.levelID.StartsWith(songHash)).ToArray();
-
-                        // Dismiss the song request viewcontroller now
-                        //_songRequestMenu.Dismiss();
-                        _flowCoordinator.Dismiss();
-                        bool success = false;
-
-                        Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
-
-
-                        if (!request.song.IsNull) {
-                            new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString()); // Display next song message
-                        }
+                        Dispatcher.RunCoroutine(WaitForRefreshAndSchroll(request));
+                    //    Stream zipStream = new MemoryStream(songZip);
+                    //    zipStream.Close();
+                    //here:
+                    //    while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
+                    //    Loader.Instance.RefreshSongs();
+                    //    while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
+                    //    Utilities.EmptyDirectory(".requestcache", true);
+                    //    levels = SongLoader.CustomLevels.Where(l => l.levelID.StartsWith(songHash)).ToArray();
+                    //    Dismiss the song request viewcontroller now
+                    //    _songRequestMenu.Dismiss();
+                    //    _flowCoordinator.Dismiss();
+                    //    bool success = false;
+                    //    Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
+                    //    if (!request.song.IsNull) {
+                    //        new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString()); // Display next song message
+                    //    }
 
 #if UNRELEASED
                         //if (!request.song.IsNull) // Experimental!
@@ -919,7 +910,6 @@ namespace SongRequestManagerV2
                         //TwitchWebSocketClient.SendCommand("/marker "+ new DynamicText().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
                         //}
 #endif
-
                     },
                     e =>
                     {
@@ -944,7 +934,20 @@ namespace SongRequestManagerV2
             }
         }
 
-
+        private static IEnumerator WaitForRefreshAndSchroll(SongRequest request)
+        {
+            yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
+            Loader.Instance.RefreshSongs();
+            yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
+            Utilities.EmptyDirectory(".requestcache", true);
+            _flowCoordinator.Dismiss();
+            bool success = false;
+            Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
+            if (!request.song.IsNull) {
+                // Display next song message
+                new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString());
+            }
+        }
         public static void UpdateRequestUI(bool writeSummary = true)
         {
             Plugin.Log("start updateUI");

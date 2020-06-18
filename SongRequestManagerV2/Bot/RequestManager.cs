@@ -45,7 +45,7 @@ namespace SongRequestManagerV2
                 foreach (var song in songs.Where(x => x != null)) {
                     try {
                         arr.Add(song.ToJson());
-                        Plugin.Log($"Added {song.song}");
+                        //Plugin.Log($"Added {song.song}");
                     }
                     catch (Exception ex) {
                         Plugin.Log($"{ex}\r\n{song}");
