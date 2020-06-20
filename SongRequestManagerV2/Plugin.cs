@@ -42,7 +42,7 @@ namespace SongRequestManagerV2
 
         private RequestBotConfig RequestBotConfig { get; } = RequestBotConfig.Instance;
 
-        public static string DataPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "UserData", "StreamCore");
+        public static string DataPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "UserData", "Song Request ManagerV2");
         public static bool SongBrowserPluginPresent;
 
         [Init]
@@ -65,6 +65,14 @@ namespace SongRequestManagerV2
         [OnStart]
         public void OnStart()
         {
+            if (!Directory.Exists(DataPath)) {
+                try {
+                    Directory.CreateDirectory(DataPath);
+                }
+                catch (Exception e) {
+                    Log($"{e}");
+                }
+            }
             this.CoreInstance = ChatCoreInstance.Create();
             this.MultiplexerInstance = this.CoreInstance.RunAllServices();
             RequestBot.Instance.Awake();

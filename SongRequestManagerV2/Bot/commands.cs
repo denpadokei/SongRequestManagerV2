@@ -15,7 +15,7 @@ using ChatCore.Models.Twitch;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot : MonoBehaviour
+    public partial class RequestBot// : MonoBehaviour
     {
         static bool _WobbleInstalled = false;
 
@@ -675,7 +675,7 @@ namespace SongRequestManagerV2
                 if (Method2 != null) Method2(state.user, state.parameter, state.flags, state.info);
                 else if (Method != null) Method(state.user, state.parameter);
                 //else if (Method3 != null) return Method3(this, state.user, state.parameter, state.flags, state.info);
-                else if (func1 != null) Instance.StartCoroutine(func1(state));
+                else if (func1 != null) Dispatcher.RunCoroutine(func1(state));
                 else if (subcommand != null) return subcommand(state); // Recommended.
                 else if (subcommand2 != null) subcommand(state);
                 else if (AsyncSubCommand != null) await AsyncSubCommand(state);

@@ -13,7 +13,7 @@ using ChatCore.SimpleJSON;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot : MonoBehaviour
+    public partial class RequestBot// : MonoBehaviour
     {
         // BUG: This one needs to be cleaned up a lot imo
         // BUG: This file needs to be split up a little, but not just yet... Its easier for me to move around in one massive file, since I can see the whole thing at once. 
@@ -565,7 +565,7 @@ namespace SongRequestManagerV2
             if (_WobbleInstalled) {
                 string wobblestate = "off";
                 if (state.parameter == "enable") wobblestate = "on";
-                SendMessage($"!wadmin toggle {wobblestate} ");
+                SendChatMessage($"!wadmin toggle {wobblestate} ");
             }
 
             state.msg($"The !bomb command is now {state.parameter}d.");
@@ -1132,18 +1132,17 @@ namespace SongRequestManagerV2
             string remapfile = Path.Combine(Plugin.DataPath, "remap.list");
 
             if (!File.Exists(remapfile)) {
-                File.Create(remapfile);
+                using (var file = File.Create(remapfile));
             }
 
             try {
-                string fileContent = File.ReadAllText(remapfile);
+                var fileContent = File.ReadAllText(remapfile);
 
-                string[] maps = fileContent.Split('\r', '\n');
-                for (int i = 0; i < maps.Length; i++) {
-                    string[] parts = maps[i].Split(',', ' ');
+                var maps = fileContent.Split('\r', '\n');
+                foreach (var map in maps) {
+                    var parts = map.Split(',', ' ');
                     if (parts.Length > 1) songremap.Add(parts[0], parts[1]);
                 }
-
             }
             catch (Exception ex) {
                 Plugin.Log(ex.ToString());

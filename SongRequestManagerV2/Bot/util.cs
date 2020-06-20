@@ -8,7 +8,7 @@ using System.IO.Compression;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot : MonoBehaviour
+    public partial class RequestBot// : MonoBehaviour
     {
 
         public static void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)

@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot : MonoBehaviour
+    public partial class RequestBot// : MonoBehaviour
     {
         private void showlists(IChatUser requestor, string request)
         {

@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 namespace SongRequestManagerV2
 {
     // https://tmi.twitch.tv/group/user/sehria_k/chatters // User list for channel 
-    public partial class RequestBot : MonoBehaviour
+    public partial class RequestBot// : MonoBehaviour
     {
     }
 

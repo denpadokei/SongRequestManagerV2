@@ -160,4 +160,7 @@
     <EmbeddedResource Include="Views\YesNoModal.bsml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetFileName)" "D:\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

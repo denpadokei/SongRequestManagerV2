@@ -20,7 +20,7 @@ using SongRequestManagerV2.Extentions;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot : MonoBehaviour
+    public partial class RequestBot// : MonoBehaviour
     {
         enum MapField { id, version, songName, songSubName, authorName, rating, hashMd5, hashSha1 };
 
@@ -463,16 +463,16 @@ namespace SongRequestManagerV2
 
 
             // Update Database from Directory
-            public static async Task LoadCustomSongs(string folder = "",string songid="")
+            public static Task LoadCustomSongs(string folder = "",string songid="")
             {
-                if (MapDatabase.DatabaseLoading) return;
+                if (MapDatabase.DatabaseLoading) {
+                    return Task.CompletedTask;
+                }
 
                 DatabaseLoading = true;
-
-                await Task.Run(() =>
+                return Task.Run(() =>
                 {
-
-                    if (songid=="") Instance.QueueChatMessage($"Starting song indexing {folder}");
+                    if (songid == "") Instance.QueueChatMessage($"Starting song indexing {folder}");
 
                     var StarTime = DateTime.UtcNow;
 
@@ -484,30 +484,25 @@ namespace SongRequestManagerV2
                     DirectoryInfo di = new DirectoryInfo(folder);
                     FullDirList(di, "*");
 
-                    if (RequestBotConfig.Instance.additionalsongpath!="")
-                    {
+                    if (RequestBotConfig.Instance.additionalsongpath != "") {
                         di = new DirectoryInfo(RequestBotConfig.Instance.additionalsongpath);
                         FullDirList(di, "*");
                     }
 
                     void FullDirList(DirectoryInfo dir, string searchPattern)
                     {
-                        try
-                        {
-                            foreach (FileInfo f in dir.GetFiles(searchPattern))
-                            {
+                        try {
+                            foreach (FileInfo f in dir.GetFiles(searchPattern)) {
                                 if (f.FullName.EndsWith("info.json"))
                                     files.Add(f);
                             }
                         }
-                        catch
-                        {
+                        catch {
                             Console.WriteLine("Directory {0}  \n could not be accessed!!!!", dir.FullName);
                             return;
                         }
 
-                        foreach (DirectoryInfo d in dir.GetDirectories())
-                        {
+                        foreach (DirectoryInfo d in dir.GetDirectories()) {
                             folders.Add(d);
                             FullDirList(d, searchPattern);
                         }
@@ -517,8 +512,7 @@ namespace SongRequestManagerV2
 
 
                     Instance.QueueChatMessage($"Processing {files.Count} maps. ");
-                    foreach (var item in files)
-                    {
+                    foreach (var item in files) {
 
                         //msg.Add(item.FullName,", ");
 
@@ -526,8 +520,7 @@ namespace SongRequestManagerV2
 
                         GetIdFromPath(item.DirectoryName, ref id, ref version);
 
-                        try
-                        {
+                        try {
                             if (MapDatabase.MapLibrary.ContainsKey(id)) continue;
 
                             JSONObject song = JSONObject.Parse(File.ReadAllText(item.FullName)).AsObject;
@@ -536,15 +529,12 @@ namespace SongRequestManagerV2
 
                             JSONNode difficultylevels = song["difficultyLevels"].AsArray;
                             var FileAccumulator = new StringBuilder();
-                            foreach (var level in difficultylevels)
-                            {
+                            foreach (var level in difficultylevels) {
                                 //Instance.QueueChatMessage($"key={level.Key} value={level.Value}");
-                                try
-                                {
+                                try {
                                     FileAccumulator.Append(File.ReadAllText($"{item.DirectoryName}\\{level.Value["jsonPath"].Value}"));
                                 }
-                                catch
-                                {
+                                catch {
                                     //Instance.QueueChatMessage($"key={level.Key} value={level.Value}");
                                     //throw;
                                 }
@@ -554,8 +544,7 @@ namespace SongRequestManagerV2
 
                             string levelId = string.Join("∎", hash, song["songName"].Value, song["songSubName"].Value, song["authorName"], song["beatsPerMinute"].AsFloat.ToString()) + "∎";
 
-                            if (LevelId.ContainsKey(levelId))
-                            {
+                            if (LevelId.ContainsKey(levelId)) {
                                 LevelId[levelId].path = item.DirectoryName;
                                 continue;
                             }
@@ -566,14 +555,13 @@ namespace SongRequestManagerV2
 
                             new SongMap(song, levelId, item.DirectoryName);
                         }
-                        catch (Exception)
-                        {
+                        catch (Exception) {
                             Instance.QueueChatMessage($"Failed to process {item}.");
                         }
 
                     }
                     var duration = DateTime.UtcNow - StarTime;
-                    if (songid=="") Instance.QueueChatMessage($"Song indexing done. ({duration.TotalSeconds} secs.");
+                    if (songid == "") Instance.QueueChatMessage($"Song indexing done. ({duration.TotalSeconds} secs.");
 
                     DatabaseImported = true;
                     DatabaseLoading = false;

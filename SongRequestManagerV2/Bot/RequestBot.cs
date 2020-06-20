@@ -40,7 +40,7 @@ using SongRequestManagerV2.Extentions;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot : MonoBehaviour//, ITwitchIntegration
+    public partial class RequestBot// : MonoBehaviour//, ITwitchIntegration
     {
         [Flags]
         public enum RequestStatus
@@ -65,7 +65,7 @@ namespace SongRequestManagerV2
 
         //SpeechSynthesizer synthesizer = new SpeechSynthesizer();
         //synthesizer.Volume = 100;  // 0...100
-          //  synthesizer.Rate = -2;     // -10...10
+        //    synthesizer.Rate = -2;     // -10...10
 
         
         private static Button _requestButton;
@@ -89,8 +89,6 @@ namespace SongRequestManagerV2
         private static string banlist = "banlist.unique"; // BUG: Name of the list, needs to use a different interface for this.
         private static string _whitelist = "whitelist.unique"; // BUG: Name of the list, needs to use a different interface for this.
         private static string _blockeduser = "blockeduser.unique";
-        //private static TwitchService _twitchService;
-        //private static MixerService _mixerService;
 
         private static Dictionary<string, string> songremap = new Dictionary<string, string>();
         public static Dictionary<string, string> deck = new Dictionary<string, string>(); // deck name/content
@@ -99,7 +97,7 @@ namespace SongRequestManagerV2
 
         public static string playedfilename = "";
 
-        //public bool IsPluginReady { get; set; } = false;
+        public event Action RecevieRequest;
 
         internal static void SRMButtonPressed()
         {
@@ -387,7 +385,7 @@ namespace SongRequestManagerV2
         public bool MyChatMessageHandler(IChatMessage msg)
         {
             string excludefilename = "chatexclude.users";
-            return RequestBot.Instance && RequestBot.listcollection.contains(ref excludefilename, msg.Sender.UserName.ToLower(), RequestBot.ListFlags.Uncached);
+            return listcollection.contains(ref excludefilename, msg.Sender.UserName.ToLower(), RequestBot.ListFlags.Uncached);
         }
 
         internal void RecievedMessages(IChatService srv, IChatMessage msg)
@@ -636,17 +634,7 @@ namespace SongRequestManagerV2
 
                 if (RequestBotConfig.Instance.OfflineMode && RequestBotConfig.Instance.offlinepath!="" && !MapDatabase.MapLibrary.ContainsKey(id))
                 {
-                    foreach (string directory in Directory.GetDirectories(RequestBotConfig.Instance.offlinepath, id+"*"))
-                    {
-                        await MapDatabase.LoadCustomSongs(directory, id);
-
-                        await Task.Run(async () =>
-                        {
-                            while (MapDatabase.DatabaseLoading) await Task.Delay(25);
-                        });
-                        
-                        break;
-                    }
+                    Dispatcher.RunCoroutine(this.LoadOfflineDataBase(id));
                 }
             }
 
@@ -678,79 +666,77 @@ namespace SongRequestManagerV2
             bool autopick = RequestBotConfig.Instance.AutopickFirstSong || requestInfo.flags.HasFlag(CmdFlags.Autopick);
 
             // Filter out too many or too few results
-            if (songs.Count == 0)
-                {
-                    if (errorMessage == "")
-                        errorMessage = $"No results found for request \"{request}\"";
+            if (songs.Count == 0) {
+                if (errorMessage == "") {
+                    errorMessage = $"No results found for request \"{request}\"";
+                }   
+            }
+            else if (!autopick && songs.Count >= 4) {
+                errorMessage = $"Request for '{request}' produces {songs.Count} results, narrow your search by adding a mapper name, or use https://beatsaver.com to look it up.";
+            }
+            else if (!autopick && songs.Count > 1 && songs.Count < 4) {
+                var msg = new QueueLongMessage(1, 5);
+                msg.Header($"@{requestor.UserName}, please choose: ");
+                foreach (var eachsong in songs) {
+                    msg.Add(new DynamicText().AddSong(eachsong).Parse(BsrSongDetail), ", ");
                 }
-                else if (!autopick && songs.Count >= 4)
-                {
-                    errorMessage = $"Request for '{request}' produces {songs.Count} results, narrow your search by adding a mapper name, or use https://beatsaver.com to look it up.";
-                }
-                else if (!autopick && songs.Count > 1 && songs.Count < 4)
-                {
-                    var msg = new QueueLongMessage(1, 5);
-                    msg.Header($"@{requestor.UserName}, please choose: ");
-                    foreach (var eachsong in songs) msg.Add(new DynamicText().AddSong(eachsong).Parse(BsrSongDetail), ", ");
-                    msg.end("...", $"No matching songs for for {request}");
-                    return;
-                }
-                else
-                {
-                    if (!requestInfo.flags.HasFlag(CmdFlags.NoFilter)) errorMessage = SongSearchFilter(songs[0], false);
-                }
+                msg.end("...", $"No matching songs for for {request}");
+                return;
+            }
+            else {
+                if (!requestInfo.flags.HasFlag(CmdFlags.NoFilter)) errorMessage = SongSearchFilter(songs[0], false);
+            }
 
-                // Display reason why chosen song was rejected, if filter is triggered. Do not add filtered songs
-                if (errorMessage != "")
-                {
-                    QueueChatMessage(errorMessage);
-                    return;
-                }
+            // Display reason why chosen song was rejected, if filter is triggered. Do not add filtered songs
+            if (errorMessage != "") {
+                QueueChatMessage(errorMessage);
+                return;
+            }
 
-                JSONObject song = songs[0];
+            JSONObject song = songs[0];
 
-                // Song requests should try to be current. If the song was local, we double check for a newer version
+            // Song requests should try to be current. If the song was local, we double check for a newer version
 
-                //if ((song["downloadUrl"].Value == "") && !RequestBotConfig.Instance.OfflineMode )
-                //{
-                //    //QueueChatMessage($"song:  {song["id"].Value.ToString()} ,{song["songName"].Value}");
+            //if ((song["downloadUrl"].Value == "") && !RequestBotConfig.Instance.OfflineMode )
+            //{
+            //    //QueueChatMessage($"song:  {song["id"].Value.ToString()} ,{song["songName"].Value}");
 
-                //    yield return Utilities.Download($"https://beatsaver.com/api/maps/detail/{song["id"].Value.ToString()}", Utilities.DownloadType.Raw, null,
-                //     // Download success
-                //     (web) =>
-                //     {
-                //         result = JSON.Parse(web.downloadHandler.text);
-                //         var newsong = result["song"].AsObject;
+            //    yield return Utilities.Download($"https://beatsaver.com/api/maps/detail/{song["id"].Value.ToString()}", Utilities.DownloadType.Raw, null,
+            //     // Download success
+            //     (web) =>
+            //     {
+            //         result = JSON.Parse(web.downloadHandler.text);
+            //         var newsong = result["song"].AsObject;
 
-                //         if (result != null && newsong["version"].Value != "")
-                //         {
-                //             new SongMap(newsong);
-                //             song = newsong;
-                //         }
-                //     },
-                //     // Download failed,  song probably doesn't exist on beatsaver
-                //     (web) =>
-                //     {
-                //         // Let player know that the song is not current on BeatSaver
-                //         requestInfo.requestInfo += " *LOCAL ONLY*";
-                //         ; //errorMessage = $"Invalid BeatSaver ID \"{request}\" specified. {requestUrl}";
-                //     });
+            //         if (result != null && newsong["version"].Value != "")
+            //         {
+            //             new SongMap(newsong);
+            //             song = newsong;
+            //         }
+            //     },
+            //     // Download failed,  song probably doesn't exist on beatsaver
+            //     (web) =>
+            //     {
+            //         // Let player know that the song is not current on BeatSaver
+            //         requestInfo.requestInfo += " *LOCAL ONLY*";
+            //         ; //errorMessage = $"Invalid BeatSaver ID \"{request}\" specified. {requestUrl}";
+            //     });
 
-                //}
+            //}
 
             RequestTracker[requestor.Id].numRequests++;
-                listcollection.add(duplicatelist, song["id"].Value);
-                if ((requestInfo.flags.HasFlag(CmdFlags.MoveToTop)))
-                    RequestQueue.Songs.Insert(0, new SongRequest(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo));
-                else
-                    RequestQueue.Songs.Add(new SongRequest(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo));
+            listcollection.add(duplicatelist, song["id"].Value);
+            if ((requestInfo.flags.HasFlag(CmdFlags.MoveToTop))) {
+                RequestQueue.Songs.Insert(0, new SongRequest(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo));
+            }
+            else {
+                RequestQueue.Songs.Add(new SongRequest(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo));
+            }
+            RequestQueue.Write();
 
-                RequestQueue.Write();
+            Writedeck(requestor, "savedqueue"); // This can be used as a backup if persistent Queue is turned off.
 
-                Writedeck(requestor, "savedqueue"); // This can be used as a backup if persistent Queue is turned off.
-
-            if (!requestInfo.flags.HasFlag(CmdFlags.SilentResult))
-            {
+            if (!requestInfo.flags.HasFlag(CmdFlags.SilentResult)) {
                 new DynamicText().AddSong(ref song).QueueMessage(AddSongToQueueText.ToString());
             }
 
@@ -759,6 +745,16 @@ namespace SongRequestManagerV2
                 UpdateRequestUI();
                 _refreshQueue = true;
             });
+        }
+
+        private IEnumerator LoadOfflineDataBase(string id)
+        {
+            foreach (string directory in Directory.GetDirectories(RequestBotConfig.Instance.offlinepath, id + "*")) {
+                MapDatabase.LoadCustomSongs(directory, id).Await(null, e => { Plugin.Log($"{e}"); }, null);
+                Task.Delay(25).Wait();
+                yield return new WaitWhile(() => MapDatabase.DatabaseLoading);
+                // break;
+            }
         }
 
         private static void ProcessSongRequest(int index, bool fromHistory = false)
@@ -1154,19 +1150,25 @@ namespace SongRequestManagerV2
 
                 RequestInfo newRequest = new RequestInfo(state.user, state.parameter, DateTime.UtcNow, _digitRegex.IsMatch(testrequest) || _beatSaverRegex.IsMatch(testrequest),state, state.flags, state.info);
 
-                if (!newRequest.isBeatSaverId && state.parameter.Length < 2)
+                if (!newRequest.isBeatSaverId && state.parameter.Length < 2) {
                     QueueChatMessage($"Request \"{state.parameter}\" is too short- Beat Saver searches must be at least 3 characters!");
-                 if (!UnverifiedRequestQueue.Contains(newRequest))
+                }
+                    
+                if (!UnverifiedRequestQueue.Contains(newRequest)) {
                     UnverifiedRequestQueue.Enqueue(newRequest);
-
+                }   
+                return success;
             }
             catch (Exception ex)
             {
                 Plugin.Log(ex.ToString());
-
+                throw;
             }
-            return success;
+            finally {
+                this.RecevieRequest?.Invoke();
+            }
         }
+        
 
         private static IChatUser SerchCreateChatUser()
         {
