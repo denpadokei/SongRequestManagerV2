@@ -681,12 +681,17 @@ namespace SongRequestManagerV2
             }
             else if (!autopick && songs.Count > 1 && songs.Count < 4) {
                 var msg = new QueueLongMessage(1, 5);
-                if (requestor is TwitchUser) {
-                    msg.Header($"@{requestor.UserName}, please choose: ");
-                }
-                else if (requestor is MixerUser) {
-                    msg.Header($"/W @{requestor.UserName} please choose: ");
-                }
+                msg.Header($"@{requestor.UserName}, please choose: ");
+                // ToDo :Support Mixer whisper
+                //if (requestor is TwitchUser) {
+                //    msg.Header($"@{requestor.UserName}, please choose: ");
+                //}
+                //else if (requestor is MixerUser) {
+                //    msg.Header($"/whisper @{requestor.UserName} please choose: ");
+                //}
+                //else {
+                //    msg.Header($"@{requestor.UserName}, please choose: ");
+                //}
                 foreach (var eachsong in songs) {
                     msg.Add(new DynamicText().AddSong(eachsong).Parse(BsrSongDetail), ", ");
                 }
