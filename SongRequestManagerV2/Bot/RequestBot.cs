@@ -114,10 +114,10 @@ namespace SongRequestManagerV2
         {
             try
             {
-                var _levelListViewController = Resources.FindObjectsOfTypeAll<LevelCollectionViewController>().First();
-                if (_levelListViewController)
+                var levelListViewController = Resources.FindObjectsOfTypeAll<LevelCollectionViewController>().First();
+                if (levelListViewController)
                     {
-                    _requestButton = UIHelper.CreateUIButton(_levelListViewController.rectTransform, "OkButton", new Vector2(66, -3.5f),
+                    _requestButton = UIHelper.CreateUIButton(levelListViewController.rectTransform, "OkButton", new Vector2(66, -3.5f),
                         new Vector2(9f, 5.5f), () => { _requestButton.interactable = false; SRMButtonPressed(); _requestButton.interactable = true; }, "SRM");
 
                     (_requestButton.transform as RectTransform).anchorMin = new Vector2(1, 1);
@@ -360,10 +360,10 @@ namespace SongRequestManagerV2
 
                 try {
                     COMMAND.CommandConfiguration();
-                    RunStartupScripts();
+                    this.RunStartupScripts();
 
 
-                    ProcessRequestQueue();
+                    this.ProcessRequestQueue().Await(null, null, null);
                 }
                 catch (Exception e) {
                     Plugin.Log(e.ToString());
@@ -542,14 +542,19 @@ namespace SongRequestManagerV2
             }, null);
         }
 
-        private async void ProcessRequestQueue()
+        private async Task ProcessRequestQueue()
         {
             while (!Plugin.Instance.IsApplicationExiting)
             {
-                while (UnverifiedRequestQueue.Count == 0) await Task.Delay(25);
+                try {
+                    while (UnverifiedRequestQueue.Count == 0) await Task.Delay(25);
 
-                if (UnverifiedRequestQueue.TryDequeue(out var requestInfo))
-                    await CheckRequest(requestInfo);
+                    if (UnverifiedRequestQueue.TryDequeue(out var requestInfo))
+                        await CheckRequest(requestInfo);
+                }
+                catch (Exception e) {
+                    Plugin.Log($"{e}");
+                }
             }
         }
 
@@ -1146,7 +1151,7 @@ namespace SongRequestManagerV2
                 }
 
                 // BUG: Need to clean up the new request pipeline
-                string testrequest = normalize.RemoveSymbols(ref state.parameter,normalize._SymbolsNoDash);
+                string testrequest = normalize.RemoveSymbols(ref state.parameter, normalize._SymbolsNoDash);
 
                 RequestInfo newRequest = new RequestInfo(state.user, state.parameter, DateTime.UtcNow, _digitRegex.IsMatch(testrequest) || _beatSaverRegex.IsMatch(testrequest),state, state.flags, state.info);
 

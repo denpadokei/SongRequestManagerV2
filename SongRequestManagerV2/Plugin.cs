@@ -131,7 +131,7 @@ namespace SongRequestManagerV2
             this.TwitchService = this.MultiplexerInstance.GetTwitchService();
 
             // setup settings ui
-            BSMLSettings.instance.AddSettingsMenu("SRM", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", SongRequestManagerSettings.instance);
+            BSMLSettings.instance.AddSettingsMenu("SRM V2", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", SongRequestManagerSettings.instance);
 
             try {
                 // main load point
@@ -147,10 +147,10 @@ namespace SongRequestManagerV2
         public static void SongBrowserCancelFilter()
         {
             if (SongBrowserPluginPresent) {
-                var _songBrowserUI = SongBrowser.SongBrowserApplication.Instance.GetField<SongBrowser.UI.SongBrowserUI, SongBrowser.SongBrowserApplication>("_songBrowserUI");
-                if (_songBrowserUI) {
-                    if (_songBrowserUI.Model.Settings.filterMode != SongBrowser.DataAccess.SongFilterMode.None && _songBrowserUI.Model.Settings.sortMode != SongBrowser.DataAccess.SongSortMode.Original) {
-                        _songBrowserUI.CancelFilter();
+                var songBrowserUI = SongBrowser.SongBrowserApplication.Instance.GetField<SongBrowser.UI.SongBrowserUI, SongBrowser.SongBrowserApplication>("_songBrowserUI");
+                if (songBrowserUI) {
+                    if (songBrowserUI.Model.Settings.filterMode != SongBrowser.DataAccess.SongFilterMode.None && songBrowserUI.Model.Settings.sortMode != SongBrowser.DataAccess.SongSortMode.Original) {
+                        songBrowserUI.CancelFilter();
                     }
                 }
                 else {

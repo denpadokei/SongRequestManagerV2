@@ -1132,7 +1132,7 @@ namespace SongRequestManagerV2
             string remapfile = Path.Combine(Plugin.DataPath, "remap.list");
 
             if (!File.Exists(remapfile)) {
-                using (var file = File.Create(remapfile));
+                using (var file = File.Create(remapfile)) { };
             }
 
             try {
