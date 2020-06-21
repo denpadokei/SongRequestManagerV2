@@ -681,7 +681,12 @@ namespace SongRequestManagerV2
             }
             else if (!autopick && songs.Count > 1 && songs.Count < 4) {
                 var msg = new QueueLongMessage(1, 5);
-                msg.Header($"@{requestor.UserName}, please choose: ");
+                if (requestor is TwitchUser) {
+                    msg.Header($"@{requestor.UserName}, please choose: ");
+                }
+                else if (requestor is MixerUser) {
+                    msg.Header($"/W @{requestor.UserName} please choose: ");
+                }
                 foreach (var eachsong in songs) {
                     msg.Add(new DynamicText().AddSong(eachsong).Parse(BsrSongDetail), ", ");
                 }
