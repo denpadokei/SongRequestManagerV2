@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SongRequestManagerV2.Utils
 {
-    public static class Utilities
+    public static class Utility
     {
         public static void EmptyDirectory(string directory, bool delete = true)
         {

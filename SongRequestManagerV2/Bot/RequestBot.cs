@@ -22,7 +22,7 @@ using SongCore;
 using IPA.Utilities;
 using SongRequestManagerV2.UI;
 using BeatSaberMarkupLanguage;
-using Utilities = SongRequestManagerV2.Utils.Utilities;
+//using Utility = SongRequestManagerV2.Utils.Utility;
 using JSONObject = ChatCore.SimpleJSON.JSONObject;
 using System.Threading.Tasks;
 using System.IO.Compression;
@@ -37,6 +37,7 @@ using System.Runtime.CompilerServices;
 using System.Reflection;
 using ChatCore.SimpleJSON;
 using SongRequestManagerV2.Extentions;
+using SongRequestManagerV2.Utils;
 
 namespace SongRequestManagerV2
 {
@@ -299,7 +300,7 @@ namespace SongRequestManagerV2
                 string filesToDelete = Path.Combine(Environment.CurrentDirectory, "FilesToDelete");
                 if (Directory.Exists(filesToDelete)) {
                     Plugin.Log("files delete");
-                    Utilities.EmptyDirectory(filesToDelete);
+                    Utility.EmptyDirectory(filesToDelete);
                 }
 
                 try
@@ -819,7 +820,7 @@ namespace SongRequestManagerV2
                 {
 
 
-                    Utilities.EmptyDirectory(".requestcache", false);
+                    Utility.EmptyDirectory(".requestcache", false);
 
 
                     //SongMap map;
@@ -844,7 +845,7 @@ namespace SongRequestManagerV2
 
                     if (Directory.Exists(currentSongDirectory))
                     {
-                        Utilities.EmptyDirectory(currentSongDirectory, true);
+                        Utility.EmptyDirectory(currentSongDirectory, true);
                         Plugin.Log($"Deleting {currentSongDirectory}");
                     }
 
@@ -950,7 +951,7 @@ namespace SongRequestManagerV2
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
             Loader.Instance.RefreshSongs();
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
-            Utilities.EmptyDirectory(".requestcache", true);
+            Utility.EmptyDirectory(".requestcache", true);
             _flowCoordinator.Dismiss();
             bool success = false;
             Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));

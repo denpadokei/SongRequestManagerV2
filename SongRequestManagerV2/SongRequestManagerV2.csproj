@@ -150,7 +150,7 @@
     <Compile Include="UI\SongRequestManagerSettings.cs" />
     <Compile Include="UI\UIHelper.cs" />
     <Compile Include="UI\YesNoModal.cs" />
-    <Compile Include="Utils\Utilities.cs" />
+    <Compile Include="Utils\Utility.cs" />
     <Compile Include="WebClient.cs" />
     <EmbeddedResource Include="Views\SongRequestManagerSettings.bsml" />
   </ItemGroup>
