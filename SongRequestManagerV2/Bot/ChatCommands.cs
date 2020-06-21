@@ -1262,7 +1262,7 @@ namespace SongRequestManagerV2
             public DynamicText AddUser(ref IChatUser user)
             {
                 try {
-                    Add("user", user.UserName);
+                    Add("user", user.DisplayName);
                 }
                 catch {
                     // Don't care. Twitch user doesn't HAVE to be defined.
