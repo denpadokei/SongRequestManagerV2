@@ -26,8 +26,8 @@ namespace SongRequestManagerV2
             {
                 try
                 {
-                    //_songBrowserInstalled = false; // Utilities.IsModInstalled("Song Browser");
-                    //_songDownloaderInstalled = false; // IPA.Loader.PluginManager.GetPlugin("BeatSaver Downloader") != null;
+                    //_songBrowserInstalled = Utilities.IsModInstalled("Song Browser");
+                    //_songDownloaderInstalled = IPA.Loader.PluginManager.GetPlugin("BeatSaver Downloader") != null;
 
                     //Plugin.Log($"Song Browser installed: {_songBrowserInstalled}");
                     //Plugin.Log($"Downloader installed: {_songDownloaderInstalled}");

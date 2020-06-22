@@ -9,7 +9,7 @@ using Image = UnityEngine.UI.Image;
 using SongRequestManagerV2.UI;
 using IPA.Utilities;
 using BeatSaberMarkupLanguage;
-using Utilities = SongRequestManagerV2.Utils.Utilities;
+//using Utilities = SongRequestManagerV2.Utils.Utility;
 using System.Threading.Tasks;
 using SongCore;
 
@@ -602,17 +602,18 @@ namespace SongRequestManagerV2
 
                 if (!_cachedTextures.TryGetValue(url, out var tex))
                 {
-                    var b = await Plugin.WebClient.DownloadImage($"https://beatsaver.com{url}", System.Threading.CancellationToken.None);
+                    using (var web = new WebClient()) {
+                        var b = await web.DownloadImage($"https://beatsaver.com{url}", System.Threading.CancellationToken.None);
 
-                    tex = new Texture2D(2, 2);
-                    tex.LoadImage(b);
+                        tex = new Texture2D(2, 2);
+                        tex.LoadImage(b);
+                    }
 
-                    try
-                    {
+
+                    try {
                         _cachedTextures.Add(url, tex);
                     }
-                    catch (Exception)
-                    {
+                    catch (Exception) {
 
                     }
                 }

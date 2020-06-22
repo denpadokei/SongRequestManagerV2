@@ -807,20 +807,18 @@ namespace SongRequestManagerV2
             string result;
 
             System.Globalization.NumberStyles style = System.Globalization.NumberStyles.AllowDecimalPoint;
+            using (var web = new WebClient()) {
+                var resp = await web.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
-            var resp = await Plugin.WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
-
-            if (resp.IsSuccessStatusCode)
-            {
-                result = resp.ContentToString();
+                if (resp.IsSuccessStatusCode) {
+                    result = resp.ContentToString();
+                }
+                else {
+                    Plugin.Log("Failed to get pp");
+                    pploading = false;
+                    return;
+                }
             }
-            else
-            {
-                Plugin.Log("Failed to get pp");
-                pploading = false;
-                return;
-            }
-
             //Instance.QueueChatMessage($"Parsing PP Data {result.Length}");
 
             JSONNode rootNode = JSON.Parse(result);

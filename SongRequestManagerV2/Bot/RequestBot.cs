@@ -22,7 +22,7 @@ using SongCore;
 using IPA.Utilities;
 using SongRequestManagerV2.UI;
 using BeatSaberMarkupLanguage;
-using Utilities = SongRequestManagerV2.Utils.Utilities;
+//using Utility = SongRequestManagerV2.Utils.Utility;
 using JSONObject = ChatCore.SimpleJSON.JSONObject;
 using System.Threading.Tasks;
 using System.IO.Compression;
@@ -37,6 +37,8 @@ using System.Runtime.CompilerServices;
 using System.Reflection;
 using ChatCore.SimpleJSON;
 using SongRequestManagerV2.Extentions;
+using SongRequestManagerV2.Utils;
+using System.Text;
 
 namespace SongRequestManagerV2
 {
@@ -99,6 +101,8 @@ namespace SongRequestManagerV2
 
         public event Action RecevieRequest;
 
+        private static readonly object _lockObject = new object();
+
         internal static void SRMButtonPressed()
         {
             var soloFlow = Resources.FindObjectsOfTypeAll<SoloFreePlayFlowCoordinator>().First();
@@ -114,10 +118,10 @@ namespace SongRequestManagerV2
         {
             try
             {
-                var _levelListViewController = Resources.FindObjectsOfTypeAll<LevelCollectionViewController>().First();
-                if (_levelListViewController)
+                var levelListViewController = Resources.FindObjectsOfTypeAll<LevelCollectionViewController>().First();
+                if (levelListViewController)
                     {
-                    _requestButton = UIHelper.CreateUIButton(_levelListViewController.rectTransform, "OkButton", new Vector2(66, -3.5f),
+                    _requestButton = UIHelper.CreateUIButton(levelListViewController.rectTransform, "OkButton", new Vector2(66, -3.5f),
                         new Vector2(9f, 5.5f), () => { _requestButton.interactable = false; SRMButtonPressed(); _requestButton.interactable = true; }, "SRM");
 
                     (_requestButton.transform as RectTransform).anchorMin = new Vector2(1, 1);
@@ -299,7 +303,7 @@ namespace SongRequestManagerV2
                 string filesToDelete = Path.Combine(Environment.CurrentDirectory, "FilesToDelete");
                 if (Directory.Exists(filesToDelete)) {
                     Plugin.Log("files delete");
-                    Utilities.EmptyDirectory(filesToDelete);
+                    Utility.EmptyDirectory(filesToDelete);
                 }
 
                 try
@@ -360,10 +364,7 @@ namespace SongRequestManagerV2
 
                 try {
                     COMMAND.CommandConfiguration();
-                    RunStartupScripts();
-
-
-                    ProcessRequestQueue();
+                    this.RunStartupScripts();
                 }
                 catch (Exception e) {
                     Plugin.Log(e.ToString());
@@ -542,14 +543,19 @@ namespace SongRequestManagerV2
             }, null);
         }
 
-        private async void ProcessRequestQueue()
+        private void ProcessRequestQueue()
         {
-            while (!Plugin.Instance.IsApplicationExiting)
-            {
-                while (UnverifiedRequestQueue.Count == 0) await Task.Delay(25);
-
-                if (UnverifiedRequestQueue.TryDequeue(out var requestInfo))
-                    await CheckRequest(requestInfo);
+            lock (_lockObject) {
+                while (!UnverifiedRequestQueue.IsEmpty) {
+                    try {
+                        if (UnverifiedRequestQueue.TryDequeue(out var requestInfo)) {
+                            CheckRequest(requestInfo).Await(null, e => { Plugin.Log($"{e}"); }, null);
+                        }
+                    }
+                    catch (Exception e) {
+                        Plugin.Log($"{e}");
+                    }
+                }
             }
         }
 
@@ -590,18 +596,18 @@ namespace SongRequestManagerV2
 
         private async void UpdateSongMap(JSONObject song)
         {
-            var resp = await Plugin.WebClient.GetAsync($"https://beatsaver.com/api/maps/detail/{song["id"].Value.ToString()}", System.Threading.CancellationToken.None);
+            using (var web = new WebClient()) {
+                var resp = await web.GetAsync($"https://beatsaver.com/api/maps/detail/{song["id"].Value.ToString()}", System.Threading.CancellationToken.None);
 
-            if (resp.IsSuccessStatusCode)
-            {
-                var result = resp.ConvertToJsonNode();
+                if (resp.IsSuccessStatusCode) {
+                    var result = resp.ConvertToJsonNode();
 
-                QueueChatMessage($"{result.AsObject}");
+                    QueueChatMessage($"{result.AsObject}");
 
-                if (result != null && result["id"].Value != "")
-                {
-                    song = result.AsObject;
-                    new SongMap(result.AsObject);
+                    if (result != null && result["id"].Value != "") {
+                        song = result.AsObject;
+                        new SongMap(result.AsObject);
+                    }
                 }
             }
         }
@@ -647,15 +653,15 @@ namespace SongRequestManagerV2
             {
                 string requestUrl = (id != "") ? $"https://beatsaver.com/api/maps/detail/{normalize.RemoveSymbols(ref request, normalize._SymbolsNoDash)}" : $"https://beatsaver.com/api/search/text/0?q={normalrequest}";
 
-                var resp = await Plugin.WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
+                using (var web = new WebClient()) {
+                    var resp = await web.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
-                if (resp.IsSuccessStatusCode)
-                {
-                    result = resp.ConvertToJsonNode();
-                }
-                else
-                {
-                    errorMessage = $"Invalid BeatSaver ID \"{request}\" specified. {requestUrl}";
+                    if (resp.IsSuccessStatusCode) {
+                        result = resp.ConvertToJsonNode();
+                    }
+                    else {
+                        errorMessage = $"Invalid BeatSaver ID \"{request}\" specified. {requestUrl}";
+                    }
                 }
             }
 
@@ -676,7 +682,30 @@ namespace SongRequestManagerV2
             }
             else if (!autopick && songs.Count > 1 && songs.Count < 4) {
                 var msg = new QueueLongMessage(1, 5);
-                msg.Header($"@{requestor.UserName}, please choose: ");
+                //ToDo: Support Mixer whisper
+                if (requestor is TwitchUser) {
+                    msg.Header($"@{requestor.UserName}, please choose: ");
+                }
+                else if (requestor is MixerUser) {
+                    var messageBuilder = new StringBuilder();
+                    messageBuilder.Append("please choose: ");
+                    foreach (var eachsong in songs) {
+                        messageBuilder.Append($"{new DynamicText().AddSong(eachsong).Parse(BsrSongDetail)}, ");
+                    }
+                    if (songs.Count == 0) {
+                        messageBuilder.Append($"No matching songs for for {request}");
+                    }
+                    else {
+                        messageBuilder.Append("...");
+                    }
+                    foreach (var channel in Plugin.Instance.MixerService.Channels) {
+                        Plugin.Instance.MixerService?.SendWhisperChat($"{messageBuilder}", requestor, channel.Value);
+                    }
+                    return;
+                }
+                else {
+                    msg.Header($"@{requestor.UserName}, please choose: ");
+                }
                 foreach (var eachsong in songs) {
                     msg.Add(new DynamicText().AddSong(eachsong).Parse(BsrSongDetail), ", ");
                 }
@@ -757,7 +786,7 @@ namespace SongRequestManagerV2
             }
         }
 
-        private static void ProcessSongRequest(int index, bool fromHistory = false)
+        private static async Task ProcessSongRequest(int index, bool fromHistory = false)
         {
             if ((RequestQueue.Songs.Count > 0 && !fromHistory) || (RequestHistory.Songs.Count > 0 && fromHistory))
             {
@@ -802,11 +831,7 @@ namespace SongRequestManagerV2
 
                 if (!Loader.CustomLevels.ContainsKey(currentSongDirectory) && !mapexists)
                 {
-
-
-                    Utilities.EmptyDirectory(".requestcache", false);
-
-
+                    Utility.EmptyDirectory(".requestcache", false);
                     //SongMap map;
                     //if (MapDatabase.MapLibrary.TryGetValue(songIndex, out map))
                     //{
@@ -816,29 +841,22 @@ namespace SongRequestManagerV2
                     //        songName = map.song["songName"].Value;
                     //        currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "CustomSongs", songIndex);
                     //        songHash = map.song["hashMd5"].Value.ToUpper();
-
                     //        Directory.CreateDirectory(currentSongDirectory);
                     //        // HACK to allow playing alternate songs not in custom song directory
-                    //        CopyFilesRecursively(new DirectoryInfo(map.path),new DirectoryInfo( currentSongDirectory));                           
-
+                    //        CopyFilesRecursively(new DirectoryInfo(map.path),new DirectoryInfo( currentSongDirectory));
                     //        goto here;
                     //    }
                     //}
-
                     //Plugin.Log("Downloading");
 
                     if (Directory.Exists(currentSongDirectory))
                     {
-                        Utilities.EmptyDirectory(currentSongDirectory, true);
+                        Utility.EmptyDirectory(currentSongDirectory, true);
                         Plugin.Log($"Deleting {currentSongDirectory}");
                     }
-
                     string localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request.song["id"].Value}.zip");
                     //string dl = $"https://beatsaver.com {request.song["downloadURL"].Value}";
                     //Instance.QueueChatMessage($"Download url: {dl}, {request.song}");
-
-
-
                     // Insert code to replace local path with ZIP path here
                     //SongMap map;
                     //if (MapDatabase.MapLibrary.TryGetValue(songIndex, out map))
@@ -866,10 +884,9 @@ namespace SongRequestManagerV2
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #else
-                    Plugin.WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None).Await(result =>
-                    {
+                    using (var web = new WebClient()) {
+                        var result = await web.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None);
                         var songZip = result;
-
                         using (var zipStream = new MemoryStream(songZip))
                         using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
                             try {
@@ -882,23 +899,11 @@ namespace SongRequestManagerV2
                             }
                             zipStream.Close();
                         }
-                        Dispatcher.RunCoroutine(WaitForRefreshAndSchroll(request));
-                    //    Stream zipStream = new MemoryStream(songZip);
-                    //    zipStream.Close();
-                    //here:
-                    //    while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
-                    //    Loader.Instance.RefreshSongs();
-                    //    while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
-                    //    Utilities.EmptyDirectory(".requestcache", true);
-                    //    levels = SongLoader.CustomLevels.Where(l => l.levelID.StartsWith(songHash)).ToArray();
-                    //    Dismiss the song request viewcontroller now
-                    //    _songRequestMenu.Dismiss();
-                    //    _flowCoordinator.Dismiss();
-                    //    bool success = false;
-                    //    Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
-                    //    if (!request.song.IsNull) {
-                    //        new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString()); // Display next song message
-                    //    }
+                        Dispatcher.RunOnMainThread(() =>
+                        {
+                            Dispatcher.RunCoroutine(WaitForRefreshAndSchroll(request));
+                        });
+                    }
 
 #if UNRELEASED
                         //if (!request.song.IsNull) // Experimental!
@@ -906,12 +911,7 @@ namespace SongRequestManagerV2
                         //TwitchWebSocketClient.SendCommand("/marker "+ new DynamicText().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
                         //}
 #endif
-                    },
-                    e =>
-                    {
-                        Plugin.Log($"{e}");
-                    }, null, true);
-#endif              
+#endif
                 }
                 else
                 {
@@ -919,9 +919,10 @@ namespace SongRequestManagerV2
                     Plugin.Log($"Song {songName} already exists!");
                     _flowCoordinator.Dismiss();
                     bool success = false;
-
-                    Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
-
+                    Dispatcher.RunOnMainThread(() =>
+                    {
+                        Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
+                    });
                     if (!request.song.IsNull) {
                         // Display next song message
                         new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString());
@@ -935,7 +936,7 @@ namespace SongRequestManagerV2
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
             Loader.Instance.RefreshSongs();
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
-            Utilities.EmptyDirectory(".requestcache", true);
+            Utility.EmptyDirectory(".requestcache", true);
             _flowCoordinator.Dismiss();
             bool success = false;
             Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
@@ -1063,12 +1064,12 @@ namespace SongRequestManagerV2
 
         public static void Process(int index, bool fromHistory)
         {
-            ProcessSongRequest(index, fromHistory);
+            ProcessSongRequest(index, fromHistory).Await(null, null, null);
         }
 
         public static void Next()
         {
-            ProcessSongRequest(0);
+            ProcessSongRequest(0).Await(null, null, null); ;
         }
 
 
@@ -1146,7 +1147,7 @@ namespace SongRequestManagerV2
                 }
 
                 // BUG: Need to clean up the new request pipeline
-                string testrequest = normalize.RemoveSymbols(ref state.parameter,normalize._SymbolsNoDash);
+                string testrequest = normalize.RemoveSymbols(ref state.parameter, normalize._SymbolsNoDash);
 
                 RequestInfo newRequest = new RequestInfo(state.user, state.parameter, DateTime.UtcNow, _digitRegex.IsMatch(testrequest) || _beatSaverRegex.IsMatch(testrequest),state, state.flags, state.info);
 
@@ -1156,6 +1157,7 @@ namespace SongRequestManagerV2
                     
                 if (!UnverifiedRequestQueue.Contains(newRequest)) {
                     UnverifiedRequestQueue.Enqueue(newRequest);
+                    this.ProcessRequestQueue();
                 }   
                 return success;
             }
