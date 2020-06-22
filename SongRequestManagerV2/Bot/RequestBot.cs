@@ -38,6 +38,7 @@ using System.Reflection;
 using ChatCore.SimpleJSON;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Utils;
+using System.Text;
 
 namespace SongRequestManagerV2
 {
@@ -681,17 +682,30 @@ namespace SongRequestManagerV2
             }
             else if (!autopick && songs.Count > 1 && songs.Count < 4) {
                 var msg = new QueueLongMessage(1, 5);
-                msg.Header($"@{requestor.UserName}, please choose: ");
-                // ToDo :Support Mixer whisper
-                //if (requestor is TwitchUser) {
-                //    msg.Header($"@{requestor.UserName}, please choose: ");
-                //}
-                //else if (requestor is MixerUser) {
-                //    msg.Header($"/whisper @{requestor.UserName} please choose: ");
-                //}
-                //else {
-                //    msg.Header($"@{requestor.UserName}, please choose: ");
-                //}
+                //ToDo: Support Mixer whisper
+                if (requestor is TwitchUser) {
+                    msg.Header($"@{requestor.UserName}, please choose: ");
+                }
+                else if (requestor is MixerUser) {
+                    var messageBuilder = new StringBuilder();
+                    messageBuilder.Append("please choose: ");
+                    foreach (var eachsong in songs) {
+                        messageBuilder.Append($"{new DynamicText().AddSong(eachsong).Parse(BsrSongDetail)}, ");
+                    }
+                    if (songs.Count == 0) {
+                        messageBuilder.Append($"No matching songs for for {request}");
+                    }
+                    else {
+                        messageBuilder.Append("...");
+                    }
+                    foreach (var channel in Plugin.Instance.MixerService.Channels) {
+                        Plugin.Instance.MixerService?.SendWhisperChat($"{messageBuilder}", requestor, channel.Value);
+                    }
+                    return;
+                }
+                else {
+                    msg.Header($"@{requestor.UserName}, please choose: ");
+                }
                 foreach (var eachsong in songs) {
                     msg.Add(new DynamicText().AddSong(eachsong).Parse(BsrSongDetail), ", ");
                 }
@@ -817,11 +831,7 @@ namespace SongRequestManagerV2
 
                 if (!Loader.CustomLevels.ContainsKey(currentSongDirectory) && !mapexists)
                 {
-
-
                     Utility.EmptyDirectory(".requestcache", false);
-
-
                     //SongMap map;
                     //if (MapDatabase.MapLibrary.TryGetValue(songIndex, out map))
                     //{
@@ -831,15 +841,12 @@ namespace SongRequestManagerV2
                     //        songName = map.song["songName"].Value;
                     //        currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "CustomSongs", songIndex);
                     //        songHash = map.song["hashMd5"].Value.ToUpper();
-
                     //        Directory.CreateDirectory(currentSongDirectory);
                     //        // HACK to allow playing alternate songs not in custom song directory
-                    //        CopyFilesRecursively(new DirectoryInfo(map.path),new DirectoryInfo( currentSongDirectory));                           
-
+                    //        CopyFilesRecursively(new DirectoryInfo(map.path),new DirectoryInfo( currentSongDirectory));
                     //        goto here;
                     //    }
                     //}
-
                     //Plugin.Log("Downloading");
 
                     if (Directory.Exists(currentSongDirectory))
@@ -847,13 +854,9 @@ namespace SongRequestManagerV2
                         Utility.EmptyDirectory(currentSongDirectory, true);
                         Plugin.Log($"Deleting {currentSongDirectory}");
                     }
-
                     string localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request.song["id"].Value}.zip");
                     //string dl = $"https://beatsaver.com {request.song["downloadURL"].Value}";
                     //Instance.QueueChatMessage($"Download url: {dl}, {request.song}");
-
-
-
                     // Insert code to replace local path with ZIP path here
                     //SongMap map;
                     //if (MapDatabase.MapLibrary.TryGetValue(songIndex, out map))
@@ -916,9 +919,10 @@ namespace SongRequestManagerV2
                     Plugin.Log($"Song {songName} already exists!");
                     _flowCoordinator.Dismiss();
                     bool success = false;
-
-                    Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
-
+                    Dispatcher.RunOnMainThread(() =>
+                    {
+                        Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
+                    });
                     if (!request.song.IsNull) {
                         // Display next song message
                         new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString());
