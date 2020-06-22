@@ -34,8 +34,6 @@ namespace SongRequestManagerV2
         public TwitchService TwitchService { get; internal set; }
         public MixerService MixerService { get; internal set; }
 
-        internal static WebClient WebClient;
-
         public bool IsAtMainMenu = true;
         public bool IsApplicationExiting = false;
         public static Plugin Instance { get; private set; }
@@ -79,8 +77,8 @@ namespace SongRequestManagerV2
             //if (Instance != null) return;
             //Instance = this;
             Dispatcher.Initialize();
-            // create our internal webclient
-            WebClient = new WebClient();
+            
+            
             SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
             // setup handle for fresh menu scene changes
             BSEvents.OnLoad();

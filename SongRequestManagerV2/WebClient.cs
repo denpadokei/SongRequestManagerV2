@@ -39,7 +39,7 @@ namespace SongRequestManagerV2
         }
     }
 
-    internal class WebClient
+    internal class WebClient : IDisposable
     {
         private HttpClient _client;
 
@@ -47,14 +47,6 @@ namespace SongRequestManagerV2
         {
             _client = new HttpClient();
             _client.DefaultRequestHeaders.UserAgent.TryParseAdd($"SongRequestManagerV2/{Plugin.Version}");
-        }
-
-        ~WebClient()
-        {
-            if (_client != null)
-            {
-                _client.Dispose();
-            }
         }
 
         internal async Task<WebResponse> GetAsync(string url, CancellationToken token)
@@ -98,45 +90,83 @@ namespace SongRequestManagerV2
             var req = new HttpRequestMessage(methodType, url);
 
             // send request
-            var resp = await _client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
+            try {
+                var resp = await _client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
+                //if ((int)resp.StatusCode == 429)
+                //{
+                //    // rate limiting handling
+                //}
+                if (token.IsCancellationRequested) throw new TaskCanceledException();
 
-            //if ((int)resp.StatusCode == 429)
-            //{
-            //    // rate limiting handling
-            //}
+                using (var memoryStream = new MemoryStream())
+                using (var stream = await resp.Content.ReadAsStreamAsync()) {
+                    var buffer = new byte[8192];
+                    var bytesRead = 0; ;
 
-            if (token.IsCancellationRequested) throw new TaskCanceledException();
+                    long? contentLength = resp.Content.Headers.ContentLength;
+                    var totalRead = 0;
 
-            using (var memoryStream = new MemoryStream())
-            using (var stream = await resp.Content.ReadAsStreamAsync())
-            {
-                var buffer = new byte[8192];
-                var bytesRead = 0; ;
+                    // send report
+                    progress?.Report(0);
 
-                long? contentLength = resp.Content.Headers.ContentLength;
-                var totalRead = 0;
+                    while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0) {
+                        if (token.IsCancellationRequested) throw new TaskCanceledException();
 
-                // send report
-                progress?.Report(0);
+                        if (contentLength != null) {
+                            progress?.Report((double)totalRead / (double)contentLength);
+                        }
 
-                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                {
-                    if (token.IsCancellationRequested) throw new TaskCanceledException();
-
-                    if (contentLength != null)
-                    {
-                        progress?.Report((double)totalRead / (double)contentLength);
+                        await memoryStream.WriteAsync(buffer, 0, bytesRead);
+                        totalRead += bytesRead;
                     }
 
-                    await memoryStream.WriteAsync(buffer, 0, bytesRead);
-                    totalRead += bytesRead;
+                    progress?.Report(1);
+                    byte[] bytes = memoryStream.ToArray();
+
+                    return new WebResponse(resp, bytes);
                 }
-
-                progress?.Report(1);
-                byte[] bytes = memoryStream.ToArray();
-
-                return new WebResponse(resp, bytes);
+            }
+            catch (Exception e) {
+                Plugin.Log($"{e}");
+                throw;
             }
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // 重複する呼び出しを検出するには
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue) {
+                if (disposing) {
+                    // TODO: マネージ状態を破棄します (マネージ オブジェクト)。
+                    if (_client != null) {
+                        _client.Dispose();
+                    }
+                }
+
+                // TODO: アンマネージ リソース (アンマネージ オブジェクト) を解放し、下のファイナライザーをオーバーライドします。
+                // TODO: 大きなフィールドを null に設定します。
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: 上の Dispose(bool disposing) にアンマネージ リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします。
+        // ~WebClient()
+        // {
+        //   // このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
+        //   Dispose(false);
+        // }
+
+        // このコードは、破棄可能なパターンを正しく実装できるように追加されました。
+        public void Dispose()
+        {
+            // このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
+            Dispose(true);
+            // TODO: 上のファイナライザーがオーバーライドされる場合は、次の行のコメントを解除してください。
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }

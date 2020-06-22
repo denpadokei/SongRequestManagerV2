@@ -100,6 +100,8 @@ namespace SongRequestManagerV2
 
         public event Action RecevieRequest;
 
+        private static readonly object _lockObject = new object();
+
         internal static void SRMButtonPressed()
         {
             var soloFlow = Resources.FindObjectsOfTypeAll<SoloFreePlayFlowCoordinator>().First();
@@ -362,9 +364,6 @@ namespace SongRequestManagerV2
                 try {
                     COMMAND.CommandConfiguration();
                     this.RunStartupScripts();
-
-
-                    this.ProcessRequestQueue().Await(null, null, null);
                 }
                 catch (Exception e) {
                     Plugin.Log(e.ToString());
@@ -543,18 +542,18 @@ namespace SongRequestManagerV2
             }, null);
         }
 
-        private async Task ProcessRequestQueue()
+        private void ProcessRequestQueue()
         {
-            while (!Plugin.Instance.IsApplicationExiting)
-            {
-                try {
-                    while (UnverifiedRequestQueue.Count == 0) await Task.Delay(25);
-
-                    if (UnverifiedRequestQueue.TryDequeue(out var requestInfo))
-                        await CheckRequest(requestInfo);
-                }
-                catch (Exception e) {
-                    Plugin.Log($"{e}");
+            lock (_lockObject) {
+                while (!UnverifiedRequestQueue.IsEmpty) {
+                    try {
+                        if (UnverifiedRequestQueue.TryDequeue(out var requestInfo)) {
+                            CheckRequest(requestInfo).Await(null, e => { Plugin.Log($"{e}"); }, null);
+                        }
+                    }
+                    catch (Exception e) {
+                        Plugin.Log($"{e}");
+                    }
                 }
             }
         }
@@ -596,18 +595,18 @@ namespace SongRequestManagerV2
 
         private async void UpdateSongMap(JSONObject song)
         {
-            var resp = await Plugin.WebClient.GetAsync($"https://beatsaver.com/api/maps/detail/{song["id"].Value.ToString()}", System.Threading.CancellationToken.None);
+            using (var web = new WebClient()) {
+                var resp = await web.GetAsync($"https://beatsaver.com/api/maps/detail/{song["id"].Value.ToString()}", System.Threading.CancellationToken.None);
 
-            if (resp.IsSuccessStatusCode)
-            {
-                var result = resp.ConvertToJsonNode();
+                if (resp.IsSuccessStatusCode) {
+                    var result = resp.ConvertToJsonNode();
 
-                QueueChatMessage($"{result.AsObject}");
+                    QueueChatMessage($"{result.AsObject}");
 
-                if (result != null && result["id"].Value != "")
-                {
-                    song = result.AsObject;
-                    new SongMap(result.AsObject);
+                    if (result != null && result["id"].Value != "") {
+                        song = result.AsObject;
+                        new SongMap(result.AsObject);
+                    }
                 }
             }
         }
@@ -653,15 +652,15 @@ namespace SongRequestManagerV2
             {
                 string requestUrl = (id != "") ? $"https://beatsaver.com/api/maps/detail/{normalize.RemoveSymbols(ref request, normalize._SymbolsNoDash)}" : $"https://beatsaver.com/api/search/text/0?q={normalrequest}";
 
-                var resp = await Plugin.WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
+                using (var web = new WebClient()) {
+                    var resp = await web.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
-                if (resp.IsSuccessStatusCode)
-                {
-                    result = resp.ConvertToJsonNode();
-                }
-                else
-                {
-                    errorMessage = $"Invalid BeatSaver ID \"{request}\" specified. {requestUrl}";
+                    if (resp.IsSuccessStatusCode) {
+                        result = resp.ConvertToJsonNode();
+                    }
+                    else {
+                        errorMessage = $"Invalid BeatSaver ID \"{request}\" specified. {requestUrl}";
+                    }
                 }
             }
 
@@ -773,7 +772,7 @@ namespace SongRequestManagerV2
             }
         }
 
-        private static void ProcessSongRequest(int index, bool fromHistory = false)
+        private static async Task ProcessSongRequest(int index, bool fromHistory = false)
         {
             if ((RequestQueue.Songs.Count > 0 && !fromHistory) || (RequestHistory.Songs.Count > 0 && fromHistory))
             {
@@ -882,10 +881,9 @@ namespace SongRequestManagerV2
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #else
-                    Plugin.WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None).Await(result =>
-                    {
+                    using (var web = new WebClient()) {
+                        var result = await web.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None);
                         var songZip = result;
-
                         using (var zipStream = new MemoryStream(songZip))
                         using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
                             try {
@@ -898,23 +896,11 @@ namespace SongRequestManagerV2
                             }
                             zipStream.Close();
                         }
-                        Dispatcher.RunCoroutine(WaitForRefreshAndSchroll(request));
-                    //    Stream zipStream = new MemoryStream(songZip);
-                    //    zipStream.Close();
-                    //here:
-                    //    while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
-                    //    Loader.Instance.RefreshSongs();
-                    //    while (!SongCore.Loader.AreSongsLoaded && SongCore.Loader.AreSongsLoading) await Task.Delay(25);
-                    //    Utilities.EmptyDirectory(".requestcache", true);
-                    //    levels = SongLoader.CustomLevels.Where(l => l.levelID.StartsWith(songHash)).ToArray();
-                    //    Dismiss the song request viewcontroller now
-                    //    _songRequestMenu.Dismiss();
-                    //    _flowCoordinator.Dismiss();
-                    //    bool success = false;
-                    //    Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
-                    //    if (!request.song.IsNull) {
-                    //        new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString()); // Display next song message
-                    //    }
+                        Dispatcher.RunOnMainThread(() =>
+                        {
+                            Dispatcher.RunCoroutine(WaitForRefreshAndSchroll(request));
+                        });
+                    }
 
 #if UNRELEASED
                         //if (!request.song.IsNull) // Experimental!
@@ -922,12 +908,7 @@ namespace SongRequestManagerV2
                         //TwitchWebSocketClient.SendCommand("/marker "+ new DynamicText().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
                         //}
 #endif
-                    },
-                    e =>
-                    {
-                        Plugin.Log($"{e}");
-                    }, null, true);
-#endif              
+#endif
                 }
                 else
                 {
@@ -1079,12 +1060,12 @@ namespace SongRequestManagerV2
 
         public static void Process(int index, bool fromHistory)
         {
-            ProcessSongRequest(index, fromHistory);
+            ProcessSongRequest(index, fromHistory).Await(null, null, null);
         }
 
         public static void Next()
         {
-            ProcessSongRequest(0);
+            ProcessSongRequest(0).Await(null, null, null); ;
         }
 
 
@@ -1172,6 +1153,7 @@ namespace SongRequestManagerV2
                     
                 if (!UnverifiedRequestQueue.Contains(newRequest)) {
                     UnverifiedRequestQueue.Enqueue(newRequest);
+                    this.ProcessRequestQueue();
                 }   
                 return success;
             }
