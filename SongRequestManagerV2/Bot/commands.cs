@@ -11,6 +11,7 @@ using ChatCore.Interfaces;
 using System.Threading.Tasks;
 using ChatCore.Services.Mixer;
 using ChatCore.Models.Twitch;
+using SongRequestManagerV2.Extentions;
 // Feature requests: Add Reason for being banned to banlist
 
 namespace SongRequestManagerV2
@@ -783,17 +784,17 @@ namespace SongRequestManagerV2
             public static void Parse(IChatUser user, string request, CmdFlags flags = 0, string info = "")
             {
                 if (string.IsNullOrEmpty(request)) {
-                    Plugin.Logger.Info($"request strings is null : {request}");
+                    Plugin.Log($"request strings is null : {request}");
                     return;
                 }
 
-                if (!string.IsNullOrEmpty(user.UserName) && listcollection.contains(ref _blockeduser, user.UserName.ToLower())) {
-                    Plugin.Logger.Info($"Sender is contain blacklist : {user.UserName}");
+                if (!string.IsNullOrEmpty(user.Id) && listcollection.contains(ref _blockeduser, user.Id.ToLower())) {
+                    Plugin.Log($"Sender is contain blacklist : {user.UserName}");
                     return;
                 }
 
                 // This will be used for all parsing type operations, allowing subcommands efficient access to parse state logic
-                ParseState parse = new ParseState(ref user, ref request, flags, ref info).ParseCommand();
+                new ParseState(ref user, ref request, flags, ref info).ParseCommand().Await(result => { Plugin.Log("finish ParceCommand"); }, null, null);
             }
 
             #region Command List Save / Load functionality
@@ -1124,43 +1125,46 @@ namespace SongRequestManagerV2
                 return request.Substring(0, commandlength).ToLower();
             }
 
-            public ParseState ParseCommand()
+            public Task<ParseState> ParseCommand()
             {
-                Plugin.Logger.Info("Start ParceCommand in ParseCommand()");
-                Plugin.Logger.Info($"request : {this.request}");
-                
-                // Notes for later.
-                //var match = Regex.Match(request, "^!(?<command>[^ ^/]*?<parameter>.*)");
-                //string username = match.Success ? match.Groups["command"].Value : null;
+                return Task.Run(() =>
+                {
+                    Plugin.Logger.Info("Start ParceCommand in ParseCommand()");
+                    Plugin.Logger.Info($"request : {this.request}");
 
-                int commandstart = 0;
-                int parameterstart = 0;
+                    // Notes for later.
+                    //var match = Regex.Match(request, "^!(?<command>[^ ^/]*?<parameter>.*)");
+                    //string username = match.Success ? match.Groups["command"].Value : null;
 
-                // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
-                while (parameterstart < request.Length && (request[parameterstart] != '=' && request[parameterstart] != '/' && request[parameterstart] != ' ')) parameterstart++;  // Command name ends with #... for now, I'll clean up some more later           
-                int commandlength = parameterstart - commandstart;
-                while (parameterstart < request.Length && request[parameterstart] == ' ') parameterstart++; // Eat the space(s) if that's the separator after the command
-                if (commandlength == 0) return this;
+                    int commandstart = 0;
+                    int parameterstart = 0;
 
-                command = request.Substring(commandstart, commandlength).ToLower();
-                Plugin.Logger.Info($"command : {this.command}");
-                if (COMMAND.aliaslist.ContainsKey(command)) {
-                    Plugin.Logger.Info("Contain ailias commad");
-                    parameter = request.Substring(parameterstart);
+                    // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
+                    while (parameterstart < request.Length && (request[parameterstart] != '=' && request[parameterstart] != '/' && request[parameterstart] != ' ')) parameterstart++;  // Command name ends with #... for now, I'll clean up some more later           
+                    int commandlength = parameterstart - commandstart;
+                    while (parameterstart < request.Length && request[parameterstart] == ' ') parameterstart++; // Eat the space(s) if that's the separator after the command
+                    if (commandlength == 0) return this;
 
-                    try {
-                        Plugin.Log("Start command");
-                        ExecuteCommand();
+                    command = request.Substring(commandstart, commandlength).ToLower();
+                    Plugin.Logger.Info($"command : {this.command}");
+                    if (COMMAND.aliaslist.ContainsKey(command)) {
+                        Plugin.Log("Contain ailias commad");
+                        parameter = request.Substring(parameterstart);
+
+                        try {
+                            Plugin.Log("Start command");
+                            ExecuteCommand();
+                        }
+                        catch (Exception ex) {
+                            Plugin.Log(ex.ToString());
+                        }
                     }
-                    catch (Exception ex) {
-                        Plugin.Log(ex.ToString());
+                    else {
+                        Plugin.Log("Not Contain ailias commad");
                     }
-                }
-                else {
-                    Plugin.Logger.Info("Not Contain ailias commad");
-                }
 
-                return this;
+                    return this;
+                });
             }
         }
 

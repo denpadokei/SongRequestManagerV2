@@ -635,11 +635,9 @@ namespace SongRequestManagerV2
 #endif
 
                 if (state.flags.HasFlag(CmdFlags.Local)) {
-                    Dispatcher.RunOnMainThread(() =>
-                    {
-                        UpdateRequestUI();
-                        _refreshQueue = true;
-                    });
+                    UpdateRequestUI();
+                    RefreshSongQuere();
+                    _refreshQueue = true;
                 }
             }
         }
@@ -702,11 +700,9 @@ namespace SongRequestManagerV2
 #endif
 
                 if (state.flags.HasFlag(CmdFlags.Local)) {
-                    Dispatcher.RunOnMainThread(() =>
-                    {
-                        UpdateRequestUI();
-                        _refreshQueue = true;
-                    });
+                    UpdateRequestUI();
+                    RefreshSongQuere();
+                    _refreshQueue = true;
                 }
             }
         }
@@ -747,11 +743,9 @@ namespace SongRequestManagerV2
                 QueueSong(state, entry);
             }
 
-            Dispatcher.RunOnMainThread(() =>
-            {
-                UpdateRequestUI();
-                _refreshQueue = true;
-            });
+            UpdateRequestUI();
+            RefreshSongQuere();
+            _refreshQueue = true;
         }
 
         public static void QueueSong(ParseState state, JSONObject song)
@@ -807,6 +801,7 @@ namespace SongRequestManagerV2
                     RequestQueue.Write();
 
                     // Refresh the queue ui
+                    RefreshSongQuere();
                     _refreshQueue = true;
 
                     // And write a summary to file
@@ -975,6 +970,7 @@ namespace SongRequestManagerV2
 
             QueueChatMessage(state ? "Queue is now open." : "Queue is now closed.");
             WriteQueueStatusToFile(QueueMessage(state));
+            RefreshSongQuere();
             _refreshQueue = true;
         }
         private static void WriteQueueSummaryToFile()
@@ -1064,6 +1060,7 @@ namespace SongRequestManagerV2
             ToggleQueue(state.user, state.parameter, false); // Close the queue.
             // Reload the queue
             UpdateRequestUI();
+            RefreshSongQuere();
             _refreshQueue = true;
             return success;
         }
@@ -1086,6 +1083,7 @@ namespace SongRequestManagerV2
             QueueChatMessage($"Queue is now empty.");
 
             // Reload the queue
+            RefreshSongQuere();
             _refreshQueue = true;
         }
 

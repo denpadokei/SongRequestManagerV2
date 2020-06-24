@@ -225,6 +225,7 @@ namespace SongRequestManagerV2
             ClearSearches();
 
             RequestBot.UpdateRequestUI();
+            RefreshSongQuere();
             RequestBot._refreshQueue = true;
         }
 
@@ -769,11 +770,9 @@ namespace SongRequestManagerV2
                 new DynamicText().AddSong(ref song).QueueMessage(AddSongToQueueText.ToString());
             }
 
-            Dispatcher.RunOnMainThread(() =>
-            {
-                UpdateRequestUI();
-                _refreshQueue = true;
-            });
+            UpdateRequestUI();
+            RefreshSongQuere();
+            _refreshQueue = true;
         }
 
         private IEnumerator LoadOfflineDataBase(string id)
@@ -952,20 +951,19 @@ namespace SongRequestManagerV2
             {
                 if (writeSummary)
                     WriteQueueSummaryToFile(); // Write out queue status to file, do it first
-
-                if (_requestButton != null)
+                Dispatcher.RunOnMainThread(() =>
                 {
-                    _requestButton.interactable = true;
+                    if (_requestButton != null) {
+                        _requestButton.interactable = true;
 
-                    if (RequestQueue.Songs.Count == 0)
-                    {
-                        _requestButton.gameObject.GetComponentInChildren<Image>().color = Color.red;
+                        if (RequestQueue.Songs.Count == 0) {
+                            _requestButton.gameObject.GetComponentInChildren<Image>().color = Color.red;
+                        }
+                        else {
+                            _requestButton.gameObject.GetComponentInChildren<Image>().color = Color.green;
+                        }
                     }
-                    else
-                    {
-                        _requestButton.gameObject.GetComponentInChildren<Image>().color = Color.green;
-                    }
-                }
+                });
             }
             catch (Exception ex)
             {
@@ -976,6 +974,15 @@ namespace SongRequestManagerV2
             }
         }
 
+        public static void RefreshSongQuere()
+        {
+            if (RequestBotListViewController.Instance) {
+                Dispatcher.RunOnMainThread(() =>
+                {
+                    RequestBotListViewController.Instance.RefreshSongQueueList(false);
+                });
+            }
+        }
 
         public static void DequeueRequest(SongRequest request, bool updateUI = true)
         {
@@ -1125,9 +1132,15 @@ namespace SongRequestManagerV2
                     RequestTracker.Add(state.user.Id, new RequestUserTracker());
 
                 int limit = RequestBotConfig.Instance.UserRequestLimit;
-                //if (state.user.isSub) limit = Math.Max(limit, RequestBotConfig.Instance.SubRequestLimit);
-                if (state.user.IsModerator) limit = Math.Max(limit, RequestBotConfig.Instance.ModRequestLimit);
-                //if (state.user.isVip) limit += RequestBotConfig.Instance.VipBonusRequests; // Current idea is to give VIP's a bonus over their base subscription class, you can set this to 0 if you like
+
+                if (state.user is TwitchUser twitchUser) {
+                    if (twitchUser.IsSubscriber) limit = Math.Max(limit, RequestBotConfig.Instance.SubRequestLimit);
+                    if (state.user.IsModerator) limit = Math.Max(limit, RequestBotConfig.Instance.ModRequestLimit);
+                    if (twitchUser.IsVip) limit += RequestBotConfig.Instance.VipBonusRequests; // Current idea is to give VIP's a bonus over their base subscription class, you can set this to 0 if you like
+                }
+                else {
+                    if (state.user.IsModerator) limit = Math.Max(limit, RequestBotConfig.Instance.ModRequestLimit);
+                }
 
                 if (!state.user.IsBroadcaster)
                 {

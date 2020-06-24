@@ -51,20 +51,20 @@ namespace SongRequestManagerV2
 
         public bool ModFullRights = false; // Allow moderator full broadcaster rights. Use at own risk!
 
-        public int maximumqueuemessages { get; set; } = 1;
-        public int maximumlookupmessages { get; set; } = 1;
+        public int maximumqueuemessages = 1;
+        public int maximumlookupmessages = 1;
 
         public string LastBackup = DateTime.MinValue.ToString();
-        public string backuppath { get; set; } = Path.Combine(Environment.CurrentDirectory, "userdata", "backup");
+        public string backuppath = Path.Combine(Environment.CurrentDirectory, "userdata", "backup");
 
         public bool OfflineMode = false;
-        public bool SavedatabaseOnNewest { get; set; } = false;
+        public bool SavedatabaseOnNewest = false;
         public string offlinepath = "d:\\customsongs";
 
         public bool LocalSearch = false;
         public bool PPSearch = false;
-        public string additionalsongpath { get; set; } = "";
-        public string songdownloadpath { get; set; } = "";
+        public string additionalsongpath = "";
+        public string songdownloadpath = "";
         public string MixerUserName = "";
 
         public event Action<RequestBotConfig> ConfigChangedEvent;
@@ -73,8 +73,7 @@ namespace SongRequestManagerV2
         private readonly FileSystemWatcher _configWatcher;
         private bool _saving;
 
-        private static RequestBotConfig _instance = new RequestBotConfig();
-        public static RequestBotConfig Instance => _instance;
+        public static RequestBotConfig Instance { get; } = new RequestBotConfig();
 
         private RequestBotConfig()
         {

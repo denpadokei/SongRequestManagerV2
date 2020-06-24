@@ -440,6 +440,7 @@ namespace SongRequestManagerV2
             ClearSearches();          
             
             RequestBot.UpdateRequestUI();
+            RequestBot.RefreshSongQuere();
             RequestBot._refreshQueue = true;
         }
 

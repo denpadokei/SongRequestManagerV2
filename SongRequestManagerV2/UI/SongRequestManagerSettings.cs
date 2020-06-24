@@ -78,5 +78,19 @@ namespace SongRequestManagerV2.UI
             get => RequestBotConfig.Instance.ModFullRights;
             set => RequestBotConfig.Instance.ModFullRights = value;
         }
+
+        [UIValue("limit-user-requests-to-session")]
+        public bool LimitUserRequestsToSession
+        {
+            get => RequestBotConfig.Instance.LimitUserRequestsToSession;
+            set => RequestBotConfig.Instance.LimitUserRequestsToSession = value;
+        }
+
+        [UIValue("session-reset-after-xhours")]
+        public int SessionResetAfterXHours
+        {
+            get => RequestBotConfig.Instance.SessionResetAfterXHours;
+            set => RequestBotConfig.Instance.SessionResetAfterXHours = value;
+        }
     }
 }
