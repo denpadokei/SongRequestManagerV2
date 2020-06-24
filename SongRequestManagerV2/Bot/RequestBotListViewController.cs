@@ -12,6 +12,7 @@ using BeatSaberMarkupLanguage;
 //using Utilities = SongRequestManagerV2.Utils.Utility;
 using System.Threading.Tasks;
 using SongCore;
+using SongRequestManagerV2.Extentions;
 
 namespace SongRequestManagerV2
 {
@@ -19,6 +20,8 @@ namespace SongRequestManagerV2
     public class RequestBotListViewController : ViewController, TableView.IDataSource
     {
         public static RequestBotListViewController Instance;
+
+        public bool IsLoading { get; set; }
 
         private bool confirmDialogActive = false;
 
@@ -87,13 +90,10 @@ namespace SongRequestManagerV2
         public void ColorDeckButtons(KEYBOARD kb, Color basecolor, Color Present)
         {
             if (RequestHistory.Songs.Count == 0) return;
-            foreach (KEYBOARD.KEY key in kb.keys)
-            {
-                foreach (var item in RequestBot.deck)
-                {
+            foreach (KEYBOARD.KEY key in kb.keys) {
+                foreach (var item in RequestBot.deck) {
                     string search = $"!{item.Key}/selected/toggle";
-                    if (key.value.StartsWith(search))
-                    {
+                    if (key.value.StartsWith(search)) {
                         string deckname = item.Key.ToLower() + ".deck";
                         Color color = (RequestBot.listcollection.contains(ref deckname, CurrentlySelectedSong().song["id"].Value)) ? Present : basecolor;
                         key.mybutton.GetComponentInChildren<Image>().color = color;
@@ -106,10 +106,8 @@ namespace SongRequestManagerV2
 
         protected override void DidActivate(bool firstActivation, ActivationType type)
         {
-            if (firstActivation)
-            {
-                if (!Loader.AreSongsLoaded)
-                {
+            if (firstActivation) {
+                if (!Loader.AreSongsLoaded) {
                     SongCore.Loader.SongsLoadedEvent += SongLoader_SongsLoadedEvent;
                 }
 
@@ -160,14 +158,14 @@ namespace SongRequestManagerV2
                 rectTransform.sizeDelta = new Vector2(74f, 0f);
                 rectTransform.pivot = new Vector2(0.4f, 0.5f);
 
-                var _songListTableViewScroller = _songListTableView.GetField<TableViewScroller, TableView>("_scroller");
+                var songListTableViewScroller = _songListTableView.GetField<TableViewScroller, TableView>("_scroller");
 
                 _pageUpButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().Last(x => (x.name == "PageUpButton")), container, false);
                 (_pageUpButton.transform as RectTransform).anchoredPosition = new Vector2(0f, 35f);
                 _pageUpButton.interactable = true;
                 _pageUpButton.onClick.AddListener(delegate ()
                 {
-                    _songListTableViewScroller.PageScrollUp();
+                    songListTableViewScroller.PageScrollUp();
                 });
 
                 _pageDownButton = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "PageDownButton")), container, false);
@@ -175,7 +173,7 @@ namespace SongRequestManagerV2
                 _pageDownButton.interactable = true;
                 _pageDownButton.onClick.AddListener(delegate ()
                 {
-                    _songListTableViewScroller.PageScrollDown();
+                    songListTableViewScroller.PageScrollDown();
                 });
                 #endregion
 
@@ -236,8 +234,7 @@ namespace SongRequestManagerV2
                 _blacklistButton.onClick.RemoveAllListeners();
                 _blacklistButton.onClick.AddListener(delegate ()
                 {
-                    if (NumberOfCells() > 0)
-                    {
+                    if (NumberOfCells() > 0) {
                         void _onConfirm()
                         {
                             RequestBot.Blacklist(_selectedRow, isShowingHistory, true);
@@ -269,8 +266,7 @@ namespace SongRequestManagerV2
                 _skipButton.onClick.RemoveAllListeners();
                 _skipButton.onClick.AddListener(delegate ()
                 {
-                    if (NumberOfCells() > 0)
-                    {
+                    if (NumberOfCells() > 0) {
                         void _onConfirm()
                         {
                             // get selected song
@@ -280,8 +276,7 @@ namespace SongRequestManagerV2
                             RequestBot.Skip(_selectedRow);
 
                             // select previous song if not first song
-                            if (_selectedRow > 0)
-                            {
+                            if (_selectedRow > 0) {
                                 _selectedRow--;
                             }
 
@@ -312,12 +307,11 @@ namespace SongRequestManagerV2
                 _playButton.onClick.RemoveAllListeners();
                 _playButton.onClick.AddListener(delegate ()
                 {
-                    if (NumberOfCells() > 0)
-                    {
+                    if (NumberOfCells() > 0) {
                         currentsong = SongInfoForRow(_selectedRow);
                         RequestBot.played.Add(currentsong.song);
                         RequestBot.WriteJSON(RequestBot.playedfilename, ref RequestBot.played);
-                        
+
                         SetUIInteractivity(false);
                         RequestBot.Process(_selectedRow, isShowingHistory);
                         _selectedRow = -1;
@@ -358,8 +352,7 @@ namespace SongRequestManagerV2
         protected override void DidDeactivate(DeactivationType type)
         {
             base.DidDeactivate(type);
-            if (!confirmDialogActive)
-            {
+            if (!confirmDialogActive) {
                 isShowingHistory = false;
             }
         }
@@ -368,8 +361,7 @@ namespace SongRequestManagerV2
         {
             var currentsong = RequestHistory.Songs[0];
 
-            if (_selectedRow != -1 && NumberOfCells() > _selectedRow)
-            {
+            if (_selectedRow != -1 && NumberOfCells() > _selectedRow) {
                 currentsong = SongInfoForRow(_selectedRow);
             }
             return currentsong;
@@ -392,37 +384,28 @@ namespace SongRequestManagerV2
 
         public void UpdateRequestUI(bool selectRowCallback = false)
         {
-            _playButton.GetComponentInChildren<Image>().color = ((isShowingHistory && RequestHistory.Songs.Count > 0) || (!isShowingHistory && RequestQueue.Songs.Count > 0)) ? Color.green : Color.red;
-            _queueButton.SetButtonText(RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed");
-            _queueButton.GetComponentInChildren<Image>().color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red; ;
-            _historyHintText.text = isShowingHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
-            _historyButton.SetButtonText(isShowingHistory ? "Requests" : "History");
-            _playButton.SetButtonText(isShowingHistory ? "Replay" : "Play");
-
-            UpdateSelectSongInfo();
-
-            _songListTableView.ReloadData();
-
-            if (_selectedRow == -1) return;
-
-            if (NumberOfCells() > _selectedRow)
+            Dispatcher.RunOnMainThread(() =>
             {
-                _songListTableView.SelectCellWithIdx(_selectedRow, selectRowCallback);
-                _songListTableView.ScrollToCellWithIdx(_selectedRow, TableViewScroller.ScrollPositionType.Beginning, true);
-            }
+                _playButton.GetComponentInChildren<Image>().color = ((isShowingHistory && RequestHistory.Songs.Count > 0) || (!isShowingHistory && RequestQueue.Songs.Count > 0)) ? Color.green : Color.red;
+                _queueButton.SetButtonText(RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed");
+                _queueButton.GetComponentInChildren<Image>().color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red; ;
+                _historyHintText.text = isShowingHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
+                _historyButton.SetButtonText(isShowingHistory ? "Requests" : "History");
+                _playButton.SetButtonText(isShowingHistory ? "Replay" : "Play");
+
+                RefreshSongQueueList(selectRowCallback);
+            });
         }
 
         private void DidSelectRow(TableView table, int row)
         {
             _selectedRow = row;
-            if (row != _lastSelection)
-            {
+            if (row != _lastSelection) {
                 _lastSelection = row;
             }
 
             // if not in history, disable play button if request is a challenge
-            if (!isShowingHistory)
-            {
+            if (!isShowingHistory) {
                 var request = SongInfoForRow(row);
                 var isChallenge = request.requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
                 _playButton.interactable = !isChallenge;
@@ -433,7 +416,7 @@ namespace SongRequestManagerV2
             SetUIInteractivity();
         }
 
-        private void SongLoader_SongsLoadedEvent(SongCore.Loader arg1, Dictionary <string,CustomPreviewBeatmapLevel> arg2)
+        private void SongLoader_SongsLoadedEvent(SongCore.Loader arg1, Dictionary<string, CustomPreviewBeatmapLevel> arg2)
         {
             _songListTableView?.ReloadData();
         }
@@ -450,15 +433,13 @@ namespace SongRequestManagerV2
 
             if (_selectedRow >= (isShowingHistory ? RequestHistory.Songs : RequestQueue.Songs).Count()) _selectedRow = -1;
 
-            if (NumberOfCells() == 0 || _selectedRow == -1 || _selectedRow >= Songs.Count())
-            {
+            if (NumberOfCells() == 0 || _selectedRow == -1 || _selectedRow >= Songs.Count()) {
                 Plugin.Log("Nothing selected, or empty list, buttons should be off");
                 toggled = false;
             }
 
             var playButtonEnabled = toggled;
-            if (toggled && !isShowingHistory)
-            {
+            if (toggled && !isShowingHistory) {
                 var request = SongInfoForRow(_selectedRow);
                 var isChallenge = request.requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
                 playButtonEnabled = isChallenge ? false : toggled;
@@ -467,8 +448,7 @@ namespace SongRequestManagerV2
             _playButton.interactable = playButtonEnabled;
 
             var skipButtonEnabled = toggled;
-            if (toggled && isShowingHistory)
-            {
+            if (toggled && isShowingHistory) {
                 skipButtonEnabled = false;
             }
             _skipButton.interactable = skipButtonEnabled;
@@ -486,12 +466,26 @@ namespace SongRequestManagerV2
             _historyButton.interactable = true;
         }
 
+        public void RefreshSongQueueList(bool selectRowCallback = false)
+        {
+            UpdateSelectSongInfo();
+
+            _songListTableView.ReloadData();
+
+            if (_selectedRow == -1) return;
+
+            if (NumberOfCells() > _selectedRow) {
+                _songListTableView.SelectCellWithIdx(_selectedRow, selectRowCallback);
+                _songListTableView.ScrollToCellWithIdx(_selectedRow, TableViewScroller.ScrollPositionType.Beginning, true);
+            }
+        }
+
         private CustomPreviewBeatmapLevel CustomLevelForRow(int row)
         {
             // get level id from hash
             var levelIds = SongCore.Collections.levelIDsForHash(SongInfoForRow(row).song["hash"]);
             if (levelIds.Count == 0) return null;
-            
+
             // lookup song from level id
             return SongCore.Loader.CustomLevels.FirstOrDefault(s => string.Equals(s.Value.levelID, levelIds.First(), StringComparison.OrdinalIgnoreCase)).Value ?? null;
         }
@@ -523,13 +517,13 @@ namespace SongRequestManagerV2
             _tableCell.SetField("_bought", true);
 
             SongRequest request = SongInfoForRow(row);
-            SetDataFromLevelAsync(request, _tableCell, row);
+            SetDataFromLevelAsync(request, _tableCell, row).Await(null, e => { Plugin.Log($"{e}"); }, null);
 
             return _tableCell;
         }
         #endregion
 
-        private async void SetDataFromLevelAsync(SongRequest request, LevelListTableCell _tableCell, int row)
+        private async Task SetDataFromLevelAsync(SongRequest request, LevelListTableCell _tableCell, int row)
         {
             var favouritesBadge = _tableCell.GetField<RawImage, LevelListTableCell>("_favoritesBadgeImage");
             favouritesBadge.enabled = false;
@@ -543,20 +537,18 @@ namespace SongRequestManagerV2
 
             var beatmapCharacteristicImages = _tableCell.GetField<UnityEngine.UI.Image[], LevelListTableCell>("_beatmapCharacteristicImages"); // NEW VERSION
             foreach (var i in beatmapCharacteristicImages) i.enabled = false;
-            
+
             // causing a nullex?
             //_tableCell.SetField("_beatmapCharacteristicAlphas", new float[5] { 1f, 1f, 1f, 1f, 1f });
 
             // set message icon if request has a message // NEW VERSION
-            if (hasMessage)
-            {
+            if (hasMessage) {
                 beatmapCharacteristicImages.Last().sprite = Base64Sprites.InfoIcon;
                 beatmapCharacteristicImages.Last().enabled = true;
             }
 
             // set challenge icon if song is a challenge
-            if (isChallenge)
-            {
+            if (isChallenge) {
                 var el = beatmapCharacteristicImages.ElementAt(beatmapCharacteristicImages.Length - 2);
 
                 el.sprite = Base64Sprites.VersusChallengeIcon;
@@ -583,11 +575,9 @@ namespace SongRequestManagerV2
             var image = _tableCell.GetField<RawImage, LevelListTableCell>("_coverRawImage");
             var imageSet = false;
 
-            if (SongCore.Loader.AreSongsLoaded)
-            {
+            if (SongCore.Loader.AreSongsLoaded) {
                 CustomPreviewBeatmapLevel level = CustomLevelForRow(row);
-                if (level != null)
-                {
+                if (level != null) {
                     //Plugin.Log("custom level found");
                     // set image from song's cover image
                     var tex = await level.GetCoverImageTexture2DAsync(System.Threading.CancellationToken.None);
@@ -596,12 +586,10 @@ namespace SongRequestManagerV2
                 }
             }
 
-            if (!imageSet)
-            {
+            if (!imageSet) {
                 string url = request.song["coverURL"].Value;
 
-                if (!_cachedTextures.TryGetValue(url, out var tex))
-                {
+                if (!_cachedTextures.TryGetValue(url, out var tex)) {
                     using (var web = new WebClient()) {
                         var b = await web.DownloadImage($"https://beatsaver.com{url}", System.Threading.CancellationToken.None);
 

@@ -34,7 +34,7 @@ namespace SongRequestManagerV2
             return songs;
         }
 
-        public static void Write(string path, ref List<SongRequest> songs)
+        public static void Write(string path, List<SongRequest> songs)
         {
             Plugin.Log($"Start write");
             try {
@@ -64,13 +64,14 @@ namespace SongRequestManagerV2
 
     public class RequestQueue
     {
-        public static List<SongRequest> Songs = new List<SongRequest>();
+        public static List<SongRequest> Songs { get; } = new List<SongRequest>();
         private static string requestsPath = Path.Combine(Plugin.DataPath, "SongRequestQueue.dat");
         public static void Read()
         {
             try
             {
-                Songs = RequestManager.Read(requestsPath);
+                Songs.Clear();
+                Songs.AddRange(RequestManager.Read(requestsPath));
             }
             catch (Exception e)
             {
@@ -82,19 +83,20 @@ namespace SongRequestManagerV2
 
         public static void Write()
         {
-            RequestManager.Write(requestsPath, ref Songs);
+            RequestManager.Write(requestsPath, Songs);
         }
     }
 
     public class RequestHistory
     {
-        public static List<SongRequest> Songs = new List<SongRequest>();
+        public static List<SongRequest> Songs { get; } = new List<SongRequest>();
         private static string historyPath = Path.Combine(Plugin.DataPath, "SongRequestHistory.dat");
         public static void Read()
         {
             try
             {
-                Songs = RequestManager.Read(historyPath);
+                Songs.Clear();
+                Songs.AddRange(RequestManager.Read(historyPath));
             }
             catch
             {
@@ -105,7 +107,7 @@ namespace SongRequestManagerV2
 
         public static void Write()
         {
-            RequestManager.Write(historyPath, ref Songs);
+            RequestManager.Write(historyPath, Songs);
         }
     }
 
