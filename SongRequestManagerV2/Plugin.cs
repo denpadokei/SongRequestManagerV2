@@ -14,8 +14,6 @@ using System.Reflection;
 using BS_Utils.Utilities;
 using ChatCore.Services.Mixer;
 using ChatCore.Services.Twitch;
-using ChatCore.Models.Mixer;
-using ChatCore.Models.Twitch;
 
 namespace SongRequestManagerV2
 {
@@ -77,8 +75,8 @@ namespace SongRequestManagerV2
             //if (Instance != null) return;
             //Instance = this;
             Dispatcher.Initialize();
-            
-            
+
+
             SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
             // setup handle for fresh menu scene changes
             BSEvents.OnLoad();
