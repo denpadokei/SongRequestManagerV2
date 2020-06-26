@@ -56,13 +56,17 @@ namespace SongRequestManagerV2
 
         internal async Task<byte[]> DownloadImage(string url, CancellationToken token)
         {
-            var response = await SendAsync(HttpMethod.Get, url, token);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return response.ContentToBytes();
+            try {
+                var response = await SendAsync(HttpMethod.Get, url, token);
+                if (response.IsSuccessStatusCode) {
+                    return response.ContentToBytes();
+                }
+                return null;
             }
-            return null;
+            catch (Exception e) {
+                Plugin.Log($"{e}");
+                throw;
+            }
         }
 
         internal async Task<byte[]> DownloadSong(string url, CancellationToken token, IProgress<double> progress = null)
@@ -72,14 +76,18 @@ namespace SongRequestManagerV2
             {
                 url = $"https://beatsaver.com/{url}";
             }
+            try {
+                var response = await SendAsync(HttpMethod.Get, url, token, progress: progress);
 
-            var response = await SendAsync(HttpMethod.Get, url, token, progress: progress);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return response.ContentToBytes();
+                if (response.IsSuccessStatusCode) {
+                    return response.ContentToBytes();
+                }
+                return null;
             }
-            return null;
+            catch (Exception e) {
+                Plugin.Log($"{e}");
+                throw;
+            }
         }
 
         internal async Task<WebResponse> SendAsync(HttpMethod methodType, string url, CancellationToken token, IProgress<double> progress = null)
@@ -142,6 +150,7 @@ namespace SongRequestManagerV2
                     // TODO: マネージ状態を破棄します (マネージ オブジェクト)。
                     if (_client != null) {
                         _client.Dispose();
+                        _client = null;
                     }
                 }
 
