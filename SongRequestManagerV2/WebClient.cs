@@ -39,22 +39,42 @@ namespace SongRequestManagerV2
         }
     }
 
-    internal class WebClient : IDisposable
+    internal static class WebClient
     {
-        private HttpClient _client;
-
-        internal WebClient()
+        private static HttpClient _client;
+        private static HttpClient Client
         {
-            _client = new HttpClient();
+            get
+            {
+                if (_client == null) {
+                    Connect();
+                }
+
+                return _client;
+            }
+        }
+
+        private static void Connect()
+        {
+            _client = new HttpClient()
+            {
+                Timeout = new TimeSpan(0, 0, 15)
+            };
             _client.DefaultRequestHeaders.UserAgent.TryParseAdd($"SongRequestManagerV2/{Plugin.Version}");
         }
 
-        internal async Task<WebResponse> GetAsync(string url, CancellationToken token)
+        internal static async Task<WebResponse> GetAsync(string url, CancellationToken token)
         {
-            return await SendAsync(HttpMethod.Get, url, token);
+            try {
+                return await SendAsync(HttpMethod.Get, url, token);
+            }
+            catch (Exception e) {
+                Plugin.Log($"{e}");
+                throw;
+            }
         }
 
-        internal async Task<byte[]> DownloadImage(string url, CancellationToken token)
+        internal static async Task<byte[]> DownloadImage(string url, CancellationToken token)
         {
             try {
                 var response = await SendAsync(HttpMethod.Get, url, token);
@@ -69,7 +89,7 @@ namespace SongRequestManagerV2
             }
         }
 
-        internal async Task<byte[]> DownloadSong(string url, CancellationToken token, IProgress<double> progress = null)
+        internal static async Task<byte[]> DownloadSong(string url, CancellationToken token, IProgress<double> progress = null)
         {
             // check if beatsaver url needs to be pre-pended
             if (!url.StartsWith(@"https://beatsaver.com/"))
@@ -90,7 +110,7 @@ namespace SongRequestManagerV2
             }
         }
 
-        internal async Task<WebResponse> SendAsync(HttpMethod methodType, string url, CancellationToken token, IProgress<double> progress = null)
+        internal static async Task<WebResponse> SendAsync(HttpMethod methodType, string url, CancellationToken token, IProgress<double> progress = null)
         {
             Plugin.Log($"{methodType.ToString()}: {url}");
 
@@ -99,7 +119,7 @@ namespace SongRequestManagerV2
 
             // send request
             try {
-                var resp = await _client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
+                var resp = await Client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
                 //if ((int)resp.StatusCode == 429)
                 //{
                 //    // rate limiting handling
@@ -135,47 +155,10 @@ namespace SongRequestManagerV2
                 }
             }
             catch (Exception e) {
+                Connect();
                 Plugin.Log($"{e}");
                 throw;
             }
         }
-
-        #region IDisposable Support
-        private bool disposedValue = false; // 重複する呼び出しを検出するには
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue) {
-                if (disposing) {
-                    // TODO: マネージ状態を破棄します (マネージ オブジェクト)。
-                    if (_client != null) {
-                        _client.Dispose();
-                        _client = null;
-                    }
-                }
-
-                // TODO: アンマネージ リソース (アンマネージ オブジェクト) を解放し、下のファイナライザーをオーバーライドします。
-                // TODO: 大きなフィールドを null に設定します。
-
-                disposedValue = true;
-            }
-        }
-
-        // TODO: 上の Dispose(bool disposing) にアンマネージ リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします。
-        // ~WebClient()
-        // {
-        //   // このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
-        //   Dispose(false);
-        // }
-
-        // このコードは、破棄可能なパターンを正しく実装できるように追加されました。
-        public void Dispose()
-        {
-            // このコードを変更しないでください。クリーンアップ コードを上の Dispose(bool disposing) に記述します。
-            Dispose(true);
-            // TODO: 上のファイナライザーがオーバーライドされる場合は、次の行のコメントを解除してください。
-            // GC.SuppressFinalize(this);
-        }
-        #endregion
     }
 }

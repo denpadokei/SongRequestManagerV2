@@ -114,7 +114,7 @@ namespace SongRequestManagerV2
             }
         }
 
-        private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenes)
+        private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO data)
         {
             Log("Menu Scene Loaded Fresh!");
             this.MultiplexerInstance.OnLogin -= this.MultiplexerInstance_OnLogin;

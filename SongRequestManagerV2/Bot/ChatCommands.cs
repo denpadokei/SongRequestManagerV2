@@ -260,16 +260,13 @@ namespace SongRequestManagerV2
 
                 if (!RequestBotConfig.Instance.OfflineMode) {
                     var requestUrl = $"https://beatsaver.com/api/maps/detail/{id}";
+                    var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
-                    using (var web = new WebClient()) {
-                        var resp = await web.GetAsync(requestUrl, System.Threading.CancellationToken.None);
-
-                        if (resp.IsSuccessStatusCode) {
-                            result = resp.ConvertToJsonNode();
-                        }
-                        else {
-                            Plugin.Log($"Ban: Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
-                        }
+                    if (resp.IsSuccessStatusCode) {
+                        result = resp.ConvertToJsonNode();
+                    }
+                    else {
+                        Plugin.Log($"Ban: Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
                     }
                 }
 
@@ -593,34 +590,32 @@ namespace SongRequestManagerV2
 
             while (offset < RequestBotConfig.Instance.MaxiumScanRange) // MaxiumAddScanRange
             {
-                using (var web = new WebClient()) {
-                    var resp = await web.GetAsync($"{requestUrl}/{offset}", System.Threading.CancellationToken.None);
+                var resp = await WebClient.GetAsync($"{requestUrl}/{offset}", System.Threading.CancellationToken.None);
 
-                    if (resp.IsSuccessStatusCode) {
-                        var result = resp.ConvertToJsonNode();
-                        if (result["docs"].IsArray && result["totalDocs"].AsInt == 0) {
-                            return;
-                        }
-
-                        if (result["docs"].IsArray) {
-                            foreach (JSONObject entry in result["docs"]) {
-                                JSONObject song = entry;
-                                new SongMap(song);
-
-                                if (mapperfiltered(song, true)) continue; // This forces the mapper filter
-                                if (filtersong(song)) continue;
-
-                                if (state.flags.HasFlag(CmdFlags.Local)) QueueSong(state, song);
-                                listcollection.add("latest.deck", song["id"].Value);
-                                totalSongs++;
-                            }
-                        }
-
-                    }
-                    else {
-                        Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
+                if (resp.IsSuccessStatusCode) {
+                    var result = resp.ConvertToJsonNode();
+                    if (result["docs"].IsArray && result["totalDocs"].AsInt == 0) {
                         return;
                     }
+
+                    if (result["docs"].IsArray) {
+                        foreach (JSONObject entry in result["docs"]) {
+                            JSONObject song = entry;
+                            new SongMap(song);
+
+                            if (mapperfiltered(song, true)) continue; // This forces the mapper filter
+                            if (filtersong(song)) continue;
+
+                            if (state.flags.HasFlag(CmdFlags.Local)) QueueSong(state, song);
+                            listcollection.add("latest.deck", song["id"].Value);
+                            totalSongs++;
+                        }
+                    }
+
+                }
+                else {
+                    Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
+                    return;
                 }
 
                 offset += 1; // Magic beatsaver.com skip constant.
@@ -660,35 +655,33 @@ namespace SongRequestManagerV2
 
             while (offset < RequestBotConfig.Instance.MaxiumScanRange) // MaxiumAddScanRange
             {
-                using (var web = new WebClient()) {
-                    var resp = await web.GetAsync($"{requestUrl}/{offset}?q={state.parameter}", System.Threading.CancellationToken.None);
+                var resp = await WebClient.GetAsync($"{requestUrl}/{offset}?q={state.parameter}", System.Threading.CancellationToken.None);
 
-                    if (resp.IsSuccessStatusCode) {
-                        var result = resp.ConvertToJsonNode();
-                        if (result["docs"].IsArray && result["totalDocs"].AsInt == 0) {
-                            return;
-                        }
-
-                        if (result["docs"].IsArray) {
-                            foreach (JSONObject entry in result["docs"]) {
-                                JSONObject song = entry;
-                                new SongMap(song);
-
-                                if (mapperfiltered(song, true)) continue; // This forces the mapper filter
-                                if (filtersong(song)) continue;
-
-                                if (state.flags.HasFlag(CmdFlags.Local)) QueueSong(state, song);
-                                listcollection.add("search.deck", song["id"].Value);
-                                totalSongs++;
-                            }
-                        }
-                    }
-                    else {
-                        Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
+                if (resp.IsSuccessStatusCode) {
+                    var result = resp.ConvertToJsonNode();
+                    if (result["docs"].IsArray && result["totalDocs"].AsInt == 0) {
                         return;
                     }
-                    offset += 1;
+
+                    if (result["docs"].IsArray) {
+                        foreach (JSONObject entry in result["docs"]) {
+                            JSONObject song = entry;
+                            new SongMap(song);
+
+                            if (mapperfiltered(song, true)) continue; // This forces the mapper filter
+                            if (filtersong(song)) continue;
+
+                            if (state.flags.HasFlag(CmdFlags.Local)) QueueSong(state, song);
+                            listcollection.add("search.deck", song["id"].Value);
+                            totalSongs++;
+                        }
+                    }
                 }
+                else {
+                    Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
+                    return;
+                }
+                offset += 1;
             }
 
             if (totalSongs == 0) {
@@ -721,17 +714,15 @@ namespace SongRequestManagerV2
             JSONNode result = null;
 
             if (!RequestBotConfig.Instance.OfflineMode) {
-                using (var web = new WebClient()) {
-                    var resp = await web.GetAsync($"{requestUrl}/{normalize.NormalizeBeatSaverString(state.parameter)}", System.Threading.CancellationToken.None);
+                var resp = await WebClient.GetAsync($"{requestUrl}/{normalize.NormalizeBeatSaverString(state.parameter)}", System.Threading.CancellationToken.None);
 
-                    if (resp.IsSuccessStatusCode) {
-                        result = resp.ConvertToJsonNode();
+                if (resp.IsSuccessStatusCode) {
+                    result = resp.ConvertToJsonNode();
 
-                    }
-                    else {
-                        Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {state.parameter}!");
-                        errorMessage = $"Invalid BeatSaver ID \"{state.parameter}\" specified.";
-                    }
+                }
+                else {
+                    Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {state.parameter}!");
+                    errorMessage = $"Invalid BeatSaver ID \"{state.parameter}\" specified.";
                 }
             }
 
@@ -853,15 +844,13 @@ namespace SongRequestManagerV2
 
             if (!RequestBotConfig.Instance.OfflineMode) {
                 string requestUrl = (id != "") ? $"https://beatsaver.com/api/maps/detail/{id}" : $"https://beatsaver.com/api/search/text/0?q={normalize.NormalizeBeatSaverString(state.parameter)}";
-                using (var web = new WebClient()) {
-                    var resp = await web.GetAsync(requestUrl, System.Threading.CancellationToken.None);
+                var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
-                    if (resp.IsSuccessStatusCode) {
-                        result = resp.ConvertToJsonNode();
-                    }
-                    else {
-                        Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
-                    }
+                if (resp.IsSuccessStatusCode) {
+                    result = resp.ConvertToJsonNode();
+                }
+                else {
+                    Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
                 }
             }
 
