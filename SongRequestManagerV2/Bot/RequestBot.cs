@@ -597,18 +597,16 @@ namespace SongRequestManagerV2
 
         private async void UpdateSongMap(JSONObject song)
         {
-            using (var web = new WebClient()) {
-                var resp = await web.GetAsync($"https://beatsaver.com/api/maps/detail/{song["id"].Value.ToString()}", System.Threading.CancellationToken.None);
+            var resp = await WebClient.GetAsync($"https://beatsaver.com/api/maps/detail/{song["id"].Value.ToString()}", System.Threading.CancellationToken.None);
 
-                if (resp.IsSuccessStatusCode) {
-                    var result = resp.ConvertToJsonNode();
+            if (resp.IsSuccessStatusCode) {
+                var result = resp.ConvertToJsonNode();
 
-                    QueueChatMessage($"{result.AsObject}");
+                QueueChatMessage($"{result.AsObject}");
 
-                    if (result != null && result["id"].Value != "") {
-                        song = result.AsObject;
-                        new SongMap(result.AsObject);
-                    }
+                if (result != null && result["id"].Value != "") {
+                    song = result.AsObject;
+                    new SongMap(result.AsObject);
                 }
             }
         }
@@ -654,15 +652,13 @@ namespace SongRequestManagerV2
             {
                 string requestUrl = (id != "") ? $"https://beatsaver.com/api/maps/detail/{normalize.RemoveSymbols(ref request, normalize._SymbolsNoDash)}" : $"https://beatsaver.com/api/search/text/0?q={normalrequest}";
 
-                using (var web = new WebClient()) {
-                    var resp = await web.GetAsync(requestUrl, System.Threading.CancellationToken.None);
+                var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
-                    if (resp.IsSuccessStatusCode) {
-                        result = resp.ConvertToJsonNode();
-                    }
-                    else {
-                        errorMessage = $"Invalid BeatSaver ID \"{request}\" specified. {requestUrl}";
-                    }
+                if (resp.IsSuccessStatusCode) {
+                    result = resp.ConvertToJsonNode();
+                }
+                else {
+                    errorMessage = $"Invalid BeatSaver ID \"{request}\" specified. {requestUrl}";
                 }
             }
 
@@ -883,27 +879,24 @@ namespace SongRequestManagerV2
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #else
-                    using (var web = new WebClient()) {
-                        var result = await web.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None);
-                        var songZip = result;
-                        using (var zipStream = new MemoryStream(songZip))
-                        using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
-                            try {
-                                // open zip archive from memory stream
-                                archive.ExtractToDirectory(currentSongDirectory);
-                            }
-                            catch (Exception e) {
-                                Plugin.Log($"Unable to extract ZIP! Exception: {e}");
-                                return;
-                            }
-                            zipStream.Close();
+                    var result = await WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None);
+                    var songZip = result;
+                    using (var zipStream = new MemoryStream(songZip))
+                    using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
+                        try {
+                            // open zip archive from memory stream
+                            archive.ExtractToDirectory(currentSongDirectory);
                         }
-                        Dispatcher.RunOnMainThread(() =>
-                        {
-                            Dispatcher.RunCoroutine(WaitForRefreshAndSchroll(request));
-                        });
+                        catch (Exception e) {
+                            Plugin.Log($"Unable to extract ZIP! Exception: {e}");
+                            return;
+                        }
+                        zipStream.Close();
                     }
-
+                    Dispatcher.RunOnMainThread(() =>
+                    {
+                        Dispatcher.RunCoroutine(WaitForRefreshAndSchroll(request));
+                    });
 #if UNRELEASED
                         //if (!request.song.IsNull) // Experimental!
                         //{

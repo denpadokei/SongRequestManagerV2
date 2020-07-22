@@ -88,8 +88,7 @@ namespace SongRequestManagerV2
 
                 Plugin.Log("FilePath exists! Continuing initialization!");
 
-                if (File.Exists(FilePath))
-                {
+                if (File.Exists(FilePath)) {
                     Load();
                 }
                 Save();

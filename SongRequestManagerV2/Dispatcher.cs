@@ -6,12 +6,10 @@ using System.Collections;
 
 namespace SongRequestManagerV2
 {
-    internal class Dispatcher : MonoBehaviour
+    public class Dispatcher : MonoBehaviour
     {
         private static Dispatcher _instance;
-        private static volatile bool _queued = false;
-        private static List<Action> _backlog = new List<Action>(8);
-        private static List<Action> _actions = new List<Action>(8);
+        private static SynchronizationContext _currentContext;
 
         public static void RunAsync(Action action)
         {
@@ -25,39 +23,42 @@ namespace SongRequestManagerV2
 
         public static void RunCoroutine(IEnumerator enumerator)
         {
+            if (!_instance) {
+                return;
+            }
+
             _instance.StartCoroutine(enumerator);
         }
 
         public static void RunOnMainThread(Action action)
         {
-            lock (_backlog) {
-                _backlog.Add(action);
-                _queued = true;
-            }
+            _currentContext?.Post(d =>
+            {
+                action?.Invoke();
+            }, null);
+        }
+
+        public static void RunOnMainThread<T>(Action<T> action, T value)
+        {
+            _currentContext?.Post(d =>
+            {
+                action?.Invoke(value);
+            }, null);
         }
 
         public static void Initialize()
         {
+            Plugin.Log("Start Initialize");
             if (_instance == null) {
-                _instance = new GameObject("Dispatcher").AddComponent<Dispatcher>();
-                DontDestroyOnLoad(_instance.gameObject);
-            }
-        }
+                try {
+                    _instance = new GameObject("Dispatcher").AddComponent<Dispatcher>();
+                    DontDestroyOnLoad(_instance.gameObject);
 
-        private void Update()
-        {
-            if (_queued) {
-                lock (_backlog) {
-                    var tmp = _actions;
-                    _actions = _backlog;
-                    _backlog = tmp;
-                    _queued = false;
+                    _currentContext = SynchronizationContext.Current;
                 }
-
-                foreach (var action in _actions)
-                    action();
-
-                _actions.Clear();
+                catch (Exception e) {
+                    Plugin.Log($"{e}");
+                }
             }
         }
     }
