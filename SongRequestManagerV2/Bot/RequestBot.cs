@@ -1067,6 +1067,8 @@ namespace SongRequestManagerV2
 
             // Then dequeue it
             DequeueRequest(index);
+
+            RequestBotListViewController.Instance.UpdateRequestUI();
         }
 
         public static void Process(int index, bool fromHistory)
