@@ -1,7 +1,4 @@
-﻿//using StreamCore.Chat;
-//using ChatCore.SimpleJSON;
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,12 +14,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using Image = UnityEngine.UI.Image;
 using SongCore;
-//using StreamCore;
-//using StreamCore.Twitch;
 using IPA.Utilities;
 using SongRequestManagerV2.UI;
 using BeatSaberMarkupLanguage;
-//using Utility = SongRequestManagerV2.Utils.Utility;
 using JSONObject = ChatCore.SimpleJSON.JSONObject;
 using System.Threading.Tasks;
 using System.IO.Compression;
@@ -30,7 +24,6 @@ using ChatCore.Models.Twitch;
 using ChatCore.Interfaces;
 using ChatCore.Services;
 using ChatCore;
-using ChatCore.Models.Mixer;
 using ChatCore.Services.Twitch;
 using ChatCore.Services.Mixer;
 using System.Runtime.CompilerServices;
@@ -39,10 +32,11 @@ using ChatCore.SimpleJSON;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Utils;
 using System.Text;
+using ChatCore.Models.Mixer;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot// : MonoBehaviour//, ITwitchIntegration
+    public partial class RequestBot
     {
         [Flags]
         public enum RequestStatus
@@ -390,7 +384,7 @@ namespace SongRequestManagerV2
             return listcollection.contains(ref excludefilename, msg.Sender.UserName.ToLower(), RequestBot.ListFlags.Uncached);
         }
 
-        internal void RecievedMessages(IChatService srv, IChatMessage msg)
+        internal void RecievedMessages(IChatService _, IChatMessage msg)
         {
             Plugin.Log($"Received Message : {msg.Message}");
             RequestBot.COMMAND.Parse(msg.Sender, msg.Message);

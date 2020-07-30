@@ -16,6 +16,9 @@ using ChatCore.Services.Mixer;
 using ChatCore.Services.Twitch;
 using ChatCore.Models.Mixer;
 using ChatCore.Models.Twitch;
+using SongRequestManagerV2.Networks;
+using ChatCore.Models;
+using SongRequestManagerV2.Models;
 
 namespace SongRequestManagerV2
 {
@@ -128,6 +131,16 @@ namespace SongRequestManagerV2
             this.MixerService = this.MultiplexerInstance.GetMixerService();
             this.TwitchService = this.MultiplexerInstance.GetTwitchService();
 
+            if (RequestBotConfig.IsStartServer) {
+                BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
+                BouyomiPipeline.instance.ReceiveMessege += this.Instance_ReceiveMessege;
+                BouyomiPipeline.instance.Start();
+            }
+            else {
+                BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
+                BouyomiPipeline.instance.Stop();
+            }
+
             // setup settings ui
             BSMLSettings.instance.AddSettingsMenu("SRM V2", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", SongRequestManagerSettings.instance);
 
@@ -140,6 +153,16 @@ namespace SongRequestManagerV2
             }
             RequestBotConfig.Save(true);
             Log("end Menu Scene Loaded Fresh!");
+        }
+
+        private void Instance_ReceiveMessege(string obj)
+        {
+            var message = new MessageEntity()
+            {
+                Message = obj
+            };
+
+            RequestBot.Instance.RecievedMessages(null, message);
         }
 
         public static void SongBrowserCancelFilter()
@@ -161,6 +184,7 @@ namespace SongRequestManagerV2
         public void OnExit()
         {
             IsApplicationExiting = true;
+            BouyomiPipeline.instance.Stop();
         }
     }
 }
