@@ -1,5 +1,7 @@
 # SongRequestManagerV2
-ChatCoreに対応したリクエストマネージャー
+ChatCoreに対応したリクエストマネージャー  
+  
+（2020/6/24追記）そろそろ開発者さんが正式に対応しそうなので開発打ち止め。
 
 
 # Mod Info
@@ -42,10 +44,11 @@ then filter out the ! lines on your tts client.
 ```
   
 # Dependencies
-Enhanced Twitch Chat depends on [EnhancedStreamChat] and [StreamCore], [CustomUI](https://www.modsaber.org/mod/customui/), [SongLoader](https://www.modsaber.org/mod/song-loader/), and [AsyncTwitch](https://www.modsaber.org/mod/asynctwitchlib/). Make sure to install them, or Song Request Manager Chat won't work!
+~~Enhanced Twitch Chat depends on [EnhancedStreamChat] and [StreamCore], [CustomUI](https://www.modsaber.org/mod/customui/), [SongLoader](https://www.modsaber.org/mod/song-loader/), and [AsyncTwitch](https://www.modsaber.org/mod/asynctwitchlib/). Make sure to install them, or Song Request Manager Chat won't work!~~  
+[CustomUI](https://www.modsaber.org/mod/customui/), [SongLoader](https://www.modsaber.org/mod/song-loader/), and [ChatCore](https://github.com/brian91292/ChatCore).
   
 # Installation
-Copy SongRequestManager.dll to your Beat Saber\Plugins folder, and install all of its dependencies. That's it!
+Copy SongRequestManagerV2.dll to your Beat Saber\Plugins folder, and install all of its dependencies. That's it!
 
 # Usage
 A song request icon will appear on the upper right of the main menu. It will be green if there are song requests in the queue, but you can press it regardless. Don't forget to Open the queue for requests when you are ready. It will stay that way until you close it again. The Open Queue button is on the lower right of the song request panel.
@@ -54,14 +57,17 @@ A song request icon will appear on the upper right of the main menu. It will be 
 Needs more documentation
 
 # Config
-The configuration files are located under UserData\EnhancedTwitchChat. RequestBotSettings.ini and TwitchLoginInfo.ini are the two files you need to adjust. *Keep in mind all config options will update in realtime when you save the file! This means you don't have to restart the game to see your changes!* Use the table below as a guide for setting these values (**NOTE:** You will need to setup your channel info to be able to receive song requests.)
+The configuration files are located under ~~UserData\EnhancedTwitchChat~~  UserData\Song Request ManagerV2 RequestBotSettings.ini ~~and TwitchLoginInfo.ini~~ are the two files you need to adjust. *Keep in mind all config options will update in realtime when you save the file! This means you don't have to restart the game to see your changes!* Use the table below as a guide for setting these values (**NOTE:** You will need to setup your channel info to be able to receive song requests.)
 
-# TwitchLoginInfo.ini
-| Option | Description |
+~~# TwitchLoginInfo.ini~~
+~~| Option | Description |
 | - | - |
 | **TwitchChannelName** | The name of the Twitch channel whos chat you want to join (this is your Twitch username if you want to join your own channel) |
 | **TwitchUsername** | Your twitch username for the account you want to send messages as in chat (only matters if you're using the request bot) |
-| **TwitchOAuthToken** | The oauth token corresponding to the TwitchUsername entered above ([Click here to generate an oauth token](https://twitchapps.com/tmi/))  |
+| **TwitchOAuthToken** | The oauth token corresponding to the TwitchUsername entered above ([Click here to generate an oauth token](https://twitchapps.com/tmi/))  |~~  
+
+# StreamLoginInfo  
+All settings are automatically retrieved from ChatCore. There is no need to tamper with your login information in this configuration file.
 
 # RequestBotSettings.ini
 | Option | Description |
@@ -79,6 +85,7 @@ The configuration files are located under UserData\EnhancedTwitchChat. RequestBo
 | **UpdateQueueStatusFiles=True** | Enables the generation of queuestatus.txt and queuelist.txt. Use StreamOBS' Text (GDI+) option to display your queue status and list on your live stream! |
 | **MaximumQueueTextEntries=8** | How many entries are sent to the queuelist.txt file. Any entries beyond that will display a ... |
 | **BotPrefix =""** | This adds a prefix to all bot output, set it to "! " to allow filtering of all bot output by TTS or Enhanced Twitch chat. You can use other means like filtering by name to achiveve this |
+| **MixerUserName** | It works with or without.　|
 
 
 # Compiling
@@ -89,4 +96,7 @@ This plugin is free. If you wish to help us out though, tips to
 [our Paypal](https://paypal.me/sehria) are always appreciated.
 
 # Download
-[Click here to download the latest SongRequestManager.dll](https://github.com/angturil/SongRequestManager/releases/download/1.3.1/SongRequestManager.dll)
+[Click here to download the latest SongRequestManager.dll](https://github.com/denpadokei/SongRequestManagerV2/releases/tag/1.5.0)
+
+# Origin  
+[origin repository](https://github.com/angturil/SongRequestManager)

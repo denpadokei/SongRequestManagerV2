@@ -590,14 +590,11 @@ namespace SongRequestManagerV2
                 string url = request.song["coverURL"].Value;
 
                 if (!_cachedTextures.TryGetValue(url, out var tex)) {
-                    using (var web = new WebClient()) {
-                        var b = await web.DownloadImage($"https://beatsaver.com{url}", System.Threading.CancellationToken.None);
+                    var b = await WebClient.DownloadImage($"https://beatsaver.com{url}", System.Threading.CancellationToken.None);
 
-                        tex = new Texture2D(2, 2);
-                        tex.LoadImage(b);
-                    }
-
-
+                    tex = new Texture2D(2, 2);
+                    tex.LoadImage(b);
+                    
                     try {
                         _cachedTextures.Add(url, tex);
                     }
