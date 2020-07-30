@@ -122,6 +122,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bases\BindableBase.cs" />
+    <Compile Include="Bases\BSBindableBase.cs" />
+    <Compile Include="Bases\SingletonBindableBase.cs" />
+    <Compile Include="Bases\ViewContlollerBindableBase.cs" />
     <Compile Include="Bot\ChatCommands.cs" />
     <Compile Include="Bot\commands.cs" />
     <Compile Include="Bot\Keyboard.cs" />
@@ -141,6 +145,11 @@
     <Compile Include="Extentions\IChatUserExtention.cs" />
     <Compile Include="Extentions\MixerServiceExtention.cs" />
     <Compile Include="Extentions\TaskExtention.cs" />
+    <Compile Include="Models\MessageEntity.cs" />
+    <Compile Include="Models\RequesterEntity.cs" />
+    <Compile Include="Networks\BouyomiPipeline.cs" />
+    <Compile Include="Networks\Client.cs" />
+    <Compile Include="Networks\Server.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Dispatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

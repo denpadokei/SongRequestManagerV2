@@ -67,6 +67,11 @@ namespace SongRequestManagerV2
         public string songdownloadpath = "";
         public string MixerUserName = "";
 
+        public bool IsStartServer = true;
+        public string ReceivePort = "50001";
+        public bool IsSendBouyomi = false;
+        public string SendPort = "50005";
+
         public event Action<RequestBotConfig> ConfigChangedEvent;
         public event PropertyChangedEventHandler PropertyChanged;
 
