@@ -387,7 +387,7 @@ namespace SongRequestManagerV2
         internal void RecievedMessages(IChatService _, IChatMessage msg)
         {
             Plugin.Log($"Received Message : {msg.Message}");
-            RequestBot.COMMAND.Parse(msg.Sender, msg.Message);
+            RequestBot.COMMAND.Parse(msg.Sender, msg.Message.Replace("！", "!"));
         }
 
         private void OnConfigChangedEvent(RequestBotConfig config)
