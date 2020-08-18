@@ -1,6 +1,5 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Models;
-using ChatCore.Models.Mixer;
 using ChatCore.Models.Twitch;
 using ChatCore.SimpleJSON;
 using SongRequestManagerV2.Extentions;

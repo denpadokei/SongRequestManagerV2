@@ -10,7 +10,7 @@ using Image = UnityEngine.UI.Image;
 using BeatSaberMarkupLanguage;
 using SongRequestManagerV2.UI;
 using ChatCore.Interfaces;
-using ChatCore.Models.Mixer;
+using ChatCore.Models.Twitch;
 
 namespace SongRequestManagerV2
 {
@@ -36,7 +36,7 @@ namespace SongRequestManagerV2
                     IsStaff = false,
                     Badges = new IChatBadge[0]
                 };
-                return new MixerUser(JsonUtility.ToJson(obj));
+                return new TwitchUser(JsonUtility.ToJson(obj));
             }
         }
 

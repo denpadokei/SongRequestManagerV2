@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using ChatCore.Interfaces;
 //using StreamCore.Twitch;
 using System.Threading.Tasks;
-using ChatCore.Services.Mixer;
 using ChatCore.Models.Twitch;
 using SongRequestManagerV2.Extentions;
 // Feature requests: Add Reason for being banned to banlist
@@ -907,9 +906,7 @@ namespace SongRequestManagerV2
                             if (line.Length < 2 || line.StartsWith("//")) continue;
 
                             UserSettings.Append(line).Append("\r\n");
-                            // MAGICALLY configure the customized commands 
-                            var service = Plugin.Instance.CoreInstance.RunAllServices();
-                            var mixerservice = service.GetMixerService();
+                            // MAGICALLY configure the customized commands
                             COMMAND.Parse(SerchCreateChatUser(), line, CmdFlags.SilentResult | CmdFlags.Local);
                         }
                         sr.Close();

@@ -12,9 +12,7 @@ using ChatCore.Services;
 using IPA.Loader;
 using System.Reflection;
 using BS_Utils.Utilities;
-using ChatCore.Services.Mixer;
 using ChatCore.Services.Twitch;
-using ChatCore.Models.Mixer;
 using ChatCore.Models.Twitch;
 using SongRequestManagerV2.Networks;
 using ChatCore.Models;
@@ -35,7 +33,6 @@ namespace SongRequestManagerV2
         public ChatCoreInstance CoreInstance { get; internal set; }
         public ChatServiceMultiplexer MultiplexerInstance { get; internal set; }
         public TwitchService TwitchService { get; internal set; }
-        public MixerService MixerService { get; internal set; }
 
         public bool IsAtMainMenu = true;
         public bool IsApplicationExiting = false;
@@ -98,23 +95,15 @@ namespace SongRequestManagerV2
         private void MultiplexerInstance_OnJoinChannel(IChatService arg1, IChatChannel arg2)
         {
             Log($"Joined! : [{arg1.DisplayName}][{arg2.Name}]");
-            if (arg1 is MixerService mixerService) {
-                this.MixerService = mixerService;
-                
-            }
-            else if (arg1 is TwitchService twitchService) {
+            if (arg1 is TwitchService twitchService) {
                 this.TwitchService = twitchService;
             }
-            
         }
 
         private void MultiplexerInstance_OnLogin(IChatService obj)
         {
             Log($"Loged in! : [{obj.DisplayName}]");
-            if (obj is MixerService mixerService) {
-                this.MixerService = mixerService;
-            }
-            else if (obj is TwitchService twitchService) {
+            if (obj is TwitchService twitchService) {
                 this.TwitchService = twitchService;
             }
         }
@@ -128,7 +117,7 @@ namespace SongRequestManagerV2
             this.MultiplexerInstance.OnJoinChannel += this.MultiplexerInstance_OnJoinChannel;
             this.MultiplexerInstance.OnTextMessageReceived -= RequestBot.Instance.RecievedMessages;
             this.MultiplexerInstance.OnTextMessageReceived += RequestBot.Instance.RecievedMessages;
-            this.MixerService = this.MultiplexerInstance.GetMixerService();
+            
             this.TwitchService = this.MultiplexerInstance.GetTwitchService();
 
             if (RequestBotConfig.IsStartServer) {
