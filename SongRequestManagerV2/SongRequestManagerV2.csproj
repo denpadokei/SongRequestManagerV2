@@ -145,7 +145,6 @@
     <Compile Include="Bot\util.cs" />
     <Compile Include="Config\RequestBotConfig.cs" />
     <Compile Include="Extentions\IChatUserExtention.cs" />
-    <Compile Include="Extentions\MixerServiceExtention.cs" />
     <Compile Include="Extentions\TaskExtention.cs" />
     <Compile Include="Models\MessageEntity.cs" />
     <Compile Include="Models\RequesterEntity.cs" />

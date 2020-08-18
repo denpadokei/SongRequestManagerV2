@@ -25,14 +25,12 @@ using ChatCore.Interfaces;
 using ChatCore.Services;
 using ChatCore;
 using ChatCore.Services.Twitch;
-using ChatCore.Services.Mixer;
 using System.Runtime.CompilerServices;
 using System.Reflection;
 using ChatCore.SimpleJSON;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Utils;
 using System.Text;
-using ChatCore.Models.Mixer;
 
 namespace SongRequestManagerV2
 {
@@ -500,11 +498,7 @@ namespace SongRequestManagerV2
             Task.Run(() =>
             {
                 Plugin.Log($"Sending message: \"{message}\"");
-                if (Plugin.Instance.MixerService != null) {
-                    foreach (var channel in Plugin.Instance.MixerService.Channels) {
-                        Plugin.Instance.MixerService?.SendTextMessage($"{message}", channel.Value);
-                    }
-                }
+                
                 if (Plugin.Instance.TwitchService != null) {
                     foreach (var channel in Plugin.Instance.TwitchService.Channels) {
                         Plugin.Instance.TwitchService.SendTextMessage($"{message}", channel.Value);
@@ -521,11 +515,6 @@ namespace SongRequestManagerV2
         {
             Task.Run(() =>
             {
-                if (Plugin.Instance.MixerService != null) {
-                    foreach (var channel in Plugin.Instance.MixerService.Channels) {
-                        Plugin.Instance.MixerService?.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", channel.Value);
-                    }
-                }
                 if (Plugin.Instance.TwitchService != null) {
                     foreach (var channel in Plugin.Instance.TwitchService.Channels) {
                         Plugin.Instance.TwitchService.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", channel.Value);
@@ -676,23 +665,6 @@ namespace SongRequestManagerV2
                 //ToDo: Support Mixer whisper
                 if (requestor is TwitchUser) {
                     msg.Header($"@{requestor.UserName}, please choose: ");
-                }
-                else if (requestor is MixerUser) {
-                    var messageBuilder = new StringBuilder();
-                    messageBuilder.Append("please choose: ");
-                    foreach (var eachsong in songs) {
-                        messageBuilder.Append($"{new DynamicText().AddSong(eachsong).Parse(BsrSongDetail)}, ");
-                    }
-                    if (songs.Count == 0) {
-                        messageBuilder.Append($"No matching songs for for {request}");
-                    }
-                    else {
-                        messageBuilder.Append("...");
-                    }
-                    foreach (var channel in Plugin.Instance.MixerService.Channels) {
-                        Plugin.Instance.MixerService?.SendWhisperChat($"{messageBuilder}", requestor, channel.Value);
-                    }
-                    return;
                 }
                 else {
                     msg.Header($"@{requestor.UserName}, please choose: ");
@@ -1193,7 +1165,7 @@ namespace SongRequestManagerV2
                     IsStaff = false,
                     Badges = new IChatBadge[0]
                 };
-                return new MixerUser(JsonUtility.ToJson(obj));
+                return new TwitchUser(JsonUtility.ToJson(obj));
             }
         }
  
