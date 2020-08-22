@@ -845,7 +845,7 @@ namespace SongRequestManagerV2
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #else
-                    var result = await WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None);
+                    var result = await WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None, RequestBotListViewController.Instance._progress);
                     var songZip = result;
                     using (var zipStream = new MemoryStream(songZip))
                     using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
@@ -892,7 +892,7 @@ namespace SongRequestManagerV2
         private static IEnumerator WaitForRefreshAndSchroll(SongRequest request)
         {
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
-            Loader.Instance.RefreshSongs();
+            Loader.Instance.RefreshSongs(false);
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
             Utility.EmptyDirectory(".requestcache", true);
             _flowCoordinator.Dismiss();

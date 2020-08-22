@@ -13,6 +13,7 @@ using BeatSaberMarkupLanguage;
 using System.Threading.Tasks;
 using SongCore;
 using SongRequestManagerV2.Extentions;
+using BeatSaberMarkupLanguage.Components;
 
 namespace SongRequestManagerV2
 {
@@ -43,6 +44,10 @@ namespace SongRequestManagerV2
         private HoverHint _historyHintText;
 
         private SongPreviewPlayer _songPreviewPlayer;
+
+        internal Progress<double> _progress;
+        private GameObject _progressTextObject;
+        private FormattableText _progressText;
 
         private int _requestRow = 0;
         private int _historyRow = 0;
@@ -84,7 +89,15 @@ namespace SongRequestManagerV2
 
         public void Awake()
         {
+            this._progress = new Progress<double>();
+            this._progress.ProgressChanged -= this._progress_ProgressChanged;
+            this._progress.ProgressChanged += this._progress_ProgressChanged;
             Instance = this;
+        }
+
+        private void _progress_ProgressChanged(object sender, double e)
+        {
+            this.ChangeProgressText(e);
         }
 
         public void ColorDeckButtons(KEYBOARD kb, Color basecolor, Color Present)
@@ -341,12 +354,36 @@ namespace SongRequestManagerV2
                 UIHelper.AddHintText(_queueButton.transform as RectTransform, "Open/Close the queue.");
                 #endregion
 
+                #region Progress
+                this.ChangeProgressText(0f);
+                this._progressTextObject.SetActive(true);
+                this._progressText.transform.SetParent(this.transform as RectTransform, false);
+                (this._progressText.transform as RectTransform).anchoredPosition = new Vector2(23f, -50f);
+                #endregion
+
                 // Set default RequestFlowCoordinator title
                 RequestBot.SetTitle(isShowingHistory ? "Song Request History" : "Song Request Queue");
             }
             base.DidActivate(firstActivation, type);
             UpdateRequestUI();
             SetUIInteractivity(true);
+        }
+
+        internal void ChangeProgressText(double progress)
+        {
+            if (this._progressTextObject == null) {
+                this._progressTextObject = new GameObject("ProgressText");
+                this._progressText = this._progressTextObject.AddComponent<FormattableText>();
+
+                this._progressText.font = MonoBehaviour.Instantiate(Resources.FindObjectsOfTypeAll<TMP_FontAsset>().First(t => t.name == "Teko-Medium SDF No Glow"));
+                this._progressText.fontSize = 4;
+                this._progressText.color = Color.white;
+
+                this._progressText.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                this._progressText.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            }
+            
+            this._progressText.SetText($"Download Progress - {progress * 100:0.00} %");
         }
 
         protected override void DidDeactivate(DeactivationType type)
