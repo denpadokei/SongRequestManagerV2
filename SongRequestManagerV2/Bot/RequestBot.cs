@@ -845,7 +845,7 @@ namespace SongRequestManagerV2
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #else
-                    var result = await WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None);
+                    var result = await WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None, RequestBotListViewController.Instance._progress);
                     var songZip = result;
                     using (var zipStream = new MemoryStream(songZip))
                     using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
