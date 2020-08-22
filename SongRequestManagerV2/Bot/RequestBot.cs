@@ -898,6 +898,7 @@ namespace SongRequestManagerV2
             _flowCoordinator.Dismiss();
             bool success = false;
             Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
+            RequestBotListViewController.Instance?.ChangeProgressText(0f);
             if (!request.song.IsNull) {
                 // Display next song message
                 new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString());
