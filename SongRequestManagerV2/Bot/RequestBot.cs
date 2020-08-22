@@ -892,7 +892,7 @@ namespace SongRequestManagerV2
         private static IEnumerator WaitForRefreshAndSchroll(SongRequest request)
         {
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
-            Loader.Instance.RefreshSongs();
+            Loader.Instance.RefreshSongs(false);
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
             Utility.EmptyDirectory(".requestcache", true);
             _flowCoordinator.Dismiss();
