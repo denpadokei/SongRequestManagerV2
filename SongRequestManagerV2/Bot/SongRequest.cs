@@ -3,7 +3,6 @@ using ChatCore.Models;
 using ChatCore.Models.Twitch;
 using ChatCore.SimpleJSON;
 using SongRequestManagerV2.Extentions;
-//using ChatCore.SimpleJSON;
 using System;
 using UnityEngine;
 using static SongRequestManagerV2.RequestBot;
@@ -35,7 +34,7 @@ namespace SongRequestManagerV2
                 obj.Add("status", new JSONString(status.ToString()));
                 obj.Add("requestInfo", new JSONString(requestInfo));
                 obj.Add("time", new JSONString(requestTime.ToFileTime().ToString()));
-                obj.Add("requestor", requestor.CustomToJson());
+                obj.Add("requestor", requestor.ToJson());
                 obj.Add("song", song);
                 return obj;
             }
@@ -45,13 +44,26 @@ namespace SongRequestManagerV2
             }
         }
 
-        public SongRequest FromJson(JSONNode node)
+        private IChatUser CreateRequester(JSONObject obj)
         {
-            requestor = new UnknownChatUser(node["requestor"].Value);
-            requestTime = DateTime.FromFileTime(long.Parse(node["time"].Value));
-            status = (RequestStatus)Enum.Parse(typeof(RequestStatus), node["status"].Value);
-            song = node["song"].AsObject;
-            requestInfo = node["requestInfo"].Value;
+            try {
+                var temp = new TwitchUser(obj["requestor"].AsObject.ToString());
+                return temp;
+            }
+            catch (Exception e) {
+                Plugin.Log($"{e}");
+                return new UnknownChatUser(obj["requestor"].AsObject.ToString());
+            }
+        }
+
+
+        public SongRequest FromJson(JSONObject obj)
+        {
+            requestor = this.CreateRequester(obj);
+            requestTime = DateTime.FromFileTime(long.Parse(obj["time"].Value));
+            status = (RequestStatus)Enum.Parse(typeof(RequestStatus), obj["status"].Value);
+            song = obj["song"].AsObject;
+            requestInfo = obj["requestInfo"].Value;
             return this;
         }
     }
