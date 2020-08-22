@@ -1,5 +1,4 @@
-﻿//using ChatCore.SimpleJSON;
-using ChatCore.SimpleJSON;
+﻿using ChatCore.SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,10 +18,8 @@ namespace SongRequestManagerV2
                 {
                     foreach (var j in json.AsArray) {
                         try {
-                            if (!j.Value.IsNull) {
-                                var songobj = j.Value;
-                                //Plugin.Log($"{songobj}");
-                                songs.Add(new SongRequest().FromJson(songobj));
+                            if (!j.Value.IsNull && j.Value is JSONObject obj) {
+                                songs.Add(new SongRequest().FromJson(obj));
                             }
                         }
                         catch (Exception e) {

@@ -2,7 +2,6 @@
 using ChatCore.Models.Twitch;
 using ChatCore.SimpleJSON;
 using JSONArray = ChatCore.SimpleJSON.JSONArray;
-//using ChatCore.SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,19 +15,25 @@ namespace SongRequestManagerV2.Extentions
         public static JSONObject CustomToJson(this IChatUser chatUser)
         {
             JSONObject obj = new JSONObject();
-            obj.Add("Id", new JSONString(chatUser.Id ?? ""));
-            obj.Add("UserName", new JSONString(chatUser.UserName ?? ""));
-            obj.Add("DisplayName", new JSONString(chatUser.DisplayName ?? ""));
-            obj.Add("Color", new JSONString(chatUser.Color ?? ""));
-            obj.Add("IsBroadcaster", new JSONBool(chatUser.IsBroadcaster));
-            obj.Add("IsModerator", new JSONBool(chatUser.IsModerator));
+            obj.Add(nameof(chatUser.Id), new JSONString(chatUser.Id ?? ""));
+            obj.Add(nameof(chatUser.UserName), new JSONString(chatUser.UserName ?? ""));
+            obj.Add(nameof(chatUser.DisplayName), new JSONString(chatUser.DisplayName ?? ""));
+            obj.Add(nameof(chatUser.Color), new JSONString(chatUser.Color ?? ""));
+            obj.Add(nameof(chatUser.IsBroadcaster), new JSONBool(chatUser.IsBroadcaster));
+            obj.Add(nameof(chatUser.IsModerator), new JSONBool(chatUser.IsModerator));
             var badges = new JSONArray();
             if (chatUser.Badges != null) {
                 foreach (var badge in chatUser.Badges) {
                     badges.Add(badge.ToJson());
                 }
-                obj.Add("Badges", badges);
+                obj.Add(nameof(chatUser.Badges), badges);
             }
+            if (chatUser is TwitchUser twitchUser) {
+                obj.Add(nameof(twitchUser.IsSubscriber), twitchUser.IsSubscriber);
+                obj.Add(nameof(twitchUser.IsTurbo), twitchUser.IsTurbo);
+                obj.Add(nameof(twitchUser.IsVip), twitchUser.IsVip);
+            }
+
             return obj;
         }
 
