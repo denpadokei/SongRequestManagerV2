@@ -133,9 +133,10 @@ namespace SongRequestManagerV2
                         Plugin.Log($"resp code : {resp.StatusCode}");
                     }
                     catch (Exception e) {
+                        Plugin.Log($"Error : {e}");
                         Plugin.Log($"{resp?.StatusCode}");
                     }
-                } while (resp?.IsSuccessStatusCode != true && retryCount <= RETRY_COUNT);
+                } while (resp?.StatusCode != HttpStatusCode.NotFound && resp?.IsSuccessStatusCode != true && retryCount <= RETRY_COUNT);
                 
 
                 if (token.IsCancellationRequested) throw new TaskCanceledException();
