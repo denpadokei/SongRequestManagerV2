@@ -54,6 +54,8 @@ namespace SongRequestManagerV2
             }
         }
 
+        private static readonly int RETRY_COUNT = 5;
+
         private static void Connect()
         {
             _client = new HttpClient()
@@ -119,32 +121,45 @@ namespace SongRequestManagerV2
 
             // send request
             try {
-                var resp = await Client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
-                //if ((int)resp.StatusCode == 429)
-                //{
-                //    // rate limiting handling
-                //}
+                HttpResponseMessage resp = null;
+                var retryCount = 0;
+                do {
+                    try {
+                        if (retryCount != 0) {
+                            await Task.Delay(1000);
+                        }
+                        retryCount++;
+                        resp = await Client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
+                        Plugin.Log($"resp code : {resp.StatusCode}");
+                    }
+                    catch (Exception e) {
+                        Plugin.Log($"Error : {e}");
+                        Plugin.Log($"{resp?.StatusCode}");
+                    }
+                } while (resp?.StatusCode != HttpStatusCode.NotFound && resp?.IsSuccessStatusCode != true && retryCount <= RETRY_COUNT);
+                
+
                 if (token.IsCancellationRequested) throw new TaskCanceledException();
 
                 using (var memoryStream = new MemoryStream())
-                using (var stream = await resp.Content.ReadAsStreamAsync()) {
+                using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
                     var buffer = new byte[8192];
                     var bytesRead = 0; ;
 
-                    long? contentLength = resp.Content.Headers.ContentLength;
+                    long? contentLength = resp?.Content.Headers.ContentLength;
                     var totalRead = 0;
 
                     // send report
                     progress?.Report(0);
 
-                    while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0) {
+                    while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0) {
                         if (token.IsCancellationRequested) throw new TaskCanceledException();
 
                         if (contentLength != null) {
                             progress?.Report((double)totalRead / (double)contentLength);
                         }
 
-                        await memoryStream.WriteAsync(buffer, 0, bytesRead);
+                        await memoryStream.WriteAsync(buffer, 0, bytesRead).ConfigureAwait(false);
                         totalRead += bytesRead;
                     }
 

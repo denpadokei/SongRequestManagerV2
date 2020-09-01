@@ -786,11 +786,10 @@ namespace SongRequestManagerV2
                 //CustomLevel[] levels = SongLoader.CustomLevels.Where(l => l.levelID.StartsWith(songHash)).ToArray();
                 //if (levels.Length == 0)
 
-                var rat = SongCore.Collections.levelIDsForHash(songHash);
-                bool mapexists = (rat.Count>0) && (rat[0] != "");
-                
+                //var rat = SongCore.Collections.levelIDsForHash(songHash);
+                //bool mapexists = (rat.Count>0) && (rat[0] != "");
 
-                if (!Loader.CustomLevels.ContainsKey(currentSongDirectory) && !mapexists)
+                if (Loader.GetLevelByHash(songHash) == null)
                 {
                     Utility.EmptyDirectory(".requestcache", false);
                     //SongMap map;
@@ -810,8 +809,7 @@ namespace SongRequestManagerV2
                     //}
                     //Plugin.Log("Downloading");
 
-                    if (Directory.Exists(currentSongDirectory))
-                    {
+                    if (Directory.Exists(currentSongDirectory)) {
                         Utility.EmptyDirectory(currentSongDirectory, true);
                         Plugin.Log($"Deleting {currentSongDirectory}");
                     }
@@ -879,7 +877,7 @@ namespace SongRequestManagerV2
                     bool success = false;
                     Dispatcher.RunOnMainThread(() =>
                     {
-                        Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
+                        Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(songHash, (s) => success = s, false));
                     });
                     if (!request.song.IsNull) {
                         // Display next song message
