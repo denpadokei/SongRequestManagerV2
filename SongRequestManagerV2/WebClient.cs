@@ -58,6 +58,14 @@ namespace SongRequestManagerV2
 
         private static void Connect()
         {
+            try {
+                _client?.Dispose();
+            }
+            catch (Exception e) {
+                Plugin.Log($"{e}");
+            }
+            
+
             _client = new HttpClient()
             {
                 Timeout = new TimeSpan(0, 0, 15)
@@ -115,16 +123,15 @@ namespace SongRequestManagerV2
         internal static async Task<WebResponse> SendAsync(HttpMethod methodType, string url, CancellationToken token, IProgress<double> progress = null)
         {
             Plugin.Log($"{methodType.ToString()}: {url}");
-
-            // create new request messsage
-            var req = new HttpRequestMessage(methodType, url);
-
+            
             // send request
             try {
                 HttpResponseMessage resp = null;
                 var retryCount = 0;
                 do {
                     try {
+                        // create new request messsage
+                        var req = new HttpRequestMessage(methodType, url);
                         if (retryCount != 0) {
                             await Task.Delay(1000);
                         }
