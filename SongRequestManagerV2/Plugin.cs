@@ -63,13 +63,8 @@ namespace SongRequestManagerV2
         [OnStart]
         public void OnStart()
         {
-            if (!Directory.Exists(DataPath)) {
-                try {
-                    Directory.CreateDirectory(DataPath);
-                }
-                catch (Exception e) {
-                    Log($"{e}");
-                }
+            if (PluginManager.GetPlugin("Song Request Manager") != null) {
+                return;
             }
             this.CoreInstance = ChatCoreInstance.Create();
             this.MultiplexerInstance = this.CoreInstance.RunAllServices();
