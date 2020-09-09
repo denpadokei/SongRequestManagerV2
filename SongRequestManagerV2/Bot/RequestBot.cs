@@ -636,8 +636,10 @@ namespace SongRequestManagerV2
                 string requestUrl = (id != "") ? $"https://beatsaver.com/api/maps/detail/{normalize.RemoveSymbols(ref request, normalize._SymbolsNoDash)}" : $"https://beatsaver.com/api/search/text/0?q={normalrequest}";
 
                 var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
-
-                if (resp.IsSuccessStatusCode) {
+                if (resp == null) {
+                    errorMessage = $"BeatSaver is down now.";
+                }
+                else if (resp.IsSuccessStatusCode) {
                     result = resp.ConvertToJsonNode();
                 }
                 else {
@@ -844,8 +846,10 @@ namespace SongRequestManagerV2
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #else
                     var result = await WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None, RequestBotListViewController.Instance._progress);
-                    var songZip = result;
-                    using (var zipStream = new MemoryStream(songZip))
+                    if (result == null) {
+                        Instance.QueueChatMessage("BeatSaver is down now.");
+                    }
+                    using (var zipStream = new MemoryStream(result))
                     using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
                         try {
                             // open zip archive from memory stream
