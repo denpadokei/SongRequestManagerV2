@@ -1,5 +1,6 @@
 # Credit  
 This program is based on angturil's [SongRequestManager](https://github.com/angturil/SongRequestManager).  
+© 2018 angturil
   
 # SongRequestManagerV2
 ChatCoreに対応したリクエストマネージャー  
