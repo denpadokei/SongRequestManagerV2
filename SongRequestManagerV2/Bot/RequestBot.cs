@@ -958,6 +958,7 @@ namespace SongRequestManagerV2
                 }
                 RequestQueue.Songs.Remove(request);
                 RequestHistory.Write();
+                HistoryManager.AddSong(request);
                 RequestQueue.Write();
 
                 // Decrement the requestors request count, since their request is now out of the queue

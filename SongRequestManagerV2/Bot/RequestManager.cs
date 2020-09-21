@@ -1,4 +1,5 @@
 ﻿using ChatCore.SimpleJSON;
+using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -93,7 +94,11 @@ namespace SongRequestManagerV2
             try
             {
                 Songs.Clear();
+                var list = RequestManager.Read(historyPath);
                 Songs.AddRange(RequestManager.Read(historyPath));
+                foreach (var item in list) {
+                    HistoryManager.AddSong(item);
+                }
             }
             catch
             {

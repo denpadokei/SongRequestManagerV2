@@ -33,6 +33,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <Private>False</Private>
+      <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
@@ -147,6 +152,8 @@
     <Compile Include="Extentions\IChatUserExtention.cs" />
     <Compile Include="Extentions\TaskExtention.cs" />
     <Compile Include="Models\MessageEntity.cs" />
+    <Compile Include="Models\PlaylistEntity.cs" />
+    <Compile Include="Models\PlaylistSongEntity.cs" />
     <Compile Include="Models\RequesterEntity.cs" />
     <Compile Include="Networks\BouyomiPipeline.cs" />
     <Compile Include="Networks\Client.cs" />
@@ -161,6 +168,7 @@
     <Compile Include="UI\SongRequestManagerSettings.cs" />
     <Compile Include="UI\UIHelper.cs" />
     <Compile Include="UI\YesNoModal.cs" />
+    <Compile Include="Utils\HistoryManager.cs" />
     <Compile Include="Utils\Utility.cs" />
     <Compile Include="WebClient.cs" />
     <EmbeddedResource Include="Views\SongRequestManagerSettings.bsml" />
