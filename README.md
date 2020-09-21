@@ -1,3 +1,7 @@
+# Credit  
+This program is based on angturil's [SongRequestManager](https://github.com/angturil/SongRequestManager).  
+© 2018 angturil
+  
 # SongRequestManagerV2
 ChatCoreに対応したリクエストマネージャー  
   
@@ -95,8 +99,5 @@ To compile this mod simply clone the repo and update the project references to r
 This plugin is free. If you wish to help us out though, tips to 
 [our Paypal](https://paypal.me/sehria) are always appreciated.
 
-# Download
+# Download  
 [Click here to download the latest SongRequestManager.dll](https://github.com/denpadokei/SongRequestManagerV2/releases/latest)
-
-# Origin  
-[origin repository](https://github.com/angturil/SongRequestManager)
