@@ -31,6 +31,7 @@ using ChatCore.SimpleJSON;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Utils;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SongRequestManagerV2
 {
@@ -775,7 +776,7 @@ namespace SongRequestManagerV2
 
  
                 string songName = request.song["songName"].Value;
-                string songIndex = $"{request.song["id"].Value} ({request.song["songName"].Value} - {request.song["levelAuthor"].Value})";
+                string songIndex = Regex.Replace($"{request.song["id"].Value} ({request.song["songName"].Value} - {request.song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
                 songIndex = normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
 
                 string currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
