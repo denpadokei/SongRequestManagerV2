@@ -880,13 +880,13 @@ namespace SongRequestManagerV2
                 Dispatcher.RunOnMainThread(() =>
                 {
                     if (button != null) {
-                        button.button.interactable = true;
+                        button.SetButtonIntaractive(true);
 
                         if (RequestQueue.Songs.Count == 0) {
-                            button.button.gameObject.GetComponentInChildren<ImageView>().color = Color.red;
+                            button.SetButtonColor(Color.red);
                         }
                         else {
-                            button.button.gameObject.GetComponentInChildren<ImageView>().color = Color.green;
+                            button.SetButtonColor(Color.green);
                         }
                     }
                 });

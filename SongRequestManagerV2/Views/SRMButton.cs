@@ -20,9 +20,11 @@ using Zenject;
 
 namespace SongRequestManagerV2.Views
 {
-    public class SRMButton : ViewController
+    public class SRMButton : BSMLAutomaticViewController
     {
         // For this method of setting the ResourceName, this class must be the first class in the file.
+        [Inject]
+        public MainFlowCoordinator _mainFlowCoordinator;
         [Inject]
         public SoloFreePlayFlowCoordinator _soloFreeFlow;
         [Inject]
@@ -31,6 +33,11 @@ namespace SongRequestManagerV2.Views
         public RequestFlowCoordinator _requestFlow;
         [Inject]
         public SearchFilterParamsViewController _searchFilterParamsViewController;
+        [Inject]
+        protected PhysicsRaycasterWithCache _physicsRaycaster;
+        public HMUI.Screen Screen { get; set; }
+
+        public FlowCoordinator Current => _mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
 
         public string ResourceName => string.Join(".", GetType().Namespace, "SRMButton.bsml");
 
@@ -40,7 +47,7 @@ namespace SongRequestManagerV2.Views
         {
             instance = this;
         }
-
+        [UIAction("action")]
         public void Action()
         {
             try {
@@ -57,15 +64,58 @@ namespace SongRequestManagerV2.Views
             
         }
 
+        [UIValue("color")]
+        /// <summary>説明 を取得、設定</summary>
+        private Color buttonColor_;
+        /// <summary>説明 を取得、設定</summary>
+        public Color ButtonColor
+        {
+            get => this.buttonColor_;
+
+            set
+            {
+                this.buttonColor_ = value;
+                this.NotifyPropertyChanged();
+            }
+        }
+
+
+
+
         internal void SRMButtonPressed()
         {
-            _soloFreeFlow.PresentFlowCoordinator(_requestFlow);
-            //_soloFreeFlow.InvokeMethod<object, SoloFreePlayFlowCoordinator>("PresentFlowCoordinator", _requestFlow, null, ViewController.AnimationDirection.Horizontal, false, false);
+            if (Current.name == _requestFlow.name) {
+                return;
+            }
+            Current.PresentFlowCoordinator(_requestFlow, null, AnimationDirection.Horizontal, false, false);
+        }
+
+        internal void SetButtonColor(Color color)
+        {
+            //this.ButtonColor = color;
+            //this.button.colors = new ColorBlock()
+            //{
+            //    colorMultiplier = button.colors.colorMultiplier,
+            //    disabledColor = button.colors.disabledColor,
+            //    fadeDuration = button.colors.fadeDuration,
+            //    highlightedColor = button.colors.highlightedColor,
+            //    normalColor = color,
+            //    pressedColor = button.colors.pressedColor,
+            //    selectedColor = button.colors.selectedColor
+            //};
+        }
+
+        internal void SetButtonIntaractive(bool intaractive)
+        {
+            button.interactable = intaractive;
         }
 
         internal void BackButtonPressed()
         {
-            _requestFlow.DismissFlowCoordinator(_requestFlow, null, AnimationDirection.Horizontal, true);
+            if (Current.name != _requestFlow.name) {
+                return;
+            }
+            Current.GetField<FlowCoordinator, FlowCoordinator>("_parentFlowCoordinator").DismissFlowCoordinator(Current, null, AnimationDirection.Horizontal, true);
         }
 
         [Inject]
@@ -78,19 +128,16 @@ namespace SongRequestManagerV2.Views
             if (_levelCollectionNavigationController) {
                 //new Vector2(9f, 5.5f)
 
-                //BSMLParser.instance.Parse(Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), this.ResourceName), navi.gameObject, this);
+                
                 //button = UIHelper.CreateUIButton(_levelSelectionNavigationController.rectTransform, "OkButton", new Vector2(50f, 23f),
                 //        Vector2.zero, () => { button.interactable = false; Action(); button.interactable = true; }, "SRM", null);
-                
-                //_levelCollectionNavigationController.rectTransform.sizeDelta = new Vector2(_levelCollectionNavigationController.rectTransform.sizeDelta.x, _levelCollectionNavigationController.rectTransform.sizeDelta.y);
-                _searchFilterParamsViewController.GetComponent<VRGraphicRaycaster>().enabled = false;
-                button = Instantiate(Resources.FindObjectsOfTypeAll<Button>().First(x => x.name == "OkButton"), (_levelCollectionNavigationController.transform as RectTransform));
-                button.SetButtonText("SRM");
-                button.onClick.RemoveAllListeners();
-                button.onClick.AddListener(Action);
-                (button.transform as RectTransform).anchoredPosition = new Vector2(120f, 42f);
-                (button.transform as RectTransform).sizeDelta = new Vector2((button.transform as RectTransform).sizeDelta.x, 8f);
 
+                //_levelCollectionNavigationController.rectTransform.sizeDelta = new Vector2(_levelCollectionNavigationController.rectTransform.sizeDelta.x, _levelCollectionNavigationController.rectTransform.sizeDelta.y);
+                this.Screen = FloatingScreen.CreateFloatingScreen(new Vector2(20f, 8f), false, new Vector3(1.2f, 1.9f, 2f), Quaternion.Euler(Vector3.zero));
+                this.Screen.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", this._physicsRaycaster);
+                var canvas = this.Screen.GetComponent<Canvas>();
+                canvas.sortingOrder = 3;
+                this.Screen.SetRootViewController(this, AnimationType.None);
                 Plugin.Logger.Debug($"{button == null}");
                 foreach (var item in button?.GetComponentsInChildren<object>()) {
                     Plugin.Logger.Debug($"{item}");
@@ -106,9 +153,7 @@ namespace SongRequestManagerV2.Views
             }
             Plugin.Logger.Debug("Setup() end");
         }
-        public Button button;
-
-        //[UIObject("root-object")]
-        //private GameObject root;
+        [UIComponent("srm-button")]
+        private NoTransitionsButton button;
     }
 }

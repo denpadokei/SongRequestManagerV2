@@ -14,17 +14,16 @@ namespace SongRequestManagerV2
         private RequestBotListViewController _requestBotListViewController;
         [Inject]
         private KeyboardViewController _keyboardViewController;
-        [Inject]
-        private SoloFreePlayFlowCoordinator _soloFreePlayFlow;
+        //[Inject]
+        //private SoloFreePlayFlowCoordinator _soloFreePlayFlow;
+
+        public void SetTitle(string newTitle) => base.SetTitle(newTitle);
 
         protected override void BackButtonWasPressed(ViewController topViewController)
         {
             base.BackButtonWasPressed(topViewController);
-            // dismiss ourselves
-            _soloFreePlayFlow.DismissFlowCoordinator(this);
+            this.GetField<FlowCoordinator, FlowCoordinator>("_parentFlowCoordinator").DismissFlowCoordinator(this);
         }
-
-        public void SetTitle(string newTitle) => base.SetTitle(newTitle);
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {

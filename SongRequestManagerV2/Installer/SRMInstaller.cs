@@ -21,7 +21,6 @@ namespace SongRequestManagerV2.Installers
     {
         public override void InstallBindings()
         {
-            
             Container.BindViewController<YesNoModal>(BeatSaberUI.CreateViewController<YesNoModal>());
             Container.BindViewController<RequestBotListViewController>(BeatSaberUI.CreateViewController<RequestBotListViewController>());
             Container.BindViewController<KeyboardViewController>(BeatSaberUI.CreateViewController<KeyboardViewController>());
