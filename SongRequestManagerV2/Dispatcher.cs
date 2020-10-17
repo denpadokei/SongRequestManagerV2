@@ -32,18 +32,36 @@ namespace SongRequestManagerV2
 
         public static void RunOnMainThread(Action action)
         {
-            _currentContext?.Post(d =>
+            HMMainThreadDispatcher.instance.Enqueue(() =>
             {
-                action?.Invoke();
-            }, null);
+                try {
+                    action?.Invoke();
+                }
+                catch (Exception e) {
+                    Plugin.Logger.Error(e);
+                }
+            });
+            //_currentContext?.Post(d =>
+            //{
+            //    action?.Invoke();
+            //}, null);
         }
 
         public static void RunOnMainThread<T>(Action<T> action, T value)
         {
-            _currentContext?.Post(d =>
+            HMMainThreadDispatcher.instance.Enqueue(() =>
             {
-                action?.Invoke(value);
-            }, null);
+                try {
+                    action?.Invoke(value);
+                }
+                catch (Exception e) {
+                    Plugin.Logger.Error(e);
+                }
+            });
+            //_currentContext?.Post(d =>
+            //{
+            //    action?.Invoke(value);
+            //}, null);
         }
 
         public static void Initialize()

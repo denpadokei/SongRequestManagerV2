@@ -1,14 +1,18 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
 using System;
 using System.Reflection;
 using TMPro;
+using Zenject;
 
 namespace SongRequestManagerV2
 {
-    public class YesNoModal : PersistentSingleton<YesNoModal>
+    public class YesNoModal : BSMLResourceViewController
     {
+        public static YesNoModal instance;
+
         private Action OnConfirm;
         private Action OnDecline;
 
@@ -20,6 +24,8 @@ namespace SongRequestManagerV2
 
         [UIComponent("message")]
         internal TextMeshProUGUI _message;
+
+        public override string ResourceName => "SongRequestManagerV2.Views.YesNoModal.bsml";
 
         [UIAction("yes-click")]
         private void YesClick()
@@ -37,6 +43,17 @@ namespace SongRequestManagerV2
             OnDecline = null;
         }
 
+        private void Awake()
+        {
+            instance = this;
+        }
+
+        [Inject]
+        public void Const(RequestBotListViewController controller)
+        {
+            BSMLParser.instance.Parse(Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "SongRequestManagerV2.Views.YesNoModal.bsml"), controller.gameObject, this);
+        }
+
         public void ShowDialog(string title, string message, Action onConfirm = null, Action onDecline = null)
         {
             _title.text = title;
@@ -46,11 +63,6 @@ namespace SongRequestManagerV2
             OnDecline = onDecline;
 
             modal.Show(true);
-        }
-
-        internal void Setup()
-        {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "SongRequestManagerV2.Views.YesNoModal.bsml"), RequestBotListViewController.Instance.gameObject, this);
         }
     }
 }

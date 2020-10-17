@@ -32,10 +32,15 @@ using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Utils;
 using System.Text;
 using System.Text.RegularExpressions;
+using HMUI;
+using SongRequestManagerV2.Views;
+using Zenject;
+using UnityEngine.PlayerLoop;
+using System.Threading;
 
 namespace SongRequestManagerV2
 {
-    public partial class RequestBot
+    public partial class RequestBot : MonoBehaviour
     {
         [Flags]
         public enum RequestStatus
@@ -48,11 +53,15 @@ namespace SongRequestManagerV2
             Wrongsong,
             SongSearch,
         }
-        public static RequestBot Instance { get; } = new RequestBot();
-        private RequestBot()
-        {
 
-        }
+        [Inject]
+        protected DiContainer Container { get; set; }
+
+        public static RequestBot Instance { get; private set; }
+        //private RequestBot()
+        //{
+
+        //}
 
         public static ConcurrentQueue<RequestInfo> UnverifiedRequestQueue { get; } = new ConcurrentQueue<RequestInfo>();
         public static Dictionary<string, RequestUserTracker> RequestTracker = new Dictionary<string, RequestUserTracker>();
@@ -61,9 +70,6 @@ namespace SongRequestManagerV2
         //SpeechSynthesizer synthesizer = new SpeechSynthesizer();
         //synthesizer.Volume = 100;  // 0...100
         //    synthesizer.Rate = -2;     // -10...10
-
-        
-        private static Button _requestButton;
         public static bool _refreshQueue = false;
 
         private static Queue<string> _botMessageQueue = new Queue<string>();
@@ -88,64 +94,173 @@ namespace SongRequestManagerV2
         private static Dictionary<string, string> songremap = new Dictionary<string, string>();
         public static Dictionary<string, string> deck = new Dictionary<string, string>(); // deck name/content
 
-        private static RequestFlowCoordinator _flowCoordinator;
+        [Inject]
+        public SRMButton button { get; set; }
+        [Inject]
+        private LevelFilteringNavigationController _levelFilteringNavigationController;
 
         public static string playedfilename = "";
 
         public event Action RecevieRequest;
+        public event Action DismissRequest;
 
         private static readonly object _lockObject = new object();
 
-        internal static void SRMButtonPressed()
+        [Inject]
+        public async void OnLoad()
         {
-            var soloFlow = Resources.FindObjectsOfTypeAll<SoloFreePlayFlowCoordinator>().First();
-            soloFlow.InvokeMethod<object, SoloFreePlayFlowCoordinator>("PresentFlowCoordinator", _flowCoordinator, null, false, false);
-        }
+            Plugin.Log("Awake start!");
+            
+#if UNRELEASED
+            var startingmem = GC.GetTotalMemory(true);
 
-        internal static void SetTitle(string title)
-        {
-            _flowCoordinator.SetTitle(title);
-        }
+            //var folder = Path.Combine(Environment.CurrentDirectory, "userdata","streamcore");
 
-        public static void OnLoad()
-        {
-            try
-            {
-                var levelListViewController = Resources.FindObjectsOfTypeAll<LevelCollectionViewController>().First();
-                if (levelListViewController)
-                    {
-                    _requestButton = UIHelper.CreateUIButton(levelListViewController.rectTransform, "OkButton", new Vector2(66, -3.5f),
-                        new Vector2(9f, 5.5f), () => { _requestButton.interactable = false; SRMButtonPressed(); _requestButton.interactable = true; }, "SRM");
+           //List<FileInfo> files = new List<FileInfo>();  // List that will hold the files and subfiles in path
+            //List<DirectoryInfo> folders = new List<DirectoryInfo>(); // List that hold direcotries that cannot be accessed
 
-                    (_requestButton.transform as RectTransform).anchorMin = new Vector2(1, 1);
-                    (_requestButton.transform as RectTransform).anchorMax = new Vector2(1, 1);
+            //DirectoryInfo di = new DirectoryInfo(folder);
 
-                    _requestButton.ToggleWordWrapping(false);
-                    _requestButton.SetButtonTextSize(3.5f);
-                    UIHelper.AddHintText(_requestButton.transform as RectTransform, "Manage the current request queue");
+            //Dictionary<string, string> remap = new Dictionary<string, string>();
+        
+            //foreach (var entry in listcollection.OpenList("all.list").list) 
+            //    {
+            //    //Instance.QueueChatMessage($"Map {entry}");
 
-                    UpdateRequestUI();
-                    Plugin.Log("Created request button!");
+            //    string[] remapparts = entry.Split('-');
+            //    if (remapparts.Length == 2)
+            //    {
+            //        int o;
+            //        if (Int32.TryParse(remapparts[1], out o))
+            //        {
+            //            try
+            //            {
+            //                remap.Add(remapparts[0], o.ToString("x"));
+            //            }
+            //            catch
+            //            { }
+            //            //Instance.QueueChatMessage($"Map {remapparts[0]} : {o.ToString("x")}");
+            //        }
+            //    }
+            //}
+
+            //Instance.QueueChatMessage($"Scanning lists");
+
+            //FullDirList(di, "*.deck");
+            //void FullDirList(DirectoryInfo dir, string searchPattern)
+            //{
+            //    try
+            //    {
+            //        foreach (FileInfo f in dir.GetFiles(searchPattern))
+            //        {
+            //            var List = listcollection.OpenList(f.UserName).list;
+            //            for (int i=0;i<List.Count;i++)
+            //                {
+            //                if (remap.ContainsKey(List[i]))
+            //                {
+            //                    //Instance.QueueChatMessage($"{List[i]} : {remap[List[i]]}");
+            //                    List[i] = remap[List[i]];
+            //                }    
+            //                }
+            //            listcollection.OpenList(f.UserName).Writefile(f.UserName);
+            //        }
+            //    }
+            //    catch
+            //    {
+            //        Console.WriteLine("Directory {0}  \n could not be accessed!!!!", dir.FullName);
+            //        return;
+            //    }
+            //}
+
+            //NOTJSON.UNITTEST();
+#endif
+
+            playedfilename = Path.Combine(Plugin.DataPath, "played.dat"); // Record of all the songs played in the current session
+            Plugin.Log("create playd path");
+            try {
+                string filesToDelete = Path.Combine(Environment.CurrentDirectory, "FilesToDelete");
+                if (Directory.Exists(filesToDelete)) {
+                    Plugin.Log("files delete");
+                    Utility.EmptyDirectory(filesToDelete);
                 }
+
+                try {
+                    DateTime LastBackup;
+                    if (!DateTime.TryParse(RequestBotConfig.Instance.LastBackup, out LastBackup)) LastBackup = DateTime.MinValue;
+                    TimeSpan TimeSinceBackup = DateTime.Now - LastBackup;
+                    if (TimeSinceBackup > TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours)) {
+                        Plugin.Log("try buck up");
+                        Backup();
+                        Plugin.Log("end buck up");
+                    }
+                }
+                catch (Exception ex) {
+                    Plugin.Log(ex.ToString());
+                    Instance.QueueChatMessage("Failed to run Backup");
+
+                }
+
+                try {
+                    TimeSpan PlayedAge = GetFileAgeDifference(playedfilename);
+                    if (PlayedAge < TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours)) played = ReadJSON(playedfilename); // Read the songsplayed file if less than x hours have passed 
+                }
+                catch (Exception ex) {
+                    Plugin.Log(ex.ToString());
+                    Instance.QueueChatMessage("Failed to clear played file");
+
+                }
+
+                if (RequestBotConfig.Instance.PPSearch) await GetPPData(); // Start loading PP data
+
+                Plugin.Log("try load database");
+                MapDatabase.LoadDatabase();
+                Plugin.Log("end load database");
+
+                if (RequestBotConfig.Instance.LocalSearch) await MapDatabase.LoadCustomSongs(); // This is a background process
+
+                RequestQueue.Read(); // Might added the timespan check for this too. To be decided later.
+                RequestHistory.Read();
+                listcollection.OpenList("banlist.unique");
+
+#if UNRELEASED
+            //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            //GC.Collect();
+            //Instance.QueueChatMessage($"hashentries: {SongMap.hashcount} memory: {(GC.GetTotalMemory(false) - startingmem) / 1048576} MB");
+#endif
+
+                listcollection.ClearOldList("duplicate.list", TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours));
+
+                UpdateRequestUI();
+                InitializeCommands();
+
+                //EnhancedStreamChat.ChatHandler.ChatMessageFilters += MyChatMessageHandler; // TODO: Reimplement this filter maybe? Or maybe we put it directly into EnhancedStreamChat
+
+                try {
+                    COMMAND.CommandConfiguration();
+                    this.RunStartupScripts();
+                }
+                catch (Exception e) {
+                    Plugin.Log(e.ToString());
+                }
+
+                //TwitchMessageHandlers.PRIVMSG += PRIVMSG;
+
+                RequestBotConfig.Instance.ConfigChangedEvent += OnConfigChangedEvent;
+
+                //IsPluginReady = true;
+                Plugin.Log("Awake finished!");
             }
-            catch
-            {
-                Plugin.Log("Unable to create request button");
+            catch (Exception ex) {
+                Plugin.Log(ex.ToString());
+                QueueChatMessage(ex.ToString());
             }
 
-            // check if flow coordinator has been setup yet
-            if (_flowCoordinator == null)
-            {
-                _flowCoordinator = BeatSaberMarkupLanguage.BeatSaberUI.CreateFlowCoordinator<RequestFlowCoordinator>();
-            }
-
+            Plugin.Logger.Debug("OnLoad()");
+            
             SongListUtils.Initialize();
 
             WriteQueueSummaryToFile();
             WriteQueueStatusToFile(QueueMessage(RequestBotConfig.Instance.RequestQueueOpen));
-            // Yes, this is disabled on purpose. StreamCore will init this class for you now, so don't uncomment this! -Brian
-            //if (Instance) return;
-            //new GameObject("SongRequestManager").AddComponent<RequestBot>();
         }
 
         public static void AddKeyboard(KEYBOARD keyboard, string keyboardname, float scale = 0.5f)
@@ -213,168 +328,17 @@ namespace SongRequestManagerV2
             }
         }
 
-        public static void ClearSearch(KEYBOARD.KEY key)
+        public void ClearSearch(KEYBOARD.KEY key)
         {
             ClearSearches();
-
-            RequestBot.UpdateRequestUI();
+            UpdateUI?.Invoke(false);
             RefreshSongQuere();
             RequestBot._refreshQueue = true;
         }
-
-        public async void Awake()
+        public void Awake()
         {
-            Plugin.Log("Awake start!");
-            //DontDestroyOnLoad(this.gameObject);
-#if UNRELEASED
-            var startingmem = GC.GetTotalMemory(true);
-
-            //var folder = Path.Combine(Environment.CurrentDirectory, "userdata","streamcore");
-
-           //List<FileInfo> files = new List<FileInfo>();  // List that will hold the files and subfiles in path
-            //List<DirectoryInfo> folders = new List<DirectoryInfo>(); // List that hold direcotries that cannot be accessed
-
-            //DirectoryInfo di = new DirectoryInfo(folder);
-
-            //Dictionary<string, string> remap = new Dictionary<string, string>();
-        
-            //foreach (var entry in listcollection.OpenList("all.list").list) 
-            //    {
-            //    //Instance.QueueChatMessage($"Map {entry}");
-
-            //    string[] remapparts = entry.Split('-');
-            //    if (remapparts.Length == 2)
-            //    {
-            //        int o;
-            //        if (Int32.TryParse(remapparts[1], out o))
-            //        {
-            //            try
-            //            {
-            //                remap.Add(remapparts[0], o.ToString("x"));
-            //            }
-            //            catch
-            //            { }
-            //            //Instance.QueueChatMessage($"Map {remapparts[0]} : {o.ToString("x")}");
-            //        }
-            //    }
-            //}
-
-            //Instance.QueueChatMessage($"Scanning lists");
-
-            //FullDirList(di, "*.deck");
-            //void FullDirList(DirectoryInfo dir, string searchPattern)
-            //{
-            //    try
-            //    {
-            //        foreach (FileInfo f in dir.GetFiles(searchPattern))
-            //        {
-            //            var List = listcollection.OpenList(f.UserName).list;
-            //            for (int i=0;i<List.Count;i++)
-            //                {
-            //                if (remap.ContainsKey(List[i]))
-            //                {
-            //                    //Instance.QueueChatMessage($"{List[i]} : {remap[List[i]]}");
-            //                    List[i] = remap[List[i]];
-            //                }    
-            //                }
-            //            listcollection.OpenList(f.UserName).Writefile(f.UserName);
-            //        }
-            //    }
-            //    catch
-            //    {
-            //        Console.WriteLine("Directory {0}  \n could not be accessed!!!!", dir.FullName);
-            //        return;
-            //    }
-            //}
-
-            //NOTJSON.UNITTEST();
-#endif
-
-            playedfilename = Path.Combine(Plugin.DataPath, "played.dat"); // Record of all the songs played in the current session
-            Plugin.Log("create playd path");
-            try
-            {
-                string filesToDelete = Path.Combine(Environment.CurrentDirectory, "FilesToDelete");
-                if (Directory.Exists(filesToDelete)) {
-                    Plugin.Log("files delete");
-                    Utility.EmptyDirectory(filesToDelete);
-                }
-
-                try
-                {
-                    DateTime LastBackup;
-                    if (!DateTime.TryParse(RequestBotConfig.Instance.LastBackup,out LastBackup)) LastBackup=DateTime.MinValue;
-                    TimeSpan TimeSinceBackup = DateTime.Now - LastBackup;
-                    if (TimeSinceBackup > TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours))
-                    {
-                        Plugin.Log("try buck up");
-                        Backup();
-                        Plugin.Log("end buck up");
-                    }
-                }
-                catch(Exception ex)
-                {
-                    Plugin.Log(ex.ToString());
-                    Instance.QueueChatMessage("Failed to run Backup");
-
-                }
-
-                try
-                {
-                    TimeSpan PlayedAge = GetFileAgeDifference(playedfilename);
-                if (PlayedAge < TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours)) played = ReadJSON(playedfilename); // Read the songsplayed file if less than x hours have passed 
-                }
-                catch (Exception ex)
-                {
-                    Plugin.Log(ex.ToString());
-                    Instance.QueueChatMessage("Failed to clear played file");
-
-                }
-
-                if (RequestBotConfig.Instance.PPSearch) await GetPPData(); // Start loading PP data
-
-                Plugin.Log("try load database");
-                MapDatabase.LoadDatabase();
-                Plugin.Log("end load database");
-
-                if (RequestBotConfig.Instance.LocalSearch) await MapDatabase.LoadCustomSongs(); // This is a background process
-
-                RequestQueue.Read(); // Might added the timespan check for this too. To be decided later.
-                RequestHistory.Read();
-                listcollection.OpenList("banlist.unique");
-
-#if UNRELEASED
-            //GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-            //GC.Collect();
-            //Instance.QueueChatMessage($"hashentries: {SongMap.hashcount} memory: {(GC.GetTotalMemory(false) - startingmem) / 1048576} MB");
-#endif
-
-                listcollection.ClearOldList("duplicate.list", TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours));
-
-                UpdateRequestUI();
-                InitializeCommands();
-
-                //EnhancedStreamChat.ChatHandler.ChatMessageFilters += MyChatMessageHandler; // TODO: Reimplement this filter maybe? Or maybe we put it directly into EnhancedStreamChat
-
-                try {
-                    COMMAND.CommandConfiguration();
-                    this.RunStartupScripts();
-                }
-                catch (Exception e) {
-                    Plugin.Log(e.ToString());
-                }
-                
-                //TwitchMessageHandlers.PRIVMSG += PRIVMSG;
-
-                RequestBotConfig.Instance.ConfigChangedEvent += OnConfigChangedEvent;
-                
-                //IsPluginReady = true;
-                Plugin.Log("Awake finished!");
-            }
-            catch (Exception ex) {
-                Plugin.Log(ex.ToString());
-                Instance.QueueChatMessage(ex.ToString());
-            }
+            DontDestroyOnLoad(this.gameObject);
+            Instance = this;
         }
 
         public bool MyChatMessageHandler(IChatMessage msg)
@@ -415,7 +379,7 @@ namespace SongRequestManagerV2
             public DateTime time;
             public string command;
             public bool repeat;
-            Timer timeq;
+            System.Timers.Timer timeq;
 
             public static void Clear()
             {                
@@ -750,7 +714,7 @@ namespace SongRequestManagerV2
             }
         }
 
-        private static async Task ProcessSongRequest(int index, bool fromHistory = false)
+        private async Task ProcessSongRequest(int index, bool fromHistory = false)
         {
             if ((RequestQueue.Songs.Count > 0 && !fromHistory) || (RequestHistory.Songs.Count > 0 && fromHistory))
             {
@@ -878,7 +842,7 @@ namespace SongRequestManagerV2
                 {
                     //Instance.QueueChatMessage($"Directory exists: {currentSongDirectory}");
                     Plugin.Log($"Song {songName} already exists!");
-                    _flowCoordinator.Dismiss();
+                    DismissRequest?.Invoke();
                     bool success = false;
                     Dispatcher.RunOnMainThread(() =>
                     {
@@ -892,13 +856,15 @@ namespace SongRequestManagerV2
             }
         }
 
-        private static IEnumerator WaitForRefreshAndSchroll(SongRequest request)
+        private IEnumerator WaitForRefreshAndSchroll(SongRequest request)
         {
-            yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
-            Loader.Instance.RefreshSongs(false);
-            yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
+            _levelFilteringNavigationController.UpdateCustomSongs();
+            yield return null;
+            //yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
+            //Loader.Instance.RefreshSongs(false);
+            //yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
             Utility.EmptyDirectory(".requestcache", true);
-            _flowCoordinator.Dismiss();
+            DismissRequest?.Invoke();
             bool success = false;
             Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
             RequestBotListViewController.Instance?.ChangeProgressText(0f);
@@ -907,34 +873,37 @@ namespace SongRequestManagerV2
                 new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString());
             }
         }
-        public static void UpdateRequestUI(bool writeSummary = true)
+        public event Action<bool> UpdateUI;
+
+        public void UpdateRequestUI(bool writeSummary = true)
         {
             Plugin.Log("start updateUI");
-            try
-            {
+            try {
                 if (writeSummary)
                     WriteQueueSummaryToFile(); // Write out queue status to file, do it first
+
+
                 Dispatcher.RunOnMainThread(() =>
                 {
-                    if (_requestButton != null) {
-                        _requestButton.interactable = true;
+                    if (button != null) {
+                        button.button.interactable = true;
 
                         if (RequestQueue.Songs.Count == 0) {
-                            _requestButton.gameObject.GetComponentInChildren<Image>().color = Color.red;
+                            button.button.gameObject.GetComponentInChildren<ImageView>().color = Color.red;
                         }
                         else {
-                            _requestButton.gameObject.GetComponentInChildren<Image>().color = Color.green;
+                            button.button.gameObject.GetComponentInChildren<ImageView>().color = Color.green;
                         }
                     }
                 });
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Plugin.Log(ex.ToString());
             }
             finally {
                 Plugin.Log("end update UI");
             }
+            UpdateUI?.Invoke(writeSummary);
         }
 
         public static void RefreshSongQuere()
@@ -947,7 +916,7 @@ namespace SongRequestManagerV2
             }
         }
 
-        public static void DequeueRequest(SongRequest request, bool updateUI = true)
+        public void DequeueRequest(SongRequest request, bool updateUI = true)
         {
             Plugin.Log("start to deque request");
             try {
@@ -974,7 +943,7 @@ namespace SongRequestManagerV2
                 Plugin.Log($"{e}");
             }
             finally {
-                UpdateRequestUI();
+                UpdateUI?.Invoke(false);
                 _refreshQueue = true;
                 Plugin.Log("end Deque");
             }
@@ -985,7 +954,7 @@ namespace SongRequestManagerV2
             SongRequest request = RequestQueue.Songs.ElementAt(index);
 
             if (request != null)
-                DequeueRequest(request, updateUI);
+                Instance?.DequeueRequest(request, updateUI);
 
 #if UNRELEASED
             // If the queue is empty, Execute a custom command, the could be a chat message, a deck request, or nothing
@@ -1035,12 +1004,12 @@ namespace SongRequestManagerV2
             RequestBotListViewController.Instance.UpdateRequestUI();
         }
 
-        public static void Process(int index, bool fromHistory)
+        public void Process(int index, bool fromHistory)
         {
             ProcessSongRequest(index, fromHistory).Await(null, null, null);
         }
 
-        public static void Next()
+        public void Next()
         {
             ProcessSongRequest(0).Await(null, null, null); ;
         }

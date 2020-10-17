@@ -1,12 +1,12 @@
-﻿using BeatSaberMarkupLanguage.Notify;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
 
 namespace SongPlayListEditer.Bases
 {
-    public abstract class BSBindableBase : MonoBehaviour, INotifiableHost
+    public abstract class BSBindableBase : MonoBehaviour, INotifyPropertyChanged
     {
         private static SynchronizationContext context;
 

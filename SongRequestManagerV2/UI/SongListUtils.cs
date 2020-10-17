@@ -220,18 +220,18 @@ namespace SongRequestManagerV2
 
                     if (RequestBotConfig.Instance.ClearNoFail)
                     {
-                        try
-                        {
-                            // disable no fail gamepaly modifier
-                            var gameplayModifiersPanelController = Resources.FindObjectsOfTypeAll<GameplayModifiersPanelController>().First();
-                            gameplayModifiersPanelController.gameplayModifiers.noFail = false;
+                        //try
+                        //{
+                        //    // disable no fail gamepaly modifier
+                        //    var gameplayModifiersPanelController = Resources.FindObjectsOfTypeAll<GameplayModifiersPanelController>().First();
+                        //    gameplayModifiersPanelController.gameplayModifiers.noFail = false;
  
-                            //gameplayModifiersPanelController.gameplayModifiers.ResetToDefault();
+                        //    //gameplayModifiersPanelController.gameplayModifiers.ResetToDefault();
 
-                            gameplayModifiersPanelController.Refresh();
-                        }
-                        catch
-                        { }
+                        //    gameplayModifiersPanelController.Refresh();
+                        //}
+                        //catch
+                        //{ }
 
                     }
                     yield break;

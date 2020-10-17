@@ -4,49 +4,40 @@ using IPA.Utilities;
 using SongRequestManagerV2.UI;
 using System.Linq;
 using UnityEngine;
+using Zenject;
 
 namespace SongRequestManagerV2
 {
     public class RequestFlowCoordinator : FlowCoordinator
     {
+        [Inject]
         private RequestBotListViewController _requestBotListViewController;
+        [Inject]
         private KeyboardViewController _keyboardViewController;
-
-        public void Awake()
-        {
-            if (_requestBotListViewController == null && _keyboardViewController == null)
-            {
-                _requestBotListViewController = BeatSaberUI.CreateViewController<RequestBotListViewController>();
-                _keyboardViewController = BeatSaberUI.CreateViewController<KeyboardViewController>();
-            }
-        }
-
-        protected override void DidActivate(bool firstActivation, ActivationType activationType)
-        {
-            if (firstActivation)
-            {
-                title = "Song Request Manager";
-                showBackButton = true;
-
-                ProvideInitialViewControllers(_requestBotListViewController, rightScreenViewController: _keyboardViewController);
-            }
-        }
+        [Inject]
+        private SoloFreePlayFlowCoordinator _soloFreePlayFlow;
 
         protected override void BackButtonWasPressed(ViewController topViewController)
         {
+            base.BackButtonWasPressed(topViewController);
             // dismiss ourselves
-            var soloFlow = Resources.FindObjectsOfTypeAll<SoloFreePlayFlowCoordinator>().First();
-            soloFlow.InvokeMethod<object, SoloFreePlayFlowCoordinator>("DismissFlowCoordinator", this, null, false);
+            _soloFreePlayFlow.DismissFlowCoordinator(this);
         }
 
-        public void Dismiss()
-        {
-            BackButtonWasPressed(null);
-        }
+        public void SetTitle(string newTitle) => base.SetTitle(newTitle);
 
-        public void SetTitle(string newTitle)
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            title = newTitle;
+            if (firstActivation) {
+                base.SetTitle("Song Request Manager");
+                showBackButton = true;
+                try {
+                    ProvideInitialViewControllers(_requestBotListViewController, _keyboardViewController);
+                }
+                catch (System.Exception e) {
+                    Plugin.Logger.Error(e);
+                }
+            }
         }
     }
 }

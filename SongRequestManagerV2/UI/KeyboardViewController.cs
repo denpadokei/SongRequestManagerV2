@@ -5,10 +5,9 @@ namespace SongRequestManagerV2.UI
 {
     public class KeyboardViewController : ViewController
     {
-        protected override void DidActivate(bool firstActivation, ActivationType type)
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            if (firstActivation)
-            {
+            if (firstActivation) {
                 RectTransform KeyboardContainer = new GameObject("KeyboardContainer", typeof(RectTransform)).transform as RectTransform;
                 KeyboardContainer.SetParent(rectTransform, false);
                 KeyboardContainer.sizeDelta = new Vector2(60f, 40f);
@@ -38,7 +37,7 @@ namespace SongRequestManagerV2.UI
                 mykeyboard.SetButtonType("OkButton"); // Adding this alters button positions??! Why?
                 mykeyboard.AddKeys(SEARCH, 0.75f);
 
-                mykeyboard.SetAction("CLEAR SEARCH", RequestBot.ClearSearch);
+                mykeyboard.SetAction("CLEAR SEARCH", key => { RequestBot.Instance?.ClearSearch(key); });
                 mykeyboard.SetAction("UNFILTERED", RequestBot.UnfilteredSearch);
                 mykeyboard.SetAction("SEARCH", RequestBot.MSD);
                 mykeyboard.SetAction("NEWEST", RequestBot.Newest);
@@ -51,6 +50,7 @@ namespace SongRequestManagerV2.UI
                 // The UI for this might need a bit of work.
                 RequestBot.AddKeyboard(mykeyboard, "RightPanel.kbd");
             }
+            base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
         }
     }
 }
