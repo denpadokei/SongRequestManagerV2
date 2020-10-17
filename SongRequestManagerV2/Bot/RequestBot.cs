@@ -54,9 +54,6 @@ namespace SongRequestManagerV2
             SongSearch,
         }
 
-        [Inject]
-        protected DiContainer Container { get; set; }
-
         public static RequestBot Instance { get; private set; }
         //private RequestBot()
         //{
@@ -97,8 +94,7 @@ namespace SongRequestManagerV2
         [Inject]
         public SRMButton button { get; set; }
         [Inject]
-        private LevelFilteringNavigationController _levelFilteringNavigationController;
-
+        public LevelFilteringNavigationController _levelFilteringNavigationController;
         public static string playedfilename = "";
 
         public event Action RecevieRequest;
@@ -844,10 +840,7 @@ namespace SongRequestManagerV2
                     Plugin.Log($"Song {songName} already exists!");
                     DismissRequest?.Invoke();
                     bool success = false;
-                    Dispatcher.RunOnMainThread(() =>
-                    {
-                        Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(songHash, (s) => success = s, false));
-                    });
+                    Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(songHash, (s) => success = s, false));
                     if (!request.song.IsNull) {
                         // Display next song message
                         new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString());
@@ -864,6 +857,7 @@ namespace SongRequestManagerV2
             //Loader.Instance.RefreshSongs(false);
             //yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
             Utility.EmptyDirectory(".requestcache", true);
+            button.BackButtonPressed();
             DismissRequest?.Invoke();
             bool success = false;
             Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));

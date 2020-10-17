@@ -63,6 +63,11 @@ namespace SongRequestManagerV2.Views
             //_soloFreeFlow.InvokeMethod<object, SoloFreePlayFlowCoordinator>("PresentFlowCoordinator", _requestFlow, null, ViewController.AnimationDirection.Horizontal, false, false);
         }
 
+        internal void BackButtonPressed()
+        {
+            _requestFlow.DismissFlowCoordinator(_requestFlow, null, AnimationDirection.Horizontal, true);
+        }
+
         [Inject]
         public void Setup()
         {
