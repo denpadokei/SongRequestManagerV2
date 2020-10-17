@@ -25,6 +25,12 @@ namespace SongRequestManagerV2
             this.GetField<FlowCoordinator, FlowCoordinator>("_parentFlowCoordinator").DismissFlowCoordinator(this);
         }
 
+        [Inject]
+        public void Const()
+        {
+            _requestBotListViewController.ChangeTitle += this.SetTitle;
+        }
+
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             if (firstActivation) {

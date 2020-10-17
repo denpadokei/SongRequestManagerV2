@@ -41,7 +41,7 @@ namespace SongRequestManagerV2.Views
 
         public string ResourceName => string.Join(".", GetType().Namespace, "SRMButton.bsml");
 
-        public static SRMButton instance;
+        public static SRMButton instance { get; private set; }
 
         protected void Awake()
         {
@@ -92,7 +92,7 @@ namespace SongRequestManagerV2.Views
 
         internal void SetButtonColor(Color color)
         {
-            //this.ButtonColor = color;
+            this.ButtonColor = color;
             //this.button.colors = new ColorBlock()
             //{
             //    colorMultiplier = button.colors.colorMultiplier,
@@ -133,7 +133,7 @@ namespace SongRequestManagerV2.Views
                 //        Vector2.zero, () => { button.interactable = false; Action(); button.interactable = true; }, "SRM", null);
 
                 //_levelCollectionNavigationController.rectTransform.sizeDelta = new Vector2(_levelCollectionNavigationController.rectTransform.sizeDelta.x, _levelCollectionNavigationController.rectTransform.sizeDelta.y);
-                this.Screen = FloatingScreen.CreateFloatingScreen(new Vector2(20f, 8f), false, new Vector3(1.2f, 1.9f, 2f), Quaternion.Euler(Vector3.zero));
+                this.Screen = FloatingScreen.CreateFloatingScreen(new Vector2(20f, 20f), false, new Vector3(1.2f, 2.2f, 2.2f), Quaternion.Euler(Vector3.zero));
                 this.Screen.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", this._physicsRaycaster);
                 var canvas = this.Screen.GetComponent<Canvas>();
                 canvas.sortingOrder = 3;
@@ -148,7 +148,7 @@ namespace SongRequestManagerV2.Views
                 //_requestButton.ToggleWordWrapping(false);
                 //_requestButton.SetButtonTextSize(3.5f);
                 //UIHelper.AddHintText(_requestButton.transform as RectTransform, "Manage the current request queue");
-
+                
                 Plugin.Log("Created request button!");
             }
             Plugin.Logger.Debug("Setup() end");
