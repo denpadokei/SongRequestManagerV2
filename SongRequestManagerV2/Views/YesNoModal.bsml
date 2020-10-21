@@ -7,8 +7,8 @@
   <horizontal child-control-width='false' anchor-pos-x='0' anchor-pos-y='0'>
     <text id='message' align='Center' text='Blacklist song? this is a really long text line to see what happens with text wrapping'></text>
   </horizontal>
-  <bottom-button-panel>
+  <vertical>
     <button on-click='yes-click' text='Yes'></button>
     <button on-click='no-click' text='No'></button>
-  </bottom-button-panel>
+  </vertical>
 </modal>

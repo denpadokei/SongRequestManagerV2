@@ -17,10 +17,13 @@ using ChatCore.Models.Twitch;
 using SongRequestManagerV2.Networks;
 using ChatCore.Models;
 using SongRequestManagerV2.Models;
+using SiraUtil.Zenject;
+using SongRequestManagerV2.Installers;
+using Zenject;
 
 namespace SongRequestManagerV2
 {
-    [Plugin(RuntimeOptions.SingleStartInit)]
+    [Plugin(RuntimeOptions.DynamicInit)]
     public class Plugin
     {
         public string Name => "Song Request ManagerV2";
@@ -29,6 +32,7 @@ namespace SongRequestManagerV2
         private static PluginMetadata _meta;
 
         public static IPALogger Logger { get; internal set; }
+        private static RequestBot _bot;
 
         public ChatCoreInstance CoreInstance { get; internal set; }
         public ChatServiceMultiplexer MultiplexerInstance { get; internal set; }
@@ -44,12 +48,13 @@ namespace SongRequestManagerV2
         public static bool SongBrowserPluginPresent;
 
         [Init]
-        public void Init(IPALogger log, PluginMetadata meta)
+        public void Init(IPALogger log, PluginMetadata meta, Zenjector zenjector)
         {
             Instance = this;
             _meta = meta;
             Logger = log;
             Logger.Debug("Logger initialized.");
+            zenjector.OnMenu<SRMInstaller>();
         }
 
         public static void Log(string text,
@@ -68,7 +73,7 @@ namespace SongRequestManagerV2
             }
             this.CoreInstance = ChatCoreInstance.Create();
             this.MultiplexerInstance = this.CoreInstance.RunAllServices();
-            RequestBot.Instance.Awake();
+            //RequestBot.Instance.Awake();
             //if (Instance != null) return;
             //Instance = this;
             Dispatcher.Initialize();
@@ -128,13 +133,7 @@ namespace SongRequestManagerV2
             // setup settings ui
             BSMLSettings.instance.AddSettingsMenu("SRM V2", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", SongRequestManagerSettings.instance);
 
-            try {
-                // main load point
-                RequestBot.OnLoad();
-            }
-            catch (Exception e) {
-                Log($"{e}");
-            }
+            
             RequestBotConfig.Save(true);
             Log("end Menu Scene Loaded Fresh!");
         }

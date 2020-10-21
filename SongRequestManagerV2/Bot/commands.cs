@@ -416,7 +416,7 @@ namespace SongRequestManagerV2
         {
             try {
                 if (state.parameter != "") state.parameter += " ";
-                state.parameter += RequestBotListViewController.Instance.CurrentlySelectedSong().song["version"];
+                state.parameter += RequestBotListViewController.Instance?.CurrentlySelectedSong.song["version"];
                 return "";
             }
             catch {

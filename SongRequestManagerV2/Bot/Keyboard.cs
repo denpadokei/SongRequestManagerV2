@@ -105,10 +105,10 @@ namespace SongRequestManagerV2
 
         }
 
-        public void SetButtonType(string ButtonName= "KeyboardButton")
+        public void SetButtonType(string ButtonName= "A")
         {
-            BaseButton = Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == ButtonName));
-            if (BaseButton==null) BaseButton = Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == "KeyboardButton"));
+            BaseButton = Resources.FindObjectsOfTypeAll<Button>().FirstOrDefault(x => (x.name == ButtonName));
+            if (BaseButton==null) BaseButton = Resources.FindObjectsOfTypeAll<Button>().FirstOrDefault(x => (x.name == "KeyboardButton"));
         }
 
         public void SetValue (string keylabel, string value)
@@ -439,7 +439,7 @@ namespace SongRequestManagerV2
         {
             ClearSearches();          
             
-            RequestBot.UpdateRequestUI();
+            RequestBot.Instance.UpdateRequestUI();
             RequestBot.RefreshSongQuere();
             RequestBot._refreshQueue = true;
         }

@@ -1,5 +1,4 @@
-﻿using BeatSaverDownloader.UI;
-//using StreamCore.Utils;
+﻿//using StreamCore.Utils;
 using HMUI;
 using System;
 using System.Collections;
@@ -94,20 +93,20 @@ namespace SongRequestManagerV2
 
         public static IEnumerator RefreshSongs(bool fullRefresh = false, bool selectOldLevel = true)
         {
-            // if (!SongLoaderPlugin.SongLoader.AreSongsLoaded) yield break;
-            // if (!_standardLevelListViewController) yield break;
+            //if (!SongLoaderPlugin.SongLoader.AreSongsLoaded) yield break;
+            //if (!_standardLevelListViewController) yield break;
 
-            // // // Grab the currently selected level id so we can restore it after refreshing
-            //// string selectedLevelId = _standardLevelListViewController.selectedLevel?.levelID;
+            // Grab the currently selected level id so we can restore it after refreshing
+            //string selectedLevelId = _standardLevelListViewController.selectedLevel?.levelID;
 
-            // // Wait until song loader is finished loading, then refresh the song list
-            // while (SongLoaderPlugin.SongLoader.AreSongsLoading) yield return null;
-            // SongLoaderPlugin.SongLoader.Instance.RefreshSongs(fullRefresh);
-            // while (SongLoaderPlugin.SongLoader.AreSongsLoading) yield return null;
+            // Wait until song loader is finished loading, then refresh the song list
+            //while (SongLoaderPlugin.SongLoader.AreSongsLoading) yield return null;
+            //SongLoaderPlugin.SongLoader.Instance.RefreshSongs(fullRefresh);
+            //while (SongLoaderPlugin.SongLoader.AreSongsLoading) yield return null;
 
             yield return null;
 
-            //// Set the row index to the previously selected song
+            // Set the row index to the previously selected song
             //if (selectOldLevel)
             //    ScrollToLevel(selectedLevelId);
         }
@@ -115,36 +114,37 @@ namespace SongRequestManagerV2
         private static int SelectCustomSongPack()
         {
             // get the Level Filtering Nav Controller, the top bar
-            var _levelFilteringNavigationController = Resources.FindObjectsOfTypeAll<LevelFilteringNavigationController>().First();
-
             // get the tab bar
-            var _tabBarViewController = _levelFilteringNavigationController.GetField<TabBarViewController, LevelFilteringNavigationController>("_tabBarViewController");
+            var selectLevelCategoryViewController = Resources.FindObjectsOfTypeAll<SelectLevelCategoryViewController>().First();
 
-            if (_tabBarViewController.selectedCellNumber != 3)
+            if (selectLevelCategoryViewController.selectedLevelCategory != SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
-                // select the 4th item, whichi is custom songs
-                _tabBarViewController.SelectItem(3);
+                var segcontrol = selectLevelCategoryViewController.GetField<IconSegmentedControl, SelectLevelCategoryViewController>("_levelFilterCategoryIconSegmentedControl");
+                segcontrol.SelectCellWithNumber(2);
+                selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(segcontrol, 2);
+                //// select the 4th item, whichi is custom songs
+                //selectLevelCategoryViewController.SelectItem(3);
 
-                // trigger a switch and reload
-                _levelFilteringNavigationController.InvokeMethod<object, LevelFilteringNavigationController>("TabBarDidSwitch");
+                //// trigger a switch and reload
+                //_levelFilteringNavigationController.InvokeMethod<object, LevelFilteringNavigationController>("TabBarDidSwitch");
             }
-            else
-            {
-                // get the annotated view controller
-                var _annotatedBeatmapLevelCollectionsViewController = _levelFilteringNavigationController.GetField<AnnotatedBeatmapLevelCollectionsViewController, LevelFilteringNavigationController>("_annotatedBeatmapLevelCollectionsViewController");
+            //else
+            //{
+            //    // get the annotated view controller
+            //    var _annotatedBeatmapLevelCollectionsViewController = _levelFilteringNavigationController.GetField<AnnotatedBeatmapLevelCollectionsViewController, LevelFilteringNavigationController>("_annotatedBeatmapLevelCollectionsViewController");
 
-                // check if the first element is selected (whichi is custom maps)
-                if (_annotatedBeatmapLevelCollectionsViewController.selectedItemIndex != 0)
-                {
-                    // get the table view
-                    var _playlistsTableView = _annotatedBeatmapLevelCollectionsViewController.GetField<AnnotatedBeatmapLevelCollectionsTableView, AnnotatedBeatmapLevelCollectionsViewController>("_playlistsTableView");
+            //    // check if the first element is selected (whichi is custom maps)
+            //    if (_annotatedBeatmapLevelCollectionsViewController.selectedItemIndex != 0)
+            //    {
+            //        // get the table view
+            //        var _playlistsTableView = _annotatedBeatmapLevelCollectionsViewController.GetField<AnnotatedBeatmapLevelCollectionsTableView, AnnotatedBeatmapLevelCollectionsViewController>("_playlistsTableView");
 
-                    // get the tableview to select custom songs
-                    var _tableView = _playlistsTableView.GetField<TableView, AnnotatedBeatmapLevelCollectionsTableView>("_tableView");
-                    _tableView.ScrollToCellWithIdx(0, TableViewScroller.ScrollPositionType.Center, false);
-                    _tableView.SelectCellWithIdx(0, true);
-                }
-            }
+            //        // get the tableview to select custom songs
+            //        var _tableView = _playlistsTableView.GetField<TableView, AnnotatedBeatmapLevelCollectionsTableView>("_tableView");
+            //        _tableView.ScrollToCellWithIdx(0, TableViewScroller.ScrollPositionType.Center, false);
+            //        _tableView.SelectCellWithIdx(0, true);
+            //    }
+            //}
 
             // first element is custom maps
             return 0;
@@ -220,18 +220,18 @@ namespace SongRequestManagerV2
 
                     if (RequestBotConfig.Instance.ClearNoFail)
                     {
-                        try
-                        {
-                            // disable no fail gamepaly modifier
-                            var gameplayModifiersPanelController = Resources.FindObjectsOfTypeAll<GameplayModifiersPanelController>().First();
-                            gameplayModifiersPanelController.gameplayModifiers.noFail = false;
+                        //try
+                        //{
+                        //    // disable no fail gamepaly modifier
+                        //    var gameplayModifiersPanelController = Resources.FindObjectsOfTypeAll<GameplayModifiersPanelController>().First();
+                        //    gameplayModifiersPanelController.gameplayModifiers.noFail = false;
  
-                            //gameplayModifiersPanelController.gameplayModifiers.ResetToDefault();
+                        //    //gameplayModifiersPanelController.gameplayModifiers.ResetToDefault();
 
-                            gameplayModifiersPanelController.Refresh();
-                        }
-                        catch
-                        { }
+                        //    gameplayModifiersPanelController.Refresh();
+                        //}
+                        //catch
+                        //{ }
 
                     }
                     yield break;
