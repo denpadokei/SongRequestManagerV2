@@ -92,7 +92,12 @@ namespace SongRequestManagerV2.Views
 
         internal void SetButtonColor(Color color)
         {
-            this.ButtonColor = color;
+            //this.ButtonColor = color;
+            Plugin.Logger.Debug($"Change button color : {color}");
+            this.button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color = color;
+            this.button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color0 = color;
+            this.button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color1 = color;
+
             //this.button.colors = new ColorBlock()
             //{
             //    colorMultiplier = button.colors.colorMultiplier,
@@ -112,36 +117,39 @@ namespace SongRequestManagerV2.Views
 
         internal void BackButtonPressed()
         {
+            Plugin.Logger.Debug($"{Current.name} : {_requestFlow.name}");
             if (Current.name != _requestFlow.name) {
+                Plugin.Logger.Debug($"{Current.name != _requestFlow.name}");
                 return;
             }
-            Current.GetField<FlowCoordinator, FlowCoordinator>("_parentFlowCoordinator").DismissFlowCoordinator(Current, null, AnimationDirection.Horizontal, true);
+            try {
+                Current.GetField<FlowCoordinator, FlowCoordinator>("_parentFlowCoordinator")?.DismissFlowCoordinator(Current, null, AnimationDirection.Horizontal, true);
+            }
+            catch (Exception e) {
+                Plugin.Logger.Error(e);
+            }
         }
 
         [Inject]
         public void Setup()
         {
             Plugin.Logger.Debug("Setup()");
-            
-            //var navi = Resources.FindObjectsOfTypeAll<LevelSelectionNavigationController>().First();
-            //if (navi) {
             if (_levelCollectionNavigationController) {
                 //new Vector2(9f, 5.5f)
-
-                
-                //button = UIHelper.CreateUIButton(_levelSelectionNavigationController.rectTransform, "OkButton", new Vector2(50f, 23f),
-                //        Vector2.zero, () => { button.interactable = false; Action(); button.interactable = true; }, "SRM", null);
-
                 //_levelCollectionNavigationController.rectTransform.sizeDelta = new Vector2(_levelCollectionNavigationController.rectTransform.sizeDelta.x, _levelCollectionNavigationController.rectTransform.sizeDelta.y);
                 this.Screen = FloatingScreen.CreateFloatingScreen(new Vector2(20f, 20f), false, new Vector3(1.2f, 2.2f, 2.2f), Quaternion.Euler(Vector3.zero));
                 this.Screen.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", this._physicsRaycaster);
+                button = UIHelper.CreateUIButton(this.Screen.transform, "OkButton", Vector2.zero,
+                        Vector2.zero, Action, "SRM", null);
+                //button.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", this._physicsRaycaster);
                 var canvas = this.Screen.GetComponent<Canvas>();
                 canvas.sortingOrder = 3;
                 this.Screen.SetRootViewController(this, AnimationType.None);
                 Plugin.Logger.Debug($"{button == null}");
-                foreach (var item in button?.GetComponentsInChildren<object>()) {
+                foreach (var item in _levelCollectionNavigationController?.GetComponentsInChildren<object>(true)) {
                     Plugin.Logger.Debug($"{item}");
                 }
+                
                 //(button.transform as RectTransform).anchorMin = new Vector2(1, 1);
                 //(button.transform as RectTransform).anchorMax = new Vector2(1, 1);
 
@@ -153,7 +161,7 @@ namespace SongRequestManagerV2.Views
             }
             Plugin.Logger.Debug("Setup() end");
         }
-        [UIComponent("srm-button")]
-        private NoTransitionsButton button;
+        //[UIComponent("srm-button")]
+        private Button button;
     }
 }

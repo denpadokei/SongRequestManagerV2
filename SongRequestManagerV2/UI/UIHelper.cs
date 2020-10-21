@@ -21,46 +21,34 @@ namespace SongRequestManagerV2.UI
             return hoverHint;
         }
 
-        public static Button CreateUIButton(Transform parent, string buttonTemplate, Vector2 anchoredPosition, Vector2 sizeDelta, UnityAction onClick = null, string buttonText = "BUTTON", Sprite icon = null, Button origin = null)
+        public static Button CreateUIButton(Transform parent, string buttonTemplate, Vector2 anchoredPosition, Vector2 sizeDelta, UnityAction onClick, string buttonText = "BUTTON", Sprite icon = null, Button origin = null)
         {
 
-            Button btn = origin == null ? Instantiate(Resources.FindObjectsOfTypeAll<Button>().Last(x => (x.name == buttonTemplate)), parent) : origin;
-            btn.onClick = new Button.ButtonClickedEvent();
-            if (onClick != null)
-                btn.onClick.AddListener(onClick);
-            btn.name = "VersusUIButton";
-
-            btn.interactable = true;
-            Polyglot.LocalizedTextMeshProUGUI localizer = btn.GetComponentInChildren<Polyglot.LocalizedTextMeshProUGUI>();
+            Button button = MonoBehaviour.Instantiate(Resources.FindObjectsOfTypeAll<Button>().Last(x => (x.name == buttonTemplate)), parent, false);
+            button.name = "BSMLButton";
+            button.interactable = true;
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(onClick);
+            Polyglot.LocalizedTextMeshProUGUI localizer = button.GetComponentInChildren<Polyglot.LocalizedTextMeshProUGUI>();
             if (localizer != null)
                 GameObject.Destroy(localizer);
-
-            //CurvedTextMeshPro textMeshPro = btn.GetComponentInChildren<CurvedTextMeshPro>();
-            //if (textMeshPro != null)
-            //    GameObject.Destroy(textMeshPro);
-            ExternalComponents externalComponents = btn.gameObject.GetComponent<ExternalComponents>();
-            TextMeshProUGUI textMesh = btn.GetComponentInChildren<TextMeshProUGUI>();
+            ExternalComponents externalComponents = button.gameObject.AddComponent<ExternalComponents>();
+            TextMeshProUGUI textMesh = button.GetComponentInChildren<TextMeshProUGUI>();
             textMesh.richText = true;
-            btn.SetButtonText(buttonText);
-            if (!string.IsNullOrEmpty(buttonText)) {
-                textMesh.text = buttonText;
-            }
+            textMesh.text = buttonText;
             externalComponents.components.Add(textMesh);
-            StackLayoutGroup stackLayoutGroup = externalComponents.GetComponentInChildren<StackLayoutGroup>();
-            if (stackLayoutGroup == null)
+
+            GameObject.Destroy(button.transform.Find("Content").GetComponent<LayoutElement>());
+
+            ContentSizeFitter buttonSizeFitter = button.gameObject.AddComponent<ContentSizeFitter>();
+            buttonSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            buttonSizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            LayoutGroup stackLayoutGroup = button.GetComponentInChildren<LayoutGroup>();
+            if (stackLayoutGroup != null)
                 externalComponents.components.Add(stackLayoutGroup);
 
-            (btn.transform as RectTransform).anchorMin = new Vector2(0.5f, 0.5f);
-            (btn.transform as RectTransform).anchorMax = new Vector2(0.5f, 0.5f);
-            (btn.transform as RectTransform).anchoredPosition = anchoredPosition;
-            if (sizeDelta != Vector2.zero) {
-                (btn.transform as RectTransform).sizeDelta = sizeDelta;
-            }
-            //btn.SetButtonText(buttonText);
-            //if (icon != null)
-            //    btn.SetButtonIcon(icon);
-
-            return btn;
+            return button;
         }
 
         /// <summary>

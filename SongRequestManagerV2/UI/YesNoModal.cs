@@ -9,7 +9,7 @@ using Zenject;
 
 namespace SongRequestManagerV2
 {
-    public class YesNoModal : BSMLResourceViewController
+    public class YesNoModal : BSMLAutomaticViewController
     {
         public static YesNoModal instance;
 
@@ -25,7 +25,7 @@ namespace SongRequestManagerV2
         [UIComponent("message")]
         internal TextMeshProUGUI _message;
 
-        public override string ResourceName => "SongRequestManagerV2.Views.YesNoModal.bsml";
+        public string ResourceName => "SongRequestManagerV2.Views.YesNoModal.bsml";
 
         [UIAction("yes-click")]
         private void YesClick()

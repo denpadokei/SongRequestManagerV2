@@ -101,10 +101,10 @@ namespace SongRequestManagerV2
         public void Awake()
         {
             Plugin.Logger.Debug("ListView Awake()");
+            Instance = this;
             this._progress = new Progress<double>();
             this._progress.ProgressChanged -= this._progress_ProgressChanged;
             this._progress.ProgressChanged += this._progress_ProgressChanged;
-            Instance = this;
         }
 
         private void _progress_ProgressChanged(object sender, double e)
@@ -351,7 +351,7 @@ namespace SongRequestManagerV2
                             if (NumberOfCells() > 0) {
                                 void _onConfirm()
                                 {
-                                    RequestBot.Blacklist(_selectedRow, isShowingHistory, true);
+                                    RequestBot.Instance.Blacklist(_selectedRow, isShowingHistory, true);
                                     if (_selectedRow > 0)
                                         _selectedRow--;
                                     confirmDialogActive = false;
@@ -391,7 +391,7 @@ namespace SongRequestManagerV2
                                     currentsong = SongInfoForRow(_selectedRow);
 
                                     // skip it
-                                    RequestBot.Skip(_selectedRow);
+                                    RequestBot.Instance.Skip(_selectedRow);
 
                                     // select previous song if not first song
                                     if (_selectedRow > 0) {
@@ -643,15 +643,20 @@ namespace SongRequestManagerV2
 
         public void RefreshSongQueueList(bool selectRowCallback = false)
         {
-            UpdateSelectSongInfo();
+            try {
+                UpdateSelectSongInfo();
 
-            _songListTableView.ReloadData();
+                this._songListTableView.ReloadData();
 
-            if (_selectedRow == -1) return;
+                if (_selectedRow == -1) return;
 
-            if (NumberOfCells() > _selectedRow) {
-                _songListTableView.SelectCellWithIdx(_selectedRow, selectRowCallback);
-                _songListTableView.ScrollToCellWithIdx(_selectedRow, TableViewScroller.ScrollPositionType.Beginning, true);
+                if (NumberOfCells() > this._selectedRow) {
+                    this._songListTableView.SelectCellWithIdx(_selectedRow, selectRowCallback);
+                    this._songListTableView.ScrollToCellWithIdx(_selectedRow, TableViewScroller.ScrollPositionType.Beginning, true);
+                }
+            }
+            catch (Exception e) {
+                Plugin.Logger.Error(e);
             }
         }
 

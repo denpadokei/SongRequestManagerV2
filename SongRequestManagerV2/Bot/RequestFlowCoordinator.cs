@@ -14,8 +14,6 @@ namespace SongRequestManagerV2
         private RequestBotListViewController _requestBotListViewController;
         [Inject]
         private KeyboardViewController _keyboardViewController;
-        //[Inject]
-        //private SoloFreePlayFlowCoordinator _soloFreePlayFlow;
 
         public void SetTitle(string newTitle) => base.SetTitle(newTitle);
 

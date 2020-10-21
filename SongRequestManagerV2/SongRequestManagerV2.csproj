@@ -65,11 +65,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="BeatSaverDownloader">
-      <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(BeatSaberDir)\Plugins\BeatSaverDownloader.dll</HintPath>
-    </Reference>
     <Reference Include="BSML">
       <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
       <Private>False</Private>
@@ -272,9 +267,5 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties manifest_1json__JsonSchema="https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json" />
-    </VisualStudio>
-  </ProjectExtensions>
+  <ProjectExtensions />
 </Project>

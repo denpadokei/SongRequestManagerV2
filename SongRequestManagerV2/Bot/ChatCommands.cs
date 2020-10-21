@@ -399,7 +399,7 @@ namespace SongRequestManagerV2
 
                 if (dequeueSong) {
                     QueueChatMessage($"{song["songName"].Value} ({song["version"].Value}) removed.");
-                    RequestBot.Skip(i);
+                    Skip(i);
                     return success;
                 }
             }
@@ -1158,7 +1158,7 @@ namespace SongRequestManagerV2
                     QueueChatMessage($"{song["songName"].Value} ({song["version"].Value}) removed.");
 
                     listcollection.remove(duplicatelist, song["id"].Value);
-                    RequestBot.Skip(i, RequestStatus.Wrongsong);
+                    Skip(i, RequestStatus.Wrongsong);
                     return;
                 }
             }

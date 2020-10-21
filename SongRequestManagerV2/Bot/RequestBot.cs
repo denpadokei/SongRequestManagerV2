@@ -94,7 +94,6 @@ namespace SongRequestManagerV2
         [Inject]
         public SRMButton button { get; set; }
         [Inject]
-        public LevelFilteringNavigationController _levelFilteringNavigationController;
         public static string playedfilename = "";
 
         public event Action RecevieRequest;
@@ -327,7 +326,6 @@ namespace SongRequestManagerV2
         public void ClearSearch(KEYBOARD.KEY key)
         {
             ClearSearches();
-            UpdateUI?.Invoke(false);
             RefreshSongQuere();
             RequestBot._refreshQueue = true;
         }
@@ -822,10 +820,7 @@ namespace SongRequestManagerV2
                         }
                         zipStream.Close();
                     }
-                    Dispatcher.RunOnMainThread(() =>
-                    {
-                        Dispatcher.RunCoroutine(WaitForRefreshAndSchroll(request));
-                    });
+                    Dispatcher.RunCoroutine(WaitForRefreshAndSchroll(request));
 #if UNRELEASED
                         //if (!request.song.IsNull) // Experimental!
                         //{
@@ -840,6 +835,7 @@ namespace SongRequestManagerV2
                     Plugin.Log($"Song {songName} already exists!");
                     DismissRequest?.Invoke();
                     bool success = false;
+                    Dispatcher.RunOnMainThread(button.BackButtonPressed);
                     Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(songHash, (s) => success = s, false));
                     if (!request.song.IsNull) {
                         // Display next song message
@@ -851,13 +847,12 @@ namespace SongRequestManagerV2
 
         private IEnumerator WaitForRefreshAndSchroll(SongRequest request)
         {
-            _levelFilteringNavigationController.UpdateCustomSongs();
             yield return null;
-            //yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
-            //Loader.Instance.RefreshSongs(false);
-            //yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
+            yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
+            Loader.Instance.RefreshSongs(false);
+            yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
             Utility.EmptyDirectory(".requestcache", true);
-            button.BackButtonPressed();
+            Dispatcher.RunOnMainThread(button.BackButtonPressed);
             DismissRequest?.Invoke();
             bool success = false;
             Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
@@ -867,7 +862,6 @@ namespace SongRequestManagerV2
                 new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString());
             }
         }
-        public event Action<bool> UpdateUI;
 
         public void UpdateRequestUI(bool writeSummary = true)
         {
@@ -897,16 +891,12 @@ namespace SongRequestManagerV2
             finally {
                 Plugin.Log("end update UI");
             }
-            UpdateUI?.Invoke(writeSummary);
         }
 
         public static void RefreshSongQuere()
         {
             if (RequestBotListViewController.Instance) {
-                Dispatcher.RunOnMainThread(() =>
-                {
-                    RequestBotListViewController.Instance.RefreshSongQueueList(false);
-                });
+                Dispatcher.RunOnMainThread(RequestBotListViewController.Instance.RefreshSongQueueList, false);
             }
         }
 
@@ -937,7 +927,7 @@ namespace SongRequestManagerV2
                 Plugin.Log($"{e}");
             }
             finally {
-                UpdateUI?.Invoke(false);
+                UpdateRequestUI();
                 _refreshQueue = true;
                 Plugin.Log("end Deque");
             }
@@ -969,7 +959,7 @@ namespace SongRequestManagerV2
                 RequestHistory.Songs[index].status = status;
         }
 
-        public static void Blacklist(int index, bool fromHistory, bool skip)
+        public void Blacklist(int index, bool fromHistory, bool skip)
         {
             // Add the song to the blacklist
             SongRequest request = fromHistory ? RequestHistory.Songs.ElementAt(index) : RequestQueue.Songs.ElementAt(index);
@@ -987,7 +977,7 @@ namespace SongRequestManagerV2
                 SetRequestStatus(index, RequestStatus.Blacklisted, fromHistory);
         }
 
-        public static void Skip(int index, RequestStatus status = RequestStatus.Skipped)
+        public void Skip(int index, RequestStatus status = RequestStatus.Skipped)
         {
             // Set the final status of the request
             SetRequestStatus(index, status);
@@ -995,7 +985,7 @@ namespace SongRequestManagerV2
             // Then dequeue it
             DequeueRequest(index);
 
-            RequestBotListViewController.Instance.UpdateRequestUI();
+            UpdateRequestUI();
         }
 
         public void Process(int index, bool fromHistory)
