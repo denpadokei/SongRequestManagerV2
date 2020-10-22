@@ -179,46 +179,6 @@ namespace SongRequestManagerV2
                 if (song != null) {
                     levelsTableView.SelectLevel(song);
                 }
-
-                //if (songIndex >= 0)
-                //{
-                //    // if header is being shown, increment row
-                //    if (levelsTableView.GetField<bool, LevelCollectionTableView>("_showLevelPackHeader"))
-                //    {
-                //        songIndex++;
-                //    }
-
-                //    Plugin.Log($"Selecting row {songIndex}");
-                //    tableView.gameObject.SetActive(false);
-                //    tableView.ReloadData();
-                //    tableView.gameObject.SetActive(true);
-                //    // scroll to song
-                //    tableView.ScrollToCellWithIdx(songIndex, TableViewScroller.ScrollPositionType.Beginning, animated);
-
-                //    // select song, and fire the event
-                //    tableView.SelectCellWithIdx(songIndex, true);
-
-                //    Plugin.Log("Selected song with index " + songIndex);
-                //    callback?.Invoke(true);
-
-                //    if (RequestBotConfig.Instance.ClearNoFail)
-                //    {
-                //        //try
-                //        //{
-                //        //    // disable no fail gamepaly modifier
-                //        //    var gameplayModifiersPanelController = Resources.FindObjectsOfTypeAll<GameplayModifiersPanelController>().First();
-                //        //    gameplayModifiersPanelController.gameplayModifiers.noFail = false;
- 
-                //        //    //gameplayModifiersPanelController.gameplayModifiers.ResetToDefault();
-
-                //        //    gameplayModifiersPanelController.Refresh();
-                //        //}
-                //        //catch
-                //        //{ }
-
-                //    }
-                //    yield break;
-                //}
             }
 
             if (!isRetry)
@@ -228,10 +188,6 @@ namespace SongRequestManagerV2
                 yield return ScrollToLevel(levelID, callback, animated, true);
                 yield break;
             }
-
-            //var tempLevels = SongLoaderPlugin.SongLoader.CustomLevels.Where(l => l.levelID == levelID).ToArray();
-            //foreach (var l in tempLevels)
-            //    SongLoaderPlugin.SongLoader.CustomLevels.Remove(l);
 
             Plugin.Log($"Failed to scroll to {levelID}!");
             callback?.Invoke(false);
