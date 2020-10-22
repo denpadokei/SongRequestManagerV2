@@ -1,0 +1,27 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+  <horizontal>
+    <text text='~progress-text' align='BottomLeft'></text>
+    <vertical>
+      <page-button event-click="request-list#PageUp" direction='Up'></page-button>
+      <list id='request-list' select-cell='selected-cell'>
+        <!--<stack vertical-fit="Unconstrained" pad="1" hover-hint="~hover-hint" background ="panel-top">
+          <horizontal child-expand-width="false">
+            <image anchor-pos-x="8" pref-width="12" pref-height="4" anchor-min-x="0" anchor-min-y="0" anchor-max-x="0" anchor-max-y="1" id="coverImage"></image>
+            <vertical anchor-pos-x="20" anchor-min-x="0" anchor-max-x="0" child-align="MiddleLeft" horizontal-fit="Unconstrained" vertical-fit="PreferredSize">
+              <text id="songNameText" font-size="4" text="Song" align="MidlineLeft"></text>
+              <text id="authorNameText" font-size="3" text="Author" align="MidlineLeft"></text>
+            </vertical>
+          </horizontal>
+        </stack>-->
+      </list>
+      <page-button event-click="request-list#PageDown" direction='Down'></page-button>
+    </vertical>
+    <vertical>
+      <button text='~history-button-text' interactable='~history-button-enable' on-click='history-click' hover-hint='~history-hint'></button>
+      <button text='~skip-button-text' interactable='~skip-button-enable' hover-hint='Remove the selected request from the queue.' on-click='skip-click'></button>
+      <button text='~blacklist-button-text' interactable='~blacklist-button-enable' hover-hint='Block the selected request from being queued in the future.' on-click='blacklist-click'></button>
+      <button text='~play-button-text' interactable='~play-button-enable' hover-hint='Download and scroll to the currently selected request.' on-click='play-click'></button>
+      <button text='~queue-button-text' hover-hint='Open/Close the queue.' on-click='queue-click'></button>
+    </vertical>
+  </horizontal>
+</bg>

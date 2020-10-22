@@ -314,8 +314,8 @@ namespace SongRequestManagerV2
         {
             for (int i = 0; i < RequestQueue.Songs.Count; i++)
             {
-                var entry = RequestQueue.Songs[i];
-                if (entry.status == RequestBot.RequestStatus.SongSearch)
+                var entry = (RequestQueue.Songs[i] as SongRequest);
+                if (entry._status == RequestBot.RequestStatus.SongSearch)
                 {
                     RequestBot.DequeueRequest(i, false);
                     i--;
@@ -356,10 +356,10 @@ namespace SongRequestManagerV2
         {
             UpdateRequestUI();
 
-            if (RequestBotListViewController.Instance.isActivated)
+            if (RequestBotListView.Instance.isActivated)
             {
-                RequestBotListViewController.Instance.UpdateRequestUI(true);
-                RequestBotListViewController.Instance.SetUIInteractivity();
+                RequestBotListView.Instance.UpdateRequestUI(true);
+                RequestBotListView.Instance.SetUIInteractivity();
             }
 
             _configChanged = false;
@@ -442,10 +442,10 @@ namespace SongRequestManagerV2
 
             if (_refreshQueue)
             {
-                if (RequestBotListViewController.Instance.isActivated)
+                if (RequestBotListView.Instance.isActivated)
                 {
-                    RequestBotListViewController.Instance.UpdateRequestUI(true);
-                    RequestBotListViewController.Instance.SetUIInteractivity();
+                    RequestBotListView.Instance.UpdateRequestUI(true);
+                    RequestBotListView.Instance.SetUIInteractivity();
                 }
                 _refreshQueue = false;
             }
@@ -680,6 +680,7 @@ namespace SongRequestManagerV2
             RequestTracker[requestor.Id].numRequests++;
             listcollection.add(duplicatelist, song["id"].Value);
             if ((requestInfo.flags.HasFlag(CmdFlags.MoveToTop))) {
+
                 RequestQueue.Songs.Insert(0, new SongRequest(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo));
             }
             else {
@@ -721,7 +722,7 @@ namespace SongRequestManagerV2
                 }
                 else
                 {
-                    request = RequestHistory.Songs.ElementAt(index);
+                    request = RequestHistory.Songs.ElementAt(index) as SongRequest;
                 }
 
                 if (request == null)
@@ -730,15 +731,13 @@ namespace SongRequestManagerV2
                     return;
                 }
                 else
-                    Plugin.Log($"Processing song request {request.song["songName"].Value}");
-
- 
-                string songName = request.song["songName"].Value;
-                string songIndex = Regex.Replace($"{request.song["id"].Value} ({request.song["songName"].Value} - {request.song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
+                    Plugin.Log($"Processing song request {request._song["songName"].Value}");
+                string songName = request._song["songName"].Value;
+                string songIndex = Regex.Replace($"{request._song["id"].Value} ({request._song["songName"].Value} - {request._song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
                 songIndex = normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
 
                 string currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
-                string songHash = request.song["hash"].Value.ToUpper();
+                string songHash = request._song["hash"].Value.ToUpper();
 
 
                 // Check to see if level exists, download if not.
@@ -750,8 +749,7 @@ namespace SongRequestManagerV2
                 //var rat = SongCore.Collections.levelIDsForHash(songHash);
                 //bool mapexists = (rat.Count>0) && (rat[0] != "");
 
-                if (Loader.GetLevelByHash(songHash) == null)
-                {
+                if (Loader.GetLevelByHash(songHash) == null) {
                     Utility.EmptyDirectory(".requestcache", false);
                     //SongMap map;
                     //if (MapDatabase.MapLibrary.TryGetValue(songIndex, out map))
@@ -774,7 +772,7 @@ namespace SongRequestManagerV2
                         Utility.EmptyDirectory(currentSongDirectory, true);
                         Plugin.Log($"Deleting {currentSongDirectory}");
                     }
-                    string localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request.song["id"].Value}.zip");
+                    string localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request._song["id"].Value}.zip");
                     //string dl = $"https://beatsaver.com {request.song["downloadURL"].Value}";
                     //Instance.QueueChatMessage($"Download url: {dl}, {request.song}");
                     // Insert code to replace local path with ZIP path here
@@ -804,7 +802,7 @@ namespace SongRequestManagerV2
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #else
-                    var result = await WebClient.DownloadSong($"https://beatsaver.com{request.song["downloadURL"].Value}", System.Threading.CancellationToken.None, RequestBotListViewController.Instance._progress);
+                    var result = await WebClient.DownloadSong($"https://beatsaver.com{request._song["downloadURL"].Value}", System.Threading.CancellationToken.None, RequestBotListView.Instance._progress);
                     if (result == null) {
                         Instance.QueueChatMessage("BeatSaver is down now.");
                     }
@@ -829,17 +827,16 @@ namespace SongRequestManagerV2
 #endif
 #endif
                 }
-                else
-                {
+                else {
                     //Instance.QueueChatMessage($"Directory exists: {currentSongDirectory}");
                     Plugin.Log($"Song {songName} already exists!");
                     DismissRequest?.Invoke();
                     bool success = false;
                     Dispatcher.RunOnMainThread(button.BackButtonPressed);
                     Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(songHash, (s) => success = s, false));
-                    if (!request.song.IsNull) {
+                    if (!request._song.IsNull) {
                         // Display next song message
-                        new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString());
+                        new DynamicText().AddUser(ref request._requestor).AddSong(request._song).QueueMessage(NextSonglink.ToString());
                     }
                 }
             }
@@ -855,11 +852,11 @@ namespace SongRequestManagerV2
             Dispatcher.RunOnMainThread(button.BackButtonPressed);
             DismissRequest?.Invoke();
             bool success = false;
-            Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request.song["hash"].Value.ToUpper(), (s) => success = s, false));
-            RequestBotListViewController.Instance?.ChangeProgressText(0f);
-            if (!request.song.IsNull) {
+            Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), (s) => success = s, false));
+            RequestBotListView.Instance?.ChangeProgressText(0f);
+            if (!request._song.IsNull) {
                 // Display next song message
-                new DynamicText().AddUser(ref request.requestor).AddSong(request.song).QueueMessage(NextSonglink.ToString());
+                new DynamicText().AddUser(ref request._requestor).AddSong(request._song).QueueMessage(NextSonglink.ToString());
             }
         }
 
@@ -895,8 +892,8 @@ namespace SongRequestManagerV2
 
         public static void RefreshSongQuere()
         {
-            if (RequestBotListViewController.Instance) {
-                Dispatcher.RunOnMainThread(RequestBotListViewController.Instance.RefreshSongQueueList, false);
+            if (RequestBotListView.Instance) {
+                Dispatcher.RunOnMainThread(RequestBotListView.Instance.RefreshSongQueueList, false);
             }
         }
 
@@ -904,13 +901,13 @@ namespace SongRequestManagerV2
         {
             Plugin.Log("start to deque request");
             try {
-                if (request.status != RequestStatus.Wrongsong && request.status != RequestStatus.SongSearch) RequestHistory.Songs.Insert(0, request); // Wrong song requests are not logged into history, is it possible that other status states shouldn't be moved either?
+                if (request._status != RequestStatus.Wrongsong && request._status != RequestStatus.SongSearch) RequestHistory.Songs.Insert(0, request); // Wrong song requests are not logged into history, is it possible that other status states shouldn't be moved either?
 
                 if (RequestHistory.Songs.Count > RequestBotConfig.Instance.RequestHistoryLimit) {
                     int diff = RequestHistory.Songs.Count - RequestBotConfig.Instance.RequestHistoryLimit;
                     RequestHistory.Songs.RemoveRange(RequestHistory.Songs.Count - diff - 1, diff);
                 }
-                RequestQueue.Songs.Remove(request);
+                RequestQueue.Songs.RemoveAt(RequestQueue.Songs.IndexOf(request));
                 RequestHistory.Write();
                 HistoryManager.AddSong(request);
                 RequestQueue.Write();
@@ -918,7 +915,7 @@ namespace SongRequestManagerV2
                 // Decrement the requestors request count, since their request is now out of the queue
 
                 if (!RequestBotConfig.Instance.LimitUserRequestsToSession) {
-                    if (RequestTracker.ContainsKey(request.requestor.Id)) RequestTracker[request.requestor.Id].numRequests--;
+                    if (RequestTracker.ContainsKey(request._requestor.Id)) RequestTracker[request._requestor.Id].numRequests--;
                 }
 
                 if (updateUI == false) return;
@@ -935,7 +932,7 @@ namespace SongRequestManagerV2
 
         public static SongRequest DequeueRequest(int index, bool updateUI = true)
         {
-            SongRequest request = RequestQueue.Songs.ElementAt(index);
+            SongRequest request = RequestQueue.Songs.OfType<SongRequest>().ToList().ElementAt(index);
 
             if (request != null)
                 Instance?.DequeueRequest(request, updateUI);
@@ -954,19 +951,19 @@ namespace SongRequestManagerV2
         public static void SetRequestStatus(int index, RequestStatus status, bool fromHistory = false)
         {
             if (!fromHistory)
-                RequestQueue.Songs[index].status = status;
+                (RequestQueue.Songs[index] as SongRequest)._status = status;
             else
-                RequestHistory.Songs[index].status = status;
+                (RequestHistory.Songs[index] as SongRequest)._status = status;
         }
 
         public void Blacklist(int index, bool fromHistory, bool skip)
         {
             // Add the song to the blacklist
-            SongRequest request = fromHistory ? RequestHistory.Songs.ElementAt(index) : RequestQueue.Songs.ElementAt(index);
+            SongRequest request = fromHistory ? RequestHistory.Songs.OfType<SongRequest>().ToList().ElementAt(index) : RequestQueue.Songs.OfType<SongRequest>().ToList().ElementAt(index);
 
-            listcollection.add(banlist, request.song["id"].Value);
+            listcollection.add(banlist, request._song["id"].Value);
  
-            Instance.QueueChatMessage($"{request.song["songName"].Value} by {request.song["authorName"].Value} ({request.song["id"].Value}) added to the blacklist.");
+            Instance.QueueChatMessage($"{request._song["songName"].Value} by {request._song["authorName"].Value} ({request._song["id"].Value}) added to the blacklist.");
 
             if (!fromHistory)
             {

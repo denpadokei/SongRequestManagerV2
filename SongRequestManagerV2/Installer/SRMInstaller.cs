@@ -21,14 +21,12 @@ namespace SongRequestManagerV2.Installers
     {
         public override void InstallBindings()
         {
-            Container.BindViewController<YesNoModal>(BeatSaberUI.CreateViewController<YesNoModal>());
-            Container.BindViewController<RequestBotListViewController>(BeatSaberUI.CreateViewController<RequestBotListViewController>());
+            Container.BindViewController<YesNoModalViewController>(BeatSaberUI.CreateViewController<YesNoModalViewController>());
+            Container.BindViewController<RequestBotListView>(BeatSaberUI.CreateViewController<RequestBotListView>());
             Container.BindViewController<KeyboardViewController>(BeatSaberUI.CreateViewController<KeyboardViewController>());
             Container.BindFlowCoordinator<RequestFlowCoordinator>(BeatSaberUI.CreateFlowCoordinator<RequestFlowCoordinator>());
             Container.BindViewController<SRMButton>(BeatSaberUI.CreateViewController<SRMButton>());
             Container.Bind<RequestBot>().FromNewComponentOnNewGameObject("SRMBot").AsSingle().NonLazy();
         }
-
-        
     }
 }
