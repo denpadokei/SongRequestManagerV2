@@ -9,9 +9,9 @@ namespace SongRequestManagerV2
 {
     public class RequestManager
     {
-        public static List<SongRequest> Read(string path)
+        public static List<object> Read(string path)
         {
-            List<SongRequest> songs = new List<SongRequest>();
+            var songs = new List<object>();
             if (File.Exists(path))
             {
                 var json = JSON.Parse(File.ReadAllText(path));
@@ -20,7 +20,8 @@ namespace SongRequestManagerV2
                     foreach (var j in json.AsArray) {
                         try {
                             if (!j.Value.IsNull && j.Value is JSONObject obj) {
-                                songs.Add(new SongRequest().FromJson(obj));
+                                var req = new SongRequest(obj);
+                                songs.Add(req);
                             }
                         }
                         catch (Exception e) {
@@ -32,7 +33,7 @@ namespace SongRequestManagerV2
             return songs;
         }
 
-        public static void Write(string path, List<SongRequest> songs)
+        public static void Write(string path, IEnumerable<object> songs)
         {
             Plugin.Log($"Start write");
             try {
@@ -40,7 +41,7 @@ namespace SongRequestManagerV2
                     Directory.CreateDirectory(Path.GetDirectoryName(path));
 
                 var arr = new JSONArray();
-                foreach (var song in songs.Where(x => x != null)) {
+                foreach (var song in songs.Where(x => x != null).Select(x => x as SongRequest)) {
                     try {
                         arr.Add(song.ToJson());
                         //Plugin.Log($"Added {song.song}");
@@ -62,7 +63,7 @@ namespace SongRequestManagerV2
 
     public class RequestQueue
     {
-        public static List<SongRequest> Songs { get; } = new List<SongRequest>();
+        public static List<object> Songs { get; } = new List<object>();
         private static string requestsPath = Path.Combine(Plugin.DataPath, "SongRequestQueue.dat");
         public static void Read()
         {
@@ -87,7 +88,7 @@ namespace SongRequestManagerV2
 
     public class RequestHistory
     {
-        public static List<SongRequest> Songs { get; } = new List<SongRequest>();
+        public static List<object> Songs { get; } = new List<object>();
         private static string historyPath = Path.Combine(Plugin.DataPath, "SongRequestHistory.dat");
         public static void Read()
         {
@@ -97,7 +98,7 @@ namespace SongRequestManagerV2
                 var list = RequestManager.Read(historyPath);
                 Songs.AddRange(RequestManager.Read(historyPath));
                 foreach (var item in list) {
-                    HistoryManager.AddSong(item);
+                    HistoryManager.AddSong(item as SongRequest);
                 }
             }
             catch

@@ -18,7 +18,11 @@ namespace SongRequestManagerV2.Utils
 
         internal static void AddSong(SongRequest song)
         {
-            var songObject = song.song.AsObject;
+            var fileInfo = new FileInfo(PlaylistPath);
+            if (!Directory.Exists(fileInfo.Directory.FullName)) {
+                Directory.CreateDirectory(fileInfo.Directory.FullName);
+            }
+            var songObject = song._song.AsObject;
 
             var playlistsong = new PlaylistSongEntity()
             {
@@ -27,8 +31,8 @@ namespace SongRequestManagerV2.Utils
                 key = songObject["id"].Value,
                 hash = songObject["hash"].Value.ToUpper(),
                 levelid = $"custom_level_{songObject["hash"].Value.ToUpper()}",
-                dateAdded = song.requestTime
-        };
+                dateAdded = song._requestTime
+            };
 
             var playlist = LoadPlaylist();
             if (playlist.songs.Any(x => x.hash.ToUpper() == playlistsong.hash)) {

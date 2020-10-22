@@ -11,6 +11,7 @@ using ChatCore.Interfaces;
 using System.Threading.Tasks;
 using ChatCore.Models.Twitch;
 using SongRequestManagerV2.Extentions;
+using SongRequestManagerV2.Views;
 // Feature requests: Add Reason for being banned to banlist
 
 namespace SongRequestManagerV2
@@ -402,7 +403,7 @@ namespace SongRequestManagerV2
         {
             try {
                 if (state.parameter != "") state.parameter += " ";
-                state.parameter += RequestHistory.Songs[0].song["version"];
+                state.parameter += (RequestHistory.Songs[0] as SongRequest)._song["version"];
                 return "";
             }
             catch {
@@ -416,7 +417,7 @@ namespace SongRequestManagerV2
         {
             try {
                 if (state.parameter != "") state.parameter += " ";
-                state.parameter += RequestBotListViewController.Instance?.CurrentlySelectedSong.song["version"];
+                state.parameter += RequestBotListView.Instance?.CurrentlySelectedSong._song["version"];
                 return "";
             }
             catch {
@@ -447,7 +448,7 @@ namespace SongRequestManagerV2
         {
             try {
                 if (state.parameter != "") state.parameter += " ";
-                state.parameter += RequestHistory.Songs[1].song["version"];
+                state.parameter += (RequestHistory.Songs[1] as SongRequest)._song["version"];
                 return "";
             }
             catch {
@@ -461,7 +462,7 @@ namespace SongRequestManagerV2
         {
             try {
                 if (state.parameter != "") state.parameter += " ";
-                state.parameter += RequestQueue.Songs[0].song["version"];
+                state.parameter += (RequestQueue.Songs[0] as SongRequest)._song["version"];
                 return "";
             }
             catch {

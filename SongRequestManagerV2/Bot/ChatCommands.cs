@@ -57,7 +57,7 @@ namespace SongRequestManagerV2
         {
             var dt = new DynamicText().AddUser(ref state.user);
             try {
-                dt.AddSong(RequestHistory.Songs[0].song); // Exposing the current song 
+                dt.AddSong((RequestHistory.Songs[0] as SongRequest)._song); // Exposing the current song 
             }
             catch (Exception ex) {
                 Plugin.Log(ex.ToString());
@@ -191,7 +191,7 @@ namespace SongRequestManagerV2
         private string SongSearchFilter(JSONObject song, bool fast = false, SongFilter filter = SongFilter.All) // BUG: This could be nicer
         {
             string songid = song["id"].Value;
-            if (filter.HasFlag(SongFilter.Queue) && RequestQueue.Songs.Any(req => req.song["version"] == song["version"])) return fast ? "X" : $"Request {song["songName"].Value} by {song["authorName"].Value} already exists in queue!";
+            if (filter.HasFlag(SongFilter.Queue) && RequestQueue.Songs.OfType<SongRequest>().Any(req => song["version"] == song["version"])) return fast ? "X" : $"Request {song["songName"].Value} by {song["authorName"].Value} already exists in queue!";
 
             if (filter.HasFlag(SongFilter.Blacklist) && listcollection.contains(ref banlist, songid)) return fast ? "X" : $"{song["songName"].Value} by {song["authorName"].Value} ({song["version"].Value}) is banned!";
 
@@ -221,7 +221,7 @@ namespace SongRequestManagerV2
             if (matchby == "") return fast ? "X" : $"Invalid song id {request} used in RequestInQueue check";
 
             foreach (SongRequest req in RequestQueue.Songs.ToArray()) {
-                var song = req.song;
+                var song = req._song;
                 if (song[matchby].Value == request) return fast ? "X" : $"Request {song["songName"].Value} by {song["authorName"].Value} ({song["version"].Value}) already exists in queue!";
             }
             return ""; // Empty string: The request is not in the RequestQueue.Songs
@@ -340,7 +340,7 @@ namespace SongRequestManagerV2
                 StreamWriter fileWriter = new StreamWriter(queuefile);
 
                 foreach (SongRequest req in RequestQueue.Songs.ToArray()) {
-                    var song = req.song;
+                    var song = req._song;
                     if (count > 0) fileWriter.Write(",");
                     fileWriter.Write(song["id"].Value);
                     count++;
@@ -384,10 +384,10 @@ namespace SongRequestManagerV2
             var songId = GetBeatSaverId(state.parameter);
             for (int i = RequestQueue.Songs.Count - 1; i >= 0; i--) {
                 bool dequeueSong = false;
-                var song = RequestQueue.Songs[i].song;
+                var song = (RequestQueue.Songs[i] as SongRequest)._song;
 
                 if (songId == "") {
-                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["version"].Value, RequestQueue.Songs[i].requestor.UserName };
+                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["version"].Value, (RequestQueue.Songs[i] as SongRequest)._requestor.UserName };
 
                     if (DoesContainTerms(state.parameter, ref terms))
                         dequeueSong = true;
@@ -454,7 +454,7 @@ namespace SongRequestManagerV2
         }
 
         // return a songrequest match in a SongRequest list. Good for scanning Queue or History
-        SongRequest FindMatch(List<SongRequest> queue, string request, QueueLongMessage qm)
+        SongRequest FindMatch(IEnumerable<SongRequest> queue, string request, QueueLongMessage qm)
         {
             var songId = GetBeatSaverId(request);
 
@@ -462,23 +462,23 @@ namespace SongRequestManagerV2
 
             string lastuser = "";
             foreach (var entry in queue) {
-                var song = entry.song;
+                var song = entry._song;
 
                 if (songId == "") {
-                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, entry.requestor.UserName };
+                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, entry._requestor.UserName };
 
                     if (DoesContainTerms(request, ref terms)) {
                         result = entry;
 
-                        if (lastuser != result.requestor.UserName) qm.Add($"{result.requestor.UserName}: ");
-                        qm.Add($"{result.song["songName"].Value} ({result.song["version"].Value})", ",");
-                        lastuser = result.requestor.UserName;
+                        if (lastuser != result._requestor.UserName) qm.Add($"{result._requestor.UserName}: ");
+                        qm.Add($"{result._song["songName"].Value} ({result._song["version"].Value})", ",");
+                        lastuser = result._requestor.UserName;
                     }
                 }
                 else {
                     if (song["id"].Value == songId) {
                         result = entry;
-                        qm.Add($"{result.requestor.UserName}: {result.song["songName"].Value} ({result.song["version"].Value})");
+                        qm.Add($"{result._requestor.UserName}: {result._song["songName"].Value} ({result._song["version"].Value})");
                         return entry;
                     }
                 }
@@ -519,8 +519,8 @@ namespace SongRequestManagerV2
 
             var qm = new QueueLongMessage();
             SongRequest result = null;
-            result = FindMatch(RequestQueue.Songs, state.parameter, qm);
-            if (result == null) result = FindMatch(RequestHistory.Songs, state.parameter, qm);
+            result = FindMatch(RequestQueue.Songs.OfType<SongRequest>(), state.parameter, qm);
+            if (result == null) result = FindMatch(RequestHistory.Songs.OfType<SongRequest>(), state.parameter, qm);
 
             //if (result != null) QueueChatMessage($"{result.song["songName"].Value} requested by {result.requestor.displayName}.");
             if (result != null) qm.end("...");
@@ -533,11 +533,11 @@ namespace SongRequestManagerV2
             var songId = GetBeatSaverId(parts[0]);
             if (songId == "") return state.helptext(true);
 
-            foreach (var entry in RequestQueue.Songs) {
-                var song = entry.song;
+            foreach (var entry in RequestQueue.Songs.OfType<SongRequest>()) {
+                var song = entry._song;
 
                 if (song["id"].Value == songId) {
-                    entry.requestInfo = "!" + parts[1];
+                    entry._requestInfo = "!" + parts[1];
                     QueueChatMessage($"{song["songName"].Value} : {parts[1]}");
                     return success;
                 }
@@ -741,10 +741,12 @@ namespace SongRequestManagerV2
 
         public static void QueueSong(ParseState state, JSONObject song)
         {
+            var req = new SongRequest(song, state.user, DateTime.UtcNow, RequestStatus.SongSearch, "search result");
+
             if ((state.flags.HasFlag(CmdFlags.MoveToTop)))
-                RequestQueue.Songs.Insert(0, new SongRequest(song, state.user, DateTime.UtcNow, RequestStatus.SongSearch, "search result"));
+                RequestQueue.Songs.Insert(0, req);
             else
-                RequestQueue.Songs.Add(new SongRequest(song, state.user, DateTime.UtcNow, RequestStatus.SongSearch, "search result"));
+                RequestQueue.Songs.Add(req);
         }
 
         #region Move Request To Top/Bottom
@@ -764,12 +766,12 @@ namespace SongRequestManagerV2
 
             string moveId = GetBeatSaverId(request);
             for (int i = RequestQueue.Songs.Count - 1; i >= 0; i--) {
-                SongRequest req = RequestQueue.Songs.ElementAt(i);
-                var song = req.song;
+                var req = RequestQueue.Songs.ElementAt(i) as SongRequest;
+                var song = req._song;
 
                 bool moveRequest = false;
                 if (moveId == "") {
-                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, RequestQueue.Songs[i].requestor.UserName };
+                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, (RequestQueue.Songs[i] as SongRequest)._requestor.UserName };
                     if (DoesContainTerms(request, ref terms))
                         moveRequest = true;
                 }
@@ -881,7 +883,7 @@ namespace SongRequestManagerV2
             var msg = new QueueLongMessage(RequestBotConfig.Instance.maximumqueuemessages);
 
             foreach (SongRequest req in RequestQueue.Songs.ToArray()) {
-                var song = req.song;
+                var song = req._song;
                 if (msg.Add(new DynamicText().AddSong(ref song).Parse(QueueListFormat), ", ")) break;
             }
             msg.end($" ... and {RequestQueue.Songs.Count - msg.Count} more songs.", "Queue is empty.");
@@ -894,8 +896,8 @@ namespace SongRequestManagerV2
 
             var msg = new QueueLongMessage(1);
 
-            foreach (var entry in RequestHistory.Songs) {
-                var song = entry.song;
+            foreach (var entry in RequestHistory.Songs.OfType<SongRequest>()) {
+                var song = entry._song;
                 if (msg.Add(new DynamicText().AddSong(ref song).Parse(HistoryListFormat), ", ")) break;
             }
             msg.end($" ... and {RequestHistory.Songs.Count - msg.Count} more songs.", "History is empty.");
@@ -975,7 +977,7 @@ namespace SongRequestManagerV2
                 int count = 0;
 
                 foreach (SongRequest req in RequestQueue.Songs.ToArray()) {
-                    var song = req.song;
+                    var song = req._song;
                     queuesummary += new DynamicText().AddSong(song).Parse(QueueTextFileFormat);  // Format of Queue is now user configurable
 
                     if (++count > RequestBotConfig.Instance.MaximumQueueTextEntries) {
@@ -1024,11 +1026,11 @@ namespace SongRequestManagerV2
 
             Shuffle(RequestQueue.Songs);
 
-            var list = RequestQueue.Songs;
+            var list = RequestQueue.Songs.OfType<SongRequest>().ToList();
             for (int i = entrycount; i < list.Count; i++) {
                 try {
-                    if (RequestTracker.ContainsKey(list[i].requestor.Id)) RequestTracker[list[i].requestor.Id].numRequests--;
-                    listcollection.remove(duplicatelist, list[i].song["id"]);
+                    if (RequestTracker.ContainsKey(list[i]._requestor.Id)) RequestTracker[list[i]._requestor.Id].numRequests--;
+                    listcollection.remove(duplicatelist, list[i]._song["id"]);
                 }
                 catch { }
             }
@@ -1153,8 +1155,8 @@ namespace SongRequestManagerV2
         {
             // Note: Scanning backwards to remove LastIn, for loop is best known way.
             for (int i = RequestQueue.Songs.Count - 1; i >= 0; i--) {
-                var song = RequestQueue.Songs[i].song;
-                if (RequestQueue.Songs[i].requestor.Id == requestor.Id) {
+                var song = (RequestQueue.Songs[i] as SongRequest)._song;
+                if ((RequestQueue.Songs[i] as SongRequest)._requestor.Id == requestor.Id) {
                     QueueChatMessage($"{song["songName"].Value} ({song["version"].Value}) removed.");
 
                     listcollection.remove(duplicatelist, song["id"].Value);
@@ -1171,7 +1173,7 @@ namespace SongRequestManagerV2
         {
             try  // We're accessing an element across threads, and currentsong doesn't need to be defined
             {
-                var song = RequestHistory.Songs[0].song;
+                var song = (RequestQueue.Songs[0] as SongRequest)._song;
                 if (!song.IsNull) new DynamicText().AddSong(ref song).QueueMessage(LinkSonglink.ToString());
             }
             catch (Exception ex) {
@@ -1185,8 +1187,8 @@ namespace SongRequestManagerV2
         {
             int total = 0;
             try {
-                foreach (var songrequest in RequestQueue.Songs) {
-                    total += songrequest.song["songduration"];
+                foreach (var songrequest in RequestQueue.Songs.OfType<SongRequest>()) {
+                    total += songrequest._song["songduration"];
                 }
             }
             catch {

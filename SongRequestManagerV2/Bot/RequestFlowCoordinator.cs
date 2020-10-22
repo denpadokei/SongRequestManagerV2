@@ -1,7 +1,7 @@
 ﻿using BeatSaberMarkupLanguage;
 using HMUI;
 using IPA.Utilities;
-using SongRequestManagerV2.UI;
+using SongRequestManagerV2.Views;
 using System.Linq;
 using UnityEngine;
 using Zenject;
@@ -11,7 +11,7 @@ namespace SongRequestManagerV2
     public class RequestFlowCoordinator : FlowCoordinator
     {
         [Inject]
-        private RequestBotListViewController _requestBotListViewController;
+        private RequestBotListView _requestBotListViewController;
         [Inject]
         private KeyboardViewController _keyboardViewController;
 

@@ -1,7 +1,4 @@
-﻿using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Parser;
-using BeatSaberMarkupLanguage.ViewControllers;
+﻿using BeatSaberMarkupLanguage.ViewControllers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,25 +11,8 @@ using System.Threading.Tasks;
 
 namespace SongPlayListEditer.Bases
 {
-    public abstract class ViewContlollerBindableBase : BSMLViewController
+    public abstract class ViewContlollerBindableBase : BSMLAutomaticViewController
     {
-        public abstract string ResourceName { get; }
-
-        [UIParams]
-        protected BSMLParserParams _parserParams;
-
-        public override string Content
-        {
-            get => Utilities.GetResourceContent(Assembly.GetAssembly(this.GetType()), ResourceName);
-        }
-        protected static SynchronizationContext context;
-
-
-        protected virtual void Awake()
-        {
-            context = SynchronizationContext.Current;
-        }
-
         /// <summary>
         /// Checks if a property already matches a desired value. Sets the property and
         /// notifies listeners only when necessary.
@@ -70,7 +50,7 @@ namespace SongPlayListEditer.Bases
         /// <param name="args">The PropertyChangedEventArgs</param>
         protected virtual void OnPropertyChanged(PropertyChangedEventArgs args)
         {
-            context?.Post(d => { NotifyPropertyChanged(args.PropertyName); }, null);
+            HMMainThreadDispatcher.instance?.Enqueue(() => { NotifyPropertyChanged(args.PropertyName); });
         }
     }
 }

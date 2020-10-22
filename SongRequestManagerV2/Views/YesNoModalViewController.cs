@@ -7,11 +7,11 @@ using System.Reflection;
 using TMPro;
 using Zenject;
 
-namespace SongRequestManagerV2
+namespace SongRequestManagerV2.Views
 {
-    public class YesNoModal : BSMLAutomaticViewController
+    public class YesNoModalViewController : BSMLAutomaticViewController
     {
-        public static YesNoModal instance;
+        public static YesNoModalViewController instance;
 
         private Action OnConfirm;
         private Action OnDecline;
@@ -49,7 +49,7 @@ namespace SongRequestManagerV2
         }
 
         [Inject]
-        public void Const(RequestBotListViewController controller)
+        public void Const(RequestBotListView controller)
         {
             BSMLParser.instance.Parse(Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "SongRequestManagerV2.Views.YesNoModal.bsml"), controller.gameObject, this);
         }

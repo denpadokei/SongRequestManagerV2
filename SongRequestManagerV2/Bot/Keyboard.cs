@@ -427,8 +427,8 @@ namespace SongRequestManagerV2
         {
             for (int i = 0; i < RequestQueue.Songs.Count; i++)
             {
-                var entry = RequestQueue.Songs[i];
-                if (entry.status == RequestBot.RequestStatus.SongSearch)
+                var entry = (RequestQueue.Songs[i] as SongRequest);
+                if (entry._status == RequestBot.RequestStatus.SongSearch)
                 {
                     RequestBot.DequeueRequest(i, false);
                     i--;
