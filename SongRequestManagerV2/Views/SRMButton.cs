@@ -138,7 +138,6 @@ namespace SongRequestManagerV2.Views
                 //new Vector2(9f, 5.5f)
                 //_levelCollectionNavigationController.rectTransform.sizeDelta = new Vector2(_levelCollectionNavigationController.rectTransform.sizeDelta.x, _levelCollectionNavigationController.rectTransform.sizeDelta.y);
                 this.Screen = FloatingScreen.CreateFloatingScreen(new Vector2(20f, 20f), false, new Vector3(1.2f, 2.2f, 2.2f), Quaternion.Euler(Vector3.zero));
-                this.Screen.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", this._physicsRaycaster);
                 button = UIHelper.CreateUIButton(this.Screen.transform, "OkButton", Vector2.zero,
                         Vector2.zero, Action, "SRM", null);
                 //button.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", this._physicsRaycaster);
