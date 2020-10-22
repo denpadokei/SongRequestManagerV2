@@ -84,7 +84,7 @@ namespace SongRequestManagerV2.Views
 
         internal void SRMButtonPressed()
         {
-            if (Current.name == _requestFlow.name) {
+            if (Current.name != _soloFreeFlow.name) {
                 return;
             }
             Current.PresentFlowCoordinator(_requestFlow, null, AnimationDirection.Horizontal, false, false);
