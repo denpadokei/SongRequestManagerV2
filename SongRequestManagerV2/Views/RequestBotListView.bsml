@@ -26,4 +26,18 @@
       <button text='~queue-button-text' hover-hint='Open/Close the queue.' on-click='queue-click'></button>
     </vertical>
   </horizontal>
+  <modal id="modal" show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino="false" size-delta-x='90' size-delta-y='45' move-to-center='true'>
+    <vertical child-control-height='false' child-expand-width='true' child-expand-height='true'>
+      <horizontal bg='panel-top' pad-left='10' pad-right='10' horizontal-fit='PreferredSize' child-align='UpperCenter'>
+        <text text='~title' align='Center'></text>
+      </horizontal>
+    </vertical>
+    <vertical child-align='LowerCenter' horizontal-fit='Unconstrained' pad-top='10'>
+      <text text='~message' align='Center' anchor-min-y='0'></text>
+      <horizontal child-align='LowerCenter'>
+        <button on-click='yes-click' text='Yes'></button>
+        <button on-click='no-click' text='No'></button>
+      </horizontal>
+    </vertical>
+  </modal>
 </bg>

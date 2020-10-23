@@ -1,10 +1,13 @@
-﻿using HMUI;
+﻿using BeatSaberMarkupLanguage.ViewControllers;
+using HMUI;
 using UnityEngine;
 
 namespace SongRequestManagerV2.Views
 {
-    public class KeyboardViewController : ViewController
+    public class KeyboardViewController : BSMLViewController
     {
+        public override string Content => @"<bg></bg>";
+
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             if (firstActivation) {
