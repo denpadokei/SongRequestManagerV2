@@ -35,7 +35,7 @@ namespace SongRequestManagerV2
                 base.SetTitle("Song Request Manager");
                 showBackButton = true;
                 try {
-                    ProvideInitialViewControllers(_requestBotListViewController, _keyboardViewController);
+                    ProvideInitialViewControllers(_requestBotListViewController, null, _keyboardViewController);
                 }
                 catch (System.Exception e) {
                     Plugin.Logger.Error(e);

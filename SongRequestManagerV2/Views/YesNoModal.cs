@@ -9,9 +9,10 @@ using Zenject;
 
 namespace SongRequestManagerV2.Views
 {
-    public class YesNoModalViewController : BSMLAutomaticViewController
+    [HotReload]
+    public class YesNoModal : BSMLAutomaticViewController
     {
-        public static YesNoModalViewController instance;
+        public static YesNoModal instance { get; private set; }
 
         private Action OnConfirm;
         private Action OnDecline;
@@ -46,12 +47,6 @@ namespace SongRequestManagerV2.Views
         private void Awake()
         {
             instance = this;
-        }
-
-        [Inject]
-        public void Const(RequestBotListView controller)
-        {
-            BSMLParser.instance.Parse(Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "SongRequestManagerV2.Views.YesNoModal.bsml"), controller.gameObject, this);
         }
 
         public void ShowDialog(string title, string message, Action onConfirm = null, Action onDecline = null)

@@ -4,19 +4,15 @@ using ChatCore.Models;
 using ChatCore.Models.Twitch;
 using ChatCore.SimpleJSON;
 using HMUI;
-using IPA.Utilities;
 using SongCore;
 using SongRequestManagerV2.Bases;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
 using System.Threading;
 using TMPro;
 using UnityEngine;
 using VRUIControls;
 using Zenject;
-using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 using static SongRequestManagerV2.RequestBot;
 
 namespace SongRequestManagerV2
@@ -32,8 +28,8 @@ namespace SongRequestManagerV2
         [UIComponent("authorNameText")]
         public TextMeshProUGUI _authorNameText;
 
-        [Inject]
-        private PhysicsRaycasterWithCache _physicsRaycaster;
+        //[Inject]
+        //private PhysicsRaycasterWithCache _physicsRaycaster;
 
         /// <summary>説明 を取得、設定</summary>
         private string hint_;
@@ -150,7 +146,6 @@ namespace SongRequestManagerV2
                     dt.Add("Info", (_requestInfo != "") ? " / " + _requestInfo : "");
                     dt.Add("RequestTime", _requestTime.ToLocalTime().ToString("hh:mm"));
                     this.Hint = dt.Parse(RequestBot.SongHintText);
-                    //songName.text = $"{request._song["songName"].Value} <size=50%>{RequestBot.GetRating(ref request._song)} <color=#3fff3f>{pp}</color></size>"; // NEW VERSION
 
                     var imageSet = false;
 

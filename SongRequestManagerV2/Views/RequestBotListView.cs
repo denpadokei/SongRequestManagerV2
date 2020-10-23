@@ -33,6 +33,9 @@ namespace SongRequestManagerV2.Views
 
         private bool confirmDialogActive = false;
 
+        [Inject]
+        private YesNoModal _modal;
+
         // ui elements
 
         /// <summary>説明 を取得、設定</summary>
@@ -475,7 +478,7 @@ namespace SongRequestManagerV2.Views
                 confirmDialogActive = true;
 
                 // show dialog
-                YesNoModalViewController.instance.ShowDialog("Skip Song Warning", $"Skipping {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { confirmDialogActive = false; });
+                _modal.ShowDialog("Skip Song Warning", $"Skipping {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { confirmDialogActive = false; });
             }
         }
         [UIAction("blacklist-click")]
@@ -497,7 +500,7 @@ namespace SongRequestManagerV2.Views
                 confirmDialogActive = true;
 
                 // show dialog
-                YesNoModalViewController.instance.ShowDialog("Blacklist Song Warning", $"Blacklisting {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { confirmDialogActive = false; });
+                _modal.ShowDialog("Blacklist Song Warning", $"Blacklisting {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { confirmDialogActive = false; });
             }
         }
         [UIAction("play-click")]

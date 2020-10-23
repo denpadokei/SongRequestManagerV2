@@ -247,7 +247,7 @@
     <Compile Include="UI\SongListUtils.cs" />
     <Compile Include="UI\SongRequestManagerSettings.cs" />
     <Compile Include="UI\UIHelper.cs" />
-    <Compile Include="Views\YesNoModalViewController.cs" />
+    <Compile Include="Views\YesNoModal.cs" />
     <Compile Include="Utils\HistoryManager.cs" />
     <Compile Include="Utils\Utility.cs" />
     <Compile Include="Views\SRMButton.cs" />

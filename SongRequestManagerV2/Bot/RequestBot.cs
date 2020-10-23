@@ -37,6 +37,7 @@ using SongRequestManagerV2.Views;
 using Zenject;
 using UnityEngine.PlayerLoop;
 using System.Threading;
+using VRUIControls;
 
 namespace SongRequestManagerV2
 {
@@ -55,10 +56,6 @@ namespace SongRequestManagerV2
         }
 
         public static RequestBot Instance { get; private set; }
-        //private RequestBot()
-        //{
-
-        //}
 
         public static ConcurrentQueue<RequestInfo> UnverifiedRequestQueue { get; } = new ConcurrentQueue<RequestInfo>();
         public static Dictionary<string, RequestUserTracker> RequestTracker = new Dictionary<string, RequestUserTracker>();
@@ -91,8 +88,8 @@ namespace SongRequestManagerV2
         private static Dictionary<string, string> songremap = new Dictionary<string, string>();
         public static Dictionary<string, string> deck = new Dictionary<string, string>(); // deck name/content
 
-        [Inject]
-        public SRMButton button { get; set; }
+        //[Inject]
+        //public SRMButton button { get; set; }
         [Inject]
         public DiContainer Container { get; set; }
 
@@ -102,14 +99,15 @@ namespace SongRequestManagerV2
         public static string playedfilename = "";
         public event Action RecevieRequest;
         public event Action DismissRequest;
+        public event Action<Color> ChangeButtonColor;
 
         private static readonly object _lockObject = new object();
 
         [Inject]
-        public async void OnLoad()
+        public async void Constroctor(PhysicsRaycasterWithCache physicsRaycaster)
         {
-            Plugin.Log("Awake start!");
-            
+            Plugin.Log("Constroctor()");
+
 #if UNRELEASED
             var startingmem = GC.GetTotalMemory(true);
 
@@ -173,7 +171,6 @@ namespace SongRequestManagerV2
 
             //NOTJSON.UNITTEST();
 #endif
-
             playedfilename = Path.Combine(Plugin.DataPath, "played.dat"); // Record of all the songs played in the current session
             Plugin.Log("create playd path");
             try {
@@ -241,13 +238,7 @@ namespace SongRequestManagerV2
                 catch (Exception e) {
                     Plugin.Log(e.ToString());
                 }
-
-                //TwitchMessageHandlers.PRIVMSG += PRIVMSG;
-
                 RequestBotConfig.Instance.ConfigChangedEvent += OnConfigChangedEvent;
-
-                //IsPluginReady = true;
-                Plugin.Log("Awake finished!");
             }
             catch (Exception ex) {
                 Plugin.Log(ex.ToString());
@@ -333,7 +324,6 @@ namespace SongRequestManagerV2
         }
         public void Awake()
         {
-            DontDestroyOnLoad(this.gameObject);
             Instance = this;
         }
 
@@ -434,24 +424,20 @@ namespace SongRequestManagerV2
 #endif
         }
 
-        private void FixedUpdate()
-        {
-            if (_configChanged)
-                OnConfigChanged();
-
-            //if (_botMessageQueue.Count > 0)
-              //  SendChatMessage(_botMessageQueue.Dequeue());
-
-            if (_refreshQueue)
-            {
-                if (RequestBotListView.Instance.isActivated)
-                {
-                    RequestBotListView.Instance.UpdateRequestUI(true);
-                    RequestBotListView.Instance.SetUIInteractivity();
-                }
-                _refreshQueue = false;
-            }
-        }
+        //private void FixedUpdate()
+        //{
+        //    if (_configChanged)
+        //        OnConfigChanged();
+        //    if (_refreshQueue)
+        //    {
+        //        if (RequestBotListView.Instance.isActivated)
+        //        {
+        //            RequestBotListView.Instance.UpdateRequestUI(true);
+        //            RequestBotListView.Instance.SetUIInteractivity();
+        //        }
+        //        _refreshQueue = false;
+        //    }
+        //}
 
 // if (!silence) QueueChatMessage($"{request.Key.song["songName"].Value}/{request.Key.song["authorName"].Value} ({songId}) added to the blacklist.");
         private void SendChatMessage(string message)
@@ -835,7 +821,7 @@ namespace SongRequestManagerV2
                     Plugin.Log($"Song {songName} already exists!");
                     DismissRequest?.Invoke();
                     bool success = false;
-                    Dispatcher.RunOnMainThread(button.BackButtonPressed);
+                    Dispatcher.RunOnMainThread(() => DismissRequest?.Invoke());
                     Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(songHash, (s) => success = s, false));
                     if (!request._song.IsNull) {
                         // Display next song message
@@ -852,7 +838,7 @@ namespace SongRequestManagerV2
             Loader.Instance.RefreshSongs(false);
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
             Utility.EmptyDirectory(".requestcache", true);
-            Dispatcher.RunOnMainThread(button.BackButtonPressed);
+            Dispatcher.RunOnMainThread(() => DismissRequest?.Invoke());
             DismissRequest?.Invoke();
             bool success = false;
             Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), (s) => success = s, false));
@@ -869,19 +855,18 @@ namespace SongRequestManagerV2
             try {
                 if (writeSummary)
                     WriteQueueSummaryToFile(); // Write out queue status to file, do it first
-
-
                 Dispatcher.RunOnMainThread(() =>
                 {
-                    if (button != null) {
-                        button.SetButtonIntaractive(true);
-
+                    try {
                         if (RequestQueue.Songs.Count == 0) {
-                            button.SetButtonColor(Color.red);
+                            ChangeButtonColor?.Invoke(Color.red);
                         }
                         else {
-                            button.SetButtonColor(Color.green);
+                            ChangeButtonColor?.Invoke(Color.green);
                         }
+                    }
+                    catch (Exception e) {
+                        Plugin.Logger.Error(e);
                     }
                 });
             }
