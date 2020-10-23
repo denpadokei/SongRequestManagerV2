@@ -23,7 +23,6 @@ namespace SongRequestManagerV2.Installers
         {
             Container.Bind<SongRequest>().AsTransient();
             Container.Bind<SongListUtils>().AsCached();
-            Container.BindViewController<YesNoModal>();
             Container.BindViewController<RequestBotListView>();
             Container.BindViewController<KeyboardViewController>();
             Container.BindFlowCoordinator<RequestFlowCoordinator>();

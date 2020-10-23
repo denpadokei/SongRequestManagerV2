@@ -32,10 +32,6 @@ namespace SongRequestManagerV2.Views
         public bool IsLoading { get; set; }
 
         private bool confirmDialogActive = false;
-
-        [Inject]
-        private YesNoModal _modal;
-
         // ui elements
 
         /// <summary>説明 を取得、設定</summary>
@@ -478,7 +474,7 @@ namespace SongRequestManagerV2.Views
                 confirmDialogActive = true;
 
                 // show dialog
-                _modal.ShowDialog("Skip Song Warning", $"Skipping {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { confirmDialogActive = false; });
+                this.ShowDialog("Skip Song Warning", $"Skipping {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { confirmDialogActive = false; });
             }
         }
         [UIAction("blacklist-click")]
@@ -500,7 +496,7 @@ namespace SongRequestManagerV2.Views
                 confirmDialogActive = true;
 
                 // show dialog
-                _modal.ShowDialog("Blacklist Song Warning", $"Blacklisting {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { confirmDialogActive = false; });
+                this.ShowDialog("Blacklist Song Warning", $"Blacklisting {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { confirmDialogActive = false; });
             }
         }
         [UIAction("play-click")]
@@ -708,6 +704,65 @@ namespace SongRequestManagerV2.Views
             }
             return this.Songs[row] as SongRequest;
         }
+
+        #region Modal
+        private Action OnConfirm;
+        private Action OnDecline;
+
+        [UIComponent("modal")]
+        internal ModalView modal;
+
+        
+        /// <summary>説明 を取得、設定</summary>
+        private string title_;
+        /// <summary>説明 を取得、設定</summary>
+        [UIValue("title")]
+        public string Title
+        {
+            get => this.title_ ?? "";
+
+            set => this.SetProperty(ref this.title_, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private string message_;
+        /// <summary>説明 を取得、設定</summary>
+        [UIValue("message")]
+        public string Message
+        {
+            get => this.message_ ?? "";
+
+            set => this.SetProperty(ref this.message_, value);
+        }
+
+        [UIAction("yes-click")]
+        private void YesClick()
+        {
+            modal.Hide(true);
+            OnConfirm?.Invoke();
+            OnConfirm = null;
+        }
+
+        [UIAction("no-click")]
+        private void NoClick()
+        {
+            modal.Hide(true);
+            OnDecline?.Invoke();
+            OnDecline = null;
+        }
+
+        [UIAction("show-dialog")]
+        public void ShowDialog(string title, string message, Action onConfirm = null, Action onDecline = null)
+        {
+            this.Title = title;
+            this.Message = message;
+
+            OnConfirm = onConfirm;
+            OnDecline = onDecline;
+
+            modal.Show(true);
+        }
+        #endregion
 
         private void PlayPreview(CustomPreviewBeatmapLevel level)
         {
