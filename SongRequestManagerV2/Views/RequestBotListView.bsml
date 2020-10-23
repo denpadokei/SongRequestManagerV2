@@ -1,19 +1,21 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
   <horizontal>
-    <text text='~progress-text' align='BottomLeft'></text>
+    <text text='~progress-text' align='BottomLeft' size-delta-x='60'></text>
     <vertical>
       <page-button event-click="request-list#PageUp" direction='Up'></page-button>
-      <list id='request-list' select-cell='selected-cell'>
-        <!--<stack vertical-fit="Unconstrained" pad="1" hover-hint="~hover-hint" background ="panel-top">
-          <horizontal child-expand-width="false">
-            <image anchor-pos-x="8" pref-width="12" pref-height="4" anchor-min-x="0" anchor-min-y="0" anchor-max-x="0" anchor-max-y="1" id="coverImage"></image>
-            <vertical anchor-pos-x="20" anchor-min-x="0" anchor-max-x="0" child-align="MiddleLeft" horizontal-fit="Unconstrained" vertical-fit="PreferredSize">
-              <text id="songNameText" font-size="4" text="Song" align="MidlineLeft"></text>
-              <text id="authorNameText" font-size="3" text="Author" align="MidlineLeft"></text>
+      <custom-list id='request-list' data='requests' clickable-cells='true' select-cell='selected-cell' min-width='80'>
+        <background tags='selected' background='round-rect-panel'></background>
+        <background tags='hovered' background='panel-top' hover-hint='~hover-hint'></background>
+        <stack>
+          <horizontal vertical-fit='Unconstrained' horizontal-fit='MinSize'>
+            <image id="coverImage" min-height="8" min-width="8" pref-width="10" pref-height="5" anchor-min-x="0" anchor-min-y="0" anchor-max-x="0" anchor-max-y="1" ></image>
+            <vertical horizontal-fit="Unconstrained" min-width="72" child-expand-width="true">
+              <text id="songNameText" word-wrapping="false" text="~song-name"></text>
+              <text id="authorNameText" word-wrapping="false" text="~author-name" color="grey" font-size="3" align="TopLeft"></text>
             </vertical>
           </horizontal>
-        </stack>-->
-      </list>
+        </stack>
+      </custom-list>
       <page-button event-click="request-list#PageDown" direction='Down'></page-button>
     </vertical>
     <vertical>

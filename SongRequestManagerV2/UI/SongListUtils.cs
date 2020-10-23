@@ -9,19 +9,23 @@ using IPA.Loader;
 using SongCore;
 using System.Threading.Tasks;
 using System.Threading;
+using Zenject;
 
 namespace SongRequestManagerV2
 {
-    class SongListUtils
+    public class SongListUtils
     {
-        private static LevelCollectionViewController _levelCollectionViewController = null;
+        [Inject]
+        private LevelCollectionViewController _levelCollectionViewController;
+        [Inject]
+        private SelectLevelCategoryViewController _selectLevelCategoryViewController;
         private static bool _initialized = false;
         //private static bool _songBrowserInstalled = false;
         //private static bool _songDownloaderInstalled = false;
-
-        public static void Initialize()
+        [Inject]
+        public void Initialize()
         {
-            _levelCollectionViewController = Resources.FindObjectsOfTypeAll<LevelCollectionViewController>().FirstOrDefault();
+            
 
             if (!_initialized)
             {
@@ -93,7 +97,7 @@ namespace SongRequestManagerV2
         //    //    ScrollToLevel(selectedLevelId);
         //}
 
-        public static IEnumerator RefreshSongs(bool fullRefresh = false, bool selectOldLevel = true)
+        public IEnumerator RefreshSongs(bool fullRefresh = false, bool selectOldLevel = true)
         {
             //if (!SongLoaderPlugin.SongLoader.AreSongsLoaded) yield break;
             //if (!_standardLevelListViewController) yield break;
@@ -113,14 +117,14 @@ namespace SongRequestManagerV2
             //    ScrollToLevel(selectedLevelId);
         }
 
-        private static void SelectCustomSongPack(int index)
+        private void SelectCustomSongPack(int index)
         {
             // get the Level Filtering Nav Controller, the top bar
             // get the tab bar
-            var selectLevelCategoryViewController = Resources.FindObjectsOfTypeAll<SelectLevelCategoryViewController>().First();
-            var segcontrol = selectLevelCategoryViewController.GetField<IconSegmentedControl, SelectLevelCategoryViewController>("_levelFilterCategoryIconSegmentedControl");
+            //var selectLevelCategoryViewController = Resources.FindObjectsOfTypeAll<SelectLevelCategoryViewController>().First();
+            var segcontrol = _selectLevelCategoryViewController.GetField<IconSegmentedControl, SelectLevelCategoryViewController>("_levelFilterCategoryIconSegmentedControl");
             segcontrol.SelectCellWithNumber(index);
-            selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(segcontrol, index);
+            _selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(segcontrol, index);
         }
 
         //public static SongCore.OverrideClasses.SongCoreCustomLevelCollection BeatSaverDownloaderGetLevelPackWithLevels()
@@ -131,13 +135,13 @@ namespace SongRequestManagerV2
         //    return null;
         //}
 
-        static bool barf(string s)
+        bool barf(string s)
         {
             RequestBot.Instance.QueueChatMessage($"x={s}");
             return true;
         }
 
-        public static IEnumerator ScrollToLevel(string levelID, Action<bool> callback, bool animated, bool isRetry = false)
+        public IEnumerator ScrollToLevel(string levelID, Action<bool> callback, bool animated, bool isRetry = false)
         {
             if (_levelCollectionViewController)
             {
@@ -155,39 +159,32 @@ namespace SongRequestManagerV2
                 yield return new WaitForSeconds(0.5f);
 
                 SelectCustomSongPack(2);
-
-
-                yield return null;
                 //int songIndex = 0;
-                IPreviewBeatmapLevel song = null;
+                var song = Loader.GetLevelByHash(levelID.Split('_').Last());
+                if (song == null) {
+                    Plugin.Logger.Debug("Song not find.");
+                    yield break;
+                }
                 // get the table view
                 var levelsTableView = _levelCollectionViewController.GetField<LevelCollectionTableView, LevelCollectionViewController>("_levelCollectionTableView");
-
-                //RequestBot.Instance.QueueChatMessage($"selecting song: {levelID} pack: {packIndex}");
-                yield return null;
-
-                // get the table view
                 var tableView = levelsTableView.GetField<TableView, LevelCollectionTableView>("_tableView");
-
+                levelsTableView.SelectLevel(song);
+                //RequestBot.Instance.QueueChatMessage($"selecting song: {levelID} pack: {packIndex}");
+                // get the table view
                 // get list of beatmaps, this is pre-sorted, etc
-                var beatmaps = levelsTableView.GetField<IPreviewBeatmapLevel[], LevelCollectionTableView>("_previewBeatmapLevels").ToList();
-
+                //var beatmaps = levelsTableView.GetField<IPreviewBeatmapLevel[], LevelCollectionTableView>("_previewBeatmapLevels").ToList();
                 // get the row number for the song we want
-                song = beatmaps.FirstOrDefault(x => (x.levelID.Split('_')[2] == levelID));
-
+                // beatmaps.FirstOrDefault(x => (x.levelID.Split('_')[2] == levelID));
                 // bail if song is not found, shouldn't happen
-                if (song != null) {
-                    levelsTableView.SelectLevel(song);
-                }
             }
 
-            if (!isRetry)
-            {
+            //if (!isRetry)
+            //{
 
-                yield return SongListUtils.RefreshSongs(false, false);
-                yield return ScrollToLevel(levelID, callback, animated, true);
-                yield break;
-            }
+            //    yield return SongListUtils.RefreshSongs(false, false);
+            //    yield return ScrollToLevel(levelID, callback, animated, true);
+            //    yield break;
+            //}
 
             Plugin.Log($"Failed to scroll to {levelID}!");
             callback?.Invoke(false);

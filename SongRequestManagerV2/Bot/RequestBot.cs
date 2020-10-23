@@ -94,8 +94,12 @@ namespace SongRequestManagerV2
         [Inject]
         public SRMButton button { get; set; }
         [Inject]
-        public static string playedfilename = "";
+        public DiContainer Container { get; set; }
 
+        [Inject]
+        public SongListUtils SongListUtils { get; set; }
+
+        public static string playedfilename = "";
         public event Action RecevieRequest;
         public event Action DismissRequest;
 
@@ -251,8 +255,6 @@ namespace SongRequestManagerV2
             }
 
             Plugin.Logger.Debug("OnLoad()");
-            
-            SongListUtils.Initialize();
 
             WriteQueueSummaryToFile();
             WriteQueueStatusToFile(QueueMessage(RequestBotConfig.Instance.RequestQueueOpen));
@@ -679,12 +681,13 @@ namespace SongRequestManagerV2
 
             RequestTracker[requestor.Id].numRequests++;
             listcollection.add(duplicatelist, song["id"].Value);
+            var req = Container?.Resolve<SongRequest>();
+            req.Init(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo);
             if ((requestInfo.flags.HasFlag(CmdFlags.MoveToTop))) {
-
-                RequestQueue.Songs.Insert(0, new SongRequest(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo));
+                RequestQueue.Songs.Insert(0, req);
             }
             else {
-                RequestQueue.Songs.Add(new SongRequest(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo));
+                RequestQueue.Songs.Add(req);
             }
             RequestQueue.Write();
 

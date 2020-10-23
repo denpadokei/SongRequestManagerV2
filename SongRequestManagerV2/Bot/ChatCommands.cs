@@ -741,7 +741,8 @@ namespace SongRequestManagerV2
 
         public static void QueueSong(ParseState state, JSONObject song)
         {
-            var req = new SongRequest(song, state.user, DateTime.UtcNow, RequestStatus.SongSearch, "search result");
+            var req = Instance.Container?.Resolve<SongRequest>();
+            req.Init(song, state.user, DateTime.UtcNow, RequestStatus.SongSearch, "search result");
 
             if ((state.flags.HasFlag(CmdFlags.MoveToTop)))
                 RequestQueue.Songs.Insert(0, req);

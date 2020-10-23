@@ -21,12 +21,15 @@ namespace SongRequestManagerV2.Installers
     {
         public override void InstallBindings()
         {
+            Container.Bind<SongRequest>().AsTransient();
+            Container.Bind<SongListUtils>().AsCached();
             Container.BindViewController<YesNoModalViewController>();
             Container.BindViewController<RequestBotListView>();
             Container.BindViewController<KeyboardViewController>();
             Container.BindFlowCoordinator<RequestFlowCoordinator>();
             Container.BindViewController<SRMButton>();
             Container.Bind<RequestBot>().FromNewComponentOnNewGameObject("SRMBot").AsSingle().NonLazy();
+            
         }
     }
 }
