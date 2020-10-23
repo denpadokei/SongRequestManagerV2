@@ -18,10 +18,10 @@ using Zenject;
 using BeatSaberMarkupLanguage.ViewControllers;
 using VRUIControls;
 using BeatSaberMarkupLanguage.Attributes;
-using SongPlayListEditer.Bases;
 using System.Collections.ObjectModel;
 using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 using System.ComponentModel;
+using SongRequestManagerV2.Bases;
 
 namespace SongRequestManagerV2.Views
 {
@@ -103,7 +103,9 @@ namespace SongRequestManagerV2.Views
 
         /// <summary>説明 を取得、設定</summary>
         [UIValue("requests")]
-        public ObservableCollection<object> Songs { get; } = new ObservableCollection<object>();
+        public List<object> Songs { get; } = new List<object>();
+
+        //public ObservableCollection<object> Songs { get; } = new ObservableCollection<object>();
 
         /// <summary>説明 を取得、設定</summary>
         private string progressText_;
@@ -161,7 +163,7 @@ namespace SongRequestManagerV2.Views
         }
 
         [UIComponent("request-list")]
-        private CustomListTableData _requestTable;
+        private CustomCellListTableData _requestTable;
 
         [Inject]
         private DiContainer diContainer;
@@ -283,7 +285,7 @@ namespace SongRequestManagerV2.Views
                         Plugin.Logger.Error(e);
                     }
                     Plugin.Logger.Debug($"Songs is null? : {this.Songs == null}");
-                    this.Songs.CollectionChanged += this.Songs_CollectionChanged;
+                    //this.Songs.CollectionChanged += this.Songs_CollectionChanged;
                     this.Songs.Clear();
                     foreach (var item in RequestQueue.Songs) {
                         Plugin.Logger.Debug($"{item}");
@@ -408,12 +410,12 @@ namespace SongRequestManagerV2.Views
                     this._requestTable.data.Clear();
                     if (this.IsShowHistory) {
                         foreach (var item in this.Songs.OfType<SongRequest>()) {
-                            this._requestTable.data.Add(new CustomCellInfo(item._songName, item._authorName, item._coverImage.sprite));
+                            //this._requestTable.data.Add(new CustomCellInfo(item._songName, item._authorName, item.CoverImage.sprite));
                         }
                     }
                     else {
                         foreach (var item in this.Songs.OfType<SongRequest>()) {
-                            this._requestTable.data.Add(new CustomCellInfo(item._songName, item._authorName, item._coverImage.sprite));
+                            //this._requestTable.data.Add(new CustomCellInfo(item._songName, item._authorName, item.CoverImage.sprite));
                         }
                     }
                     this._requestTable.tableView.ReloadData();
@@ -523,17 +525,18 @@ namespace SongRequestManagerV2.Views
         }
 
         [UIAction("selected-cell")]
-        private void SelectedCell(TableView tableView, int row)
+        private void SelectedCell(TableView tableView, object row)
         {
             Plugin.Logger.Debug($"Selected cell : {tableView}({row})");
-            _selectedRow = row;
-            if (row != _lastSelection) {
-                _lastSelection = 0;
-            }
+
+            _selectedRow = this.Songs.IndexOf(row);
+            //if (row != _lastSelection) {
+            //    _lastSelection = 0;
+            //}
 
             // if not in history, disable play button if request is a challenge
             if (!IsShowHistory) {
-                var request = SongInfoForRow(row);
+                var request = SongInfoForRow(_selectedRow);
                 var isChallenge = request._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
                 this.IsPlayButtonEnable = !isChallenge;
             }
@@ -671,6 +674,7 @@ namespace SongRequestManagerV2.Views
                         this.Songs.Add(item);
                     }
                 }
+                this._requestTable?.tableView?.ReloadData();
                 if (_selectedRow == -1) return;
 
                 if (_requestTable.NumberOfCells() > this._selectedRow) {

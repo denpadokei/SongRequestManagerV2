@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SongPlayListEditer.Bases
+namespace SongRequestManagerV2.Bases
 {
     public abstract class ViewContlollerBindableBase : BSMLAutomaticViewController
     {

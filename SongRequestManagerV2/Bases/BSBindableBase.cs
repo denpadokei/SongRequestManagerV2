@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
 
-namespace SongPlayListEditer.Bases
+namespace SongRequestManagerV2.Bases
 {
     public abstract class BSBindableBase : MonoBehaviour, INotifyPropertyChanged
     {

@@ -20,7 +20,8 @@ namespace SongRequestManagerV2
                     foreach (var j in json.AsArray) {
                         try {
                             if (!j.Value.IsNull && j.Value is JSONObject obj) {
-                                var req = new SongRequest(obj);
+                                var req = RequestBot.Instance?.Container?.Resolve<SongRequest>();
+                                req.Init(obj);
                                 songs.Add(req);
                             }
                         }

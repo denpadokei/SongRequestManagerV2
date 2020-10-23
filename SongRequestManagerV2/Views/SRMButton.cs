@@ -9,7 +9,6 @@ using BeatSaberMarkupLanguage.FloatingScreen;
 using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
 using IPA.Utilities;
-using SongPlayListEditer.Bases;
 using SongRequestManagerV2.UI;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;

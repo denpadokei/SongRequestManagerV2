@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace SongPlayListEditer.Bases
+namespace SongRequestManagerV2.Bases
 {
     public abstract class SingletonBindableBase<TController> : NotifiableSingleton<TController> where TController : MonoBehaviour
     {
