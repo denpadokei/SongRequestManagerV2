@@ -71,6 +71,11 @@ namespace SongRequestManagerV2
             if (PluginManager.GetPlugin("Song Request Manager") != null) {
                 return;
             }
+            if (!Directory.Exists(DataPath)) {
+                Directory.CreateDirectory(DataPath);
+            }
+
+
             this.CoreInstance = ChatCoreInstance.Create();
             this.MultiplexerInstance = this.CoreInstance.RunAllServices();
             //RequestBot.Instance.Awake();

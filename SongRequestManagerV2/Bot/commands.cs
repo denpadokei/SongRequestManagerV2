@@ -900,6 +900,12 @@ namespace SongRequestManagerV2
                 // This is probably just runscript
 
                 try {
+                    if (!File.Exists(filename)) {
+                        using (File.Create(filename)) {
+
+                        }
+                    }
+
                     using (StreamReader sr = new StreamReader(filename)) {
                         while (sr.Peek() >= 0) {
                             string line = sr.ReadLine();

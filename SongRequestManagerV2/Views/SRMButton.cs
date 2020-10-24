@@ -35,33 +35,26 @@ namespace SongRequestManagerV2.Views
         public SearchFilterParamsViewController _searchFilterParamsViewController;
         [Inject]
         private RequestBot _bot;
+
+        private Button _button;
         //[Inject]
         //protected PhysicsRaycasterWithCache _physicsRaycaster;
         public HMUI.Screen Screen { get; set; }
 
         public FlowCoordinator Current => _mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
-
-        public string ResourceName => string.Join(".", GetType().Namespace, "SRMButton.bsml");
-
-        public static SRMButton instance { get; private set; }
-
-        protected void Awake()
-        {
-            instance = this;
-        }
         [UIAction("action")]
         public void Action()
         {
             try {
                 Plugin.Log("action");
-                button.interactable = false;
+                _button.interactable = false;
                 SRMButtonPressed();
             }
             catch (Exception e) {
                 Plugin.Logger.Error(e);
             }
             finally {
-                button.interactable = true;
+                _button.interactable = true;
             }
             
         }
@@ -76,22 +69,11 @@ namespace SongRequestManagerV2.Views
 
         internal void SetButtonColor(Color color)
         {
-            //this.ButtonColor = color;
             Plugin.Logger.Debug($"Change button color : {color}");
-            this.button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color = color;
-            this.button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color0 = color;
-            this.button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color1 = color;
-            this.button.interactable = true;
-            //this.button.colors = new ColorBlock()
-            //{
-            //    colorMultiplier = button.colors.colorMultiplier,
-            //    disabledColor = button.colors.disabledColor,
-            //    fadeDuration = button.colors.fadeDuration,
-            //    highlightedColor = button.colors.highlightedColor,
-            //    normalColor = color,
-            //    pressedColor = button.colors.pressedColor,
-            //    selectedColor = button.colors.selectedColor
-            //};
+            this._button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color = color;
+            this._button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color0 = color;
+            this._button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color1 = color;
+            this._button.interactable = true;
         }
 
         internal void BackButtonPressed()
@@ -116,17 +98,15 @@ namespace SongRequestManagerV2.Views
             _bot.ChangeButtonColor += this.SetButtonColor;
             _bot.DismissRequest += this.BackButtonPressed;
             this.Screen = FloatingScreen.CreateFloatingScreen(new Vector2(20f, 20f), false, new Vector3(1.2f, 2.2f, 2.2f), Quaternion.Euler(Vector3.zero));
-            button = UIHelper.CreateUIButton(this.Screen.transform, "OkButton", Vector2.zero, Vector2.zero, Action, "SRM", null);
+            _button = UIHelper.CreateUIButton(this.Screen.transform, "OkButton", Vector2.zero, Vector2.zero, Action, "SRM", null);
             var canvas = this.Screen.GetComponent<Canvas>();
             canvas.sortingOrder = 3;
             this.Screen.SetRootViewController(this, AnimationType.None);
-            Plugin.Logger.Debug($"{button == null}");
+            Plugin.Logger.Debug($"{_button == null}");
 
             Plugin.Log("Created request button!");
             
             Plugin.Logger.Debug("Setup() end");
         }
-        //[UIComponent("srm-button")]
-        private Button button;
     }
 }
