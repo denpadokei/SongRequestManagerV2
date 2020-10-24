@@ -23,7 +23,7 @@
       <button text='~skip-button-text' interactable='~skip-button-enable' hover-hint='Remove the selected request from the queue.' on-click='skip-click'></button>
       <button text='~blacklist-button-text' interactable='~blacklist-button-enable' hover-hint='Block the selected request from being queued in the future.' on-click='blacklist-click'></button>
       <button text='~play-button-text' interactable='~play-button-enable' hover-hint='Download and scroll to the currently selected request.' on-click='play-click'></button>
-      <button text='~queue-button-text' hover-hint='Open/Close the queue.' on-click='queue-click'></button>
+      <button id='queue-button' text='~queue-button-text' hover-hint='Open/Close the queue.' on-click='queue-click'></button>
     </vertical>
   </horizontal>
   <modal id="modal" show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino="false" size-delta-x='90' size-delta-y='45' move-to-center='true'>

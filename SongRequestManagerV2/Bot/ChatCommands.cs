@@ -191,7 +191,7 @@ namespace SongRequestManagerV2
         private string SongSearchFilter(JSONObject song, bool fast = false, SongFilter filter = SongFilter.All) // BUG: This could be nicer
         {
             string songid = song["id"].Value;
-            if (filter.HasFlag(SongFilter.Queue) && RequestQueue.Songs.OfType<SongRequest>().Any(req => song["version"] == song["version"])) return fast ? "X" : $"Request {song["songName"].Value} by {song["authorName"].Value} already exists in queue!";
+            if (filter.HasFlag(SongFilter.Queue) && RequestQueue.Songs.OfType<SongRequest>().Any(req => req._song["version"] == song["version"])) return fast ? "X" : $"Request {song["songName"].Value} by {song["authorName"].Value} already exists in queue!";
 
             if (filter.HasFlag(SongFilter.Blacklist) && listcollection.contains(ref banlist, songid)) return fast ? "X" : $"{song["songName"].Value} by {song["authorName"].Value} ({song["version"].Value}) is banned!";
 
@@ -220,8 +220,10 @@ namespace SongRequestManagerV2
             else if (_digitRegex.IsMatch(request)) matchby = "id";
             if (matchby == "") return fast ? "X" : $"Invalid song id {request} used in RequestInQueue check";
 
-            foreach (SongRequest req in RequestQueue.Songs.ToArray()) {
+            foreach (SongRequest req in RequestQueue.Songs) {
                 var song = req._song;
+                Plugin.Logger.Debug($"{song[matchby].Value}");
+                Plugin.Logger.Debug($"{request}");
                 if (song[matchby].Value == request) return fast ? "X" : $"Request {song["songName"].Value} by {song["authorName"].Value} ({song["version"].Value}) already exists in queue!";
             }
             return ""; // Empty string: The request is not in the RequestQueue.Songs
@@ -337,16 +339,15 @@ namespace SongRequestManagerV2
                 }
 
                 string queuefile = Path.Combine(Plugin.DataPath, request + ".deck");
-                StreamWriter fileWriter = new StreamWriter(queuefile);
+                var sb = new StringBuilder();
 
                 foreach (SongRequest req in RequestQueue.Songs.ToArray()) {
                     var song = req._song;
-                    if (count > 0) fileWriter.Write(",");
-                    fileWriter.Write(song["id"].Value);
+                    if (count > 0) sb.Append(",");
+                    sb.Append(song["id"].Value);
                     count++;
                 }
-
-                fileWriter.Close();
+                File.WriteAllText(queuefile, sb.ToString());
                 if (request != "savedqueue") QueueChatMessage($"wrote {count} entries to {request}");
             }
             catch {
@@ -358,6 +359,10 @@ namespace SongRequestManagerV2
         {
             try {
                 string queuefile = Path.Combine(Plugin.DataPath, state.parameter + ".deck");
+                if (!File.Exists(queuefile)) {
+                    using (File.Create(queuefile)) { };
+                }
+
                 string fileContent = File.ReadAllText(queuefile);
                 string[] integerStrings = fileContent.Split(new char[] { ',', ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -972,23 +977,19 @@ namespace SongRequestManagerV2
 
             try {
                 string statusfile = Path.Combine(Plugin.DataPath, "queuelist.txt");
-                StreamWriter fileWriter = new StreamWriter(statusfile);
-
-                string queuesummary = "";
+                var queuesummary = new StringBuilder();
                 int count = 0;
 
                 foreach (SongRequest req in RequestQueue.Songs.ToArray()) {
                     var song = req._song;
-                    queuesummary += new DynamicText().AddSong(song).Parse(QueueTextFileFormat);  // Format of Queue is now user configurable
+                    queuesummary.Append(new DynamicText().AddSong(song).Parse(QueueTextFileFormat));  // Format of Queue is now user configurable
 
                     if (++count > RequestBotConfig.Instance.MaximumQueueTextEntries) {
-                        queuesummary += "...\n";
+                        queuesummary.Append("...\n");
                         break;
                     }
                 }
-
-                fileWriter.Write(count > 0 ? queuesummary : "Queue is empty.");
-                fileWriter.Close();
+                File.WriteAllText(statusfile, count > 0 ? queuesummary.ToString() : "Queue is empty.");
             }
             catch (Exception ex) {
                 Plugin.Log(ex.ToString());
@@ -999,9 +1000,7 @@ namespace SongRequestManagerV2
         {
             try {
                 string statusfile = Path.Combine(Plugin.DataPath, "queuestatus.txt");
-                StreamWriter fileWriter = new StreamWriter(statusfile);
-                fileWriter.Write(status);
-                fileWriter.Close();
+                File.WriteAllText(statusfile, status);
             }
 
             catch (Exception ex) {
@@ -1115,13 +1114,12 @@ namespace SongRequestManagerV2
             try {
                 string remapfile = Path.Combine(Plugin.DataPath, "remap.list");
 
-                StreamWriter fileWriter = new StreamWriter(remapfile);
+                var sb = new StringBuilder();
 
                 foreach (var entry in songremap) {
-                    fileWriter.Write($"{entry.Key},{entry.Value}\n");
+                    sb.Append($"{entry.Key},{entry.Value}\n");
                 }
-
-                fileWriter.Close();
+                File.WriteAllText(remapfile, sb.ToString());
             }
             catch (Exception ex) {
                 Plugin.Log(ex.ToString());

@@ -1,27 +1,18 @@
-﻿using HMUI;
+﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
+using HMUI;
+using SongCore;
+using SongRequestManagerV2.Bases;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Image = UnityEngine.UI.Image;
-using SongRequestManagerV2.UI;
-using IPA.Utilities;
-using BeatSaberMarkupLanguage;
-//using Utilities = SongRequestManagerV2.Utils.Utility;
-using System.Threading.Tasks;
-using SongCore;
-using SongRequestManagerV2.Extentions;
-using BeatSaberMarkupLanguage.Components;
-using Zenject;
-using BeatSaberMarkupLanguage.ViewControllers;
 using VRUIControls;
-using BeatSaberMarkupLanguage.Attributes;
-using System.Collections.ObjectModel;
-using static BeatSaberMarkupLanguage.Components.CustomListTableData;
-using System.ComponentModel;
-using SongRequestManagerV2.Bases;
+using Zenject;
+using Image = UnityEngine.UI.Image;
 
 namespace SongRequestManagerV2.Views
 {
@@ -164,6 +155,9 @@ namespace SongRequestManagerV2.Views
         [UIComponent("request-list")]
         private CustomCellListTableData _requestTable;
 
+        [UIComponent("queue-button")]
+        private NoTransitionsButton _queueButton;
+
         [Inject]
         private DiContainer diContainer;
         [Inject]
@@ -258,7 +252,7 @@ namespace SongRequestManagerV2.Views
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            
+
             if (firstActivation) {
                 try {
                     if (!Loader.AreSongsLoaded) {
@@ -313,7 +307,7 @@ namespace SongRequestManagerV2.Views
                 RequestBot.AddKeyboard(CenterKeys, "mainpanel.kbd");
                 ColorDeckButtons(CenterKeys, Color.white, Color.magenta);
 #endif
-                    
+
 
                     CenterKeys.DefaultActions();
                     try {
@@ -375,7 +369,7 @@ namespace SongRequestManagerV2.Views
                     Plugin.Log($"{e}");
                 }
             }
-            
+
             this._requestTable.tableView.selectionType = TableViewSelectionType.Single;
             UpdateRequestUI();
             SetUIInteractivity(true);
@@ -401,35 +395,11 @@ namespace SongRequestManagerV2.Views
             }
         }
 
-        private void Songs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            Dispatcher.RunOnMainThread(() =>
-            {
-                try {
-                    this._requestTable.data.Clear();
-                    if (this.IsShowHistory) {
-                        foreach (var item in this.Songs.OfType<SongRequest>()) {
-                            //this._requestTable.data.Add(new CustomCellInfo(item._songName, item._authorName, item.CoverImage.sprite));
-                        }
-                    }
-                    else {
-                        foreach (var item in this.Songs.OfType<SongRequest>()) {
-                            //this._requestTable.data.Add(new CustomCellInfo(item._songName, item._authorName, item.CoverImage.sprite));
-                        }
-                    }
-                    this._requestTable.tableView.ReloadData();
-                }
-                catch (Exception ex) {
-                    Plugin.Logger.Error(ex);
-                }
-            });
-        }
-
         [UIAction("history-click")]
         private void HistoryButtonClick()
         {
             IsShowHistory = !IsShowHistory;
-            
+
             ChangeTitle?.Invoke(IsShowHistory ? "Song Request History" : "Song Request Queue");
             this.Songs.Clear();
             if (this.IsShowHistory) {
@@ -542,7 +512,7 @@ namespace SongRequestManagerV2.Views
 
             UpdateSelectSongInfo();
 
-            SetUIInteractivity(); 
+            SetUIInteractivity();
         }
 
 
@@ -712,7 +682,7 @@ namespace SongRequestManagerV2.Views
         [UIComponent("modal")]
         internal ModalView modal;
 
-        
+
         /// <summary>説明 を取得、設定</summary>
         private string title_;
         /// <summary>説明 を取得、設定</summary>
