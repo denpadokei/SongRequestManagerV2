@@ -222,8 +222,6 @@ namespace SongRequestManagerV2
 
             foreach (SongRequest req in RequestQueue.Songs) {
                 var song = req._song;
-                Plugin.Logger.Debug($"{song[matchby].Value}");
-                Plugin.Logger.Debug($"{request}");
                 if (song[matchby].Value == request) return fast ? "X" : $"Request {song["songName"].Value} by {song["authorName"].Value} ({song["version"].Value}) already exists in queue!";
             }
             return ""; // Empty string: The request is not in the RequestQueue.Songs
