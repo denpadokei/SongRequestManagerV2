@@ -19,8 +19,8 @@ namespace SongRequestManagerV2
     {
         private IChatUser GetLoginUser()
         {
-            if (Plugin.Instance.TwitchService?.LoggedInUser != null) {
-                return Plugin.Instance.TwitchService?.LoggedInUser;
+            if (RequestBot.Instance.TwitchService?.LoggedInUser != null) {
+                return RequestBot.Instance.TwitchService?.LoggedInUser;
             }
             else {
                 var obj = new

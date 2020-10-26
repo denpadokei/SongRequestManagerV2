@@ -140,7 +140,7 @@ namespace SongRequestManagerV2
             {
                 try {
                     _coverImage.enabled = false;
-                    var dt = new RequestBot.DynamicText().AddSong(_song).AddUser(ref _requestor); // Get basic fields
+                    var dt = new RequestBot.DynamicText().AddSong(_song).AddUser(_requestor); // Get basic fields
                     dt.Add("Status", _status.ToString());
                     dt.Add("Info", (_requestInfo != "") ? " / " + _requestInfo : "");
                     dt.Add("RequestTime", _requestTime.ToLocalTime().ToString("hh:mm"));

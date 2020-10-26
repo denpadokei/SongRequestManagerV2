@@ -41,9 +41,9 @@ namespace SongRequestManagerV2.Views
                 mykeyboard.AddKeys(SEARCH, 0.75f);
 
                 mykeyboard.SetAction("CLEAR SEARCH", key => { RequestBot.Instance?.ClearSearch(key); });
-                mykeyboard.SetAction("UNFILTERED", RequestBot.UnfilteredSearch);
-                mykeyboard.SetAction("SEARCH", RequestBot.MSD);
-                mykeyboard.SetAction("NEWEST", RequestBot.Newest);
+                mykeyboard.SetAction("UNFILTERED", RequestBot.Instance.UnfilteredSearch);
+                mykeyboard.SetAction("SEARCH", RequestBot.Instance.MSD);
+                mykeyboard.SetAction("NEWEST", RequestBot.Instance.Newest);
 
 
 #if UNRELEASED

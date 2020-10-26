@@ -22,7 +22,7 @@ namespace SongRequestManagerV2
 
         private string listaccess(ParseState state)
         {
-            QueueChatMessage($"Hi, my name is {state.botcmd.userParameter} , and I'm a list object!");
+            QueueChatMessage($"Hi, my name is {state._botcmd.userParameter} , and I'm a list object!");
             return success;
         }
 
@@ -139,7 +139,7 @@ namespace SongRequestManagerV2
         {
             try
             {
-                StringListManager list = listcollection.OpenList(state.parameter);
+                StringListManager list = listcollection.OpenList(state._parameter);
                 foreach (var entry in list.list) ProcessSongRequest(new ParseState(state, entry)); // Must use copies here, since these are all threads
             }
             catch (Exception ex) { Plugin.Log(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
@@ -149,10 +149,10 @@ namespace SongRequestManagerV2
         // Remove entire list from queue
         private string unqueuelist(ParseState state)
         {
-            state.flags |= Silent;
-            foreach (var entry in listcollection.OpenList(state.parameter).list)
+            state._flags |= Silent;
+            foreach (var entry in listcollection.OpenList(state._parameter).list)
             {
-                state.parameter = entry;
+                state._parameter = entry;
                 DequeueSong(state);
             }
             return success;

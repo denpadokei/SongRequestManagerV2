@@ -7,6 +7,9 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.FloatingScreen;
 using BeatSaberMarkupLanguage.ViewControllers;
+using ChatCore.Interfaces;
+using ChatCore.Services;
+using ChatCore.Services.Twitch;
 using HMUI;
 using IPA.Utilities;
 using SongRequestManagerV2.UI;
@@ -37,6 +40,8 @@ namespace SongRequestManagerV2.Views
         private RequestBot _bot;
 
         private Button _button;
+
+        
         //[Inject]
         //protected PhysicsRaycasterWithCache _physicsRaycaster;
         public HMUI.Screen Screen { get; set; }
@@ -70,9 +75,14 @@ namespace SongRequestManagerV2.Views
         internal void SetButtonColor(Color color)
         {
             Plugin.Logger.Debug($"Change button color : {color}");
-            this._button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color = color;
-            this._button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color0 = color;
-            this._button.GetComponentsInChildren<ImageView>(true).First(x => x.name == "BG").color1 = color;
+            var imageview = this._button.GetComponentsInChildren<ImageView>(true).FirstOrDefault(x => x?.name == "BG");
+            if (imageview == null) {
+                Plugin.Logger.Debug("ImageView is null.");
+                return;
+            }
+            imageview.color = color;
+            imageview.color0 = color;
+            imageview.color1 = color;
             this._button.interactable = true;
         }
 
@@ -91,22 +101,35 @@ namespace SongRequestManagerV2.Views
             }
         }
 
-        [Inject]
-        public void Setup()
+        void Start()
         {
-            Plugin.Logger.Debug("Setup()");
+            Plugin.Logger.Debug("Start()");
+
             _bot.ChangeButtonColor += this.SetButtonColor;
             _bot.DismissRequest += this.BackButtonPressed;
-            this.Screen = FloatingScreen.CreateFloatingScreen(new Vector2(20f, 20f), false, new Vector3(1.2f, 2.2f, 2.2f), Quaternion.Euler(Vector3.zero));
-            _button = UIHelper.CreateUIButton(this.Screen.transform, "OkButton", Vector2.zero, Vector2.zero, Action, "SRM", null);
-            var canvas = this.Screen.GetComponent<Canvas>();
-            canvas.sortingOrder = 3;
-            this.Screen.SetRootViewController(this, AnimationType.None);
+            if (this.Screen == null) {
+                this.Screen = FloatingScreen.CreateFloatingScreen(new Vector2(20f, 20f), false, new Vector3(1.2f, 2.2f, 2.2f), Quaternion.Euler(Vector3.zero));
+                var canvas = this.Screen.GetComponent<Canvas>();
+                canvas.sortingOrder = 3;
+                this.Screen.SetRootViewController(this, AnimationType.None);
+            }
             Plugin.Logger.Debug($"{_button == null}");
+            if (_button == null) {
+                _button = UIHelper.CreateUIButton(this.Screen.transform, "OkButton", Vector2.zero, Vector2.zero, Action, "SRM", null);
+                DontDestroyOnLoad(_button.gameObject);
+            }
 
             Plugin.Log("Created request button!");
-            
-            Plugin.Logger.Debug("Setup() end");
+            Plugin.Logger.Debug("Start() end");
         }
+
+        void OnDestroy()
+        {
+            Plugin.Logger.Debug("OnDestroy");
+            _bot.ChangeButtonColor -= this.SetButtonColor;
+            _bot.DismissRequest -= this.BackButtonPressed;
+        }
+
+        
     }
 }

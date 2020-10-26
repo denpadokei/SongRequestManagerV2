@@ -518,7 +518,10 @@ namespace SongRequestManagerV2.Views
 
         internal void ChangeProgressText(double progress)
         {
-            this.ProgressText = $"Download Progress - {progress * 100:0.00} %";
+            HMMainThreadDispatcher.instance?.Enqueue(() =>
+            {
+                this.ProgressText = $"Download Progress - {progress * 100:0.00} %";
+            });
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)

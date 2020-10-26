@@ -19,6 +19,8 @@ namespace SongRequestManagerV2
         private LevelCollectionViewController _levelCollectionViewController;
         [Inject]
         private SelectLevelCategoryViewController _selectLevelCategoryViewController;
+        [Inject]
+        private GameplaySetupViewController _gameplaySetupViewController;
         private static bool _initialized = false;
         //private static bool _songBrowserInstalled = false;
         //private static bool _songDownloaderInstalled = false;
@@ -159,7 +161,7 @@ namespace SongRequestManagerV2
                 yield return new WaitForSeconds(0.5f);
 
                 SelectCustomSongPack(2);
-                //int songIndex = 0;
+
                 var song = Loader.GetLevelByHash(levelID.Split('_').Last());
                 if (song == null) {
                     Plugin.Logger.Debug("Song not find.");
@@ -167,27 +169,16 @@ namespace SongRequestManagerV2
                 }
                 // get the table view
                 var levelsTableView = _levelCollectionViewController.GetField<LevelCollectionTableView, LevelCollectionViewController>("_levelCollectionTableView");
-                var tableView = levelsTableView.GetField<TableView, LevelCollectionTableView>("_tableView");
                 levelsTableView.SelectLevel(song);
-                //RequestBot.Instance.QueueChatMessage($"selecting song: {levelID} pack: {packIndex}");
-                // get the table view
-                // get list of beatmaps, this is pre-sorted, etc
-                //var beatmaps = levelsTableView.GetField<IPreviewBeatmapLevel[], LevelCollectionTableView>("_previewBeatmapLevels").ToList();
-                // get the row number for the song we want
-                // beatmaps.FirstOrDefault(x => (x.levelID.Split('_')[2] == levelID));
-                // bail if song is not found, shouldn't happen
+                
             }
-
-            //if (!isRetry)
-            //{
-
-            //    yield return SongListUtils.RefreshSongs(false, false);
-            //    yield return ScrollToLevel(levelID, callback, animated, true);
-            //    yield break;
-            //}
-
-            Plugin.Log($"Failed to scroll to {levelID}!");
             callback?.Invoke(false);
+
+            if (RequestBotConfig.Instance?.ClearNoFail == true) {
+                var gameplayModifiersPanelController = this._gameplaySetupViewController.GetField<GameplayModifiersPanelController, GameplaySetupViewController>("_gameplayModifiersPanelController");
+                gameplayModifiersPanelController.gameplayModifiers.SetField("_noFail", false);
+                this._gameplaySetupViewController.RefreshActivePanel();
+            }
         }
     }
 }
