@@ -123,7 +123,7 @@ namespace SongRequestManagerV2
                 the command configuration file (srmcommands.ini).
  
             */
-
+            COMMAND.aliaslist.Clear();
 
             new COMMAND(new string[] { "!request", "!bsr", "!add", "!sr", "!srm" }).Action(ProcessSongRequest).Help(Everyone, "usage: %alias%<songname> or <song id>, omit <,>'s. %|%This adds a song to the request queue. Try and be a little specific. You can look up songs on %beatsaver%", _atleast1);
             new COMMAND(new string[] { "!lookup", "!find" }).AsyncAction(LookupSongs).Help(Mod | Sub | VIP, "usage: %alias%<song name> or <song id>, omit <>'s.%|%Get a list of songs from %beatsaver% matching your search criteria.", _atleast1);
@@ -335,38 +335,38 @@ namespace SongRequestManagerV2
         #region Subcommands
         public string SubcmdEnable(ParseState state)
         {
-            state.botcmd.Flags &= ~CmdFlags.Disabled;
-            state.botcmd.UpdateCommand(COMMAND.ChangedFlags.Flags);
-            Instance?.QueueChatMessage($"{state.command} Enabled.");
+            state._botcmd.Flags &= ~CmdFlags.Disabled;
+            state._botcmd.UpdateCommand(COMMAND.ChangedFlags.Flags);
+            Instance?.QueueChatMessage($"{state._command} Enabled.");
             return endcommand;
         }
 
         public string SubcmdNewest(ParseState state)
         {
-            state.flags |= CmdFlags.Autopick;
-            state.sort = "-id -rating";
+            state._flags |= CmdFlags.Autopick;
+            state._sort = "-id -rating";
             return success;
         }
 
         public string SubcmdPP(ParseState state)
         {
-            state.flags |= CmdFlags.Autopick;
-            state.sort = "-pp -rating -id";
+            state._flags |= CmdFlags.Autopick;
+            state._sort = "-pp -rating -id";
             return success;
         }
 
 
         public string SubcmdBest(ParseState state)
         {
-            state.flags |= CmdFlags.Autopick;
-            state.sort = "-rating -id";
+            state._flags |= CmdFlags.Autopick;
+            state._sort = "-rating -id";
             return success;
         }
 
         public string SubcmdOldest(ParseState state)
         {
-            state.flags |= CmdFlags.Autopick;
-            state.sort = "+id -rating";
+            state._flags |= CmdFlags.Autopick;
+            state._sort = "+id -rating";
             return success;
         }
 
@@ -374,27 +374,27 @@ namespace SongRequestManagerV2
 
         public string SubcmdDisable(ParseState state)
         {
-            state.botcmd.Flags |= CmdFlags.Disabled;
-            state.botcmd.UpdateCommand(COMMAND.ChangedFlags.Flags);
-            Instance?.QueueChatMessage($"{state.command} Disabled.");
+            state._botcmd.Flags |= CmdFlags.Disabled;
+            state._botcmd.UpdateCommand(COMMAND.ChangedFlags.Flags);
+            Instance?.QueueChatMessage($"{state._command} Disabled.");
             return endcommand;
         }
 
         public string SubcmdList(ParseState state)
         {
-            ListList(state.user, state.botcmd.userParameter.ToString());
+            ListList(state._user, state._botcmd.userParameter.ToString());
             return endcommand;
         }
 
         public string SubcmdAdd(ParseState state)
         {
-            Addtolist(state.user, state.botcmd.userParameter.ToString() + " " + state.subparameter);
+            Addtolist(state._user, state._botcmd.userParameter.ToString() + " " + state._subparameter);
             return endcommand;
         }
 
         public string SubcmdRemove(ParseState state)
         {
-            RemoveFromlist(state.user, state.botcmd.userParameter.ToString() + " " + state.subparameter);
+            RemoveFromlist(state._user, state._botcmd.userParameter.ToString() + " " + state._subparameter);
             return endcommand;
         }
 
@@ -402,8 +402,8 @@ namespace SongRequestManagerV2
         public string SubcmdCurrentSong(ParseState state)
         {
             try {
-                if (state.parameter != "") state.parameter += " ";
-                state.parameter += (RequestHistory.Songs[0] as SongRequest)._song["version"];
+                if (state._parameter != "") state._parameter += " ";
+                state._parameter += (RequestHistory.Songs[0] as SongRequest)._song["version"];
                 return "";
             }
             catch {
@@ -416,8 +416,8 @@ namespace SongRequestManagerV2
         public string SubcmdSelected(ParseState state)
         {
             try {
-                if (state.parameter != "") state.parameter += " ";
-                state.parameter += RequestBotListView.Instance?.CurrentlySelectedSong._song["version"];
+                if (state._parameter != "") state._parameter += " ";
+                state._parameter += RequestBotListView.Instance?.CurrentlySelectedSong._song["version"];
                 return "";
             }
             catch {
@@ -432,7 +432,7 @@ namespace SongRequestManagerV2
         public string SubcmdCurrentUser(ParseState state)
         {
             try {
-                if (state.parameter != "") state.parameter += " ";
+                if (state._parameter != "") state._parameter += " ";
                 //state.parameter += RequestHistory.Songs[0][""];
                 return "";
             }
@@ -447,8 +447,8 @@ namespace SongRequestManagerV2
         public string SubcmdPreviousSong(ParseState state)
         {
             try {
-                if (state.parameter != "") state.parameter += " ";
-                state.parameter += (RequestHistory.Songs[1] as SongRequest)._song["version"];
+                if (state._parameter != "") state._parameter += " ";
+                state._parameter += (RequestHistory.Songs[1] as SongRequest)._song["version"];
                 return "";
             }
             catch {
@@ -461,8 +461,8 @@ namespace SongRequestManagerV2
         public string SubcmdNextSong(ParseState state)
         {
             try {
-                if (state.parameter != "") state.parameter += " ";
-                state.parameter += (RequestQueue.Songs[0] as SongRequest)._song["version"];
+                if (state._parameter != "") state._parameter += " ";
+                state._parameter += (RequestQueue.Songs[0] as SongRequest)._song["version"];
                 return "";
             }
             catch {
@@ -475,8 +475,8 @@ namespace SongRequestManagerV2
 
         public string SubcmdShowflags(ParseState state)
         {
-            if (state.subparameter == "") {
-                Instance?.QueueChatMessage($"{state.command} flags: {state.botcmd.Flags.ToString()}");
+            if (state._subparameter == "") {
+                Instance?.QueueChatMessage($"{state._command} flags: {state._botcmd.Flags.ToString()}");
             }
             else {
 
@@ -490,17 +490,17 @@ namespace SongRequestManagerV2
         {
             try {
 
-                string[] flags = state.subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] flags = state._subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                CmdFlags flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state.subparameter);
-                state.botcmd.Flags |= flag;
-                state.botcmd.UpdateCommand(COMMAND.ChangedFlags.Flags);
+                CmdFlags flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state._subparameter);
+                state._botcmd.Flags |= flag;
+                state._botcmd.UpdateCommand(COMMAND.ChangedFlags.Flags);
 
-                if (!state.flags.HasFlag(CmdFlags.SilentResult)) Instance?.QueueChatMessage($"{state.command} flags: {state.botcmd.Flags.ToString()}");
+                if (!state._flags.HasFlag(CmdFlags.SilentResult)) Instance?.QueueChatMessage($"{state._command} flags: {state._botcmd.Flags.ToString()}");
 
             }
             catch {
-                return $"Unable to set  {state.command} flags to {state.subparameter}";
+                return $"Unable to set  {state._command} flags to {state._subparameter}";
             }
 
             return endcommand;
@@ -508,14 +508,14 @@ namespace SongRequestManagerV2
 
         public string SubcmdClearflags(ParseState state)
         {
-            string[] flags = state.subparameter.Split(new char[] { ' ', ',' });
+            string[] flags = state._subparameter.Split(new char[] { ' ', ',' });
 
-            CmdFlags flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state.subparameter);
+            CmdFlags flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state._subparameter);
 
-            state.botcmd.Flags &= ~flag;
+            state._botcmd.Flags &= ~flag;
 
-            state.botcmd.UpdateCommand(COMMAND.ChangedFlags.Flags);
-            if (!state.flags.HasFlag(CmdFlags.SilentResult)) Instance?.QueueChatMessage($"{state.command} flags: {state.botcmd.Flags.ToString()}");
+            state._botcmd.UpdateCommand(COMMAND.ChangedFlags.Flags);
+            if (!state._flags.HasFlag(CmdFlags.SilentResult)) Instance?.QueueChatMessage($"{state._command} flags: {state._botcmd.Flags.ToString()}");
 
             return endcommand;
         }
@@ -524,26 +524,26 @@ namespace SongRequestManagerV2
         public string SubcmdAllow(ParseState state)
         {
             // BUG: No parameter checking
-            string key = state.subparameter.ToLower();
-            state.botcmd.permittedusers = key;
-            if (!state.flags.HasFlag(CmdFlags.SilentResult)) Instance?.QueueChatMessage($"Permit custom userlist set to  {key}.");
+            string key = state._subparameter.ToLower();
+            state._botcmd.permittedusers = key;
+            if (!state._flags.HasFlag(CmdFlags.SilentResult)) Instance?.QueueChatMessage($"Permit custom userlist set to  {key}.");
             return endcommand;
         }
 
         public string SubcmdAlias(ParseState state)
         {
 
-            state.subparameter.ToLower();
+            state._subparameter.ToLower();
 
-            if (state.botcmd.aliases.Contains(state.botcmd.aliases[0]) || COMMAND.aliaslist.ContainsKey(state.botcmd.aliases[0])) {
-                foreach (var alias in state.botcmd.aliases) COMMAND.aliaslist.Remove(alias);
-                state.botcmd.aliases = state.subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                state.botcmd.AddAliases();
-                state.botcmd.UpdateCommand(COMMAND.ChangedFlags.Aliases);
+            if (state._botcmd.aliases.Contains(state._botcmd.aliases[0]) || COMMAND.aliaslist.ContainsKey(state._botcmd.aliases[0])) {
+                foreach (var alias in state._botcmd.aliases) COMMAND.aliaslist.Remove(alias);
+                state._botcmd.aliases = state._subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                state._botcmd.AddAliases();
+                state._botcmd.UpdateCommand(COMMAND.ChangedFlags.Aliases);
 
             }
             else {
-                return $"Unable to set {state.command} aliases to {state.subparameter}";
+                return $"Unable to set {state._command} aliases to {state._subparameter}";
             }
 
             return endcommand;
@@ -552,40 +552,40 @@ namespace SongRequestManagerV2
 
         public string SubcmdSethelp(ParseState state)
         {
-            state.botcmd.ShortHelp = state.subparameter + state.parameter; // This one's different
-            state.botcmd.UpdateCommand(COMMAND.ChangedFlags.Help);
+            state._botcmd.ShortHelp = state._subparameter + state._parameter; // This one's different
+            state._botcmd.UpdateCommand(COMMAND.ChangedFlags.Help);
 
-            if (!state.flags.HasFlag(CmdFlags.SilentResult)) Instance?.QueueChatMessage($"{state.command} help: {state.botcmd.ShortHelp}");
+            if (!state._flags.HasFlag(CmdFlags.SilentResult)) Instance?.QueueChatMessage($"{state._command} help: {state._botcmd.ShortHelp}");
             return endcommand;
         }
 
 
         public string SubcmdSilent(ParseState state)
         {
-            state.flags |= CmdFlags.Silent;
+            state._flags |= CmdFlags.Silent;
             return success;
         }
 
         public string SubcmdTop(ParseState state)
         {
-            state.flags |= CmdFlags.MoveToTop;
+            state._flags |= CmdFlags.MoveToTop;
             return success;
         }
 
         public string SubcmdMod(ParseState state)
         {
-            state.flags |= CmdFlags.NoFilter;
+            state._flags |= CmdFlags.NoFilter;
             return success;
         }
 
 
         public string SubcmdEqual(ParseState state)
         {
-            state.flags |= CmdFlags.SilentResult; // Turn off success messages, but still allow errors.
+            state._flags |= CmdFlags.SilentResult; // Turn off success messages, but still allow errors.
 
-            if (state.botcmd.Flags.HasFlag(CmdFlags.Variable)) {
-                state.botcmd.userParameter.Clear().Append(state.subparameter + state.parameter);
-                state.botcmd.UpdateCommand(COMMAND.ChangedFlags.Variable);
+            if (state._botcmd.Flags.HasFlag(CmdFlags.Variable)) {
+                state._botcmd.userParameter.Clear().Append(state._subparameter + state._parameter);
+                state._botcmd.UpdateCommand(COMMAND.ChangedFlags.Variable);
 
             }
 
@@ -595,10 +595,10 @@ namespace SongRequestManagerV2
 
         public string SubcmdDefault(ParseState state)
         {
-            if (state.botcmd.Flags.HasFlag(CmdFlags.Variable)) {
-                state.botcmd.userParameter.Clear().Append(state.botcmd.UserString);
-                state.botcmd.UpdateCommand(COMMAND.ChangedFlags.Variable);
-                return state.msg($"{state.command} has been reset to its original value.", endcommand);
+            if (state._botcmd.Flags.HasFlag(CmdFlags.Variable)) {
+                state._botcmd.userParameter.Clear().Append(state._botcmd.UserString);
+                state._botcmd.UpdateCommand(COMMAND.ChangedFlags.Variable);
+                return state.msg($"{state._command} has been reset to its original value.", endcommand);
             }
 
             return state.text("You cannot use /default on anything except a Format variable at this time.");
@@ -607,7 +607,7 @@ namespace SongRequestManagerV2
         #endregion
 
         #region COMMAND Class
-        public partial class COMMAND
+        public class COMMAND
         {
             public static StringBuilder commandsummary = new StringBuilder();
             public static bool Loading = false;
@@ -673,8 +673,8 @@ namespace SongRequestManagerV2
             {
                 // BUG: Most of these will be replaced.  
 
-                if (Method2 != null) Method2(state.user, state.parameter, state.flags, state.info);
-                else if (Method != null) Method(state.user, state.parameter);
+                if (Method2 != null) Method2(state._user, state._parameter, state._flags, state._info);
+                else if (Method != null) Method(state._user, state._parameter);
                 //else if (Method3 != null) return Method3(this, state.user, state.parameter, state.flags, state.info);
                 else if (func1 != null) Dispatcher.RunCoroutine(func1(state));
                 else if (subcommand != null) return subcommand(state); // Recommended.
@@ -914,7 +914,7 @@ namespace SongRequestManagerV2
 
                             UserSettings.Append(line).Append("\r\n");
                             // MAGICALLY configure the customized commands
-                            COMMAND.Parse(SerchCreateChatUser(), line, CmdFlags.SilentResult | CmdFlags.Local);
+                            COMMAND.Parse(Instance.SerchCreateChatUser(), line, CmdFlags.SilentResult | CmdFlags.Local);
                         }
                         sr.Close();
                     }
@@ -935,41 +935,41 @@ namespace SongRequestManagerV2
 
         public class ParseState
         {
-            public IChatUser user;
-            public String request;
-            public CmdFlags flags;
-            public string info;
+            public IChatUser _user;
+            public String _request;
+            public CmdFlags _flags;
+            public string _info;
 
-            public string command = null;
-            public string parameter = "";
-            public string sort = "";
+            public string _command = null;
+            public string _parameter = "";
+            public string _sort = "";
 
-            public COMMAND botcmd = null;
+            public COMMAND _botcmd = null;
 
-            public string subparameter = "";
+            public string _subparameter = "";
 
             // Object clone constructor. Mostly used when spawning multiple threads against a single command
             public ParseState(ParseState state, string parameter = null)
             {
                 // These are references
-                this.user = state.user;
-                this.botcmd = state.botcmd;
+                this._user = state._user;
+                this._botcmd = state._botcmd;
 
-                this.flags = state.flags;
-                this.parameter = state.parameter;
-                if (parameter != null) this.parameter = parameter;
-                this.subparameter = state.subparameter;
-                this.command = state.command;
-                this.info = state.info;
-                this.sort = state.sort;
+                this._flags = state._flags;
+                this._parameter = state._parameter;
+                if (parameter != null) this._parameter = parameter;
+                this._subparameter = state._subparameter;
+                this._command = state._command;
+                this._info = state._info;
+                this._sort = state._sort;
             }
 
             public ParseState(ref IChatUser user, ref string request, CmdFlags flags, ref string info)
             {
-                this.user = user;
-                this.request = request;
-                this.flags = flags;
-                this.info = info;
+                this._user = user;
+                this._request = request;
+                this._flags = flags;
+                this._info = info;
             }
 
             // BUG: Execute command and subcommand can probably be largely unified soon
@@ -979,13 +979,13 @@ namespace SongRequestManagerV2
                 Plugin.Log("Execute SubCommand");
                 int commandstart = 0;
 
-                if (parameter.Length < 2) return notsubcommand;
+                if (_parameter.Length < 2) return notsubcommand;
 
-                int subcommandend = parameter.IndexOfAny(new[] { ' ', '/' }, 1);
-                if (subcommandend == -1) subcommandend = parameter.Length;
+                int subcommandend = _parameter.IndexOfAny(new[] { ' ', '/' }, 1);
+                if (subcommandend == -1) subcommandend = _parameter.Length;
 
-                int subcommandsectionend = parameter.IndexOf('/', 1);
-                if (subcommandsectionend == -1) subcommandsectionend = parameter.Length;
+                int subcommandsectionend = _parameter.IndexOf('/', 1);
+                if (subcommandsectionend == -1) subcommandsectionend = _parameter.Length;
 
                 //RequestBot.Instance.QueueChatMessage($"parameter [{parameter}] ({subcommandend},{subcommandsectionend})");
 
@@ -993,9 +993,9 @@ namespace SongRequestManagerV2
 
                 if (commandlength == 0) return notsubcommand;
 
-                string subcommand = parameter.Substring(commandstart, commandlength).ToLower();
+                string subcommand = _parameter.Substring(commandstart, commandlength).ToLower();
 
-                subparameter = (subcommandsectionend - subcommandend > 0) ? parameter.Substring(subcommandend, subcommandsectionend - subcommandend).Trim(' ') : "";
+                _subparameter = (subcommandsectionend - subcommandend > 0) ? _parameter.Substring(subcommandend, subcommandsectionend - subcommandend).Trim(' ') : "";
 
                 COMMAND subcmd;
                 if (!COMMAND.aliaslist.TryGetValue(subcommand, out subcmd)) return notsubcommand;
@@ -1003,13 +1003,13 @@ namespace SongRequestManagerV2
                 if (!subcmd.Flags.HasFlag(CmdFlags.Subcommand)) return notsubcommand;
                 // BUG: Need to check subcmd permissions here.     
 
-                if (!HasRights(ref subcmd, ref user, flags)) return error($"No permission to use {subcommand}");
+                if (!HasRights(ref subcmd, ref _user, _flags)) return error($"No permission to use {subcommand}");
 
                 if (subcmd.Flags.HasFlag(CmdFlags.NoParameter)) {
-                    parameter = parameter.Substring(subcommandend).Trim(' ');
+                    _parameter = _parameter.Substring(subcommandend).Trim(' ');
                 }
                 else {
-                    parameter = parameter.Substring(subcommandsectionend);
+                    _parameter = _parameter.Substring(subcommandsectionend);
                 }
 
                 try {
@@ -1024,7 +1024,7 @@ namespace SongRequestManagerV2
 
             public string msg(string text, string result = success)
             {
-                if (!flags.HasFlag(CmdFlags.SilentResult)) new DynamicText().AddUser(ref user).AddBotCmd(ref botcmd).QueueMessage(ref text);
+                if (!_flags.HasFlag(CmdFlags.SilentResult)) new DynamicText().AddUser(_user).AddBotCmd(_botcmd).QueueMessage(ref text);
                 return result;
             }
 
@@ -1035,18 +1035,18 @@ namespace SongRequestManagerV2
 
             public string helptext(bool showlong = false)
             {
-                return new DynamicText().AddUser(ref user).AddBotCmd(ref botcmd).Parse(ref botcmd.ShortHelp, showlong);
+                return new DynamicText().AddUser(_user).AddBotCmd(_botcmd).Parse(_botcmd.ShortHelp, showlong);
             }
 
             public string text(string text) // Return a formatted text message
             {
-                return new DynamicText().AddUser(ref user).AddBotCmd(ref botcmd).Parse(ref text);
+                return new DynamicText().AddUser(_user).AddBotCmd(_botcmd).Parse(text);
             }
 
-            static string done = "X";
+            static readonly string _done = "X";
             public async void ExecuteCommand()
             {
-                if (!COMMAND.aliaslist.TryGetValue(command, out botcmd)) {
+                if (!COMMAND.aliaslist.TryGetValue(_command, out _botcmd)) {
                     Plugin.Logger.Info("Unknown command");
                     return; // Unknown command
                 } 
@@ -1063,8 +1063,8 @@ namespace SongRequestManagerV2
                     Plugin.Log($"errormsg : {errormsg}");
                     if (errormsg == notsubcommand) break;
                     if (errormsg != "") {
-                        if (errormsg == done) {
-                            flags |= CmdFlags.Disabled; // Temporarily disable the rest of the command - flags is local parse state flag.
+                        if (errormsg == _done) {
+                            _flags |= CmdFlags.Disabled; // Temporarily disable the rest of the command - flags is local parse state flag.
                             continue;
                         }
                         else {
@@ -1075,41 +1075,41 @@ namespace SongRequestManagerV2
                     }
                 }
 
-                if (botcmd.ChangedParameters != 0 && !botcmd.ChangedParameters.HasFlag(COMMAND.ChangedFlags.Saved)) {
+                if (_botcmd.ChangedParameters != 0 && !_botcmd.ChangedParameters.HasFlag(COMMAND.ChangedFlags.Saved)) {
                     if (COMMAND.Loading == false) COMMAND.WriteCommandConfiguration();
-                    botcmd.ChangedParameters |= COMMAND.ChangedFlags.Saved;
+                    _botcmd.ChangedParameters |= COMMAND.ChangedFlags.Saved;
                 }
 
-                if (botcmd.Flags.HasFlag(CmdFlags.Disabled) || flags.HasFlag(CmdFlags.Disabled)) return; // Disabled commands fail silently
+                if (_botcmd.Flags.HasFlag(CmdFlags.Disabled) || _flags.HasFlag(CmdFlags.Disabled)) return; // Disabled commands fail silently
 
                 // Check permissions first
 
-                bool allow = HasRights(ref botcmd, ref user, flags);
+                bool allow = HasRights(ref _botcmd, ref _user, _flags);
 
 
                 // Num is Nani?
-                if (!allow && !botcmd.Flags.HasFlag(CmdFlags.BypassRights) && !listcollection.contains(ref botcmd.permittedusers, user.UserName.ToLower())) {
-                    CmdFlags twitchpermission = botcmd.Flags & CmdFlags.TwitchLevel;
-                    if (!botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) Instance?.QueueChatMessage($"{command} is restricted to {twitchpermission.ToString()}");
+                if (!allow && !_botcmd.Flags.HasFlag(CmdFlags.BypassRights) && !listcollection.contains(ref _botcmd.permittedusers, _user.UserName.ToLower())) {
+                    CmdFlags twitchpermission = _botcmd.Flags & CmdFlags.TwitchLevel;
+                    if (!_botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) Instance?.QueueChatMessage($"{_command} is restricted to {twitchpermission.ToString()}");
                     return;
                 }
 
-                if (parameter == "?") // Handle per command help requests - If permitted.
+                if (_parameter == "?") // Handle per command help requests - If permitted.
                 {
-                    ShowHelpMessage(ref botcmd, ref user, parameter, true);
+                    ShowHelpMessage(ref _botcmd, ref _user, _parameter, true);
                     return;
                 }
 
                 // Check regex
 
-                if (!botcmd.regexfilter.IsMatch(parameter)) {
-                    if (!botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) ShowHelpMessage(ref botcmd, ref user, parameter, false);
+                if (!_botcmd.regexfilter.IsMatch(_parameter)) {
+                    if (!_botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) ShowHelpMessage(ref _botcmd, ref _user, _parameter, false);
                     return;
                 }
 
                 try {
-                    string errormsg = await botcmd.Execute(this); // Call the command
-                    if (errormsg != "" && !flags.HasFlag(CmdFlags.SilentError)) {
+                    string errormsg = await _botcmd.Execute(this); // Call the command
+                    if (errormsg != "" && !_flags.HasFlag(CmdFlags.SilentError)) {
                         Instance.QueueChatMessage(errormsg);
                     }
                 }
@@ -1134,7 +1134,7 @@ namespace SongRequestManagerV2
                 return Task.Run(() =>
                 {
                     Plugin.Logger.Info("Start ParceCommand in ParseCommand()");
-                    Plugin.Logger.Info($"request : {this.request}");
+                    Plugin.Logger.Info($"request : {this._request}");
 
                     // Notes for later.
                     //var match = Regex.Match(request, "^!(?<command>[^ ^/]*?<parameter>.*)");
@@ -1144,16 +1144,16 @@ namespace SongRequestManagerV2
                     int parameterstart = 0;
 
                     // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
-                    while (parameterstart < request.Length && (request[parameterstart] != '=' && request[parameterstart] != '/' && request[parameterstart] != ' ')) parameterstart++;  // Command name ends with #... for now, I'll clean up some more later           
+                    while (parameterstart < _request.Length && (_request[parameterstart] != '=' && _request[parameterstart] != '/' && _request[parameterstart] != ' ')) parameterstart++;  // Command name ends with #... for now, I'll clean up some more later           
                     int commandlength = parameterstart - commandstart;
-                    while (parameterstart < request.Length && request[parameterstart] == ' ') parameterstart++; // Eat the space(s) if that's the separator after the command
+                    while (parameterstart < _request.Length && _request[parameterstart] == ' ') parameterstart++; // Eat the space(s) if that's the separator after the command
                     if (commandlength == 0) return this;
 
-                    command = request.Substring(commandstart, commandlength).ToLower();
-                    Plugin.Logger.Info($"command : {this.command}");
-                    if (COMMAND.aliaslist.ContainsKey(command)) {
+                    _command = _request.Substring(commandstart, commandlength).ToLower();
+                    Plugin.Logger.Info($"command : {this._command}");
+                    if (COMMAND.aliaslist.ContainsKey(_command)) {
                         Plugin.Log("Contain ailias commad");
-                        parameter = request.Substring(parameterstart);
+                        _parameter = _request.Substring(parameterstart);
 
                         try {
                             Plugin.Log("Start command");
@@ -1180,19 +1180,19 @@ namespace SongRequestManagerV2
         {
             if (botcmd.Flags.HasFlag(CmdFlags.Disabled)) return; // Make sure we're allowed to show help
 
-            new DynamicText().AddUser(ref user).AddBotCmd(ref botcmd).QueueMessage(ref botcmd.ShortHelp, showlong);
+            new DynamicText().AddUser(user).AddBotCmd(botcmd).QueueMessage(ref botcmd.ShortHelp, showlong);
             return;
         }
 
         // Get help on a command
         private string help(ParseState state)
         {
-            if (state.parameter == "") {
+            if (state._parameter == "") {
                 var msg = new QueueLongMessage();
                 msg.Header("Usage: help < ");
                 foreach (var entry in COMMAND.aliaslist) {
                     var botcmd = entry.Value;
-                    if (HasRights(ref botcmd, ref state.user, 0) && !botcmd.Flags.HasFlag(Subcmd) && !botcmd.Flags.HasFlag(Var))
+                    if (HasRights(ref botcmd, ref state._user, 0) && !botcmd.Flags.HasFlag(Subcmd) && !botcmd.Flags.HasFlag(Var))
 
                         msg.Add($"{entry.Key.TrimStart('!')}", " "); // BUG: Removes the built in ! in the commands, letting it slide... for now 
                 }
@@ -1200,17 +1200,17 @@ namespace SongRequestManagerV2
                 msg.end("...", $"No commands available >");
                 return success;
             }
-            if (COMMAND.aliaslist.ContainsKey(state.parameter.ToLower())) {
-                var BotCmd = COMMAND.aliaslist[state.parameter.ToLower()];
-                ShowHelpMessage(ref BotCmd, ref state.user, state.parameter, true);
+            if (COMMAND.aliaslist.ContainsKey(state._parameter.ToLower())) {
+                var BotCmd = COMMAND.aliaslist[state._parameter.ToLower()];
+                ShowHelpMessage(ref BotCmd, ref state._user, state._parameter, true);
             }
-            else if (COMMAND.aliaslist.ContainsKey("!" + state.parameter.ToLower())) // BUG: Ugly code, gets help on ! version of command
+            else if (COMMAND.aliaslist.ContainsKey("!" + state._parameter.ToLower())) // BUG: Ugly code, gets help on ! version of command
             {
-                var BotCmd = COMMAND.aliaslist["!" + state.parameter.ToLower()];
-                ShowHelpMessage(ref BotCmd, ref state.user, state.parameter, true);
+                var BotCmd = COMMAND.aliaslist["!" + state._parameter.ToLower()];
+                ShowHelpMessage(ref BotCmd, ref state._user, state._parameter, true);
             }
             else {
-                QueueChatMessage($"Unable to find help for {state.parameter}.");
+                QueueChatMessage($"Unable to find help for {state._parameter}.");
             }
             return success;
         }

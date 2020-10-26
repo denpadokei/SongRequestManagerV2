@@ -32,11 +32,8 @@ namespace SongRequestManagerV2
         private static PluginMetadata _meta;
 
         public static IPALogger Logger { get; internal set; }
-        private static RequestBot _bot;
 
-        public ChatCoreInstance CoreInstance { get; internal set; }
-        public ChatServiceMultiplexer MultiplexerInstance { get; internal set; }
-        public TwitchService TwitchService { get; internal set; }
+        public static ChatCoreInstance CoreInstance { get; internal set; }
 
         public bool IsAtMainMenu = true;
         public bool IsApplicationExiting = false;
@@ -74,16 +71,7 @@ namespace SongRequestManagerV2
             if (!Directory.Exists(DataPath)) {
                 Directory.CreateDirectory(DataPath);
             }
-
-
-            this.CoreInstance = ChatCoreInstance.Create();
-            this.MultiplexerInstance = this.CoreInstance.RunAllServices();
-            //RequestBot.Instance.Awake();
-            //if (Instance != null) return;
-            //Instance = this;
-            Dispatcher.Initialize();
-            
-            
+            CoreInstance = ChatCoreInstance.Create();
             SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
             // setup handle for fresh menu scene changes
             BSEvents.OnLoad();
@@ -97,33 +85,11 @@ namespace SongRequestManagerV2
             Base64Sprites.Init();
         }
 
-        private void MultiplexerInstance_OnJoinChannel(IChatService arg1, IChatChannel arg2)
-        {
-            Log($"Joined! : [{arg1.DisplayName}][{arg2.Name}]");
-            if (arg1 is TwitchService twitchService) {
-                this.TwitchService = twitchService;
-            }
-        }
-
-        private void MultiplexerInstance_OnLogin(IChatService obj)
-        {
-            Log($"Loged in! : [{obj.DisplayName}]");
-            if (obj is TwitchService twitchService) {
-                this.TwitchService = twitchService;
-            }
-        }
+        
 
         private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenes)
         {
-            Log("Menu Scene Loaded Fresh!");
-            this.MultiplexerInstance.OnLogin -= this.MultiplexerInstance_OnLogin;
-            this.MultiplexerInstance.OnLogin += this.MultiplexerInstance_OnLogin;
-            this.MultiplexerInstance.OnJoinChannel -= this.MultiplexerInstance_OnJoinChannel;
-            this.MultiplexerInstance.OnJoinChannel += this.MultiplexerInstance_OnJoinChannel;
-            this.MultiplexerInstance.OnTextMessageReceived -= RequestBot.Instance.RecievedMessages;
-            this.MultiplexerInstance.OnTextMessageReceived += RequestBot.Instance.RecievedMessages;
             
-            this.TwitchService = this.MultiplexerInstance.GetTwitchService();
 
             if (RequestBotConfig.IsStartServer) {
                 BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;

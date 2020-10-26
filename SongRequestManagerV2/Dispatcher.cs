@@ -6,9 +6,8 @@ using System.Collections;
 
 namespace SongRequestManagerV2
 {
-    public class Dispatcher : MonoBehaviour
+    public class Dispatcher
     {
-        private static Dispatcher _instance;
         public static void RunCoroutine(IEnumerator enumerator) => HMMainThreadDispatcher.instance.Enqueue(enumerator);
 
         public static void RunOnMainThread(Action action) => HMMainThreadDispatcher.instance.Enqueue(action);
@@ -24,20 +23,6 @@ namespace SongRequestManagerV2
                     Plugin.Logger.Error(e);
                 }
             });
-        }
-
-        public static void Initialize()
-        {
-            Plugin.Log("Start Initialize");
-            if (_instance == null) {
-                try {
-                    _instance = new GameObject("Dispatcher").AddComponent<Dispatcher>();
-                    DontDestroyOnLoad(_instance.gameObject);
-                }
-                catch (Exception e) {
-                    Plugin.Log($"{e}");
-                }
-            }
         }
     }
 }

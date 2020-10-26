@@ -107,7 +107,6 @@ namespace SongRequestManagerV2
         internal void Setup()
         {
             this.SongName = $"{_songName} <size=50%>{RequestBot.GetRating(ref _song)}";
-            this.AuthorName = _authorName;
             this.SetCover();
         }
 
@@ -141,10 +140,11 @@ namespace SongRequestManagerV2
             {
                 try {
                     _coverImage.enabled = false;
-                    var dt = new RequestBot.DynamicText().AddSong(_song).AddUser(ref _requestor); // Get basic fields
+                    var dt = new RequestBot.DynamicText().AddSong(_song).AddUser(_requestor); // Get basic fields
                     dt.Add("Status", _status.ToString());
                     dt.Add("Info", (_requestInfo != "") ? " / " + _requestInfo : "");
                     dt.Add("RequestTime", _requestTime.ToLocalTime().ToString("hh:mm"));
+                    this.AuthorName = dt.Parse(RequestBot.QueueListRow2);
                     this.Hint = dt.Parse(RequestBot.SongHintText);
 
                     var imageSet = false;
