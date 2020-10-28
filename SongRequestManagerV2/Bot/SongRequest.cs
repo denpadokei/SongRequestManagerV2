@@ -6,6 +6,7 @@ using ChatCore.Utilities;
 using HMUI;
 using SongCore;
 using SongRequestManagerV2.Bases;
+using SongRequestManagerV2.Bot;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -27,6 +28,12 @@ namespace SongRequestManagerV2
 
         [UIComponent("authorNameText")]
         public TextMeshProUGUI _authorNameText;
+
+        [Inject]
+        RequestBot _bot;
+
+        [Inject]
+        DynamicText.DynamicTextFactory _textFactory;
 
         //[Inject]
         //private PhysicsRaycasterWithCache _physicsRaycaster;
@@ -76,12 +83,8 @@ namespace SongRequestManagerV2
         private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(4, 4);
 
         private static readonly Dictionary<string, Texture2D> _cachedTextures = new Dictionary<string, Texture2D>();
-        public SongRequest()
-        {
 
-        }
-
-        public void Init(JSONObject obj)
+        public SongRequest Init(JSONObject obj)
         {
             this.Init(
                 obj["song"].AsObject,
@@ -90,9 +93,10 @@ namespace SongRequestManagerV2
                 (RequestStatus)Enum.Parse(typeof(RequestStatus),
                 obj["status"].Value),
                 obj["requestInfo"].Value);
+            return this;
         }
 
-        public void Init(JSONObject song, IChatUser requestor, DateTime requestTime, RequestStatus status = RequestStatus.Invalid, string requestInfo = "")
+        public SongRequest Init(JSONObject song, IChatUser requestor, DateTime requestTime, RequestStatus status = RequestStatus.Invalid, string requestInfo = "")
         {
             this._song = song;
             this._songName = song["songName"].Value;
@@ -101,12 +105,13 @@ namespace SongRequestManagerV2
             this._status = status;
             this._requestTime = requestTime;
             this._requestInfo = requestInfo;
+            return this;
         }
 
         [UIAction("#post-parse")]
         internal void Setup()
         {
-            this.SongName = $"{_songName} <size=50%>{RequestBot.GetRating(ref _song)}";
+            this.SongName = $"{_songName} <size=50%>{_bot.GetRating(ref _song)}";
             this.SetCover();
         }
 
@@ -140,7 +145,7 @@ namespace SongRequestManagerV2
             {
                 try {
                     _coverImage.enabled = false;
-                    var dt = new RequestBot.DynamicText().AddSong(_song).AddUser(_requestor); // Get basic fields
+                    var dt = _textFactory.Create().AddSong(_song).AddUser(_requestor); // Get basic fields
                     dt.Add("Status", _status.ToString());
                     dt.Add("Info", (_requestInfo != "") ? " / " + _requestInfo : "");
                     dt.Add("RequestTime", _requestTime.ToLocalTime().ToString("hh:mm"));
@@ -215,6 +220,11 @@ namespace SongRequestManagerV2
                 Plugin.Log($"{e}");
                 return new UnknownChatUser(obj["requestor"].AsObject.ToString());
             }
+        }
+
+        public class SongRequestFactory : PlaceholderFactory<SongRequest>
+        {
+
         }
     }
 }

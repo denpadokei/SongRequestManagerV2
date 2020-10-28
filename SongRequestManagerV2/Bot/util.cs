@@ -4,6 +4,10 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 using System.IO.Compression;
+using SongRequestManagerV2.Models;
+using ChatCore.Interfaces;
+using SongRequestManagerV2.Statics;
+using ChatCore.Models.Twitch;
 // Feature requests: Add Reason for being banned to banlist
 
 namespace SongRequestManagerV2
@@ -167,5 +171,17 @@ namespace SongRequestManagerV2
 
         public static StringNormalization normalize = new StringNormalization();
 
+        public static bool HasRights(SRMCommand botcmd, IChatUser user, CmdFlags flags)
+        {
+            if (flags.HasFlag(CmdFlags.Local)) return true;
+            if (botcmd.Flags.HasFlag(CmdFlags.Disabled)) return false;
+            if (botcmd.Flags.HasFlag(CmdFlags.Everyone)) return true; // Not sure if this is the best approach actually, not worth thinking about right now
+            if (user.IsModerator & RequestBotConfig.Instance.ModFullRights) return true;
+            if (user.IsBroadcaster & botcmd.Flags.HasFlag(CmdFlags.Broadcaster)) return true;
+            if (user.IsModerator & botcmd.Flags.HasFlag(CmdFlags.Mod)) return true;
+            if (user is TwitchUser twitchUser && twitchUser.IsSubscriber & botcmd.Flags.HasFlag(CmdFlags.Sub)) return true;
+            if (user is TwitchUser twitchUser1 && twitchUser1.IsVip & botcmd.Flags.HasFlag(CmdFlags.VIP)) return true;
+            return false;
+        }
     }
 }

@@ -1,11 +1,17 @@
 ﻿using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
 using UnityEngine;
+using Zenject;
 
 namespace SongRequestManagerV2.Views
 {
     public class KeyboardViewController : BSMLViewController
     {
+        [Inject]
+        private KEYBOARD.KEYBOARDFactiry _factiry;
+        [Inject]
+        RequestBot _bot;
+
         public override string Content => @"<bg></bg>";
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -15,7 +21,7 @@ namespace SongRequestManagerV2.Views
                 KeyboardContainer.SetParent(rectTransform, false);
                 KeyboardContainer.sizeDelta = new Vector2(60f, 40f);
 
-                var mykeyboard = new KEYBOARD(KeyboardContainer, "");
+                var mykeyboard = this._factiry.Create().Setup(KeyboardContainer, "");
 
 #if UNRELEASED
                 //mykeyboard.AddKeys(BOTKEYS, 0.4f);
@@ -40,10 +46,10 @@ namespace SongRequestManagerV2.Views
                 mykeyboard.SetButtonType("OkButton"); // Adding this alters button positions??! Why?
                 mykeyboard.AddKeys(SEARCH, 0.75f);
 
-                mykeyboard.SetAction("CLEAR SEARCH", key => { RequestBot.Instance?.ClearSearch(key); });
-                mykeyboard.SetAction("UNFILTERED", RequestBot.Instance.UnfilteredSearch);
-                mykeyboard.SetAction("SEARCH", RequestBot.Instance.MSD);
-                mykeyboard.SetAction("NEWEST", RequestBot.Instance.Newest);
+                mykeyboard.SetAction("CLEAR SEARCH", key => { _bot?.ClearSearch(key); });
+                mykeyboard.SetAction("UNFILTERED", _bot.UnfilteredSearch);
+                mykeyboard.SetAction("SEARCH", _bot.MSD);
+                mykeyboard.SetAction("NEWEST", _bot.Newest);
 
 
 #if UNRELEASED
@@ -51,7 +57,7 @@ namespace SongRequestManagerV2.Views
 #endif
 
                 // The UI for this might need a bit of work.
-                RequestBot.AddKeyboard(mykeyboard, "RightPanel.kbd");
+                mykeyboard.AddKeyboard("RightPanel.kbd");
             }
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
         }

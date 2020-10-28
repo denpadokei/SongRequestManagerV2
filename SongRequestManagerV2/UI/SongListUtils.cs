@@ -140,11 +140,11 @@ namespace SongRequestManagerV2
         //    return null;
         //}
 
-        bool barf(string s)
-        {
-            RequestBot.Instance.QueueChatMessage($"x={s}");
-            return true;
-        }
+        //bool barf(string s)
+        //{
+        //    RequestBot.Instance.QueueChatMessage($"x={s}");
+        //    return true;
+        //}
 
         public IEnumerator ScrollToLevel(string levelID, Action<bool> callback, bool animated, bool isRetry = false)
         {

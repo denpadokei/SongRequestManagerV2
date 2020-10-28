@@ -107,6 +107,7 @@ namespace SongRequestManagerV2.Views
 
             _bot.ChangeButtonColor += this.SetButtonColor;
             _bot.DismissRequest += this.BackButtonPressed;
+            _bot.RefreshListRequest += this.RefreshListRequest;
             if (this.Screen == null) {
                 this.Screen = FloatingScreen.CreateFloatingScreen(new Vector2(20f, 20f), false, new Vector3(1.2f, 2.2f, 2.2f), Quaternion.Euler(Vector3.zero));
                 var canvas = this.Screen.GetComponent<Canvas>();
@@ -121,6 +122,11 @@ namespace SongRequestManagerV2.Views
 
             Plugin.Log("Created request button!");
             Plugin.Logger.Debug("Start() end");
+        }
+
+        private void RefreshListRequest(bool obj)
+        {
+            this._requestFlow.RefreshSongList(obj);
         }
 
         void OnDestroy()

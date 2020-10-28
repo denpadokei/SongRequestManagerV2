@@ -14,6 +14,8 @@ using System.Security.Cryptography;
 
 using SongRequestManagerV2.Extentions;
 using ChatCore.Utilities;
+using SongRequestManagerV2.Models;
+using SongRequestManagerV2.Statics;
 // Feature requests: Add Reason for being banned to banlist
 //  
 
@@ -620,7 +622,7 @@ namespace SongRequestManagerV2
 
 
 
-        private List<JSONObject> GetSongListFromResults(JSONNode result,string SearchString, ref string errorMessage, SongFilter filter = SongFilter.All, string sortby = "-rating", int reverse = 1)
+        internal List<JSONObject> GetSongListFromResults(JSONNode result,string SearchString, ref string errorMessage, SongFilter filter = SongFilter.All, string sortby = "-rating", int reverse = 1)
         {
             List<JSONObject> songs = new List<JSONObject>();
 
@@ -867,7 +869,7 @@ namespace SongRequestManagerV2
                     }
                 }
             }
-            COMMAND.Parse(SerchCreateChatUser(), "!deck pp", RequestBot.CmdFlags.Local);
+            _commandFactory.Create().Parse(SerchCreateChatUser(), "!deck pp", CmdFlags.Local);
 
             Instance.QueueChatMessage("PP Data indexed");
             pploading = false;

@@ -4,12 +4,22 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Zenject;
 
 namespace SongRequestManagerV2
 {
     public class RequestManager
     {
-        public static List<object> Read(string path)
+        [Inject]
+        SongRequest.SongRequestFactory factory;
+
+        public static List<object> RequestSongs { get; } = new List<object>();
+        private static string requestsPath = Path.Combine(Plugin.DataPath, "SongRequestQueue.dat");
+
+        public static List<object> HistorySongs { get; } = new List<object>();
+        private static string historyPath = Path.Combine(Plugin.DataPath, "SongRequestHistory.dat");
+
+        public List<object> Read(string path)
         {
             var songs = new List<object>();
             if (File.Exists(path))
@@ -20,8 +30,7 @@ namespace SongRequestManagerV2
                     foreach (var j in json.AsArray) {
                         try {
                             if (!j.Value.IsNull && j.Value is JSONObject obj) {
-                                var req = RequestBot.Instance?.Container?.Resolve<SongRequest>();
-                                req.Init(obj);
+                                var req = this.factory.Create().Init(obj);
                                 songs.Add(req);
                             }
                         }
@@ -34,7 +43,7 @@ namespace SongRequestManagerV2
             return songs;
         }
 
-        public static void Write(string path, IEnumerable<object> songs)
+        public void Write(string path, IEnumerable<object> songs)
         {
             Plugin.Log($"Start write");
             try {
@@ -60,59 +69,44 @@ namespace SongRequestManagerV2
                 Plugin.Log($"End write");
             }
         }
-    }
 
-    public class RequestQueue
-    {
-        public static List<object> Songs { get; } = new List<object>();
-        private static string requestsPath = Path.Combine(Plugin.DataPath, "SongRequestQueue.dat");
-        public static void Read()
+        public void ReadRequest()
         {
-            try
-            {
-                Songs.Clear();
-                Songs.AddRange(RequestManager.Read(requestsPath));
+            try {
+                RequestSongs.Clear();
+                RequestSongs.AddRange(Read(requestsPath));
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Plugin.Log($"{e}");
                 RequestBot.Instance.QueueChatMessage("There was an error reading the request queue.");
             }
 
         }
 
-        public static void Write()
+        public void WriteRequest()
         {
-            RequestManager.Write(requestsPath, Songs);
+            Write(requestsPath, RequestSongs);
         }
-    }
 
-    public class RequestHistory
-    {
-        public static List<object> Songs { get; } = new List<object>();
-        private static string historyPath = Path.Combine(Plugin.DataPath, "SongRequestHistory.dat");
-        public static void Read()
+        public void ReadHistory()
         {
-            try
-            {
-                Songs.Clear();
-                var list = RequestManager.Read(historyPath);
-                Songs.AddRange(RequestManager.Read(historyPath));
+            try {
+                HistorySongs.Clear();
+                var list = Read(historyPath);
+                HistorySongs.AddRange(Read(historyPath));
                 foreach (var item in list) {
                     HistoryManager.AddSong(item as SongRequest);
                 }
             }
-            catch
-            {
+            catch {
                 RequestBot.Instance.QueueChatMessage("There was an error reading the request history.");
             }
 
         }
 
-        public static void Write()
+        public void WriteHistory()
         {
-            RequestManager.Write(historyPath, Songs);
+            Write(historyPath, HistorySongs);
         }
     }
-
 }
