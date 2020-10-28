@@ -1,5 +1,5 @@
 using ChatCore.Interfaces;
-using ChatCore.SimpleJSON;
+using ChatCore.Utilities;
 //using ChatCore.SimpleJSON;
 //using StreamCore.Twitch;
 using System;

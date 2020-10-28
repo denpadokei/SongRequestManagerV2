@@ -1,4 +1,4 @@
-﻿using ChatCore.SimpleJSON;
+﻿using ChatCore.Utilities;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;

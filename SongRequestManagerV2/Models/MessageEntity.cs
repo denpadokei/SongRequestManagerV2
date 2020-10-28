@@ -1,6 +1,6 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Models;
-using ChatCore.SimpleJSON;
+using ChatCore.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,11 +32,6 @@ namespace SongRequestManagerV2.Models
 
         public ReadOnlyDictionary<string, string> Metadata { get; set; }
 
-        public JSONObject ToJson()
-        {
-            return null;
-        }
-
         public MessageEntity()
         {
             Id = "";
@@ -45,6 +40,11 @@ namespace SongRequestManagerV2.Models
             Channel = new UnknownChatChannel();
             Emotes = new IChatEmote[0];
             Metadata = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
+        }
+
+        public JSONObject ToJson()
+        {
+            throw new NotImplementedException();
         }
     }
 }

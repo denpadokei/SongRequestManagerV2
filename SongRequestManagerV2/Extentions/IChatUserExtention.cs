@@ -1,7 +1,6 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Models.Twitch;
-using ChatCore.SimpleJSON;
-using JSONArray = ChatCore.SimpleJSON.JSONArray;
+using ChatCore.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

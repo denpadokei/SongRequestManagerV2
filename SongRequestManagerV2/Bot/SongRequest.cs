@@ -2,7 +2,7 @@
 using ChatCore.Interfaces;
 using ChatCore.Models;
 using ChatCore.Models.Twitch;
-using ChatCore.SimpleJSON;
+using ChatCore.Utilities;
 using HMUI;
 using SongCore;
 using SongRequestManagerV2.Bases;

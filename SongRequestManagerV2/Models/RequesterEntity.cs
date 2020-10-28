@@ -1,5 +1,5 @@
 ﻿using ChatCore.Interfaces;
-using ChatCore.SimpleJSON;
+using ChatCore.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

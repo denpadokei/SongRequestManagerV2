@@ -1,4 +1,4 @@
-﻿using ChatCore.SimpleJSON;
+﻿using ChatCore.Utilities;
 using System;
 using System.IO;
 using System.Net;

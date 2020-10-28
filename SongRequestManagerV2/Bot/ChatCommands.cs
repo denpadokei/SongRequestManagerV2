@@ -9,7 +9,7 @@ using UnityEngine;
 //using StreamCore.Twitch;
 using System.Threading.Tasks;
 using ChatCore.Interfaces;
-using ChatCore.SimpleJSON;
+using ChatCore.Utilities;
 
 namespace SongRequestManagerV2
 {

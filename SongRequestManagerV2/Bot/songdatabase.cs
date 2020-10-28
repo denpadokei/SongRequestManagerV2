@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime;
-//using ChatCore.SimpleJSON;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -12,9 +11,9 @@ using UnityEngine;
 using System.Collections.Concurrent;
 
 using System.Security.Cryptography;
-//using StreamCore.Twitch;
-using ChatCore.SimpleJSON;
+
 using SongRequestManagerV2.Extentions;
+using ChatCore.Utilities;
 // Feature requests: Add Reason for being banned to banlist
 //  
 
