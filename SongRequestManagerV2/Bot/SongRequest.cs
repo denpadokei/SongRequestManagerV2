@@ -8,6 +8,7 @@ using SongCore;
 using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Bot;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using TMPro;
@@ -82,7 +83,7 @@ namespace SongRequestManagerV2
 
         private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(4, 4);
 
-        private static readonly Dictionary<string, Texture2D> _cachedTextures = new Dictionary<string, Texture2D>();
+        private static readonly ConcurrentDictionary<string, Texture2D> _cachedTextures = new ConcurrentDictionary<string, Texture2D>();
 
         public SongRequest Init(JSONObject obj)
         {
@@ -175,7 +176,7 @@ namespace SongRequestManagerV2
                             tex.LoadImage(b);
 
                             try {
-                                _cachedTextures.Add(url, tex);
+                                _cachedTextures.AddOrUpdate(url, tex, (s, v) => tex);
                             }
                             catch (Exception e) {
                                 Plugin.Logger.Error(e);
