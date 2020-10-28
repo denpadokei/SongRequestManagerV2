@@ -1,7 +1,9 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-  <horizontal>
-    <text text='~progress-text' align='BottomLeft' size-delta-x='60'></text>
-    <vertical>
+  <horizontal horizontal-fit='MinSize' child-align='MiddleLeft'>
+    <vertical min-width='50' child-align='LowerLeft' horizontal-fit='Unconstrained'>
+      <text text='~progress-text' align='BottomLeft' word-wrapping='false' overflow-mode='Overflow' anchor-max-x='0' anchor-min-x='0' anchor-max-y='1' anchor-min-y='0'></text>
+    </vertical>
+    <vertical min-width='80'>
       <page-button event-click="request-list#PageUp" direction='Up'></page-button>
       <custom-list id='request-list' data='requests' clickable-cells='true' select-cell='selected-cell' min-width='80'>
         <background tags='selected' background='round-rect-panel'></background>
@@ -18,7 +20,7 @@
       </custom-list>
       <page-button event-click="request-list#PageDown" direction='Down'></page-button>
     </vertical>
-    <vertical>
+    <vertical min-width='50'>
       <button text='~history-button-text' interactable='~history-button-enable' on-click='history-click' hover-hint='~history-hint'></button>
       <button text='~skip-button-text' interactable='~skip-button-enable' hover-hint='Remove the selected request from the queue.' on-click='skip-click'></button>
       <button text='~blacklist-button-text' interactable='~blacklist-button-enable' hover-hint='Block the selected request from being queued in the future.' on-click='blacklist-click'></button>

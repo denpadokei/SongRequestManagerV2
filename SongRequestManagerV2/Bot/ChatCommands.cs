@@ -9,7 +9,12 @@ using UnityEngine;
 //using StreamCore.Twitch;
 using System.Threading.Tasks;
 using ChatCore.Interfaces;
-using ChatCore.SimpleJSON;
+using ChatCore.Utilities;
+using Zenject;
+using SongRequestManagerV2.Bot;
+using SongRequestManagerV2.Models;
+using SongRequestManagerV2.Statics;
+using IPA.Loader;
 
 namespace SongRequestManagerV2
 {
@@ -18,24 +23,26 @@ namespace SongRequestManagerV2
         // BUG: This one needs to be cleaned up a lot imo
         // BUG: This file needs to be split up a little, but not just yet... Its easier for me to move around in one massive file, since I can see the whole thing at once. 
 
-        static StringBuilder AddSongToQueueText = new StringBuilder("Request %songName% %songSubName%/%authorName% %Rating% (%version%) added to queue.");
-        static StringBuilder LookupSongDetail = new StringBuilder("%songName% %songSubName%/%authorName% %Rating% (%version%)");
-        static StringBuilder BsrSongDetail = new StringBuilder("%songName% %songSubName%/%authorName% %Rating% (%version%)");
-        static StringBuilder LinkSonglink = new StringBuilder("%songName% %songSubName%/%authorName% %Rating% (%version%) %BeatsaverLink%");
-        static StringBuilder NextSonglink = new StringBuilder("%songName% %songSubName%/%authorName% %Rating% (%version%) requested by %user% is next.");
-        static public StringBuilder SongHintText = new StringBuilder("Requested by %user%%LF%Status: %Status%%Info%%LF%%LF%<size=60%>Request Time: %RequestTime%</size>");
-        static StringBuilder QueueTextFileFormat = new StringBuilder("%songName%%LF%");         // Don't forget to include %LF% for these. 
+        public static StringBuilder AddSongToQueueText { get; } = new StringBuilder("Request %songName% %songSubName%/%authorName% %Rating% (%version%) added to queue.");
+        public static StringBuilder LookupSongDetail { get; } = new StringBuilder("%songName% %songSubName%/%authorName% %Rating% (%version%)");
+        public static StringBuilder BsrSongDetail { get; } = new StringBuilder("%songName% %songSubName%/%authorName% %Rating% (%version%)");
+        public static StringBuilder LinkSonglink { get; } = new StringBuilder("%songName% %songSubName%/%authorName% %Rating% (%version%) %BeatsaverLink%");
+        public static StringBuilder NextSonglink { get; } = new StringBuilder("%songName% %songSubName%/%authorName% %Rating% (%version%) requested by %user% is next.");
+        public static StringBuilder SongHintText { get; } = new StringBuilder("Requested by %user%%LF%Status: %Status%%Info%%LF%%LF%<size=60%>Request Time: %RequestTime%</size>");
+        public static StringBuilder QueueTextFileFormat { get; } = new StringBuilder("%songName%%LF%");         // Don't forget to include %LF% for these. 
 
-        static public StringBuilder QueueListRow2 = new StringBuilder("%authorName% (%id%) <color=white>%songlength%</color>");
+        public static  StringBuilder QueueListRow2 { get; } = new StringBuilder("%authorName% (%id%) <color=white>%songlength%</color>");
 
-        static StringBuilder BanSongDetail = new StringBuilder("Blocking %songName%/%authorName% (%version%)");
+        public static StringBuilder BanSongDetail { get; } = new StringBuilder("Blocking %songName%/%authorName% (%version%)");
 
-        static StringBuilder QueueListFormat = new StringBuilder("%songName% (%version%)");
-        static StringBuilder HistoryListFormat = new StringBuilder("%songName% (%version%)");
+        public static StringBuilder QueueListFormat { get; } = new StringBuilder("%songName% (%version%)");
+        public static StringBuilder HistoryListFormat { get; } = new StringBuilder("%songName% (%version%)");
 
-        static StringBuilder AddSortOrder = new StringBuilder("-rating +id");
-        static StringBuilder LookupSortOrder = new StringBuilder("-rating +id");
-        static StringBuilder AddSongsSortOrder = new StringBuilder("-rating +id");
+        public static StringBuilder AddSortOrder { get; } = new StringBuilder("-rating +id");
+        public static StringBuilder LookupSortOrder { get; } = new StringBuilder("-rating +id");
+        public static StringBuilder AddSongsSortOrder { get; } = new StringBuilder("-rating +id");
+
+        
 
         #region Utility functions
 
@@ -55,9 +62,9 @@ namespace SongRequestManagerV2
 
         public string ChatMessage(ParseState state)
         {
-            var dt = new DynamicText().AddUser(state._user);
+            var dt = _textFactory.Create().AddUser(state._user);
             try {
-                dt.AddSong((RequestHistory.Songs[0] as SongRequest)._song); // Exposing the current song 
+                dt.AddSong((RequestManager.HistorySongs[0] as SongRequest)._song); // Exposing the current song 
             }
             catch (Exception ex) {
                 Plugin.Log(ex.ToString());
@@ -77,85 +84,11 @@ namespace SongRequestManagerV2
             DateTime lastModified = System.IO.File.GetLastWriteTime(filename);
             return DateTime.Now - lastModified;
         }
-
-        public class QueueLongMessage
-        {
-            private StringBuilder msgBuilder = new StringBuilder();
-            private int messageCount = 1;
-            private int maxMessages = 2;
-            int maxoverflowtextlength = 60; // We don't know ahead of time, so we're going to do a safe estimate. 
-
-            private int maxoverflowpoint = 0; // The offset in the string where the overflow message needs to go
-            private int overflowcount = 0; // We need to save Count
-            private int separatorlength = 0;
-            public int Count = 0;
-
-            // BUG: This version doesn't reallly strings > twitchmessagelength well, will support
-
-            public QueueLongMessage(int maximummessageallowed = 2, int maxoverflowtext = 60) // Constructor supports setting max messages
-            {
-                maxMessages = maximummessageallowed;
-                maxoverflowtextlength = maxoverflowtext;
-            }
-
-            public void Header(string text)
-            {
-                msgBuilder.Append(text);
-            }
-
-            // BUG: Only works form string < MaximumTwitchMessageLength
-            public bool Add(string text, string separator = "") // Make sure you use Header(text) for your initial nonlist message, or your displayed message count will be wrong.
-            {
-
-                // Save the point where we would put the overflow message
-                if (messageCount >= maxMessages && maxoverflowpoint == 0 && msgBuilder.Length + text.Length > MaximumTwitchMessageLength - maxoverflowtextlength) {
-                    maxoverflowpoint = msgBuilder.Length - separatorlength;
-                    overflowcount = Count;
-                }
-
-                if (msgBuilder.Length + text.Length > MaximumTwitchMessageLength) {
-                    messageCount++;
-
-                    if (maxoverflowpoint > 0) {
-                        msgBuilder.Length = maxoverflowpoint;
-                        Count = overflowcount;
-                        return true;
-                    }
-                    RequestBot.Instance.QueueChatMessage(msgBuilder.ToString(0, msgBuilder.Length - separatorlength));
-                    msgBuilder.Clear();
-                }
-
-                Count++;
-                msgBuilder.Append(text);
-                msgBuilder.Append(separator);
-                separatorlength = separator.Length;
-
-                return false;
-            }
-
-            public void end(string overflowtext = "", string emptymsg = "")
-            {
-                if (Count == 0)
-                    RequestBot.Instance.QueueChatMessage(emptymsg); // Note, this means header doesn't get printed either for empty lists                
-                else if (messageCount > maxMessages && overflowcount > 0)
-                    RequestBot.Instance.QueueChatMessage(msgBuilder.ToString() + overflowtext);
-                else {
-                    msgBuilder.Length -= separatorlength;
-                    RequestBot.Instance.QueueChatMessage(msgBuilder.ToString());
-                }
-
-                // Reset the class for reuse
-                maxoverflowpoint = 0;
-                messageCount = 1;
-                msgBuilder.Clear();
-            }
-        }
-
         #endregion
 
         #region Filter support functions
 
-        private bool DoesContainTerms(string request, ref string[] terms)
+        internal bool DoesContainTerms(string request, ref string[] terms)
         {
             if (request == "") return false;
             request = request.ToLower();
@@ -175,7 +108,7 @@ namespace SongRequestManagerV2
             return true;
         }
 
-        private bool filtersong(JSONObject song)
+        internal bool filtersong(JSONObject song)
         {
             string songid = song["id"].Value;
             if (IsInQueue(songid)) return true;
@@ -186,12 +119,12 @@ namespace SongRequestManagerV2
 
         // Returns error text if filter triggers, or "" otherwise, "fast" version returns X if filter triggers
 
-        [Flags] enum SongFilter { none = 0, Queue = 1, Blacklist = 2, Mapper = 4, Duplicate = 8, Remap = 16, Rating = 32, Duration = 64, NJS = 128, All = -1 };
+        
 
-        private string SongSearchFilter(JSONObject song, bool fast = false, SongFilter filter = SongFilter.All) // BUG: This could be nicer
+        internal string SongSearchFilter(JSONObject song, bool fast = false, SongFilter filter = SongFilter.All) // BUG: This could be nicer
         {
             string songid = song["id"].Value;
-            if (filter.HasFlag(SongFilter.Queue) && RequestQueue.Songs.OfType<SongRequest>().Any(req => req._song["version"] == song["version"])) return fast ? "X" : $"Request {song["songName"].Value} by {song["authorName"].Value} already exists in queue!";
+            if (filter.HasFlag(SongFilter.Queue) && RequestManager.RequestSongs.OfType<SongRequest>().Any(req => req._song["version"] == song["version"])) return fast ? "X" : $"Request {song["songName"].Value} by {song["authorName"].Value} already exists in queue!";
 
             if (filter.HasFlag(SongFilter.Blacklist) && listcollection.contains(ref banlist, songid)) return fast ? "X" : $"{song["songName"].Value} by {song["authorName"].Value} ({song["version"].Value}) is banned!";
 
@@ -212,19 +145,19 @@ namespace SongRequestManagerV2
             return "";
         }
 
-        // checks if request is in the RequestQueue.Songs - needs to improve interface
-        private string IsRequestInQueue(string request, bool fast = false)
+        // checks if request is in the RequestManager.RequestSongs - needs to improve interface
+        internal string IsRequestInQueue(string request, bool fast = false)
         {
             string matchby = "";
             if (_beatSaverRegex.IsMatch(request)) matchby = "version";
             else if (_digitRegex.IsMatch(request)) matchby = "id";
             if (matchby == "") return fast ? "X" : $"Invalid song id {request} used in RequestInQueue check";
 
-            foreach (SongRequest req in RequestQueue.Songs) {
+            foreach (SongRequest req in RequestManager.RequestSongs) {
                 var song = req._song;
                 if (song[matchby].Value == request) return fast ? "X" : $"Request {song["songName"].Value} by {song["authorName"].Value} ({song["version"].Value}) already exists in queue!";
             }
-            return ""; // Empty string: The request is not in the RequestQueue.Songs
+            return ""; // Empty string: The request is not in the RequestManager.RequestSongs
         }
 
         bool IsInQueue(string request) // unhappy about naming here
@@ -232,7 +165,7 @@ namespace SongRequestManagerV2
             return !(IsRequestInQueue(request) == "");
         }
 
-        private string ClearDuplicateList(ParseState state)
+        internal string ClearDuplicateList(ParseState state)
         {
             if (!state._botcmd.Flags.HasFlag(CmdFlags.SilentResult)) QueueChatMessage("Session duplicate list is now clear.");
             listcollection.ClearList(duplicatelist);
@@ -246,7 +179,7 @@ namespace SongRequestManagerV2
         //    Ban(requestor, request, false);
         //}
 
-        private async Task Ban(ParseState state)
+        internal async Task Ban(ParseState state)
         {
             var id = GetBeatSaverId(state._parameter.ToLower());
 
@@ -279,7 +212,7 @@ namespace SongRequestManagerV2
                 QueueChatMessage($"{id} is now on the ban list.");
             }
             else {
-                state.msg(new DynamicText().AddSong(ref song.song).Parse(BanSongDetail), ", ");
+                state.msg(_textFactory.Create().AddSong(ref song.song).Parse(BanSongDetail), ", ");
             }
         }
 
@@ -307,7 +240,7 @@ namespace SongRequestManagerV2
         //    }
         //}
 
-        private void Unban(IChatUser requestor, string request)
+        internal void Unban(IChatUser requestor, string request)
         {
             var unbanvalue = GetBeatSaverId(request);
 
@@ -322,16 +255,16 @@ namespace SongRequestManagerV2
         #endregion
 
         #region Deck Commands
-        private string restoredeck(ParseState state)
+        internal string restoredeck(ParseState state)
         {
-            return Readdeck(new ParseState(state, "savedqueue"));
+            return Readdeck(_stateFactory.Create().Setup(state, "savedqueue"));
         }
 
-        private void Writedeck(IChatUser requestor, string request)
+        internal void Writedeck(IChatUser requestor, string request)
         {
             try {
                 int count = 0;
-                if (RequestQueue.Songs.Count == 0) {
+                if (RequestManager.RequestSongs.Count == 0) {
                     QueueChatMessage("Queue is empty  .");
                     return;
                 }
@@ -339,7 +272,7 @@ namespace SongRequestManagerV2
                 string queuefile = Path.Combine(Plugin.DataPath, request + ".deck");
                 var sb = new StringBuilder();
 
-                foreach (SongRequest req in RequestQueue.Songs.ToArray()) {
+                foreach (SongRequest req in RequestManager.RequestSongs.ToArray()) {
                     var song = req._song;
                     if (count > 0) sb.Append(",");
                     sb.Append(song["id"].Value);
@@ -353,7 +286,7 @@ namespace SongRequestManagerV2
             }
         }
 
-        private string Readdeck(ParseState state)
+        internal string Readdeck(ParseState state)
         {
             try {
                 string queuefile = Path.Combine(Plugin.DataPath, state._parameter + ".deck");
@@ -367,7 +300,7 @@ namespace SongRequestManagerV2
                 for (int n = 0; n < integerStrings.Length; n++) {
                     if (IsInQueue(integerStrings[n])) continue;
 
-                    ParseState newstate = new ParseState(state); // Must use copies here, since these are all threads
+                    ParseState newstate = _stateFactory.Create().Setup(state); // Must use copies here, since these are all threads
                     newstate._parameter = integerStrings[n];
                     ProcessSongRequest(newstate);
                 }
@@ -381,16 +314,16 @@ namespace SongRequestManagerV2
         #endregion
 
         #region Dequeue Song
-        private string DequeueSong(ParseState state)
+        internal string DequeueSong(ParseState state)
         {
 
             var songId = GetBeatSaverId(state._parameter);
-            for (int i = RequestQueue.Songs.Count - 1; i >= 0; i--) {
+            for (int i = RequestManager.RequestSongs.Count - 1; i >= 0; i--) {
                 bool dequeueSong = false;
-                var song = (RequestQueue.Songs[i] as SongRequest)._song;
+                var song = (RequestManager.RequestSongs[i] as SongRequest)._song;
 
                 if (songId == "") {
-                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["version"].Value, (RequestQueue.Songs[i] as SongRequest)._requestor.UserName };
+                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["version"].Value, (RequestManager.RequestSongs[i] as SongRequest)._requestor.UserName };
 
                     if (DoesContainTerms(state._parameter, ref terms))
                         dequeueSong = true;
@@ -412,34 +345,34 @@ namespace SongRequestManagerV2
 
 
         // BUG: Will use a new interface to the list manager
-        private void MapperAllowList(IChatUser requestor, string request)
+        internal void MapperAllowList(IChatUser requestor, string request)
         {
             string key = request.ToLower();
             mapperwhitelist = listcollection.OpenList(key); // BUG: this is still not the final interface
             QueueChatMessage($"Mapper whitelist set to {request}.");
         }
 
-        private void MapperBanList(IChatUser requestor, string request)
+        internal void MapperBanList(IChatUser requestor, string request)
         {
             string key = request.ToLower();
             mapperBanlist = listcollection.OpenList(key);
             //QueueChatMessage($"Mapper ban list set to {request}.");
         }
 
-        private void WhiteList(IChatUser requestor, string request)
+        internal void WhiteList(IChatUser requestor, string request)
         {
             string key = request.ToLower();
             Whitelist = listcollection.OpenList(key);
         }
 
-        private void BlockedUserList(IChatUser requestor, string request)
+        internal void BlockedUserList(IChatUser requestor, string request)
         {
             string key = request.ToLower();
             BlockedUser = listcollection.OpenList(key);
         }
 
         // Not super efficient, but what can you do
-        private bool mapperfiltered(JSONObject song, bool white)
+        internal bool mapperfiltered(JSONObject song, bool white)
         {
             string normalizedauthor = song["metadata"]["levelAuthorName"].Value.ToLower();
             if (white && mapperwhitelist.list.Count > 0) {
@@ -520,10 +453,10 @@ namespace SongRequestManagerV2
         public string Who(ParseState state)
         {
 
-            var qm = new QueueLongMessage();
+            var qm = this._messageFactroy.Create();
             SongRequest result = null;
-            result = FindMatch(RequestQueue.Songs.OfType<SongRequest>(), state._parameter, qm);
-            if (result == null) result = FindMatch(RequestHistory.Songs.OfType<SongRequest>(), state._parameter, qm);
+            result = FindMatch(RequestManager.RequestSongs.OfType<SongRequest>(), state._parameter, qm);
+            if (result == null) result = FindMatch(RequestManager.HistorySongs.OfType<SongRequest>(), state._parameter, qm);
 
             //if (result != null) QueueChatMessage($"{result.song["songName"].Value} requested by {result.requestor.displayName}.");
             if (result != null) qm.end("...");
@@ -536,7 +469,7 @@ namespace SongRequestManagerV2
             var songId = GetBeatSaverId(parts[0]);
             if (songId == "") return state.helptext(true);
 
-            foreach (var entry in RequestQueue.Songs.OfType<SongRequest>()) {
+            foreach (var entry in RequestManager.RequestSongs.OfType<SongRequest>()) {
                 var song = entry._song;
 
                 if (song["id"].Value == songId) {
@@ -549,7 +482,7 @@ namespace SongRequestManagerV2
             return success;
         }
 
-        private IEnumerator SetBombState(ParseState state)
+        internal IEnumerator SetBombState(ParseState state)
         {
             state._parameter = state._parameter.ToLower();
 
@@ -565,7 +498,7 @@ namespace SongRequestManagerV2
 
             System.Diagnostics.Process.Start($"liv-streamerkit://gamechanger/beat-saber-sabotage/{state._parameter}");
 
-            if (_WobbleInstalled) {
+            if (PluginManager.GetPlugin("WobbleSaber") != null) {
                 string wobblestate = "off";
                 if (state._parameter == "enable") wobblestate = "on";
                 SendChatMessage($"!wadmin toggle {wobblestate} ");
@@ -577,7 +510,7 @@ namespace SongRequestManagerV2
         }
 
 
-        private async Task addsongsFromnewest(ParseState state)
+        internal async Task addsongsFromnewest(ParseState state)
         {
             int totalSongs = 0;
 
@@ -640,7 +573,7 @@ namespace SongRequestManagerV2
             }
         }
 
-        private async Task makelistfromsearch(ParseState state)
+        internal async Task makelistfromsearch(ParseState state)
         {
             int totalSongs = 0;
 
@@ -704,7 +637,7 @@ namespace SongRequestManagerV2
         }
 
         // General search version
-        private async Task addsongs(ParseState state)
+        internal async Task addsongs(ParseState state)
         {
 
             var id = GetBeatSaverId(state._parameter);
@@ -742,40 +675,40 @@ namespace SongRequestManagerV2
             _refreshQueue = true;
         }
 
-        public static void QueueSong(ParseState state, JSONObject song)
+        public void QueueSong(ParseState state, JSONObject song)
         {
-            var req = Instance.Container?.Resolve<SongRequest>();
+            var req = _songRequestFactory.Create();
             req.Init(song, state._user, DateTime.UtcNow, RequestStatus.SongSearch, "search result");
 
             if ((state._flags.HasFlag(CmdFlags.MoveToTop)))
-                RequestQueue.Songs.Insert(0, req);
+                RequestManager.RequestSongs.Insert(0, req);
             else
-                RequestQueue.Songs.Add(req);
+                RequestManager.RequestSongs.Add(req);
         }
 
         #region Move Request To Top/Bottom
 
-        private void MoveRequestToTop(IChatUser requestor, string request)
+        internal void MoveRequestToTop(IChatUser requestor, string request)
         {
             MoveRequestPositionInQueue(requestor, request, true);
         }
 
-        private void MoveRequestToBottom(IChatUser requestor, string request)
+        internal void MoveRequestToBottom(IChatUser requestor, string request)
         {
             MoveRequestPositionInQueue(requestor, request, false);
         }
 
-        private void MoveRequestPositionInQueue(IChatUser requestor, string request, bool top)
+        internal void MoveRequestPositionInQueue(IChatUser requestor, string request, bool top)
         {
 
             string moveId = GetBeatSaverId(request);
-            for (int i = RequestQueue.Songs.Count - 1; i >= 0; i--) {
-                var req = RequestQueue.Songs.ElementAt(i) as SongRequest;
+            for (int i = RequestManager.RequestSongs.Count - 1; i >= 0; i--) {
+                var req = RequestManager.RequestSongs.ElementAt(i) as SongRequest;
                 var song = req._song;
 
                 bool moveRequest = false;
                 if (moveId == "") {
-                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, (RequestQueue.Songs[i] as SongRequest)._requestor.UserName };
+                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, (RequestManager.RequestSongs[i] as SongRequest)._requestor.UserName };
                     if (DoesContainTerms(request, ref terms))
                         moveRequest = true;
                 }
@@ -786,16 +719,16 @@ namespace SongRequestManagerV2
 
                 if (moveRequest) {
                     // Remove the request from the queue
-                    RequestQueue.Songs.RemoveAt(i);
+                    RequestManager.RequestSongs.RemoveAt(i);
 
                     // Then readd it at the appropriate position
                     if (top)
-                        RequestQueue.Songs.Insert(0, req);
+                        RequestManager.RequestSongs.Insert(0, req);
                     else
-                        RequestQueue.Songs.Add(req);
+                        RequestManager.RequestSongs.Add(req);
 
                     // Write the modified request queue to file
-                    RequestQueue.Write();
+                    _requestManager.WriteRequest();
 
                     // Refresh the queue ui
                     RefreshSongQuere();
@@ -812,132 +745,7 @@ namespace SongRequestManagerV2
         }
         #endregion
 
-        #region List Commands
-
-        private void showCommandlist(IChatUser requestor, string request)
-        {
-
-            var msg = new QueueLongMessage();
-
-            foreach (var entry in COMMAND.aliaslist) {
-                var botcmd = entry.Value;
-                // BUG: Please refactor this its getting too damn long
-                if (HasRights(ref botcmd, ref requestor, 0) && !botcmd.Flags.HasFlag(Var) && !botcmd.Flags.HasFlag(Subcmd)) msg.Add($"{entry.Key}", " "); // Only show commands you're allowed to use
-            }
-            msg.end("...", $"No commands available.");
-        }
-
-        private void showFormatList(IChatUser requestor, string request)
-        {
-
-            var msg = new QueueLongMessage();
-
-            foreach (var entry in COMMAND.aliaslist) {
-                var botcmd = entry.Value;
-                // BUG: Please refactor this its getting too damn long
-                if (HasRights(ref botcmd, ref requestor, 0) && botcmd.Flags.HasFlag(Var)) msg.Add($"{entry.Key}", ", "); // Only show commands you're allowed to use
-            }
-            msg.end("...", $"No commands available.");
-        }
-
-
-        private async Task LookupSongs(ParseState state)
-        {
-
-            var id = GetBeatSaverId(state._parameter);
-
-            JSONNode result = null;
-
-            if (!RequestBotConfig.Instance.OfflineMode) {
-                string requestUrl = (id != "") ? $"https://beatsaver.com/api/maps/detail/{id}" : $"https://beatsaver.com/api/search/text/0?q={normalize.NormalizeBeatSaverString(state._parameter)}";
-                var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
-
-                if (resp.IsSuccessStatusCode) {
-                    result = resp.ConvertToJsonNode();
-                }
-                else {
-                    Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
-                }
-            }
-
-            string errorMessage = "";
-            SongFilter filter = SongFilter.none;
-            if (state._flags.HasFlag(CmdFlags.NoFilter)) filter = SongFilter.Queue;
-            List<JSONObject> songs = GetSongListFromResults(result, state._parameter, ref errorMessage, filter, state._sort != "" ? state._sort : LookupSortOrder.ToString());
-
-            JSONObject song;
-
-            var msg = new QueueLongMessage(1, 5); // One message maximum, 5 bytes reserved for the ...
-            msg.Header($"{songs.Count} found: ");
-            foreach (JSONObject entry in songs) {
-                //entry.Add("pp", 100);
-                //SongBrowserPlugin.DataAccess.ScoreSaberDataFile
-
-                song = entry;
-                msg.Add(new DynamicText().AddSong(ref song).Parse(LookupSongDetail), ", ");
-            }
-
-            msg.end("...", $"No results for {state._parameter}");
-        }
-
-        // BUG: Should be dynamic text
-        private void ListQueue(IChatUser requestor, string request)
-        {
-
-            var msg = new QueueLongMessage(RequestBotConfig.Instance.maximumqueuemessages);
-
-            foreach (SongRequest req in RequestQueue.Songs.ToArray()) {
-                var song = req._song;
-                if (msg.Add(new DynamicText().AddSong(ref song).Parse(QueueListFormat), ", ")) break;
-            }
-            msg.end($" ... and {RequestQueue.Songs.Count - msg.Count} more songs.", "Queue is empty.");
-            return;
-
-        }
-
-        private void ShowHistory(IChatUser requestor, string request)
-        {
-
-            var msg = new QueueLongMessage(1);
-
-            foreach (var entry in RequestHistory.Songs.OfType<SongRequest>()) {
-                var song = entry._song;
-                if (msg.Add(new DynamicText().AddSong(ref song).Parse(HistoryListFormat), ", ")) break;
-            }
-            msg.end($" ... and {RequestHistory.Songs.Count - msg.Count} more songs.", "History is empty.");
-            return;
-
-        }
-
-        private void ShowSongsplayed(IChatUser requestor, string request) // Note: This can be spammy.
-        {
-            var msg = new QueueLongMessage(2);
-
-            msg.Header($"{played.Count} songs played tonight: ");
-
-            foreach (JSONObject song in played) {
-                if (msg.Add(song["songName"].Value + " (" + song["version"] + ")", ", ")) break;
-            }
-            msg.end($" ... and {played.Count - msg.Count} other songs.", "No songs have been played.");
-            return;
-
-        }
-
-        private void ShowBanList(IChatUser requestor, string request)
-        {
-
-            var msg = new QueueLongMessage(1);
-
-            msg.Header("Banlist ");
-
-            foreach (string songId in listcollection.OpenList("banlist.unique").list) {
-                if (msg.Add(songId, ", ")) break;
-            }
-            msg.end($" ... and {listcollection.OpenList("banlist.unique").list.Count - msg.Count} more entries.", "is empty.");
-
-        }
-
-        #endregion
+        
 
         #region Queue Related
 
@@ -946,19 +754,19 @@ namespace SongRequestManagerV2
         {
             return QueueState ? "Queue is open" : "Queue is closed";
         }
-        private string OpenQueue(ParseState state)
+        public string OpenQueue(ParseState state)
         {
             ToggleQueue(state._user, state._parameter, true);
             return success;
         }
 
-        private string CloseQueue(ParseState state)
+        public string CloseQueue(ParseState state)
         {
             ToggleQueue(state._user, state._parameter, false);
             return success;
         }
 
-        private void ToggleQueue(IChatUser requestor, string request, bool state)
+        internal void ToggleQueue(IChatUser requestor, string request, bool state)
         {
             RequestBotConfig.Instance.RequestQueueOpen = state;
             RequestBotConfig.Instance.Save();
@@ -968,7 +776,7 @@ namespace SongRequestManagerV2
             RefreshSongQuere();
             _refreshQueue = true;
         }
-        private static void WriteQueueSummaryToFile()
+        internal void WriteQueueSummaryToFile()
         {
 
             if (!RequestBotConfig.Instance.UpdateQueueStatusFiles) return;
@@ -978,9 +786,9 @@ namespace SongRequestManagerV2
                 var queuesummary = new StringBuilder();
                 int count = 0;
 
-                foreach (SongRequest req in RequestQueue.Songs.ToArray()) {
+                foreach (SongRequest req in RequestManager.RequestSongs.ToArray()) {
                     var song = req._song;
-                    queuesummary.Append(new DynamicText().AddSong(song).Parse(QueueTextFileFormat));  // Format of Queue is now user configurable
+                    queuesummary.Append(_textFactory.Create().AddSong(song).Parse(QueueTextFileFormat));  // Format of Queue is now user configurable
 
                     if (++count > RequestBotConfig.Instance.MaximumQueueTextEntries) {
                         queuesummary.Append("...\n");
@@ -1018,13 +826,13 @@ namespace SongRequestManagerV2
             }
         }
 
-        private string QueueLottery(ParseState state)
+        internal string QueueLottery(ParseState state)
         {
             Int32.TryParse(state._parameter, out int entrycount);
 
-            Shuffle(RequestQueue.Songs);
+            Shuffle(RequestManager.RequestSongs);
 
-            var list = RequestQueue.Songs.OfType<SongRequest>().ToList();
+            var list = RequestManager.RequestSongs.OfType<SongRequest>().ToList();
             for (int i = entrycount; i < list.Count; i++) {
                 try {
                     if (RequestTracker.ContainsKey(list[i]._requestor.Id)) RequestTracker[list[i]._requestor.Id].numRequests--;
@@ -1036,12 +844,12 @@ namespace SongRequestManagerV2
             if (entrycount > 0) {
                 try {
                     Writedeck(state._user, "prelotto");
-                    RequestQueue.Songs.RemoveRange(entrycount, RequestQueue.Songs.Count - entrycount);
+                    RequestManager.RequestSongs.RemoveRange(entrycount, RequestManager.RequestSongs.Count - entrycount);
                 }
                 catch { }
             }
 
-            RequestQueue.Write();
+            _requestManager.WriteRequest();
 
             // Notify the chat that the queue was cleared
             QueueChatMessage($"Queue lottery complete!");
@@ -1054,16 +862,16 @@ namespace SongRequestManagerV2
             return success;
         }
 
-        private void Clearqueue(IChatUser requestor, string request)
+        internal void Clearqueue(IChatUser requestor, string request)
         {
             // Write our current queue to file so we can restore it if needed
             Writedeck(requestor, "justcleared");
 
             // Cycle through each song in the final request queue, adding them to the song history
 
-            while (RequestQueue.Songs.Count > 0) DequeueRequest(0, false); // More correct now, previous version did not keep track of user requests 
+            while (RequestManager.RequestSongs.Count > 0) DequeueRequest(0, false); // More correct now, previous version did not keep track of user requests 
 
-            RequestQueue.Write();
+            _requestManager.WriteRequest();
 
             // Update the request button ui accordingly
             UpdateRequestUI();
@@ -1079,7 +887,7 @@ namespace SongRequestManagerV2
         #endregion
 
         #region Unmap/Remap Commands
-        private void Remap(IChatUser requestor, string request)
+        internal void Remap(IChatUser requestor, string request)
         {
             string[] parts = request.Split(',', ' ');
 
@@ -1094,7 +902,7 @@ namespace SongRequestManagerV2
             WriteRemapList();
         }
 
-        private void Unmap(IChatUser requestor, string request)
+        internal void Unmap(IChatUser requestor, string request)
         {
 
             if (songremap.ContainsKey(request)) {
@@ -1104,7 +912,7 @@ namespace SongRequestManagerV2
             WriteRemapList();
         }
 
-        private void WriteRemapList()
+        internal void WriteRemapList()
         {
 
             // BUG: Its more efficient to write it in one call
@@ -1124,7 +932,7 @@ namespace SongRequestManagerV2
             }
         }
 
-        private void ReadRemapList()
+        internal void ReadRemapList()
         {
             string remapfile = Path.Combine(Plugin.DataPath, "remap.list");
 
@@ -1148,12 +956,12 @@ namespace SongRequestManagerV2
         #endregion
 
         #region Wrong Song
-        private void WrongSong(IChatUser requestor, string request)
+        internal void WrongSong(IChatUser requestor, string request)
         {
             // Note: Scanning backwards to remove LastIn, for loop is best known way.
-            for (int i = RequestQueue.Songs.Count - 1; i >= 0; i--) {
-                var song = (RequestQueue.Songs[i] as SongRequest)._song;
-                if ((RequestQueue.Songs[i] as SongRequest)._requestor.Id == requestor.Id) {
+            for (int i = RequestManager.RequestSongs.Count - 1; i >= 0; i--) {
+                var song = (RequestManager.RequestSongs[i] as SongRequest)._song;
+                if ((RequestManager.RequestSongs[i] as SongRequest)._requestor.Id == requestor.Id) {
                     QueueChatMessage($"{song["songName"].Value} ({song["version"].Value}) removed.");
 
                     listcollection.remove(duplicatelist, song["id"].Value);
@@ -1166,12 +974,12 @@ namespace SongRequestManagerV2
         #endregion
 
         // BUG: This requires a switch, or should be disabled for those who don't allow links
-        private string ShowSongLink(ParseState state)
+        public string ShowSongLink(ParseState state)
         {
             try  // We're accessing an element across threads, and currentsong doesn't need to be defined
             {
-                var song = (RequestQueue.Songs[0] as SongRequest)._song;
-                if (!song.IsNull) new DynamicText().AddSong(ref song).QueueMessage(LinkSonglink.ToString());
+                var song = (RequestManager.RequestSongs[0] as SongRequest)._song;
+                if (!song.IsNull) _textFactory.Create().AddSong(ref song).QueueMessage(LinkSonglink.ToString());
             }
             catch (Exception ex) {
                 Plugin.Log(ex.ToString());
@@ -1184,7 +992,7 @@ namespace SongRequestManagerV2
         {
             int total = 0;
             try {
-                foreach (var songrequest in RequestQueue.Songs.OfType<SongRequest>()) {
+                foreach (var songrequest in RequestManager.RequestSongs.OfType<SongRequest>()) {
                     total += songrequest._song["songduration"];
                 }
             }
@@ -1196,14 +1004,14 @@ namespace SongRequestManagerV2
             return $"{total / 60}:{ total % 60:00}";
         }
 
-        private string QueueStatus(ParseState state)
+        internal string QueueStatus(ParseState state)
         {
             string queuestate = RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open. " : "Queue is closed. ";
-            QueueChatMessage($"{queuestate} There are {RequestQueue.Songs.Count} maps ({queueduration()}) in the queue.");
+            QueueChatMessage($"{queuestate} There are {RequestManager.RequestSongs.Count} maps ({queueduration()}) in the queue.");
             return success;
         }
 
-        public static string GetStarRating(ref JSONObject song, bool mode = true)
+        public string GetStarRating(ref JSONObject song, bool mode = true)
         {
             if (!mode) return "";
 
@@ -1214,7 +1022,7 @@ namespace SongRequestManagerV2
             return starrating;
         }
 
-        public static string GetRating(ref JSONObject song, bool mode = true)
+        public string GetRating(ref JSONObject song, bool mode = true)
         {
             if (!mode) return "";
 
@@ -1225,174 +1033,7 @@ namespace SongRequestManagerV2
 
         #region DynamicText class and support functions.
 
-        public class DynamicText
-        {
-            public Dictionary<string, string> Dynamicvariables { get; } = new Dictionary<string, string>();  // A list of the variables available to us, we're using a list of pairs because the match we use uses BeginsWith,since the name of the string is unknown. The list is very short, so no biggie
-
-            public bool AllowLinks = true;
-
-
-            public DynamicText Add(string key, string value)
-            {
-                Dynamicvariables.Add(key, value); // Make the code slower but more readable :(
-                return this;
-            }
-
-            public DynamicText()
-            {
-                Add("|", ""); // This is the official section separator character, its used in help to separate usage from extended help, and because its easy to detect when parsing, being one character long
-
-                // BUG: Note -- Its my intent to allow sections to be used as a form of conditional. If a result failure occurs within a section, we should be able to rollback the entire section, and continue to the next. Its a better way of handline missing dynamic fields without excessive scripting
-                // This isn't implemented yet.
-
-                AddLinks();
-
-                DateTime Now = DateTime.Now; //"MM/dd/yyyy hh:mm:ss.fffffff";         
-                Add("SRM", "Song Request Manager");
-                Add("Time", Now.ToString("hh:mm"));
-                Add("LongTime", Now.ToString("hh:mm:ss"));
-                Add("Date", Now.ToString("yyyy/MM/dd"));
-                Add("LF", "\n"); // Allow carriage return
-
-            }
-
-            public DynamicText AddUser(IChatUser user)
-            {
-                try {
-                    Add("user", user.DisplayName);
-                }
-                catch {
-                    // Don't care. Twitch user doesn't HAVE to be defined.
-                }
-                return this;
-            }
-
-            public DynamicText AddLinks()
-            {
-                if (AllowLinks) {
-                    Add("beatsaver", "https://beatsaver.com");
-                    Add("beatsaber", "https://beatsaber.com");
-                    Add("scoresaber", "https://scoresaber.com");
-                }
-                else {
-                    Add("beatsaver", "beatsaver site");
-                    Add("beatsaver", "beatsaber site");
-                    Add("scoresaber", "scoresaber site");
-                }
-
-                return this;
-            }
-
-
-            public DynamicText AddBotCmd(COMMAND botcmd)
-            {
-
-                StringBuilder aliastext = new StringBuilder();
-                foreach (var alias in botcmd.aliases) aliastext.Append($"{alias} ");
-                Add("alias", aliastext.ToString());
-
-                aliastext.Clear();
-                aliastext.Append('[');
-                aliastext.Append(botcmd.Flags & CmdFlags.TwitchLevel).ToString();
-                aliastext.Append(']');
-                Add("rights", aliastext.ToString());
-                return this;
-            }
-
-            // Adds a JSON object to the dictionary. You can define a prefix to make the object identifiers unique if needed.
-            public DynamicText AddJSON(ref JSONObject json, string prefix = "")
-            {
-                foreach (var element in json) Add(prefix + element.Key, element.Value);
-                return this;
-            }
-
-            public DynamicText AddSong(JSONObject json, string prefix = "") // Alternate call for direct object
-            {
-                return AddSong(ref json, prefix);
-            }
-
-            public DynamicText AddSong(ref JSONObject song, string prefix = "")
-            {
-                AddJSON(ref song, prefix); // Add the song JSON
-
-                //SongMap map;
-                //if (MapDatabase.MapLibrary.TryGetValue(song["version"].Value, out map) && map.pp>0)
-                //{
-                //    Add("pp", map.pp.ToString());
-                //}
-                //else
-                //{
-                //    Add("pp", "");
-                //}
-
-
-                if (song["pp"].AsFloat > 0) Add("PP", song["pp"].AsInt.ToString() + " PP"); else Add("PP", "");
-
-                Add("StarRating", GetStarRating(ref song)); // Add additional dynamic properties
-                Add("Rating", GetRating(ref song));
-                Add("BeatsaverLink", $"https://beatsaver.com/beatmap/{song["id"].Value}");
-                Add("BeatsaberLink", $"https://bsaber.com/songs/{song["id"].Value}");
-                return this;
-            }
-
-            public string Parse(StringBuilder text, bool parselong = false) // We implement a path for ref or nonref
-            {
-                return Parse(text.ToString(), parselong);
-            }
-
-            // Refactor, supports %variable%, and no longer uses split, should be closer to c++ speed.
-            public string Parse(string text, bool parselong = false)
-            {
-                StringBuilder output = new StringBuilder(text.Length); // We assume a starting capacity at LEAST = to length of original string;
-
-                for (int p = 0; p < text.Length; p++) // P is pointer, that's good enough for me
-                {
-                    char c = text[p];
-                    if (c == '%') {
-                        int keywordstart = p + 1;
-                        int keywordlength = 0;
-
-                        int end = Math.Min(p + 32, text.Length); // Limit the scan for the 2nd % to 32 characters, or the end of the string
-                        for (int k = keywordstart; k < end; k++) // Pretty sure there's a function for this, I'll look it up later
-                        {
-                            if (text[k] == '%') {
-                                keywordlength = k - keywordstart;
-                                break;
-                            }
-                        }
-
-                        string substitutetext;
-
-                        if (keywordlength > 0 && keywordlength != 0 && Dynamicvariables.TryGetValue(text.Substring(keywordstart, keywordlength), out substitutetext)) {
-
-                            if (keywordlength == 1 && !parselong) return output.ToString(); // Return at first sepearator on first 1 character code. 
-
-                            output.Append(substitutetext);
-
-                            p += keywordlength + 1; // Reset regular text
-                            continue;
-                        }
-                    }
-                    output.Append(c);
-                }
-
-                return output.ToString();
-            }
-
-            public DynamicText QueueMessage(string text, bool parselong = false)
-            {
-                QueueMessage(ref text, parselong);
-                return this;
-            }
-
-
-            public DynamicText QueueMessage(ref string text, bool parselong = false)
-            {
-                Instance.QueueChatMessage(Parse(text, parselong));
-                return this;
-            }
-
-        }
+        
 
         #endregion
     }

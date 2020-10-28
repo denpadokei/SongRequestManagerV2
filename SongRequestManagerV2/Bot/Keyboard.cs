@@ -11,6 +11,10 @@ using BeatSaberMarkupLanguage;
 using SongRequestManagerV2.UI;
 using ChatCore.Interfaces;
 using ChatCore.Models.Twitch;
+using Zenject;
+using System.IO;
+using SongRequestManagerV2.Models;
+using SongRequestManagerV2.Statics;
 
 namespace SongRequestManagerV2
 {
@@ -19,8 +23,8 @@ namespace SongRequestManagerV2
     {
         private IChatUser GetLoginUser()
         {
-            if (RequestBot.Instance.TwitchService?.LoggedInUser != null) {
-                return RequestBot.Instance.TwitchService?.LoggedInUser;
+            if (_bot.TwitchService?.LoggedInUser != null) {
+                return _bot.TwitchService?.LoggedInUser;
             }
             else {
                 var obj = new
@@ -55,6 +59,13 @@ namespace SongRequestManagerV2
         public TextMeshProUGUI KeyboardText;
         private TextMeshProUGUI KeyboardCursor;
         public Button BaseButton;
+        [Inject]
+        RequestBot _bot;
+
+        [Inject]
+        CommandManager _commandManager;
+        [Inject]
+        SRMCommand.SRMCommandFactory _commandFactory;
 
 
         KEY dummy = new KEY(); // This allows for some lazy programming, since unfound key searches will point to this instead of null. It still logs an error though
@@ -333,6 +344,17 @@ namespace SongRequestManagerV2
             return this;
         }
 
+        public void AddKeyboard(string keyboardname, float scale = 0.5f)
+        {
+            try {
+                string fileContent = File.ReadAllText(Path.Combine(Plugin.DataPath, keyboardname));
+                if (fileContent.Length > 0) this.AddKeys(fileContent, scale);
+            }
+            catch {
+                // This is a silent fail since custom keyboards are optional
+            }
+        }
+
         // Default actions may be called more than once. Make sure to only set any overrides that replace these AFTER all keys have been added
         public KEYBOARD DefaultActions()
         {
@@ -345,7 +367,12 @@ namespace SongRequestManagerV2
             return this;    
         }
 
-        public KEYBOARD(RectTransform container, string DefaultKeyboard = QWERTY, bool EnableInputField = true, float x = 0, float y = 0)
+        public KEYBOARD()
+        {
+            
+        }
+
+        public KEYBOARD Setup(RectTransform container, string DefaultKeyboard = QWERTY, bool EnableInputField = true, float x = 0, float y = 0)
         {
             this.EnableInputField = EnableInputField;
             this.container = container;
@@ -379,13 +406,12 @@ namespace SongRequestManagerV2
 
             // BUG: These are here on a temporary basis, they will be moving out as soon as API is finished
 
-            if (DefaultKeyboard != "")
-            {
+            if (DefaultKeyboard != "") {
                 AddKeys(DefaultKeyboard);
                 DefaultActions();
             }
 
-            return;
+            return this;
         }
 
         public KEYBOARD NextRow(float adjustx = 0)
@@ -406,7 +432,7 @@ namespace SongRequestManagerV2
             ClearSearches();
             
 
-            RequestBot.COMMAND.Parse(GetLoginUser(), $"!addnew/top",RequestBot.CmdFlags.Local);
+            _bot.Parse(GetLoginUser(), $"!addnew/top", CmdFlags.Local);
         }
 
         void Search(KEY key)
@@ -418,19 +444,19 @@ namespace SongRequestManagerV2
 
 #if UNRELEASED
             ClearSearches();
-            RequestBot.COMMAND.Parse(GetLoginUser(), $"!addsongs/top {key.kb.KeyboardText.text}",RequestBot.CmdFlags.Local);
+            SRMCommand.Parse(GetLoginUser(), $"!addsongs/top {key.kb.KeyboardText.text}",RequestBot.CmdFlags.Local);
             Clear(key);
 #endif
         }
 
         void ClearSearches()
         {
-            for (int i = 0; i < RequestQueue.Songs.Count; i++)
+            for (int i = 0; i < RequestManager.RequestSongs.Count; i++)
             {
-                var entry = (RequestQueue.Songs[i] as SongRequest);
+                var entry = (RequestManager.RequestSongs[i] as SongRequest);
                 if (entry._status == RequestBot.RequestStatus.SongSearch)
                 {
-                    RequestBot.DequeueRequest(i, false);
+                    _bot.DequeueRequest(i, false);
                     i--;
                 }
             }
@@ -439,8 +465,8 @@ namespace SongRequestManagerV2
         {
             ClearSearches();          
             
-            RequestBot.Instance.UpdateRequestUI();
-            RequestBot.RefreshSongQuere();
+            _bot.UpdateRequestUI();
+           _bot.RefreshSongQuere();
             RequestBot._refreshQueue = true;
         }
 
@@ -455,9 +481,9 @@ namespace SongRequestManagerV2
             var typedtext = key.kb.KeyboardText.text;
             if (typedtext != "")
             {
-                if (RequestBot.COMMAND.aliaslist.ContainsKey(RequestBot.ParseState.GetCommand(ref typedtext)))
+                if (_commandManager.Aliases.ContainsKey(ParseState.GetCommand(ref typedtext)))
                 {
-                    RequestBot.COMMAND.Parse(GetLoginUser(), typedtext,RequestBot.CmdFlags.Local);
+                    _bot.Parse(GetLoginUser(), typedtext, CmdFlags.Local);
                 }
                 else
                 {
@@ -501,7 +527,7 @@ namespace SongRequestManagerV2
             SabotageState = !SabotageState;
             key.mybutton.GetComponentInChildren<Image>().color = SabotageState ? Color.green : Color.red;
             string text = "!sabotage "+ ( SabotageState ? "on" : "off");
-            RequestBot.COMMAND.Parse(GetLoginUser(), text, RequestBot.CmdFlags.Local);
+            _bot.Parse(GetLoginUser(), text, CmdFlags.Local);
         }
 
         void DrawCursor()
@@ -609,6 +635,11 @@ namespace SongRequestManagerV2
                 });
                 HoverHint _MyHintText = UIHelper.AddHintText(mybutton.transform as RectTransform, value);
             }
+        }
+
+        public class KEYBOARDFactiry : PlaceholderFactory<KEYBOARD>
+        {
+
         }
     }
 }

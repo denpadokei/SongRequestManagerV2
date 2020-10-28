@@ -16,6 +16,7 @@ namespace SongRequestManagerV2
         private KeyboardViewController _keyboardViewController;
 
         public void SetTitle(string newTitle) => base.SetTitle(newTitle);
+        public void RefreshSongList(bool obj) => _requestBotListViewController.RefreshSongQueueList(obj);
 
         protected override void BackButtonWasPressed(ViewController topViewController)
         {

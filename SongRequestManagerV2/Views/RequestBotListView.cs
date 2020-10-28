@@ -164,6 +164,10 @@ namespace SongRequestManagerV2.Views
         private LevelFilteringNavigationController _levelFilteringNavigationController;
         [Inject]
         protected PhysicsRaycasterWithCache _physicsRaycaster;
+        [Inject]
+        KEYBOARD.KEYBOARDFactiry _factiry;
+        [Inject]
+        RequestBot _bot;
 
         private TextMeshProUGUI _CurrentSongName;
         private TextMeshProUGUI _CurrentSongName2;
@@ -186,8 +190,6 @@ namespace SongRequestManagerV2.Views
 
             set => this.SetProperty(ref this.isShowHistory_, value);
         }
-
-        static public SongRequest Currentsong { get; set; } = null;
 
         private int _selectedRow
         {
@@ -237,7 +239,7 @@ namespace SongRequestManagerV2.Views
 
         public void ColorDeckButtons(KEYBOARD kb, Color basecolor, Color Present)
         {
-            if (RequestHistory.Songs.Count == 0) return;
+            if (!RequestManager.HistorySongs.Any()) return;
             foreach (KEYBOARD.KEY key in kb.keys) {
                 foreach (var item in RequestBot.deck) {
                     string search = $"!{item.Key}/selected/toggle";
@@ -267,12 +269,8 @@ namespace SongRequestManagerV2.Views
                 }
                 try {
                     try {
-                        RectTransform container = new GameObject("BSMLCustomListContainer", typeof(ViewController)).transform as RectTransform;
-                        Plugin.Log($"{container}");
-                        container.SetParent(rectTransform, false);
-                        container.sizeDelta = new Vector2(60f, 0f);
-                        CenterKeys = new KEYBOARD(container, "", false, -15, 15);
-                        RequestBot.AddKeyboard(CenterKeys, "CenterPanel.kbd");
+                        CenterKeys = _factiry.Create().Setup(this.rectTransform, "", false, -15, 15);
+                        CenterKeys.AddKeyboard("CenterPanel.kbd");
                     }
                     catch (Exception e) {
                         Plugin.Logger.Error(e);
@@ -280,7 +278,7 @@ namespace SongRequestManagerV2.Views
                     Plugin.Logger.Debug($"Songs is null? : {this.Songs == null}");
                     //this.Songs.CollectionChanged += this.Songs_CollectionChanged;
                     this.Songs.Clear();
-                    foreach (var item in RequestQueue.Songs) {
+                    foreach (var item in RequestManager.RequestSongs) {
                         Plugin.Logger.Debug($"{item}");
                         this.Songs.Add(item);
                     }
@@ -380,12 +378,12 @@ namespace SongRequestManagerV2.Views
             if (args.PropertyName == nameof(this.IsShowHistory)) {
                 this.Songs.Clear();
                 if (this.IsShowHistory) {
-                    foreach (var item in RequestHistory.Songs) {
+                    foreach (var item in RequestManager.HistorySongs) {
                         this.Songs.Add(item);
                     }
                 }
                 else {
-                    foreach (var item in RequestQueue.Songs) {
+                    foreach (var item in RequestManager.RequestSongs) {
                         this.Songs.Add(item);
                     }
                 }
@@ -403,12 +401,12 @@ namespace SongRequestManagerV2.Views
             ChangeTitle?.Invoke(IsShowHistory ? "Song Request History" : "Song Request Queue");
             this.Songs.Clear();
             if (this.IsShowHistory) {
-                foreach (var item in RequestHistory.Songs) {
+                foreach (var item in RequestManager.HistorySongs) {
                     this.Songs.Add(item);
                 }
             }
             else {
-                foreach (var item in RequestQueue.Songs) {
+                foreach (var item in RequestManager.RequestSongs) {
                     this.Songs.Add(item);
                 }
             }
@@ -423,10 +421,10 @@ namespace SongRequestManagerV2.Views
                 void _onConfirm()
                 {
                     // get selected song
-                    Currentsong = SongInfoForRow(_selectedRow);
+                    _bot.Currentsong = SongInfoForRow(_selectedRow);
 
                     // skip it
-                    RequestBot.Instance.Skip(_selectedRow);
+                    _bot.Skip(_selectedRow);
 
                     // select previous song if not first song
                     if (_selectedRow > 0) {
@@ -453,7 +451,7 @@ namespace SongRequestManagerV2.Views
             if (_requestTable.NumberOfCells() > 0) {
                 void _onConfirm()
                 {
-                    RequestBot.Instance.Blacklist(_selectedRow, IsShowHistory, true);
+                    _bot.Blacklist(_selectedRow, IsShowHistory, true);
                     if (_selectedRow > 0)
                         _selectedRow--;
                     confirmDialogActive = false;
@@ -473,12 +471,12 @@ namespace SongRequestManagerV2.Views
         private void PlayButtonClick()
         {
             if (_requestTable.NumberOfCells() > 0) {
-                Currentsong = SongInfoForRow(_selectedRow);
-                RequestBot.played.Add(Currentsong._song);
+                _bot.Currentsong = SongInfoForRow(_selectedRow);
+                RequestBot.played.Add(_bot.Currentsong._song);
                 RequestBot.WriteJSON(RequestBot.playedfilename, ref RequestBot.played);
 
                 SetUIInteractivity(false);
-                RequestBot.Instance.Process(_selectedRow, IsShowHistory);
+                _bot.Process(_selectedRow, IsShowHistory);
                 this._requestTable.tableView.SelectCellWithIdx(-1);
             }
         }
@@ -489,7 +487,7 @@ namespace SongRequestManagerV2.Views
             RequestBotConfig.Instance.RequestQueueOpen = !RequestBotConfig.Instance.RequestQueueOpen;
             RequestBotConfig.Instance.Save();
             RequestBot.WriteQueueStatusToFile(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
-            RequestBot.Instance.QueueChatMessage(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
+            _bot.QueueChatMessage(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
             UpdateRequestUI();
         }
 
@@ -536,7 +534,7 @@ namespace SongRequestManagerV2.Views
         {
             get
             {
-                var currentsong = RequestHistory.Songs[0];
+                var currentsong = RequestManager.HistorySongs[0];
 
                 if (_selectedRow != -1 && _requestTable.NumberOfCells() > _selectedRow) {
                     currentsong = SongInfoForRow(_selectedRow);
@@ -548,7 +546,7 @@ namespace SongRequestManagerV2.Views
         public void UpdateSelectSongInfo()
         {
 #if UNRELEASED
-            if (RequestHistory.Songs.Count > 0)
+            if (RequestManager.HistorySongs.Count > 0)
             {
                 var currentsong = CurrentlySelectedSong();
 
@@ -565,7 +563,7 @@ namespace SongRequestManagerV2.Views
             Dispatcher.RunOnMainThread(() =>
             {
                 try {
-                    //_playButton.GetComponentInChildren<Image>().color = ((IsShowHistory && RequestHistory.Songs.Count > 0) || (!IsShowHistory && RequestQueue.Songs.Count > 0)) ? Color.green : Color.red;
+                    //_playButton.GetComponentInChildren<Image>().color = ((IsShowHistory && RequestManager.HistorySongs.Count > 0) || (!IsShowHistory && RequestManager.RequestSongs.Count > 0)) ? Color.green : Color.red;
                     this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed";
                     //_queueButton.GetComponentInChildren<Image>().color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red; ;
                     this.HistoryHoverHint = IsShowHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
@@ -593,7 +591,7 @@ namespace SongRequestManagerV2.Views
             try {
                 var toggled = interactive;
 
-                if (_selectedRow >= (IsShowHistory ? RequestHistory.Songs : RequestQueue.Songs).Count()) _selectedRow = -1;
+                if (_selectedRow >= (IsShowHistory ? RequestManager.HistorySongs : RequestManager.RequestSongs).Count()) _selectedRow = -1;
 
                 if (_requestTable.NumberOfCells() == 0 || _selectedRow == -1 || _selectedRow >= Songs.Count()) {
                     Plugin.Log("Nothing selected, or empty list, buttons should be off");
@@ -637,21 +635,24 @@ namespace SongRequestManagerV2.Views
                 UpdateSelectSongInfo();
                 this.Songs.Clear();
                 if (this.IsShowHistory) {
-                    foreach (var item in RequestHistory.Songs) {
+                    foreach (var item in RequestManager.HistorySongs) {
                         this.Songs.Add(item);
                     }
                 }
                 else {
-                    foreach (var item in RequestQueue.Songs) {
+                    foreach (var item in RequestManager.RequestSongs) {
                         this.Songs.Add(item);
                     }
                 }
-                this._requestTable?.tableView?.ReloadData();
+                Dispatcher.RunOnMainThread(this._requestTable.tableView.ReloadData);
                 if (_selectedRow == -1) return;
 
                 if (_requestTable.NumberOfCells() > this._selectedRow) {
-                    this._requestTable?.tableView?.SelectCellWithIdx(_selectedRow, selectRowCallback);
-                    this._requestTable?.tableView?.ScrollToCellWithIdx(_selectedRow, TableViewScroller.ScrollPositionType.Beginning, true);
+                    Dispatcher.RunOnMainThread(() =>
+                    {
+                        this._requestTable?.tableView?.SelectCellWithIdx(_selectedRow, selectRowCallback);
+                        this._requestTable?.tableView?.ScrollToCellWithIdx(_selectedRow, TableViewScroller.ScrollPositionType.Beginning, true);
+                    });
                 }
             }
             catch (Exception e) {
@@ -749,7 +750,7 @@ namespace SongRequestManagerV2.Views
 
         //public int NumberOfCells()
         //{
-        //    return IsShowHistory ? RequestHistory.Songs.Count() : RequestQueue.Songs.Count();
+        //    return IsShowHistory ? RequestManager.HistorySongs.Count() : RequestManager.RequestSongs.Count();
         //}
 
         //public TableCell CellForIdx(TableView tableView, int row)
