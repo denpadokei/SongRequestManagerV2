@@ -291,7 +291,7 @@ namespace SongRequestManagerV2
         public void Newest(KEYBOARD.KEY key)
         {
             ClearSearches();
-            _commandFactory.Create().Parse(SerchCreateChatUser(), $"!addnew/top", CmdFlags.Local);
+            Parse(SerchCreateChatUser(), $"!addnew/top", CmdFlags.Local);
         }
 
         public void Search(KEYBOARD.KEY key)
@@ -300,7 +300,7 @@ namespace SongRequestManagerV2
                 key.kb.Enter(key);
             }
             ClearSearches();
-            _commandFactory.Create().Parse(SerchCreateChatUser(), $"!addsongs/top {key.kb.KeyboardText.text}", CmdFlags.Local);
+            Parse(SerchCreateChatUser(), $"!addsongs/top {key.kb.KeyboardText.text}", CmdFlags.Local);
             key.kb.Clear(key);
         }
 
@@ -310,7 +310,7 @@ namespace SongRequestManagerV2
                 key.kb.Enter(key);
             }
             ClearSearches();
-            _commandFactory.Create().Parse(SerchCreateChatUser(), $"!makesearchdeck {key.kb.KeyboardText.text}", CmdFlags.Local);
+            Parse(SerchCreateChatUser(), $"!makesearchdeck {key.kb.KeyboardText.text}", CmdFlags.Local);
             key.kb.Clear(key);
         }
 
@@ -320,7 +320,7 @@ namespace SongRequestManagerV2
                 key.kb.Enter(key);
             }
             ClearSearches();
-            _commandFactory.Create().Parse(SerchCreateChatUser(), $"!addsongs/top/mod {key.kb.KeyboardText.text}", CmdFlags.Local);
+            Parse(SerchCreateChatUser(), $"!addsongs/top/mod {key.kb.KeyboardText.text}", CmdFlags.Local);
             key.kb.Clear(key);
         }
 
@@ -351,7 +351,7 @@ namespace SongRequestManagerV2
         internal void RecievedMessages(IChatService _, IChatMessage msg)
         {
             Plugin.Log($"Received Message : {msg.Message}");
-            _commandFactory.Create().Parse(msg.Sender, msg.Message.Replace("！", "!"));
+            Parse(msg.Sender, msg.Message.Replace("！", "!"));
         }
 
         internal void OnConfigChangedEvent(RequestBotConfig config)
@@ -412,7 +412,7 @@ namespace SongRequestManagerV2
 
         public void ScheduledCommand(string command, System.Timers.ElapsedEventArgs e)
         {
-            _commandFactory.Create().Parse(SerchCreateChatUser(), command);
+            Parse(SerchCreateChatUser(), command);
         }
 
         internal void RunStartupScripts()
@@ -1117,6 +1117,20 @@ namespace SongRequestManagerV2
                 return new TwitchUser(JsonUtility.ToJson(obj));
             }
         }
+        public void Parse(IChatUser user, string request, CmdFlags flags = 0, string info = "")
+        {
+            if (string.IsNullOrEmpty(request)) {
+                Plugin.Log($"request strings is null : {request}");
+                return;
+            }
 
+            if (!string.IsNullOrEmpty(user.Id) && listcollection.contains(ref _blockeduser, user.Id.ToLower())) {
+                Plugin.Log($"Sender is contain blacklist : {user.UserName}");
+                return;
+            }
+
+            // This will be used for all parsing type operations, allowing subcommands efficient access to parse state logic
+            _stateFactory.Create().Setup(user, request, flags, info).ParseCommand().Await(result => { Plugin.Log("finish ParceCommand"); }, null, null);
+        }
     }
 }

@@ -8,6 +8,7 @@ using SongRequestManagerV2.Models;
 using ChatCore.Interfaces;
 using SongRequestManagerV2.Statics;
 using ChatCore.Models.Twitch;
+using SongRequestManagerV2.Extentions;
 // Feature requests: Add Reason for being banned to banlist
 
 namespace SongRequestManagerV2

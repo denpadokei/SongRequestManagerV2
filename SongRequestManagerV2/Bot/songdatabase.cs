@@ -869,7 +869,7 @@ namespace SongRequestManagerV2
                     }
                 }
             }
-            _commandFactory.Create().Parse(SerchCreateChatUser(), "!deck pp", CmdFlags.Local);
+            Parse(SerchCreateChatUser(), "!deck pp", CmdFlags.Local);
 
             Instance.QueueChatMessage("PP Data indexed");
             pploading = false;

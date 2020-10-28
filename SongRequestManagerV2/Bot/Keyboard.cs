@@ -432,7 +432,7 @@ namespace SongRequestManagerV2
             ClearSearches();
             
 
-            _commandFactory.Create().Parse(GetLoginUser(), $"!addnew/top", CmdFlags.Local);
+            _bot.Parse(GetLoginUser(), $"!addnew/top", CmdFlags.Local);
         }
 
         void Search(KEY key)
@@ -483,7 +483,7 @@ namespace SongRequestManagerV2
             {
                 if (_commandManager.Aliases.ContainsKey(ParseState.GetCommand(ref typedtext)))
                 {
-                    _commandFactory.Create().Parse(GetLoginUser(), typedtext, CmdFlags.Local);
+                    _bot.Parse(GetLoginUser(), typedtext, CmdFlags.Local);
                 }
                 else
                 {
@@ -527,7 +527,7 @@ namespace SongRequestManagerV2
             SabotageState = !SabotageState;
             key.mybutton.GetComponentInChildren<Image>().color = SabotageState ? Color.green : Color.red;
             string text = "!sabotage "+ ( SabotageState ? "on" : "off");
-            _commandFactory.Create().Parse(GetLoginUser(), text, CmdFlags.Local);
+            _bot.Parse(GetLoginUser(), text, CmdFlags.Local);
         }
 
         void DrawCursor()

@@ -183,21 +183,7 @@ namespace SongRequestManagerV2.Models
             return this;
         }
 
-        public void Parse(IChatUser user, string request, CmdFlags flags = 0, string info = "")
-        {
-            if (string.IsNullOrEmpty(request)) {
-                Plugin.Log($"request strings is null : {request}");
-                return;
-            }
-
-            if (!string.IsNullOrEmpty(user.Id) && listcollection.contains(ref _blockeduser, user.Id.ToLower())) {
-                Plugin.Log($"Sender is contain blacklist : {user.UserName}");
-                return;
-            }
-
-            // This will be used for all parsing type operations, allowing subcommands efficient access to parse state logic
-            _stateFactory.Create().Setup(user, request, flags, info).ParseCommand().Await(result => { Plugin.Log("finish ParceCommand"); }, null, null);
-        }
+        
 
         #region Command List Save / Load functionality
         internal string GetHelpText()

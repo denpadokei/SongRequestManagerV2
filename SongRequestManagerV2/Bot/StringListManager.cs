@@ -24,6 +24,8 @@ namespace SongRequestManagerV2.Bot
 
         [Inject]
         SRMCommand.SRMCommandFactory _commandFactory;
+        [Inject]
+        RequestBot _bot;
 
         ListFlags flags = 0;
 
@@ -61,7 +63,7 @@ namespace SongRequestManagerV2.Bot
             try {
                 // BUG: A DynamicText context needs to be applied to each command to allow use of dynamic variables
 
-                foreach (var line in list) _commandFactory.Create().Parse(null, line, CmdFlags.Local);
+                foreach (var line in list) _bot.Parse(null, line, CmdFlags.Local);
             }
             catch (Exception ex) {
                 Plugin.Log(ex.ToString());
