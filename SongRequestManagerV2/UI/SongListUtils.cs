@@ -21,6 +21,9 @@ namespace SongRequestManagerV2
         private SelectLevelCategoryViewController _selectLevelCategoryViewController;
         [Inject]
         private GameplaySetupViewController _gameplaySetupViewController;
+        [Inject]
+        private LevelFilteringNavigationController _levelFilteringNavigationController;
+
         private static bool _initialized = false;
         //private static bool _songBrowserInstalled = false;
         //private static bool _songDownloaderInstalled = false;
@@ -156,11 +159,8 @@ namespace SongRequestManagerV2
                 }
 
                 // Make sure our custom songpack is selected
-                SelectCustomSongPack(0);
-
-                yield return new WaitForSeconds(0.5f);
-
                 SelectCustomSongPack(2);
+                _levelFilteringNavigationController.UpdateCustomSongs();
 
                 var song = Loader.GetLevelByHash(levelID.Split('_').Last());
                 if (song == null) {
