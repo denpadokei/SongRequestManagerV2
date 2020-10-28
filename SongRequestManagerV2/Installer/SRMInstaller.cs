@@ -4,6 +4,7 @@ using HMUI;
 using IPA.Utilities;
 using SiraUtil;
 using SongRequestManagerV2.Bot;
+using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.UI;
 using SongRequestManagerV2.Views;
@@ -29,7 +30,6 @@ namespace SongRequestManagerV2.Installers
             Container.BindFactory<SongRequest, SongRequest.SongRequestFactory>().AsCached();
             Container.BindFactory<ParseState, ParseState.ParseStateFactory>().AsCached();
             Container.BindFactory<SRMCommand, SRMCommand.SRMCommandFactory>().AsCached();
-
             
             Container.BindInterfacesAndSelfTo<CommandManager>().AsSingle();
             

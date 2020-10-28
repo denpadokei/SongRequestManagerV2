@@ -215,6 +215,7 @@
     <Compile Include="Bases\BindableBase.cs" />
     <Compile Include="Bases\BSBindableBase.cs" />
     <Compile Include="Bases\SingletonBindableBase.cs" />
+    <Compile Include="Bases\SRMCommandBase.cs" />
     <Compile Include="Bases\ViewContlollerBindableBase.cs" />
     <Compile Include="Bot\ChatCommands.cs" />
     <Compile Include="Bot\DynamicText.cs" />
@@ -224,6 +225,7 @@
     <Compile Include="Bot\QueueLongMessage.cs" />
     <Compile Include="Bot\RequestBot.cs" />
     <Compile Include="Bot\StringListManager.cs" />
+    <Compile Include="Interfaces\ISRMCommand.cs" />
     <Compile Include="Models\SRMCommand.cs" />
     <Compile Include="Models\CommandManager.cs" />
     <Compile Include="Models\ParseState.cs" />

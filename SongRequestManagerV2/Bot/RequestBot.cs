@@ -345,7 +345,7 @@ namespace SongRequestManagerV2
         public bool MyChatMessageHandler(IChatMessage msg)
         {
             string excludefilename = "chatexclude.users";
-            return listcollection.contains(ref excludefilename, msg.Sender.UserName.ToLower(), RequestBot.ListFlags.Uncached);
+            return listcollection.contains(excludefilename, msg.Sender.UserName.ToLower(), RequestBot.ListFlags.Uncached);
         }
 
         internal void RecievedMessages(IChatService _, IChatMessage msg)
@@ -1124,7 +1124,7 @@ namespace SongRequestManagerV2
                 return;
             }
 
-            if (!string.IsNullOrEmpty(user.Id) && listcollection.contains(ref _blockeduser, user.Id.ToLower())) {
+            if (!string.IsNullOrEmpty(user.Id) && listcollection.contains(_blockeduser, user.Id.ToLower())) {
                 Plugin.Log($"Sender is contain blacklist : {user.UserName}");
                 return;
             }

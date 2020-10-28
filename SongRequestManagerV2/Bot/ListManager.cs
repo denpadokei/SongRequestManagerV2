@@ -25,7 +25,7 @@ namespace SongRequestManagerV2
 
         internal string listaccess(ParseState state)
         {
-            QueueChatMessage($"Hi, my name is {state._botcmd.userParameter} , and I'm a list object!");
+            QueueChatMessage($"Hi, my name is {state._botcmd.UserParameter} , and I'm a list object!");
             return success;
         }
 

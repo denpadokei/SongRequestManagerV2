@@ -245,7 +245,7 @@ namespace SongRequestManagerV2.Views
                     string search = $"!{item.Key}/selected/toggle";
                     if (key.value.StartsWith(search)) {
                         string deckname = item.Key.ToLower() + ".deck";
-                        Color color = (RequestBot.listcollection.contains(ref deckname, CurrentlySelectedSong._song["id"].Value)) ? Present : basecolor;
+                        Color color = (RequestBot.listcollection.contains(deckname, CurrentlySelectedSong._song["id"].Value)) ? Present : basecolor;
                         key.mybutton.GetComponentInChildren<Image>().color = color;
                     }
                 }

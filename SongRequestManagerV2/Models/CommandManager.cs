@@ -1,6 +1,7 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Utilities;
 using SongRequestManagerV2.Bot;
+using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Statics;
 using System;
 using System.Collections.Concurrent;
@@ -26,7 +27,7 @@ namespace SongRequestManagerV2.Models
         [Inject]
         RequestBot _bot;
         [Inject]
-        RequestManager _requestManager;
+        DiContainer _diContainer;
 
         #region common Regex expressions
 
@@ -48,7 +49,7 @@ namespace SongRequestManagerV2.Models
 
         #endregion
 
-        public ConcurrentDictionary<string, SRMCommand> Aliases { get; private set; } = new ConcurrentDictionary<string, SRMCommand>(); // There can be only one (static)!
+        public ConcurrentDictionary<string, ISRMCommand> Aliases { get; private set; } = new ConcurrentDictionary<string, ISRMCommand>(); // There can be only one (static)!
 
         public void Initialize()
         {
@@ -61,10 +62,10 @@ namespace SongRequestManagerV2.Models
  
             */
 
-            var commands = new List<SRMCommand>();
+            var commands = new List<ISRMCommand>();
 
             this.Aliases.Clear();
-
+            
             #region 初期化ごにょごにょ
             commands.Add(this._commandFactory.Create().Setup(new string[] { "!request", "!bsr", "!add", "!sr", "!srm" }).Action(_bot.ProcessSongRequest).Help(FlagParameter.Everyone, "usage: %alias%<songname> or <song id>, omit <,>'s. %|%This adds a song to the request queue. Try and be a little specific. You can look up songs on %beatsaver%", _atleast1));
             commands.Add(this._commandFactory.Create().Setup(new string[] { "!lookup", "!find" }).AsyncAction(LookupSongs).Help(FlagParameter.Mod | FlagParameter.Sub | FlagParameter.VIP, "usage: %alias%<song name> or <song id>, omit <>'s.%|%Get a list of songs from %beatsaver% matching your search criteria.", _atleast1));
@@ -256,12 +257,13 @@ namespace SongRequestManagerV2.Models
             commands.Add(this._commandFactory.Create().Setup(new string[] { "/top", "subcmdtop" }).Action(SubcmdTop).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Mod | FlagParameter.Broadcaster, "%alias% sets a flag to move the request(s) to the top of the queue."));
             commands.Add(this._commandFactory.Create().Setup(new string[] { "/mod", "subcmdmod" }).Action(SubcmdMod).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Mod | FlagParameter.Broadcaster, "%alias% sets a flag to ignore all filtering"));
             #endregion
-            SummarizeCommands(); // Save original command states string.
-            #endregion
+            commands.AddRange(this._diContainer.ResolveAll<ISRMCommand>());
+
             foreach (var item in commands) {
                 AddAliases(item);
             }
-
+            SummarizeCommands(); // Save original command states string.
+            #endregion
             try {
                 CommandConfiguration();
                 _bot.RunStartupScripts();
@@ -281,9 +283,9 @@ namespace SongRequestManagerV2.Models
             return success;
         }
 
-        public void AddAliases(SRMCommand command)
+        public void AddAliases(ISRMCommand command)
         {
-            foreach (var entry in command.aliases.Select(x => x.ToLower())) {
+            foreach (var entry in command.Aliases.Select(x => x.ToLower())) {
                 if (string.IsNullOrEmpty(entry)) continue; // Make sure we don't get a blank command
                 Aliases.AddOrUpdate(entry, command, (s, c) => command);
             }
@@ -291,12 +293,12 @@ namespace SongRequestManagerV2.Models
 
         public void SummarizeCommands(StringBuilder target = null, bool everything = true)
         {
-            SortedDictionary<string, SRMCommand> unique = new SortedDictionary<string, SRMCommand>();
+            var unique = new SortedDictionary<string, ISRMCommand>();
 
             if (target == null) target = commandsummary;
 
             foreach (var alias in this.Aliases) {
-                var BaseKey = alias.Value.aliases[0];
+                var BaseKey = alias.Value.Aliases[0];
                 if (!unique.ContainsKey(BaseKey)) unique.Add(BaseKey, alias.Value); // Create a sorted dictionary of each unique command object
             }
 
@@ -306,12 +308,12 @@ namespace SongRequestManagerV2.Models
 
                 if (command.Flags.HasFlag(CmdFlags.Dynamic) || command.Flags.HasFlag(CmdFlags.Subcommand)) continue; // we do not allow customization of Subcommands or dynamic commands at this time
 
-                var cmdname = command.aliases[0];
+                var cmdname = command.Aliases[0];
                 if (everything) cmdname += new string(' ', 20 - cmdname.Length);
 
                 if (command.Flags.HasFlag(CmdFlags.Variable) && (everything | command.ChangedParameters.HasFlag(ChangedFlags.Variable))) {
                     if (everything) target.Append("// ");
-                    target.Append($"{cmdname}= {command.userParameter.ToString()}\r\n");
+                    target.Append($"{cmdname}= {command.UserParameter.ToString()}\r\n");
                 }
                 else {
                     if (everything || (command.ChangedParameters & ChangedFlags.Any) != 0) {
@@ -487,19 +489,19 @@ namespace SongRequestManagerV2.Models
 
         public string SubcmdList(ParseState state)
         {
-            _bot.ListList(state._user, state._botcmd.userParameter.ToString());
+            _bot.ListList(state._user, state._botcmd.UserParameter.ToString());
             return endcommand;
         }
 
         public string SubcmdAdd(ParseState state)
         {
-            _bot.Addtolist(state._user, state._botcmd.userParameter.ToString() + " " + state._subparameter);
+            _bot.Addtolist(state._user, state._botcmd.UserParameter.ToString() + " " + state._subparameter);
             return endcommand;
         }
 
         public string SubcmdRemove(ParseState state)
         {
-            _bot.RemoveFromlist(state._user, state._botcmd.userParameter.ToString() + " " + state._subparameter);
+            _bot.RemoveFromlist(state._user, state._botcmd.UserParameter.ToString() + " " + state._subparameter);
             return endcommand;
         }
 
@@ -630,7 +632,7 @@ namespace SongRequestManagerV2.Models
         {
             // BUG: No parameter checking
             string key = state._subparameter.ToLower();
-            state._botcmd.permittedusers = key;
+            state._botcmd.Permittedusers = key;
             if (!state._flags.HasFlag(CmdFlags.SilentResult)) _bot.QueueChatMessage($"Permit custom userlist set to  {key}.");
             return endcommand;
         }
@@ -640,10 +642,10 @@ namespace SongRequestManagerV2.Models
 
             state._subparameter.ToLower();
 
-            if (state._botcmd.aliases.Contains(state._botcmd.aliases[0]) || Aliases.ContainsKey(state._botcmd.aliases[0])) {
-                foreach (var alias in state._botcmd.aliases) Aliases.TryRemove(alias, out _);
-                state._botcmd.aliases.Clear();
-                state._botcmd.aliases.AddRange(state._subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
+            if (state._botcmd.Aliases.Contains(state._botcmd.Aliases[0]) || Aliases.ContainsKey(state._botcmd.Aliases[0])) {
+                foreach (var alias in state._botcmd.Aliases) Aliases.TryRemove(alias, out _);
+                state._botcmd.Aliases.Clear();
+                state._botcmd.Aliases.AddRange(state._subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
                 state._botcmd.AddAliases();
                 state._botcmd.UpdateCommand(ChangedFlags.Aliases);
                 this.AddAliases(state._botcmd);
@@ -690,7 +692,7 @@ namespace SongRequestManagerV2.Models
             state._flags |= CmdFlags.SilentResult; // Turn off success messages, but still allow errors.
 
             if (state._botcmd.Flags.HasFlag(CmdFlags.Variable)) {
-                state._botcmd.userParameter.Clear().Append(state._subparameter + state._parameter);
+                state._botcmd.UserParameter.Clear().Append(state._subparameter + state._parameter);
                 state._botcmd.UpdateCommand(ChangedFlags.Variable);
 
             }
@@ -702,7 +704,7 @@ namespace SongRequestManagerV2.Models
         public string SubcmdDefault(ParseState state)
         {
             if (state._botcmd.Flags.HasFlag(CmdFlags.Variable)) {
-                state._botcmd.userParameter.Clear().Append(state._botcmd.UserString);
+                state._botcmd.UserParameter.Clear().Append(state._botcmd.UserString);
                 state._botcmd.UpdateCommand(ChangedFlags.Variable);
                 return state.msg($"{state._command} has been reset to its original value.", endcommand);
             }
@@ -716,11 +718,11 @@ namespace SongRequestManagerV2.Models
         // We thus build a table with only those values we have. 
 
         // BUG: This is actually part of botcmd, please move
-        public void ShowHelpMessage(SRMCommand botcmd, IChatUser user, string param, bool showlong)
+        public void ShowHelpMessage(ISRMCommand botcmd, IChatUser user, string param, bool showlong)
         {
             if (botcmd.Flags.HasFlag(CmdFlags.Disabled)) return; // Make sure we're allowed to show help
 
-            _textFactory.Create().AddUser(user).AddBotCmd(botcmd).QueueMessage(ref botcmd.ShortHelp, showlong);
+            _textFactory.Create().AddUser(user).AddBotCmd(botcmd).QueueMessage(botcmd.ShortHelp, showlong);
             return;
         }
 

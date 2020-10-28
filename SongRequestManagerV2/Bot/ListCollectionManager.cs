@@ -58,7 +58,7 @@ namespace SongRequestManagerV2.Bot
             return list;
         }
 
-        public bool contains(ref string listname, string key, ListFlags flags = ListFlags.Unchanged)
+        public bool contains(string listname, string key, ListFlags flags = ListFlags.Unchanged)
         {
             try {
                 StringListManager list = OpenList(listname);

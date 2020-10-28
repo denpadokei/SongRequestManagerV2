@@ -48,7 +48,7 @@ namespace SongRequestManagerV2
 
         public string Variable(ParseState state) // Basically show the value of a variable without parsing
         {
-            QueueChatMessage(state._botcmd.userParameter.ToString());
+            QueueChatMessage(state._botcmd.UserParameter.ToString());
             return "";
         }
 
@@ -112,8 +112,8 @@ namespace SongRequestManagerV2
         {
             string songid = song["id"].Value;
             if (IsInQueue(songid)) return true;
-            if (listcollection.contains(ref banlist, songid)) return true;
-            if (listcollection.contains(ref duplicatelist, songid)) return true;
+            if (listcollection.contains(banlist, songid)) return true;
+            if (listcollection.contains(duplicatelist, songid)) return true;
             return false;
         }
 
@@ -126,13 +126,13 @@ namespace SongRequestManagerV2
             string songid = song["id"].Value;
             if (filter.HasFlag(SongFilter.Queue) && RequestManager.RequestSongs.OfType<SongRequest>().Any(req => req._song["version"] == song["version"])) return fast ? "X" : $"Request {song["songName"].Value} by {song["authorName"].Value} already exists in queue!";
 
-            if (filter.HasFlag(SongFilter.Blacklist) && listcollection.contains(ref banlist, songid)) return fast ? "X" : $"{song["songName"].Value} by {song["authorName"].Value} ({song["version"].Value}) is banned!";
+            if (filter.HasFlag(SongFilter.Blacklist) && listcollection.contains(banlist, songid)) return fast ? "X" : $"{song["songName"].Value} by {song["authorName"].Value} ({song["version"].Value}) is banned!";
 
             if (filter.HasFlag(SongFilter.Mapper) && mapperfiltered(song, _mapperWhitelist)) return fast ? "X" : $"{song["songName"].Value} by {song["authorName"].Value} does not have a permitted mapper!";
 
-            if (filter.HasFlag(SongFilter.Duplicate) && listcollection.contains(ref duplicatelist, songid)) return fast ? "X" : $"{song["songName"].Value} by  {song["authorName"].Value} already requested this session!";
+            if (filter.HasFlag(SongFilter.Duplicate) && listcollection.contains(duplicatelist, songid)) return fast ? "X" : $"{song["songName"].Value} by  {song["authorName"].Value} already requested this session!";
 
-            if (listcollection.contains(ref _whitelist, songid)) return "";
+            if (listcollection.contains(_whitelist, songid)) return "";
 
             if (filter.HasFlag(SongFilter.Duration) && song["songduration"].AsFloat > RequestBotConfig.Instance.MaximumSongLength * 60) return fast ? "X" : $"{song["songName"].Value} ({song["songlength"].Value}) by {song["authorName"].Value} ({song["version"].Value}) is too long!";
 
@@ -183,7 +183,7 @@ namespace SongRequestManagerV2
         {
             var id = GetBeatSaverId(state._parameter.ToLower());
 
-            if (listcollection.contains(ref banlist, id)) {
+            if (listcollection.contains(banlist, id)) {
                 QueueChatMessage($"{id} is already on the ban list.");
                 return;
             }
@@ -244,7 +244,7 @@ namespace SongRequestManagerV2
         {
             var unbanvalue = GetBeatSaverId(request);
 
-            if (listcollection.contains(ref banlist, unbanvalue)) {
+            if (listcollection.contains(banlist, unbanvalue)) {
                 QueueChatMessage($"Removed {request} from the ban list.");
                 listcollection.remove(banlist, unbanvalue);
             }
