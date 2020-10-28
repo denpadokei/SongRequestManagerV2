@@ -1,6 +1,7 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Models.Twitch;
 using SongRequestManagerV2.Bot;
+using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Statics;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace SongRequestManagerV2.Models
         public string _parameter = "";
         public string _sort = "";
 
-        public SRMCommand _botcmd = null;
+        public ISRMCommand _botcmd = null;
 
         public string _subparameter = "";
 
@@ -88,8 +89,8 @@ namespace SongRequestManagerV2.Models
 
             _subparameter = (subcommandsectionend - subcommandend > 0) ? _parameter.Substring(subcommandend, subcommandsectionend - subcommandend).Trim(' ') : "";
 
-            SRMCommand subcmd;
-            if (!_commandManager.Aliases.TryGetValue(subcommand, out subcmd)) return notsubcommand;
+            
+            if (!_commandManager.Aliases.TryGetValue(subcommand, out var subcmd)) return notsubcommand;
 
             if (!subcmd.Flags.HasFlag(CmdFlags.Subcommand)) return notsubcommand;
             // BUG: Need to check subcmd permissions here.     
@@ -104,7 +105,7 @@ namespace SongRequestManagerV2.Models
             }
 
             try {
-                return subcmd.subcommand(this);
+                return subcmd.Subcommand(this);
             }
             catch (Exception ex) {
                 Plugin.Log(ex.ToString());
@@ -115,7 +116,7 @@ namespace SongRequestManagerV2.Models
 
         public string msg(string text, string result = "")
         {
-            if (!_flags.HasFlag(CmdFlags.SilentResult)) _textFactory.Create().AddUser(_user).AddBotCmd(_botcmd).QueueMessage(ref text);
+            if (!_flags.HasFlag(CmdFlags.SilentResult)) _textFactory.Create().AddUser(_user).AddBotCmd(_botcmd).QueueMessage(text);
             return result;
         }
 
@@ -181,7 +182,7 @@ namespace SongRequestManagerV2.Models
 
 
             // Num is Nani?
-            if (!allow && !_botcmd.Flags.HasFlag(CmdFlags.BypassRights) && !listcollection.contains(ref _botcmd.permittedusers, _user.UserName.ToLower())) {
+            if (!allow && !_botcmd.Flags.HasFlag(CmdFlags.BypassRights) && !listcollection.contains(_botcmd.Permittedusers, _user.UserName.ToLower())) {
                 CmdFlags twitchpermission = _botcmd.Flags & CmdFlags.TwitchLevel;
                 if (!_botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) Instance?.QueueChatMessage($"{_command} is restricted to {twitchpermission.ToString()}");
                 return;
@@ -195,7 +196,7 @@ namespace SongRequestManagerV2.Models
 
             // Check regex
 
-            if (!_botcmd.regexfilter.IsMatch(_parameter)) {
+            if (!_botcmd.Regexfilter.IsMatch(_parameter)) {
                 if (!_botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) _commandManager.ShowHelpMessage(_botcmd, _user, _parameter, false);
                 return;
             }

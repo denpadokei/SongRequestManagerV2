@@ -1,5 +1,6 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Utilities;
+using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
 using System;
@@ -54,11 +55,11 @@ namespace SongRequestManagerV2.Bot
         }
 
 
-        public DynamicText AddBotCmd(SRMCommand botcmd)
+        public DynamicText AddBotCmd(ISRMCommand botcmd)
         {
 
             StringBuilder aliastext = new StringBuilder();
-            foreach (var alias in botcmd.aliases) aliastext.Append($"{alias} ");
+            foreach (var alias in botcmd.Aliases) aliastext.Append($"{alias} ");
             Add("alias", aliastext.ToString());
 
             aliastext.Clear();
@@ -150,13 +151,6 @@ namespace SongRequestManagerV2.Bot
         }
 
         public DynamicText QueueMessage(string text, bool parselong = false)
-        {
-            QueueMessage(ref text, parselong);
-            return this;
-        }
-
-
-        public DynamicText QueueMessage(ref string text, bool parselong = false)
         {
             _bot.QueueChatMessage(Parse(text, parselong));
             return this;

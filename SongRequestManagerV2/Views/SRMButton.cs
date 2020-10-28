@@ -134,6 +134,7 @@ namespace SongRequestManagerV2.Views
             Plugin.Logger.Debug("OnDestroy");
             _bot.ChangeButtonColor -= this.SetButtonColor;
             _bot.DismissRequest -= this.BackButtonPressed;
+            _bot.RefreshListRequest -= this.RefreshListRequest;
         }
 
         

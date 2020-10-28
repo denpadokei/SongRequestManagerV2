@@ -9,6 +9,7 @@ using ChatCore.Interfaces;
 using SongRequestManagerV2.Statics;
 using ChatCore.Models.Twitch;
 using SongRequestManagerV2.Extentions;
+using SongRequestManagerV2.Interfaces;
 // Feature requests: Add Reason for being banned to banlist
 
 namespace SongRequestManagerV2
@@ -172,7 +173,7 @@ namespace SongRequestManagerV2
 
         public static StringNormalization normalize = new StringNormalization();
 
-        public static bool HasRights(SRMCommand botcmd, IChatUser user, CmdFlags flags)
+        public static bool HasRights(ISRMCommand botcmd, IChatUser user, CmdFlags flags)
         {
             if (flags.HasFlag(CmdFlags.Local)) return true;
             if (botcmd.Flags.HasFlag(CmdFlags.Disabled)) return false;
