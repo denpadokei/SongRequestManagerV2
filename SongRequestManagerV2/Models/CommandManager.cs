@@ -646,7 +646,7 @@ namespace SongRequestManagerV2.Models
                 state._botcmd.aliases.AddRange(state._subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
                 state._botcmd.AddAliases();
                 state._botcmd.UpdateCommand(ChangedFlags.Aliases);
-
+                this.AddAliases(state._botcmd);
             }
             else {
                 return $"Unable to set {state._command} aliases to {state._subparameter}";

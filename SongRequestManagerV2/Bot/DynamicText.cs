@@ -26,13 +26,6 @@ namespace SongRequestManagerV2.Bot
             Dynamicvariables.Add(key, value); // Make the code slower but more readable :(
             return this;
         }
-
-        private DynamicText()
-        {
-            
-
-        }
-
         public DynamicText AddUser(IChatUser user)
         {
             try {
