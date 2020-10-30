@@ -1,4 +1,5 @@
 ﻿using ChatCore.Interfaces;
+using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
@@ -6,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -26,7 +28,7 @@ namespace SongRequestManagerV2.Bases
                                                                               //private Func<COMMAND, IChatUser, string, CmdFlags, string, string> Method3 = null; // Prefered method, returns the error msg as a string.
         protected Func<ParseState, IEnumerator> func1 = null;
 
-        protected static string _blockeduser = "blockeduser.unique";
+        protected static readonly string _blockeduser = "blockeduser.unique";
 
         public Func<ParseState, string> Subcommand { get; protected set; } = null; // Prefered calling convention. It does expose calling command base properties, so be careful.
         public Func<ParseState> Subcommand2 { get; protected set; } = null;
@@ -34,7 +36,7 @@ namespace SongRequestManagerV2.Bases
 
         public CmdFlags Flags { set; get; } = FlagParameter.Broadcaster;          // flags
         public string ShortHelp { set; get; } = "";                   // short help text (on failing preliminary check
-        public List<string> Aliases { get; } = new List<string>();               // list of command aliases
+        public HashSet<string> Aliases { get; } = new HashSet<string>();               // list of command aliases
         public Regex Regexfilter { get; protected set; } = _anything;                 // reg ex filter to apply. For now, we're going to use a single string
 
         public string LongHelp { get; protected set; } = null; // Long help text
@@ -48,17 +50,21 @@ namespace SongRequestManagerV2.Bases
         public ChangedFlags ChangedParameters { get; set; } = 0; // Indicates if any prameters were changed by the user
 
         [Inject]
-        protected RequestBot _bot;
+        protected IRequestBot _bot;
 
         [Inject]
         public abstract void Constractor();
 
-        public ISRMCommand AddAliases()
+        public ISRMCommand AddAliases(IEnumerable<string> aliases)
         {
-            foreach (var entry in Aliases) {
-                if (entry.Length == 0) continue; // Make sure we don't get a blank command
-                Plugin.Logger.Debug(entry);
+            foreach (var item in aliases) {
+                this.Aliases.Add(item.ToLower());
             }
+            return this;
+        }
+        public ISRMCommand AddAliases(string aliase)
+        {
+            this.Aliases.Add(aliase.ToLower());
             return this;
         }
 
@@ -98,7 +104,6 @@ namespace SongRequestManagerV2.Bases
         {
             Aliases.Clear();
             Aliases.Add(alias.ToLower());
-            AddAliases();
             return this;
         }
 
@@ -108,7 +113,6 @@ namespace SongRequestManagerV2.Bases
             foreach (var element in alias) {
                 Aliases.Add(element.ToLower());
             }
-            AddAliases();
             return this;
         }
 
@@ -122,7 +126,6 @@ namespace SongRequestManagerV2.Bases
             Regexfilter = _anything;
             ShortHelp = "the = operator currently requires a space after it";
             UserString = reference.ToString(); // Save a backup
-            AddAliases();
             return this;
         }
 
@@ -145,7 +148,7 @@ namespace SongRequestManagerV2.Bases
         {
             this.Flags = flags;
             this.ShortHelp = ShortHelp;
-            this.Regexfilter = regexfilter != null ? regexfilter : _anything;
+            this.Regexfilter = regexfilter ?? _anything;
 
             return this;
         }

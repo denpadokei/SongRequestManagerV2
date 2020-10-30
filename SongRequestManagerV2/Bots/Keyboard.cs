@@ -15,6 +15,8 @@ using Zenject;
 using System.IO;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
+using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Interfaces;
 
 namespace SongRequestManagerV2
 {
@@ -60,12 +62,9 @@ namespace SongRequestManagerV2
         private TextMeshProUGUI KeyboardCursor;
         public Button BaseButton;
         [Inject]
-        RequestBot _bot;
-
+        IRequestBot _bot;
         [Inject]
         CommandManager _commandManager;
-        [Inject]
-        SRMCommand.SRMCommandFactory _commandFactory;
 
 
         KEY dummy = new KEY(); // This allows for some lazy programming, since unfound key searches will point to this instead of null. It still logs an error though
@@ -166,7 +165,7 @@ namespace SongRequestManagerV2
 
         KEY AddKey(string keylabel, string Shifted, float width = 12,float height=10)
         {
-            KEY key = AddKey(keylabel, width);
+            KEY key = AddKey(keylabel, width, height);
             key.shifted = Shifted;
             return key;
         }
@@ -454,7 +453,7 @@ namespace SongRequestManagerV2
             for (int i = 0; i < RequestManager.RequestSongs.Count; i++)
             {
                 var entry = (RequestManager.RequestSongs[i] as SongRequest);
-                if (entry._status == RequestBot.RequestStatus.SongSearch)
+                if (entry._status == RequestStatus.SongSearch)
                 {
                     _bot.DequeueRequest(i, false);
                     i--;
@@ -466,8 +465,8 @@ namespace SongRequestManagerV2
             ClearSearches();          
             
             _bot.UpdateRequestUI();
-           _bot.RefreshSongQuere();
-            RequestBot._refreshQueue = true;
+            _bot.RefreshSongQuere();
+            _bot.RefreshQueue = true;
         }
 
 

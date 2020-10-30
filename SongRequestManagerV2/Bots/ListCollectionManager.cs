@@ -1,12 +1,14 @@
-﻿using System;
+﻿using SongRequestManagerV2.Interfaces;
+using SongRequestManagerV2.Statics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static SongRequestManagerV2.RequestBot;
+using Zenject;
 
-namespace SongRequestManagerV2.Bot
+namespace SongRequestManagerV2.Bots
 {
     /// <summary>
     /// The list collection maintains a dictionary of named, persistent lists. Accessing a collection by name automatically loads or crates it.
@@ -14,6 +16,9 @@ namespace SongRequestManagerV2.Bot
     /// </summary>
     public class ListCollectionManager
     {
+        [Inject]
+        IRequestBot _bot;
+
         // BUG: DoNotCreate flags currently do nothing
         // BUG: List name case normalization is inconsistent. I'll probably fix it by changing the list interface (its currently just the filename)
 
@@ -29,7 +34,7 @@ namespace SongRequestManagerV2.Bot
         public StringListManager ClearOldList(string request, TimeSpan delta, ListFlags flags = ListFlags.Unchanged)
         {
             string listfilename = Path.Combine(Plugin.DataPath, request);
-            TimeSpan UpdatedAge = GetFileAgeDifference(listfilename);
+            TimeSpan UpdatedAge = _bot.GetFileAgeDifference(listfilename);
 
             StringListManager list = OpenList(request, flags);
 
@@ -58,7 +63,7 @@ namespace SongRequestManagerV2.Bot
             return list;
         }
 
-        public bool contains(string listname, string key, ListFlags flags = ListFlags.Unchanged)
+        public bool Contains(string listname, string key, ListFlags flags = ListFlags.Unchanged)
         {
             try {
                 StringListManager list = OpenList(listname);
@@ -69,12 +74,12 @@ namespace SongRequestManagerV2.Bot
             return false;
         }
 
-        public bool add(string listname, string key, ListFlags flags = ListFlags.Unchanged)
+        public bool Add(string listname, string key, ListFlags flags = ListFlags.Unchanged)
         {
-            return add(ref listname, ref key, flags);
+            return Add(ref listname, ref key, flags);
         }
 
-        public bool add(ref string listname, ref string key, ListFlags flags = ListFlags.Unchanged)
+        public bool Add(ref string listname, ref string key, ListFlags flags = ListFlags.Unchanged)
         {
             try {
                 StringListManager list = OpenList(listname);
@@ -91,11 +96,11 @@ namespace SongRequestManagerV2.Bot
             return false;
         }
 
-        public bool remove(string listname, string key, ListFlags flags = ListFlags.Unchanged)
+        public bool Remove(string listname, string key, ListFlags flags = ListFlags.Unchanged)
         {
-            return remove(ref listname, ref key, flags);
+            return Remove(ref listname, ref key, flags);
         }
-        public bool remove(ref string listname, ref string key, ListFlags flags = ListFlags.Unchanged)
+        public bool Remove(ref string listname, ref string key, ListFlags flags = ListFlags.Unchanged)
         {
             try {
                 StringListManager list = OpenList(listname);
@@ -112,10 +117,10 @@ namespace SongRequestManagerV2.Bot
             return false;
         }
 
-        public void runscript(string listname, ListFlags flags = ListFlags.Unchanged)
+        public void Runscript(string listname, ListFlags flags = ListFlags.Unchanged)
         {
             try {
-                OpenList(listname, flags).runscript();
+                OpenList(listname, flags).Runscript();
 
             }
             catch (Exception ex) { Plugin.Log(ex.ToString()); } // Going to try this form, to reduce code verbosity.              

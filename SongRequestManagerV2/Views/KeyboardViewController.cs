@@ -1,5 +1,7 @@
 ﻿using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
+using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Interfaces;
 using UnityEngine;
 using Zenject;
 
@@ -10,7 +12,7 @@ namespace SongRequestManagerV2.Views
         [Inject]
         private KEYBOARD.KEYBOARDFactiry _factiry;
         [Inject]
-        RequestBot _bot;
+        IRequestBot _bot;
 
         public override string Content => @"<bg></bg>";
 

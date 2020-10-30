@@ -3,6 +3,8 @@ using BeatSaberMarkupLanguage.Components;
 using HMUI;
 using SongCore;
 using SongRequestManagerV2.Bases;
+using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -157,17 +159,12 @@ namespace SongRequestManagerV2.Views
 
         [UIComponent("queue-button")]
         private NoTransitionsButton _queueButton;
-
-        [Inject]
-        private DiContainer diContainer;
-        [Inject]
-        private LevelFilteringNavigationController _levelFilteringNavigationController;
         [Inject]
         protected PhysicsRaycasterWithCache _physicsRaycaster;
         [Inject]
         KEYBOARD.KEYBOARDFactiry _factiry;
         [Inject]
-        RequestBot _bot;
+        IRequestBot _bot;
 
         private TextMeshProUGUI _CurrentSongName;
         private TextMeshProUGUI _CurrentSongName2;
@@ -191,7 +188,7 @@ namespace SongRequestManagerV2.Views
             set => this.SetProperty(ref this.isShowHistory_, value);
         }
 
-        private int _selectedRow
+        private int SelectedRow
         {
             get { return IsShowHistory ? _historyRow : _requestRow; }
             set
@@ -228,11 +225,11 @@ namespace SongRequestManagerV2.Views
             Plugin.Logger.Debug("ListView Awake()");
             Instance = this;
             this._progress = new Progress<double>();
-            this._progress.ProgressChanged -= this._progress_ProgressChanged;
-            this._progress.ProgressChanged += this._progress_ProgressChanged;
+            this._progress.ProgressChanged -= this.Progress_ProgressChanged;
+            this._progress.ProgressChanged += this.Progress_ProgressChanged;
         }
 
-        private void _progress_ProgressChanged(object sender, double e)
+        private void Progress_ProgressChanged(object sender, double e)
         {
             this.ChangeProgressText(e);
         }
@@ -245,7 +242,7 @@ namespace SongRequestManagerV2.Views
                     string search = $"!{item.Key}/selected/toggle";
                     if (key.value.StartsWith(search)) {
                         string deckname = item.Key.ToLower() + ".deck";
-                        Color color = (RequestBot.listcollection.contains(deckname, CurrentlySelectedSong._song["id"].Value)) ? Present : basecolor;
+                        Color color = (_bot.ListCollectionManager.Contains(deckname, CurrentlySelectedSong._song["id"].Value)) ? Present : basecolor;
                         key.mybutton.GetComponentInChildren<Image>().color = color;
                     }
                 }
@@ -421,14 +418,14 @@ namespace SongRequestManagerV2.Views
                 void _onConfirm()
                 {
                     // get selected song
-                    _bot.Currentsong = SongInfoForRow(_selectedRow);
+                    _bot.Currentsong = SongInfoForRow(SelectedRow);
 
                     // skip it
-                    _bot.Skip(_selectedRow);
+                    _bot.Skip(SelectedRow);
 
                     // select previous song if not first song
-                    if (_selectedRow > 0) {
-                        _selectedRow--;
+                    if (SelectedRow > 0) {
+                        SelectedRow--;
                     }
 
                     // indicate dialog is no longer active
@@ -436,7 +433,7 @@ namespace SongRequestManagerV2.Views
                 }
 
                 // get song
-                var song = SongInfoForRow(_selectedRow)._song;
+                var song = SongInfoForRow(SelectedRow)._song;
 
                 // indicate dialog is active
                 confirmDialogActive = true;
@@ -451,14 +448,14 @@ namespace SongRequestManagerV2.Views
             if (_requestTable.NumberOfCells() > 0) {
                 void _onConfirm()
                 {
-                    _bot.Blacklist(_selectedRow, IsShowHistory, true);
-                    if (_selectedRow > 0)
-                        _selectedRow--;
+                    _bot.Blacklist(SelectedRow, IsShowHistory, true);
+                    if (SelectedRow > 0)
+                        SelectedRow--;
                     confirmDialogActive = false;
                 }
 
                 // get song
-                var song = SongInfoForRow(_selectedRow)._song;
+                var song = SongInfoForRow(SelectedRow)._song;
 
                 // indicate dialog is active
                 confirmDialogActive = true;
@@ -471,12 +468,12 @@ namespace SongRequestManagerV2.Views
         private void PlayButtonClick()
         {
             if (_requestTable.NumberOfCells() > 0) {
-                _bot.Currentsong = SongInfoForRow(_selectedRow);
-                RequestBot.played.Add(_bot.Currentsong._song);
-                RequestBot.WriteJSON(RequestBot.playedfilename, ref RequestBot.played);
+                _bot.Currentsong = SongInfoForRow(SelectedRow);
+                RequestBot.Played.Add(_bot.Currentsong._song);
+                _bot.WriteJSON(RequestBot.playedfilename, RequestBot.Played);
 
                 SetUIInteractivity(false);
-                _bot.Process(_selectedRow, IsShowHistory);
+                _bot.Process(SelectedRow, IsShowHistory);
                 this._requestTable.tableView.SelectCellWithIdx(-1);
             }
         }
@@ -486,7 +483,7 @@ namespace SongRequestManagerV2.Views
         {
             RequestBotConfig.Instance.RequestQueueOpen = !RequestBotConfig.Instance.RequestQueueOpen;
             RequestBotConfig.Instance.Save();
-            RequestBot.WriteQueueStatusToFile(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
+            _bot.WriteQueueStatusToFile(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
             _bot.QueueChatMessage(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
             UpdateRequestUI();
         }
@@ -496,14 +493,14 @@ namespace SongRequestManagerV2.Views
         {
             Plugin.Logger.Debug($"Selected cell : {tableView}({row})");
 
-            _selectedRow = this.Songs.IndexOf(row);
+            SelectedRow = this.Songs.IndexOf(row);
             //if (row != _lastSelection) {
             //    _lastSelection = 0;
             //}
 
             // if not in history, disable play button if request is a challenge
             if (!IsShowHistory) {
-                var request = SongInfoForRow(_selectedRow);
+                var request = SongInfoForRow(SelectedRow);
                 var isChallenge = request._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
                 this.IsPlayButtonEnable = !isChallenge;
             }
@@ -536,8 +533,8 @@ namespace SongRequestManagerV2.Views
             {
                 var currentsong = RequestManager.HistorySongs[0];
 
-                if (_selectedRow != -1 && _requestTable.NumberOfCells() > _selectedRow) {
-                    currentsong = SongInfoForRow(_selectedRow);
+                if (SelectedRow != -1 && _requestTable.NumberOfCells() > SelectedRow) {
+                    currentsong = SongInfoForRow(SelectedRow);
                 }
                 return currentsong as SongRequest;
             }
@@ -591,16 +588,16 @@ namespace SongRequestManagerV2.Views
             try {
                 var toggled = interactive;
 
-                if (_selectedRow >= (IsShowHistory ? RequestManager.HistorySongs : RequestManager.RequestSongs).Count()) _selectedRow = -1;
+                if (SelectedRow >= (IsShowHistory ? RequestManager.HistorySongs : RequestManager.RequestSongs).Count()) SelectedRow = -1;
 
-                if (_requestTable.NumberOfCells() == 0 || _selectedRow == -1 || _selectedRow >= Songs.Count()) {
+                if (_requestTable.NumberOfCells() == 0 || SelectedRow == -1 || SelectedRow >= Songs.Count()) {
                     Plugin.Log("Nothing selected, or empty list, buttons should be off");
                     toggled = false;
                 }
 
                 var playButtonEnabled = toggled;
                 if (toggled && !IsShowHistory) {
-                    var request = SongInfoForRow(_selectedRow);
+                    var request = SongInfoForRow(SelectedRow);
                     var isChallenge = request._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
                     playButtonEnabled = isChallenge ? false : toggled;
                 }
@@ -645,13 +642,13 @@ namespace SongRequestManagerV2.Views
                     }
                 }
                 Dispatcher.RunOnMainThread(this._requestTable.tableView.ReloadData);
-                if (_selectedRow == -1) return;
+                if (SelectedRow == -1) return;
 
-                if (_requestTable.NumberOfCells() > this._selectedRow) {
+                if (_requestTable.NumberOfCells() > this.SelectedRow) {
                     Dispatcher.RunOnMainThread(() =>
                     {
-                        this._requestTable?.tableView?.SelectCellWithIdx(_selectedRow, selectRowCallback);
-                        this._requestTable?.tableView?.ScrollToCellWithIdx(_selectedRow, TableViewScroller.ScrollPositionType.Beginning, true);
+                        this._requestTable?.tableView?.SelectCellWithIdx(SelectedRow, selectRowCallback);
+                        this._requestTable?.tableView?.ScrollToCellWithIdx(SelectedRow, TableViewScroller.ScrollPositionType.Beginning, true);
                     });
                 }
             }
@@ -742,8 +739,6 @@ namespace SongRequestManagerV2.Views
         {
             //_songPreviewPlayer.CrossfadeTo(level.previewAudioClip, level.previewStartTime, level.previewDuration);
         }
-
-        private static Dictionary<string, Texture2D> _cachedTextures = new Dictionary<string, Texture2D>();
 
         #region TableView.IDataSource interface
         //public float CellSize() { return 10f; }

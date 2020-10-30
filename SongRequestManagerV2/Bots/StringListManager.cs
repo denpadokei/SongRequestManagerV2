@@ -1,5 +1,7 @@
-﻿using SongRequestManagerV2.Models;
+﻿using SongRequestManagerV2.Interfaces;
+using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
+using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,9 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zenject;
-using static SongRequestManagerV2.RequestBot;
 
-namespace SongRequestManagerV2.Bot
+namespace SongRequestManagerV2.Bots
 {
     /// <summary>
     /// All variables are public for now until we finalize the interface
@@ -21,11 +22,10 @@ namespace SongRequestManagerV2.Bot
 
         public List<string> list = new List<string>();
         private HashSet<string> hashlist = new HashSet<string>();
-
         [Inject]
-        SRMCommand.SRMCommandFactory _commandFactory;
+        IRequestBot _bot;
         [Inject]
-        RequestBot _bot;
+        StringNormalization _stringNormalization;
 
         ListFlags flags = 0;
 
@@ -58,7 +58,7 @@ namespace SongRequestManagerV2.Bot
             return false;
         }
 
-        public void runscript()
+        public void Runscript()
         {
             try {
                 // BUG: A DynamicText context needs to be applied to each command to allow use of dynamic variables
@@ -109,7 +109,7 @@ namespace SongRequestManagerV2.Bot
         public string Drawentry()
         {
             if (list.Count == 0) return "";
-            int entry = generator.Next(0, list.Count);
+            int entry = RequestBot.Generator.Next(0, list.Count);
             string result = list.ElementAt(entry);
             list.RemoveAt(entry);
             return result;
@@ -119,7 +119,7 @@ namespace SongRequestManagerV2.Bot
         public string Randomentry()
         {
             if (list.Count == 0) return "";
-            int entry = generator.Next(0, list.Count);
+            int entry = RequestBot.Generator.Next(0, list.Count);
             string result = list.ElementAt(entry);
             return result;
         }

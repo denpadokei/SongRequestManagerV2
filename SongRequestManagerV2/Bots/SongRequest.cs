@@ -6,7 +6,9 @@ using ChatCore.Utilities;
 using HMUI;
 using SongCore;
 using SongRequestManagerV2.Bases;
-using SongRequestManagerV2.Bot;
+using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Interfaces;
+using SongRequestManagerV2.Statics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,7 +17,6 @@ using TMPro;
 using UnityEngine;
 using VRUIControls;
 using Zenject;
-using static SongRequestManagerV2.RequestBot;
 
 namespace SongRequestManagerV2
 {
@@ -31,7 +32,7 @@ namespace SongRequestManagerV2
         public TextMeshProUGUI _authorNameText;
 
         [Inject]
-        RequestBot _bot;
+        IRequestBot _bot;
 
         [Inject]
         DynamicText.DynamicTextFactory _textFactory;
@@ -80,8 +81,6 @@ namespace SongRequestManagerV2
 
         public string _songName;
         public string _authorName;
-
-        private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(4, 4);
 
         private static readonly ConcurrentDictionary<string, Texture2D> _cachedTextures = new ConcurrentDictionary<string, Texture2D>();
 
@@ -150,8 +149,8 @@ namespace SongRequestManagerV2
                     dt.Add("Status", _status.ToString());
                     dt.Add("Info", (_requestInfo != "") ? " / " + _requestInfo : "");
                     dt.Add("RequestTime", _requestTime.ToLocalTime().ToString("hh:mm"));
-                    this.AuthorName = dt.Parse(RequestBot.QueueListRow2);
-                    this.Hint = dt.Parse(RequestBot.SongHintText);
+                    this.AuthorName = dt.Parse(StringFormat.QueueListRow2);
+                    this.Hint = dt.Parse(StringFormat.SongHintText);
 
                     var imageSet = false;
 
