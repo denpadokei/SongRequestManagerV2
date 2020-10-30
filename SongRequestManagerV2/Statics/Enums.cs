@@ -20,6 +20,41 @@ namespace SongRequestManagerV2.Statics
         public const CmdFlags Var = CmdFlags.Variable | Broadcaster;
     }
 
+    [Flags]
+    public enum RequestStatus
+    {
+        Invalid,
+        Queued,
+        Blacklisted,
+        Skipped,
+        Played,
+        Wrongsong,
+        SongSearch,
+    }
+
+    [Flags]
+    public enum ListFlags
+    {
+        ReadOnly = 1,
+        InMemory = 2,
+        Uncached = 4,
+        Dynamic = 8,
+        LineSeparator = 16,
+        Unchanged = 256
+    }
+
+    enum MapField
+    {
+        id,
+        version,
+        songName,
+        songSubName,
+        authorName,
+        rating,
+        hashMd5,
+        hashSha1
+    }
+
     #region COMMANDFLAGS
     [Flags]
     public enum ChangedFlags

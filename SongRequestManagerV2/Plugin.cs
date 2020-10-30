@@ -20,6 +20,7 @@ using SongRequestManagerV2.Models;
 using SiraUtil.Zenject;
 using SongRequestManagerV2.Installers;
 using Zenject;
+using SongRequestManagerV2.Bots;
 
 namespace SongRequestManagerV2
 {
@@ -91,33 +92,10 @@ namespace SongRequestManagerV2
         {
             
 
-            if (RequestBotConfig.IsStartServer) {
-                BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
-                BouyomiPipeline.instance.ReceiveMessege += this.Instance_ReceiveMessege;
-                BouyomiPipeline.instance.Start();
-            }
-            else {
-                BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
-                BouyomiPipeline.instance.Stop();
-            }
-
-            // setup settings ui
-            BSMLSettings.instance.AddSettingsMenu("SRM V2", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", SongRequestManagerSettings.instance);
-
             
-            RequestBotConfig.Save(true);
-            Log("end Menu Scene Loaded Fresh!");
         }
 
-        private void Instance_ReceiveMessege(string obj)
-        {
-            var message = new MessageEntity()
-            {
-                Message = obj
-            };
-
-            RequestBot.Instance.RecievedMessages(null, message);
-        }
+        
 
         public static void SongBrowserCancelFilter()
         {

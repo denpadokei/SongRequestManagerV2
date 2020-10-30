@@ -20,7 +20,7 @@ namespace SongRequestManagerV2.Interfaces
 
         CmdFlags Flags { set; get; }
         string ShortHelp { set; get; }
-        List<string> Aliases { get; }
+        HashSet<string> Aliases { get; }
         Regex Regexfilter { get; }
         string LongHelp { get; }
         string HelpLink { get; }
@@ -31,10 +31,9 @@ namespace SongRequestManagerV2.Interfaces
         int UseCount { get; set; }
         ChangedFlags ChangedParameters { get; set; }
 
-        ISRMCommand AddAliases();
-
+        ISRMCommand AddAliases(IEnumerable<string> aliases);
+        ISRMCommand AddAliases(string aliases);
         void Constractor();
-
         void UpdateCommand(ChangedFlags changed);
         void SetPermittedUsers(string listname);
         Task<string> Execute(ParseState state);

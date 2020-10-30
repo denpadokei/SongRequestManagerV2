@@ -3,10 +3,11 @@ using BeatSaberMarkupLanguage.FloatingScreen;
 using HMUI;
 using IPA.Utilities;
 using SiraUtil;
-using SongRequestManagerV2.Bot;
+using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.UI;
+using SongRequestManagerV2.Utils;
 using SongRequestManagerV2.Views;
 using System;
 using System.Collections.Generic;
@@ -34,9 +35,12 @@ namespace SongRequestManagerV2.Installers
             Container.BindInterfacesAndSelfTo<CommandManager>().AsSingle();
             
             Container.Bind<SongListUtils>().AsCached();
+            Container.Bind<MapDatabase>().AsSingle();
+            Container.Bind<StringNormalization>().AsSingle();
+            Container.Bind<ListCollectionManager>().AsSingle();
             Container.Bind<RequestManager>().AsSingle();
 
-            Container.Bind<RequestBot>().FromNewComponentOnNewGameObject("SRMBot").AsSingle();
+            Container.BindInterfacesAndSelfTo<RequestBot>().FromNewComponentOnNewGameObject("SRMBot").AsSingle();
 
             Container.BindViewController<RequestBotListView>();
             Container.BindViewController<KeyboardViewController>();

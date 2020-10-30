@@ -12,6 +12,8 @@ using ChatCore.Services;
 using ChatCore.Services.Twitch;
 using HMUI;
 using IPA.Utilities;
+using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.UI;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
@@ -37,7 +39,7 @@ namespace SongRequestManagerV2.Views
         [Inject]
         public SearchFilterParamsViewController _searchFilterParamsViewController;
         [Inject]
-        private RequestBot _bot;
+        private IRequestBot _bot;
 
         private Button _button;
 
@@ -128,13 +130,13 @@ namespace SongRequestManagerV2.Views
         {
             this._requestFlow.RefreshSongList(obj);
         }
-
-        void OnDestroy()
+        protected override void OnDestroy()
         {
             Plugin.Logger.Debug("OnDestroy");
             _bot.ChangeButtonColor -= this.SetButtonColor;
             _bot.DismissRequest -= this.BackButtonPressed;
             _bot.RefreshListRequest -= this.RefreshListRequest;
+            base.OnDestroy();
         }
 
         

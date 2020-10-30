@@ -1,11 +1,12 @@
-﻿using System;
+﻿using SongRequestManagerV2.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zenject;
 
-namespace SongRequestManagerV2.Bot
+namespace SongRequestManagerV2.Bots
 {
     public class QueueLongMessage
     {
@@ -20,7 +21,7 @@ namespace SongRequestManagerV2.Bot
         public int Count = 0;
 
         [Inject]
-        RequestBot _bot;
+        IRequestBot _bot;
 
         // BUG: This version doesn't reallly strings > twitchmessagelength well, will support
         public QueueLongMessage() // Constructor supports setting max messages
@@ -70,7 +71,7 @@ namespace SongRequestManagerV2.Bot
             return false;
         }
 
-        public void end(string overflowtext = "", string emptymsg = "")
+        public void End(string overflowtext = "", string emptymsg = "")
         {
             if (Count == 0)
                 _bot.QueueChatMessage(emptymsg); // Note, this means header doesn't get printed either for empty lists                

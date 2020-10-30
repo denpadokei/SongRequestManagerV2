@@ -1,4 +1,6 @@
 ﻿using ChatCore.Utilities;
+using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
@@ -12,6 +14,8 @@ namespace SongRequestManagerV2
     {
         [Inject]
         SongRequest.SongRequestFactory factory;
+        [Inject]
+        IRequestBot _bot;
 
         public static List<object> RequestSongs { get; } = new List<object>();
         private static string requestsPath = Path.Combine(Plugin.DataPath, "SongRequestQueue.dat");
@@ -78,7 +82,7 @@ namespace SongRequestManagerV2
             }
             catch (Exception e) {
                 Plugin.Log($"{e}");
-                RequestBot.Instance.QueueChatMessage("There was an error reading the request queue.");
+                _bot.QueueChatMessage("There was an error reading the request queue.");
             }
 
         }
@@ -99,7 +103,7 @@ namespace SongRequestManagerV2
                 }
             }
             catch {
-                RequestBot.Instance.QueueChatMessage("There was an error reading the request history.");
+                _bot.QueueChatMessage("There was an error reading the request history.");
             }
 
         }

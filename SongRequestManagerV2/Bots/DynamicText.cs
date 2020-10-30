@@ -10,12 +10,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Zenject;
 
-namespace SongRequestManagerV2.Bot
+namespace SongRequestManagerV2.Bots
 {
     public class DynamicText
     {
         [Inject]
-        RequestBot _bot;
+        IRequestBot _bot;
 
         public Dictionary<string, string> Dynamicvariables { get; } = new Dictionary<string, string>();  // A list of the variables available to us, we're using a list of pairs because the match we use uses BeginsWith,since the name of the string is unknown. The list is very short, so no biggie
 
