@@ -76,8 +76,6 @@ namespace SongRequestManagerV2
             SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
             // setup handle for fresh menu scene changes
             BSEvents.OnLoad();
-            BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
-
             // keep track of active scene
             BSEvents.menuSceneActive += () => { IsAtMainMenu = true; };
             BSEvents.gameSceneActive += () => { IsAtMainMenu = false; };
@@ -85,17 +83,6 @@ namespace SongRequestManagerV2
             // init sprites
             Base64Sprites.Init();
         }
-
-        
-
-        private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenes)
-        {
-            
-
-            
-        }
-
-        
 
         public static void SongBrowserCancelFilter()
         {

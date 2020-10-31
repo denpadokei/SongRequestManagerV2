@@ -195,10 +195,5 @@ namespace SongRequestManagerV2.Bases
             return String.Join(",", Aliases.ToArray());
         }
         #endregion
-
-        public class SRMCommandFactory : PlaceholderFactory<SRMCommand>
-        {
-
-        }
     }
 }

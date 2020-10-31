@@ -99,8 +99,8 @@ namespace SongRequestManagerV2.Bots
 
             if (song["pp"].AsFloat > 0) Add("PP", song["pp"].AsInt.ToString() + " PP"); else Add("PP", "");
 
-            Add("StarRating", _bot.GetStarRating(ref song)); // Add additional dynamic properties
-            Add("Rating", _bot.GetRating(ref song));
+            Add("StarRating", _bot.GetStarRating(song)); // Add additional dynamic properties
+            Add("Rating", _bot.GetRating(song));
             Add("BeatsaverLink", $"https://beatsaver.com/beatmap/{song["id"].Value}");
             Add("BeatsaberLink", $"https://bsaber.com/songs/{song["id"].Value}");
             return this;
@@ -131,10 +131,7 @@ namespace SongRequestManagerV2.Bots
                             break;
                         }
                     }
-
-                    string substitutetext;
-
-                    if (keywordlength > 0 && keywordlength != 0 && Dynamicvariables.TryGetValue(text.Substring(keywordstart, keywordlength), out substitutetext)) {
+                    if (keywordlength > 0 && keywordlength != 0 && Dynamicvariables.TryGetValue(text.Substring(keywordstart, keywordlength), out var substitutetext)) {
 
                         if (keywordlength == 1 && !parselong) return output.ToString(); // Return at first sepearator on first 1 character code. 
 

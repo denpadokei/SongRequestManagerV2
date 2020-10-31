@@ -1,4 +1,5 @@
 ﻿using SongRequestManagerV2.Bases;
+using Zenject;
 
 namespace SongRequestManagerV2.Models
 {
@@ -7,6 +8,11 @@ namespace SongRequestManagerV2.Models
     {
         public override void Constractor()
         {
+        }
+
+        public class SRMCommandFactory : PlaceholderFactory<SRMCommand>
+        {
+
         }
     }
     #endregion

@@ -111,7 +111,7 @@ namespace SongRequestManagerV2
         [UIAction("#post-parse")]
         internal void Setup()
         {
-            this.SongName = $"{_songName} <size=50%>{_bot.GetRating(ref _song)}";
+            this.SongName = $"{_songName} <size=50%>{_bot.GetRating(_song)}";
             this.SetCover();
         }
 

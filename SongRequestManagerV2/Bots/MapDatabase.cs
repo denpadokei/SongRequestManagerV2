@@ -17,9 +17,9 @@ namespace SongRequestManagerV2.Bots
 {
     public class MapDatabase
     {
-        public static ConcurrentDictionary<string, SongMap> MapLibrary = new ConcurrentDictionary<string, SongMap>();
-        public static ConcurrentDictionary<string, SongMap> LevelId = new ConcurrentDictionary<string, SongMap>();
-        public static ConcurrentDictionary<string, HashSet<int>> SearchDictionary = new ConcurrentDictionary<string, HashSet<int>>();
+        public static ConcurrentDictionary<string, SongMap> MapLibrary { get; } = new ConcurrentDictionary<string, SongMap>();
+        public static ConcurrentDictionary<string, SongMap> LevelId { get; } = new ConcurrentDictionary<string, SongMap>();
+        public static ConcurrentDictionary<string, HashSet<int>> SearchDictionary { get; } = new ConcurrentDictionary<string, HashSet<int>>();
 
         static int tempid = 100000; // For now, we use these for local ID less songs
 
@@ -30,6 +30,8 @@ namespace SongRequestManagerV2.Bots
         IRequestBot _bot;
         [Inject]
         StringNormalization normalize;
+        [Inject]
+        SongMap.SongMapFactory _songMapFactory;
 
         // Fast? Full Text Search
         public List<SongMap> Search(string SearchKey)
@@ -41,8 +43,7 @@ namespace SongRequestManagerV2.Bots
             List<SongMap> result = new List<SongMap>();
 
             if (_bot.GetBeatSaverId(SearchKey) != "") {
-                SongMap song;
-                if (MapDatabase.MapLibrary.TryGetValue(normalize.RemoveSymbols(ref SearchKey, normalize._SymbolsNoDash), out song)) {
+                if (MapDatabase.MapLibrary.TryGetValue(normalize.RemoveSymbols(ref SearchKey, normalize._SymbolsNoDash), out var song)) {
                     result.Add(song);
                     return result;
                 }
@@ -53,9 +54,7 @@ namespace SongRequestManagerV2.Bots
             string[] SearchParts = normalize.Split(SearchKey);
 
             foreach (var part in SearchParts) {
-                HashSet<int> idset;
-
-                if (!SearchDictionary.TryGetValue(part, out idset)) return result; // Keyword must be found
+                if (!SearchDictionary.TryGetValue(part, out var idset)) return result; // Keyword must be found
                 resultlist.Add(idset);
             }
 
@@ -90,7 +89,6 @@ namespace SongRequestManagerV2.Bots
         public void RemoveMap(JSONObject song)
         {
 
-
         }
         public void AddDirectory()
         {
@@ -109,7 +107,7 @@ namespace SongRequestManagerV2.Bots
                 //JSONArray arr = new JSONArray();
                 JSONObject arr = new JSONObject();
                 foreach (var entry in MapLibrary)
-                    arr.Add(entry.Value.song["id"], entry.Value.song);
+                    arr.Add(entry.Value.Song["id"], entry.Value.Song);
                 File.WriteAllText(Path.Combine(Plugin.DataPath, "SongDatabase.dat"), arr.ToString());
                 _bot.QueueChatMessage($"Saved Song Databse in  {(DateTime.Now - start).Seconds} secs.");
             }
@@ -137,7 +135,7 @@ namespace SongRequestManagerV2.Bots
 
 
                         foreach (KeyValuePair<string, JSONNode> kvp in json) {
-                            new SongMap((JSONObject)kvp.Value);
+                            _songMapFactory.Create((JSONObject)kvp.Value);
                         }
 
 
@@ -201,7 +199,7 @@ namespace SongRequestManagerV2.Bots
                         GetIdFromPath(f.Name, ref id, ref version);
 
                         if (MapDatabase.MapLibrary.ContainsKey(id)) {
-                            if (MapLibrary[id].path != "") MapLibrary[id].path = f.FullName;
+                            if (MapLibrary[id].Path != "") MapLibrary[id].Path = f.FullName;
                             continue;
                         }
 
@@ -227,7 +225,7 @@ namespace SongRequestManagerV2.Bots
 
                         if (LevelId.ContainsKey(levelId)) {
 
-                            LevelId[levelId].path = f.FullName;
+                            LevelId[levelId].Path = f.FullName;
                             continue;
                         }
 
@@ -237,7 +235,7 @@ namespace SongRequestManagerV2.Bots
                         song.Add("version", version);
                         song.Add("hashMd5", hash);
 
-                        new SongMap(song, levelId, f.FullName);
+                        _songMapFactory.Create(song, levelId, f.FullName);
 
                         x = null;
 
@@ -252,7 +250,7 @@ namespace SongRequestManagerV2.Bots
                 _bot.QueueChatMessage($"Archive indexing done, {addcount} files added. ({(DateTime.Now - StarTime).TotalSeconds} secs.");
                 GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
                 GC.Collect();
-                _bot.QueueChatMessage($"hashentries: {SongMap.hashcount} memory: {(GC.GetTotalMemory(false) - startingmem) / 1048576} MB");
+                _bot.QueueChatMessage($"hashentries: {SongMap.HashCount} memory: {(GC.GetTotalMemory(false) - startingmem) / 1048576} MB");
 
 
             });
@@ -345,7 +343,7 @@ namespace SongRequestManagerV2.Bots
                         string levelId = string.Join("∎", hash, song["songName"].Value, song["songSubName"].Value, song["authorName"], song["beatsPerMinute"].AsFloat.ToString()) + "∎";
 
                         if (LevelId.ContainsKey(levelId)) {
-                            LevelId[levelId].path = item.DirectoryName;
+                            LevelId[levelId].Path = item.DirectoryName;
                             continue;
                         }
 
@@ -353,7 +351,7 @@ namespace SongRequestManagerV2.Bots
                         song.Add("version", version);
                         song.Add("hashMd5", hash);
 
-                        new SongMap(song, levelId, item.DirectoryName);
+                        _songMapFactory.Create(song, levelId, item.DirectoryName);
                     }
                     catch (Exception) {
                         _bot.QueueChatMessage($"Failed to process {item}.");

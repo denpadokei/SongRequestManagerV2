@@ -23,29 +23,6 @@ namespace SongRequestManagerV2
     // Experimental chat console
     public class KEYBOARD
     {
-        private IChatUser GetLoginUser()
-        {
-            if (_bot.TwitchService?.LoggedInUser != null) {
-                return _bot.TwitchService?.LoggedInUser;
-            }
-            else {
-                var obj = new
-                {
-                    Id = "",
-                    UserName = RequestBotConfig.Instance.MixerUserName,
-                    DisplayName = RequestBotConfig.Instance.MixerUserName,
-                    Color = "#FFFFFFFF",
-                    IsBroadcaster = true,
-                    IsModerator = false,
-                    IsSubscriber = false,
-                    IsPro = false,
-                    IsStaff = false,
-                    Badges = new IChatBadge[0]
-                };
-                return new TwitchUser(JsonUtility.ToJson(obj));
-            }
-        }
-
         public List<KEY> keys = new List<KEY>();
 
         bool SabotageState = false;
@@ -431,7 +408,7 @@ namespace SongRequestManagerV2
             ClearSearches();
             
 
-            _bot.Parse(GetLoginUser(), $"!addnew/top", CmdFlags.Local);
+            _bot.Parse(_bot.GetLoginUser(), $"!addnew/top", CmdFlags.Local);
         }
 
         void Search(KEY key)
@@ -482,7 +459,7 @@ namespace SongRequestManagerV2
             {
                 if (_commandManager.Aliases.ContainsKey(ParseState.GetCommand(ref typedtext)))
                 {
-                    _bot.Parse(GetLoginUser(), typedtext, CmdFlags.Local);
+                    _bot.Parse(_bot.GetLoginUser(), typedtext, CmdFlags.Local);
                 }
                 else
                 {
@@ -526,7 +503,7 @@ namespace SongRequestManagerV2
             SabotageState = !SabotageState;
             key.mybutton.GetComponentInChildren<Image>().color = SabotageState ? Color.green : Color.red;
             string text = "!sabotage "+ ( SabotageState ? "on" : "off");
-            _bot.Parse(GetLoginUser(), text, CmdFlags.Local);
+            _bot.Parse(_bot.GetLoginUser(), text, CmdFlags.Local);
         }
 
         void DrawCursor()
