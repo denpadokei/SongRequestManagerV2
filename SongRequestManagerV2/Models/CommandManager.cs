@@ -394,7 +394,7 @@ namespace SongRequestManagerV2.Models
 
                             UserSettings.Append(line).Append("\r\n");
                             // MAGICALLY configure the customized commands
-                            _bot.Parse(_bot.SerchCreateChatUser(), line, CmdFlags.SilentResult | CmdFlags.Local);
+                            _bot.Parse(_bot.GetLoginUser(), line, CmdFlags.SilentResult | CmdFlags.Local);
                         }
                         sr.Close();
                     }

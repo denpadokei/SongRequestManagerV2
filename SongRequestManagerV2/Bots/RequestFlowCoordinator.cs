@@ -14,8 +14,6 @@ namespace SongRequestManagerV2
         private RequestBotListView _requestBotListViewController;
         [Inject]
         private KeyboardViewController _keyboardViewController;
-
-        public void SetTitle(string newTitle) => base.SetTitle(newTitle);
         public void RefreshSongList(bool obj) => _requestBotListViewController.RefreshSongQueueList(obj);
 
         protected override void BackButtonWasPressed(ViewController topViewController)
@@ -27,13 +25,13 @@ namespace SongRequestManagerV2
         [Inject]
         public void Const()
         {
-            _requestBotListViewController.ChangeTitle += this.SetTitle;
+            _requestBotListViewController.ChangeTitle += s => this.SetTitle(s);
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             if (firstActivation) {
-                base.SetTitle("Song Request Manager");
+                this.SetTitle("Song Request Manager");
                 showBackButton = true;
                 try {
                     ProvideInitialViewControllers(_requestBotListViewController, null, _keyboardViewController);

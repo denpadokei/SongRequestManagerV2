@@ -632,19 +632,15 @@ namespace SongRequestManagerV2.Views
                 UpdateSelectSongInfo();
                 this.Songs.Clear();
                 if (this.IsShowHistory) {
-                    foreach (var item in RequestManager.HistorySongs) {
-                        this.Songs.Add(item);
-                    }
+                    this.Songs.AddRange(RequestManager.HistorySongs);
                 }
                 else {
-                    foreach (var item in RequestManager.RequestSongs) {
-                        this.Songs.Add(item);
-                    }
+                    this.Songs.AddRange(RequestManager.RequestSongs);
                 }
-                Dispatcher.RunOnMainThread(this._requestTable.tableView.ReloadData);
+                Dispatcher.RunOnMainThread(() => this._requestTable?.tableView?.ReloadData());
                 if (SelectedRow == -1) return;
 
-                if (_requestTable.NumberOfCells() > this.SelectedRow) {
+                if (_requestTable?.NumberOfCells() > this.SelectedRow) {
                     Dispatcher.RunOnMainThread(() =>
                     {
                         this._requestTable?.tableView?.SelectCellWithIdx(SelectedRow, selectRowCallback);
@@ -735,29 +731,9 @@ namespace SongRequestManagerV2.Views
         }
         #endregion
 
-        private void PlayPreview(CustomPreviewBeatmapLevel level)
+        private void PlayPreview(IPreviewBeatmapLevel level)
         {
             //_songPreviewPlayer.CrossfadeTo(level.previewAudioClip, level.previewStartTime, level.previewDuration);
         }
-
-        #region TableView.IDataSource interface
-        //public float CellSize() { return 10f; }
-
-        //public int NumberOfCells()
-        //{
-        //    return IsShowHistory ? RequestManager.HistorySongs.Count() : RequestManager.RequestSongs.Count();
-        //}
-
-        //public TableCell CellForIdx(TableView tableView, int row)
-        //{
-        //    LevelListTableCell _tableCell = Instantiate(_requestListTableCellInstance);
-        //    _tableCell.reuseIdentifier = "RequestBotFriendCell";
-        //    _tableCell.SetField("_notOwned", true);
-
-        //    SongRequest request = SongInfoForRow(row);
-        //    SetDataFromLevelAsync(request, _tableCell, row).Await(null, e => { Plugin.Log($"{e}"); }, null);
-        //    return _tableCell;
-        //}
-        #endregion
     }
 }

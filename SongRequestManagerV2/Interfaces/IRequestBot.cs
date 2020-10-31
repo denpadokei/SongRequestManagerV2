@@ -21,7 +21,6 @@ namespace SongRequestManagerV2.Interfaces
     public interface IRequestBot
     {
         ChatServiceMultiplexer MultiplexerInstance { get; }
-        
         SongListUtils SongListUtils { get; }
         StringNormalization Normalize { get; }
         MapDatabase MapDatabase { get; }
@@ -34,6 +33,7 @@ namespace SongRequestManagerV2.Interfaces
         event Action DismissRequest;
         event Action<bool> RefreshListRequest;
         event Action<Color> ChangeButtonColor;
+
         bool HasRights(ISRMCommand botcmd, IChatUser user, CmdFlags flags);
         string QueueMessage(bool QueueState);
         List<JSONObject> ReadJSON(string path);
@@ -72,9 +72,9 @@ namespace SongRequestManagerV2.Interfaces
         TimeSpan GetFileAgeDifference(string filename);
         string GetGCCount(ParseState state);
         Task GetPPData();
-        string GetRating(ref JSONObject song, bool mode = true);
+        string GetRating(JSONObject song, bool mode = true);
         List<JSONObject> GetSongListFromResults(JSONNode result, string SearchString, ref string errorMessage, SongFilter filter = (SongFilter)(-1), string sortby = "-rating", int reverse = 1);
-        string GetStarRating(ref JSONObject song, bool mode = true);
+        string GetStarRating(JSONObject song, bool mode = true);
         string IsRequestInQueue(string request, bool fast = false);
         string Listaccess(ParseState state);
         void ListList(IChatUser requestor, string request);
@@ -114,7 +114,7 @@ namespace SongRequestManagerV2.Interfaces
         IEnumerator SaveSongDatabase(ParseState state);
         void ScheduledCommand(string command, ElapsedEventArgs e);
         void Search(KEYBOARD.KEY key);
-        IChatUser SerchCreateChatUser();
+        IChatUser GetLoginUser();
         IEnumerator SetBombState(ParseState state);
         void Showlists(IChatUser requestor, string request);
         string ShowSongLink(ParseState state);

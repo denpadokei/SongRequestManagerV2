@@ -65,7 +65,7 @@ namespace SongRequestManagerV2
         public bool PPSearch = false;
         public string additionalsongpath = "";
         public string songdownloadpath = "";
-        public string MixerUserName = "";
+        public string LocalUserName = "";
 
         public bool IsStartServer = false;
         public string ReceivePort = "50001";

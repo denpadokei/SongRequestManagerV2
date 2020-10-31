@@ -1,5 +1,6 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.FloatingScreen;
+using ChatCore.Utilities;
 using HMUI;
 using IPA.Utilities;
 using SiraUtil;
@@ -31,6 +32,7 @@ namespace SongRequestManagerV2.Installers
             Container.BindFactory<SongRequest, SongRequest.SongRequestFactory>().AsCached();
             Container.BindFactory<ParseState, ParseState.ParseStateFactory>().AsCached();
             Container.BindFactory<SRMCommand, SRMCommand.SRMCommandFactory>().AsCached();
+            Container.BindFactory<JSONObject, string, string, SongMap, SongMap.SongMapFactory>().AsCached();
             
             Container.BindInterfacesAndSelfTo<CommandManager>().AsSingle();
             

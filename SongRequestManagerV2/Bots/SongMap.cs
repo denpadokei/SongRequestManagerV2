@@ -17,12 +17,12 @@ namespace SongRequestManagerV2.Bots
         [Inject]
         StringNormalization _normalize;
 
-        public JSONObject song;
-        public string path;
-        public string LevelId;
-        public float pp = 0;
+        public JSONObject Song { get; set; }
+        public string Path { get; set; }
+        public string LevelId { get; set; }
+        public float PP { get; set; } = 0;
 
-        public static int hashcount = 0;
+        public static int HashCount { get; private set; } = 0;
 
         void IndexFields(bool Add, int id, params string[] parameters)
         {
@@ -40,38 +40,40 @@ namespace SongRequestManagerV2.Bots
         void UpdateSearchEntry(string key, int id, bool Add = true)
         {
 
-            if (Add) hashcount++; else hashcount--;
+            if (Add) HashCount++; else HashCount--;
 
             if (Add)
-                MapDatabase.SearchDictionary.AddOrUpdate(key, (k) => { HashSet<int> va = new HashSet<int>(); va.Add(id); return va; }, (k, va) => { va.Add(id); return va; });
+                MapDatabase.SearchDictionary.AddOrUpdate(key, (k) => {
+                    HashSet<int> va = new HashSet<int>
+                    {
+                        id
+                    }; return va; }, (k, va) => { va.Add(id); return va; });
             else {
                 MapDatabase.SearchDictionary[key].Remove(id); // An empty keyword is fine, and actually uncommon
             }
 
         }
 
-        public SongMap(string id, string version, string songName, string songSubName, string authorName, string duration, string rating)
+        public SongMap(JSONObject song, string levelId = "", string path = "")
         {
-            //JSONObject song = new JSONObject();
-
-            //IndexSong(song);
+            this.Song = song;
+            this.LevelId = levelId;
+            this.Path = path;
         }
 
-
-        public SongMap(JSONObject song, string LevelId = "", string path = "")
+        [Inject]
+        private void Constractor()
         {
+            if (!this.Song["version"].IsString) {
+                this.Song.Add("id", this.Song["key"]);
+                this.Song.Add("version", this.Song["key"]);
 
-            if (!song["version"].IsString) {
-                //RequestBot.Instance.QueueChatMessage($"{song["key"].Value}: {song["metadata"]}");
-                song.Add("id", song["key"]);
-                song.Add("version", song["key"]);
-
-                var metadata = song["metadata"];
-                song.Add("songName", metadata["songName"].Value);
-                song.Add("songSubName", metadata["songSubName"].Value);
-                song.Add("authorName", metadata["songAuthorName"].Value);
-                song.Add("levelAuthor", metadata["levelAuthorName"].Value);
-                song.Add("rating", song["stats"]["rating"].AsFloat * 100);
+                var metadata = this.Song["metadata"];
+                this.Song.Add("songName", metadata["songName"].Value);
+                this.Song.Add("songSubName", metadata["songSubName"].Value);
+                this.Song.Add("authorName", metadata["songAuthorName"].Value);
+                this.Song.Add("levelAuthor", metadata["levelAuthorName"].Value);
+                this.Song.Add("rating", this.Song["stats"]["rating"].AsFloat * 100);
 
                 bool degrees90 = false;
                 bool degrees360 = false;
@@ -79,9 +81,6 @@ namespace SongRequestManagerV2.Bots
                 try {
 
                     var characteristics = metadata["characteristics"][0]["difficulties"];
-
-                    //Instance.QueueChatMessage($"{characteristics}");
-
                     foreach (var entry in metadata["characteristics"]) {
                         if (entry.Value["name"] == "360Degree") degrees360 = true;
                         if (entry.Value["name"] == "90Degree") degrees90 = true;
@@ -97,61 +96,42 @@ namespace SongRequestManagerV2.Bots
 
 
                         if (diff > 0) {
-                            song.Add("songlength", $"{diff / 60}:{diff % 60:00}");
-                            song.Add("songduration", diff);
+                            this.Song.Add("songlength", $"{diff / 60}:{diff % 60:00}");
+                            this.Song.Add("songduration", diff);
                             //Instance.QueueChatMessage($"{diff / 60}:{diff % 60}");
                         }
                     }
 
                     if (maxnjs > 0) {
-                        song.Add("njs", maxnjs);
+                        this.Song.Add("njs", maxnjs);
                     }
-                    if (degrees360 || degrees90) song.Add("maptype", "360");
+                    if (degrees360 || degrees90) this.Song.Add("maptype", "360");
                 }
-                catch {
+                catch (Exception e) {
+                    Plugin.Logger.Error(e);
                 }
-
             }
 
-            if (RequestBot.ppmap.TryGetValue(song["id"].Value, out var songpp)) {
-                song.Add("pp", songpp);
+            if (RequestBot.PPmap.TryGetValue(this.Song["id"].Value, out var songpp)) {
+                this.Song.Add("pp", songpp);
             }
-
-            //SongMap oldmap;
-            //if (MapDatabase.MapLibrary.TryGetValue(song["id"].Value,out oldmap))
-            //{
-
-            //    if (LevelId == oldmap.LevelId && song["version"].Value == oldmap.song["version"].Value)
-            //    {
-            //        oldmap.song = song;
-            //        return;
-            //    }
-
-            //    int id = int.Parse(song["id"].Value.ToUpper(), System.Globalization.NumberStyles.HexNumber);
-
-            //    oldmap.UnIndexSong(id);                    
-            //}
-
-            this.path = path;
-            //this.LevelId = LevelId;
-            IndexSong(song);
+            IndexSong(this.Song);
         }
 
         void UnIndexSong(int id)
         {
-            string indexpp = (song["pp"].AsFloat > 0) ? "PP" : "";
+            string indexpp = (Song["pp"].AsFloat > 0) ? "PP" : "";
 
-            IndexFields(false, id, song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, indexpp, song["maptype"].Value);
+            IndexFields(false, id, Song["songName"].Value, Song["songSubName"].Value, Song["authorName"].Value, Song["levelAuthor"].Value, indexpp, Song["maptype"].Value);
 
-            MapDatabase.MapLibrary.TryRemove(song["id"].Value, out _);
-            MapDatabase.MapLibrary.TryRemove(song["version"].Value, out _);
+            MapDatabase.MapLibrary.TryRemove(Song["id"].Value, out _);
+            MapDatabase.MapLibrary.TryRemove(Song["version"].Value, out _);
             //MapDatabase.LevelId.TryRemove(LevelId, out temp);
         }
 
         public void IndexSong(JSONObject song)
         {
             try {
-                this.song = song;
                 string indexpp = (song["pp"].AsFloat > 0) ? "PP" : "";
 
                 int id = int.Parse(song["id"].Value.ToUpper(), System.Globalization.NumberStyles.HexNumber);
@@ -160,12 +140,31 @@ namespace SongRequestManagerV2.Bots
 
                 IndexFields(true, id, song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"], indexpp, song["maptype"].Value);
 
-                MapDatabase.MapLibrary.TryAdd(song["id"].Value, this);
-                MapDatabase.MapLibrary.TryAdd(song["version"].Value, this);
+                if (string.IsNullOrEmpty(song["version"].Value)) {
+                    MapDatabase.MapLibrary.AddOrUpdate(song["id"].Value, this, (key, value) => this);
+                }
+                else {
+                    MapDatabase.MapLibrary.AddOrUpdate(song["version"].Value, this, (key, value) => this);
+                }
                 //MapDatabase.LevelId.TryAdd(LevelId, this);
             }
             catch (Exception ex) {
                 _bot.QueueChatMessage(ex.ToString());
+            }
+        }
+
+        public class SongMapFactory : PlaceholderFactory<JSONObject, string, string, SongMap>
+        {
+            /// <summary>
+            /// Create songmap.
+            /// </summary>
+            /// <param name="param1">Song</param>
+            /// <param name="param2">Level ID</param>
+            /// <param name="param3">Path</param>
+            /// <returns></returns>
+            public override SongMap Create(JSONObject param1, string param2 = "", string param3 = "")
+            {
+                return base.Create(param1, param2, param3);
             }
         }
     }
