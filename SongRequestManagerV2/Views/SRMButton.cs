@@ -125,11 +125,6 @@ namespace SongRequestManagerV2.Views
             Plugin.Log("Created request button!");
             Plugin.Logger.Debug("Start() end");
         }
-
-        private void RefreshListRequest(bool obj)
-        {
-            this._requestFlow.RefreshSongList(obj);
-        }
         protected override void OnDestroy()
         {
             Plugin.Logger.Debug("OnDestroy");
@@ -139,6 +134,9 @@ namespace SongRequestManagerV2.Views
             base.OnDestroy();
         }
 
-        
+        private void RefreshListRequest(bool obj)
+        {
+            this._requestFlow.RefreshSongList(obj);
+        }
     }
 }

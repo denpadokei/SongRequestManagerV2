@@ -18,7 +18,7 @@ using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Interfaces;
 
-namespace SongRequestManagerV2
+namespace SongRequestManagerV2.Bots
 {
     // Experimental chat console
     public class KEYBOARD
@@ -443,7 +443,6 @@ namespace SongRequestManagerV2
             
             _bot.UpdateRequestUI();
             _bot.RefreshSongQuere();
-            _bot.RefreshQueue = true;
         }
 
 

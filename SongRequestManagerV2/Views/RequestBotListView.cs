@@ -15,13 +15,13 @@ using UnityEngine.UI;
 using VRUIControls;
 using Zenject;
 using Image = UnityEngine.UI.Image;
+using KEYBOARD = SongRequestManagerV2.Bots.KEYBOARD;
 
 namespace SongRequestManagerV2.Views
 {
     [HotReload]
     public class RequestBotListView : ViewContlollerBindableBase
     {
-        public static RequestBotListView Instance { get; private set; }
         public bool IsLoading { get; set; }
 
         private bool confirmDialogActive = false;
@@ -159,24 +159,24 @@ namespace SongRequestManagerV2.Views
 
         [UIComponent("queue-button")]
         private NoTransitionsButton _queueButton;
+        [UIComponent("play-button")]
+        private NoTransitionsButton _playButton;
         [Inject]
         protected PhysicsRaycasterWithCache _physicsRaycaster;
         [Inject]
         KEYBOARD.KEYBOARDFactiry _factiry;
         [Inject]
         IRequestBot _bot;
-
+#if UNRELEASED
         private TextMeshProUGUI _CurrentSongName;
         private TextMeshProUGUI _CurrentSongName2;
         private SongPreviewPlayer _songPreviewPlayer;
-
-        internal Progress<double> _progress;
-
+#endif
         public event Action<string> ChangeTitle;
 
         private int _requestRow = -1;
         private int _historyRow = -1;
-        private int _lastSelection = -1;
+        //private int _lastSelection = -1;
 
         /// <summary>説明 を取得、設定</summary>
         private bool isShowHistory_;
@@ -201,7 +201,7 @@ namespace SongRequestManagerV2.Views
         }
 
         private KEYBOARD CenterKeys;
-
+#if UNRELEASED
         string SONGLISTKEY = @"
 [blacklist last]/0'!block/current%CR%'
 
@@ -213,6 +213,7 @@ namespace SongRequestManagerV2.Views
 [anime +]/25'!anime/current/toggle%CR%' [pop +]/25'!pop/current/toggle%CR%' 
 
 [Random song!]/0'!decklist draw%CR%'";
+#endif
 
         public static void InvokeBeatSaberButton(String buttonName)
         {
@@ -220,13 +221,24 @@ namespace SongRequestManagerV2.Views
             buttonInstance.onClick.Invoke();
         }
 
-        public void Awake()
+        [Inject]
+        void Constractor()
         {
-            Plugin.Logger.Debug("ListView Awake()");
-            Instance = this;
-            this._progress = new Progress<double>();
-            this._progress.ProgressChanged -= this.Progress_ProgressChanged;
-            this._progress.ProgressChanged += this.Progress_ProgressChanged;
+            this._bot.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
+            this._bot.DownloadProgress.ProgressChanged += this.Progress_ProgressChanged;
+            this._bot.UpdateUIRequest -= this.UpdateRequestUI;
+            this._bot.UpdateUIRequest += this.UpdateRequestUI;
+            this._bot.SetButtonIntactivityRequest -= this.SetUIInteractivity;
+            this._bot.SetButtonIntactivityRequest += this.SetUIInteractivity;
+        }
+
+        protected override void OnDestroy()
+        {
+            this._bot.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
+            this._bot.UpdateUIRequest -= this.UpdateRequestUI;
+            this._bot.SetButtonIntactivityRequest -= this.SetUIInteractivity;
+            
+            base.OnDestroy();
         }
 
         private void Progress_ProgressChanged(object sender, double e)
@@ -258,8 +270,9 @@ namespace SongRequestManagerV2.Views
                         Loader.SongsLoadedEvent += SongLoader_SongsLoadedEvent;
                     }
 
-                    // get table cell instance
+#if UNRELEASED
                     _songPreviewPlayer = Resources.FindObjectsOfTypeAll<SongPreviewPlayer>().FirstOrDefault();
+#endif
                 }
                 catch (Exception e) {
                     Plugin.Log($"{e}");
@@ -306,53 +319,53 @@ namespace SongRequestManagerV2.Views
 
                     CenterKeys.DefaultActions();
                     try {
-                        #region History button
+#region History button
                         // History button
                         HistoryButtonText = "HISTORY";
-                        #endregion
+#endregion
                     }
                     catch (Exception e) {
                         Plugin.Log($"{e}");
                     }
                     try {
-                        #region Blacklist button
+#region Blacklist button
                         // Blacklist button
                         this.BlackListButtonText = "Blacklist";
-                        #endregion
+#endregion
                     }
                     catch (Exception e) {
                         Plugin.Log($"{e}");
                     }
                     try {
-                        #region Skip button
+#region Skip button
                         this.SkipButtonName = "Skip";
-                        #endregion
+#endregion
                     }
                     catch (Exception e) {
                         Plugin.Log($"{e}");
                     }
                     try {
-                        #region Play button
+#region Play button
                         // Play button
                         this.PlayButtonText = "Play";
-                        #endregion
+#endregion
                     }
                     catch (Exception e) {
                         Plugin.Log($"{e}");
                     }
                     try {
-                        #region Queue button
+#region Queue button
                         // Queue button
                         this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed";
-                        #endregion
+#endregion
                     }
                     catch (Exception e) {
                         Plugin.Log($"{e}");
                     }
                     try {
-                        #region Progress
+#region Progress
                         this.ChangeProgressText(0f);
-                        #endregion
+#endregion
                     }
                     catch (Exception e) {
                         Plugin.Log($"{e}");
@@ -386,7 +399,7 @@ namespace SongRequestManagerV2.Views
                 }
                 UpdateRequestUI();
                 SetUIInteractivity();
-                _lastSelection = -1;
+                //_lastSelection = -1;
             }
         }
 
@@ -557,12 +570,15 @@ namespace SongRequestManagerV2.Views
 
         public void UpdateRequestUI(bool selectRowCallback = false)
         {
+            if (!this.isActivated) {
+                return;
+            }
             Dispatcher.RunOnMainThread(() =>
             {
                 try {
-                    //_playButton.GetComponentInChildren<Image>().color = ((IsShowHistory && RequestManager.HistorySongs.Count > 0) || (!IsShowHistory && RequestManager.RequestSongs.Count > 0)) ? Color.green : Color.red;
+                    this._playButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = ((IsShowHistory && RequestManager.HistorySongs.Count > 0) || (!IsShowHistory && RequestManager.RequestSongs.Count > 0)) ? Color.green : Color.red;
                     this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed";
-                    //_queueButton.GetComponentInChildren<Image>().color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red; ;
+                    this._queueButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red; ;
                     this.HistoryHoverHint = IsShowHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
                     HistoryButtonText = IsShowHistory ? "Requests" : "History";
                     PlayButtonText = IsShowHistory ? "Replay" : "Play";
@@ -585,6 +601,9 @@ namespace SongRequestManagerV2.Views
         /// <param name="interactive">Set to false to force disable all buttons, true to auto enable buttons based on states</param>
         public void SetUIInteractivity(bool interactive = true)
         {
+            if (!this.isActivated) {
+                return;
+            }
             try {
                 var toggled = interactive;
 
@@ -672,7 +691,7 @@ namespace SongRequestManagerV2.Views
             return this.Songs[row] as SongRequest;
         }
 
-        #region Modal
+#region Modal
         private Action OnConfirm;
         private Action OnDecline;
 
@@ -731,9 +750,11 @@ namespace SongRequestManagerV2.Views
         }
         #endregion
 
+#if UNRELEASED
         private void PlayPreview(IPreviewBeatmapLevel level)
         {
-            //_songPreviewPlayer.CrossfadeTo(level.previewAudioClip, level.previewStartTime, level.previewDuration);
+            _songPreviewPlayer.CrossfadeTo(level.previewAudioClip, level.previewStartTime, level.previewDuration);
         }
+#endif
     }
 }
