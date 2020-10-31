@@ -10,6 +10,7 @@ using SongCore;
 using System.Threading.Tasks;
 using System.Threading;
 using Zenject;
+using System.Collections.Generic;
 
 namespace SongRequestManagerV2
 {
@@ -23,6 +24,8 @@ namespace SongRequestManagerV2
         private GameplaySetupViewController _gameplaySetupViewController;
         [Inject]
         private LevelFilteringNavigationController _levelFilteringNavigationController;
+        [Inject]
+        private AnnotatedBeatmapLevelCollectionsViewController _annotatedBeatmapLevelCollectionsViewController;
 
         private static bool _initialized = false;
         //private static bool _songBrowserInstalled = false;
@@ -161,6 +164,11 @@ namespace SongRequestManagerV2
                 // Make sure our custom songpack is selected
                 SelectCustomSongPack(2);
                 _levelFilteringNavigationController.UpdateCustomSongs();
+                var tableView = _annotatedBeatmapLevelCollectionsViewController.GetField<AnnotatedBeatmapLevelCollectionsTableView, AnnotatedBeatmapLevelCollectionsViewController>("_annotatedBeatmapLevelCollectionsTableView");
+                tableView.SelectAndScrollToCellWithIdx(0);
+                var customSong = tableView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsTableView>("_annotatedBeatmapLevelCollections").FirstOrDefault();
+                _levelFilteringNavigationController.HandleAnnotatedBeatmapLevelCollectionsViewControllerDidSelectAnnotatedBeatmapLevelCollection(customSong);
+
 
                 var song = Loader.GetLevelByHash(levelID.Split('_').Last());
                 if (song == null) {

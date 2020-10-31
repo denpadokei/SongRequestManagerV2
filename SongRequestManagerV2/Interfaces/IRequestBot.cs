@@ -27,11 +27,14 @@ namespace SongRequestManagerV2.Interfaces
         SongRequest Currentsong { get; set; }
         TwitchService TwitchService { get; }
         ListCollectionManager ListCollectionManager { get; }
-        bool RefreshQueue { get; set; }
+        Progress<double> DownloadProgress { get; }
+        bool RefreshQueue { get; }
 
-        event Action RecevieRequest;
+        event Action ReceviedRequest;
         event Action DismissRequest;
         event Action<bool> RefreshListRequest;
+        event Action<bool> UpdateUIRequest;
+        event Action<bool> SetButtonIntactivityRequest;
         event Action<Color> ChangeButtonColor;
 
         bool HasRights(ISRMCommand botcmd, IChatUser user, CmdFlags flags);

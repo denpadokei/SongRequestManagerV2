@@ -20,12 +20,14 @@
       </custom-list>
       <page-button event-click="request-list#PageDown" direction='Down'></page-button>
     </vertical>
-    <vertical min-width='50'>
-      <button text='~history-button-text' interactable='~history-button-enable' on-click='history-click' hover-hint='~history-hint'></button>
-      <button text='~skip-button-text' interactable='~skip-button-enable' hover-hint='Remove the selected request from the queue.' on-click='skip-click'></button>
-      <button text='~blacklist-button-text' interactable='~blacklist-button-enable' hover-hint='Block the selected request from being queued in the future.' on-click='blacklist-click'></button>
-      <button text='~play-button-text' interactable='~play-button-enable' hover-hint='Download and scroll to the currently selected request.' on-click='play-click'></button>
-      <button id='queue-button' text='~queue-button-text' hover-hint='Open/Close the queue.' on-click='queue-click'></button>
+    <vertical min-width='50' child-expand-width='true' pad='5'>
+      <button text='~history-button-text' interactable='~history-button-enable' on-click='history-click' hover-hint='~history-hint' anchor-min-x='0' anchor-min-y='0' anchor-max-x='1' anchor-max-y='1' min-width='32'></button>
+      <vertical pad-top='8' pad-bottom='8'>
+        <button text='~skip-button-text' interactable='~skip-button-enable' hover-hint='Remove the selected request from the queue.' on-click='skip-click' anchor-min-x='0' anchor-min-y='0' anchor-max-x='1' anchor-max-y='1' min-width='32'></button>
+        <button text='~blacklist-button-text' interactable='~blacklist-button-enable' hover-hint='Block the selected request from being queued in the future.' on-click='blacklist-click' anchor-min-x='0' anchor-min-y='0' anchor-max-x='1' anchor-max-y='1' min-width='32'></button>
+        <button id='play-button' text='~play-button-text' interactable='~play-button-enable' hover-hint='Download and scroll to the currently selected request.' on-click='play-click' anchor-min-x='0' anchor-min-y='0' anchor-max-x='1' anchor-max-y='1' min-width='32'></button>
+      </vertical>
+      <button id='queue-button' text='~queue-button-text' hover-hint='Open/Close the queue.' on-click='queue-click' min-width='32'></button>
     </vertical>
   </horizontal>
   <modal id="modal" show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino="false" size-delta-x='90' size-delta-y='45' move-to-center='true'>

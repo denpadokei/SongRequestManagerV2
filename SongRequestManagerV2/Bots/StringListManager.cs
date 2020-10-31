@@ -17,15 +17,13 @@ namespace SongRequestManagerV2.Bots
     /// </summary>
     public class StringListManager
     {
-        private static char[] anyseparator = { ',', ' ', '\t', '\r', '\n' };
-        private static char[] lineseparator = { '\n', '\r' };
+        private static readonly char[] anyseparator = { ',', ' ', '\t', '\r', '\n' };
+        private static readonly char[] lineseparator = { '\n', '\r' };
 
         public List<string> list = new List<string>();
         private HashSet<string> hashlist = new HashSet<string>();
         [Inject]
         IRequestBot _bot;
-        [Inject]
-        StringNormalization _stringNormalization;
 
         ListFlags flags = 0;
 
