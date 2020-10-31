@@ -40,7 +40,8 @@ namespace SongRequestManagerV2.Bots
         public ChatServiceMultiplexer MultiplexerInstance { get; internal set; }
         public TwitchService TwitchService { get; internal set; }
 
-        public static ConcurrentQueue<RequestInfo> UnverifiedRequestQueue { get; } = new ConcurrentQueue<RequestInfo>();
+        private readonly ConcurrentQueue<RequestInfo> _unverifiedRequestQueue = new ConcurrentQueue<RequestInfo>();
+        private readonly ConcurrentQueue<string> _botMessageQueue = new ConcurrentQueue<string>();
         public static Dictionary<string, RequestUserTracker> RequestTracker { get; } = new Dictionary<string, RequestUserTracker>();
         //private ChatServiceMultiplexer _chatService { get; set; }
 
@@ -49,7 +50,7 @@ namespace SongRequestManagerV2.Bots
         //    synthesizer.Rate = -2;     // -10...10
         public bool RefreshQueue { get; set; } = false;
 
-        private static Queue<string> _botMessageQueue = new Queue<string>();
+        
 
         bool _mapperWhitelist = false; // BUG: Need to clean these up a bit.
 
@@ -82,6 +83,8 @@ namespace SongRequestManagerV2.Bots
         [Inject]
         public MapDatabase MapDatabase { get; private set; }
         [Inject]
+        public ListCollectionManager ListCollectionManager { get; private set; }
+        [Inject]
         RequestManager _requestManager;
         [Inject]
         QueueLongMessage.QueueLongMessageFactroy _messageFactroy;
@@ -94,9 +97,6 @@ namespace SongRequestManagerV2.Bots
         [Inject]
         SongMap.SongMapFactory _songMapFactory;
 
-        [Inject]
-        public ListCollectionManager ListCollectionManager { get; private set; }
-
         public static string playedfilename = "";
         public event Action RecevieRequest;
         public event Action DismissRequest;
@@ -107,7 +107,9 @@ namespace SongRequestManagerV2.Bots
 
         public SongRequest Currentsong { get; set; }
 
-
+        /// <summary>
+        /// This is string empty.
+        /// </summary>
         const string success = "";
         const string endcommand = "X";
         const string notsubcommand = "NotSubcmd";
@@ -123,6 +125,15 @@ namespace SongRequestManagerV2.Bots
         private async void Constroctor()
         {
             Plugin.Log("Constroctor()");
+            this.MultiplexerInstance = Plugin.CoreInstance.RunAllServices();
+            this.MultiplexerInstance.OnLogin -= this.MultiplexerInstance_OnLogin;
+            this.MultiplexerInstance.OnLogin += this.MultiplexerInstance_OnLogin;
+            this.MultiplexerInstance.OnJoinChannel -= this.MultiplexerInstance_OnJoinChannel;
+            this.MultiplexerInstance.OnJoinChannel += this.MultiplexerInstance_OnJoinChannel;
+            this.MultiplexerInstance.OnTextMessageReceived -= this.RecievedMessages;
+            this.MultiplexerInstance.OnTextMessageReceived += this.RecievedMessages;
+
+            this.TwitchService = this.MultiplexerInstance.GetTwitchService();
 #if UNRELEASED
             var startingmem = GC.GetTotalMemory(true);
 
@@ -241,17 +252,6 @@ namespace SongRequestManagerV2.Bots
                 ListCollectionManager.ClearOldList("duplicate.list", TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours));
 
                 UpdateRequestUI();
-
-                this.MultiplexerInstance = Plugin.CoreInstance.RunAllServices();
-                this.MultiplexerInstance.OnLogin -= this.MultiplexerInstance_OnLogin;
-                this.MultiplexerInstance.OnLogin += this.MultiplexerInstance_OnLogin;
-                this.MultiplexerInstance.OnJoinChannel -= this.MultiplexerInstance_OnJoinChannel;
-                this.MultiplexerInstance.OnJoinChannel += this.MultiplexerInstance_OnJoinChannel;
-                this.MultiplexerInstance.OnTextMessageReceived -= this.RecievedMessages;
-                this.MultiplexerInstance.OnTextMessageReceived += this.RecievedMessages;
-
-                this.TwitchService = this.MultiplexerInstance.GetTwitchService();
-
                 RequestBotConfig.Instance.ConfigChangedEvent += OnConfigChangedEvent;
             }
             catch (Exception ex) {
@@ -410,10 +410,8 @@ namespace SongRequestManagerV2.Bots
         //{
         //    if (_configChanged)
         //        OnConfigChanged();
-        //    if (_refreshQueue)
-        //    {
-        //        if (RequestBotListView.Instance.isActivated)
-        //        {
+        //    if (_refreshQueue) {
+        //        if (RequestBotListView.Instance.isActivated) {
         //            RequestBotListView.Instance.UpdateRequestUI(true);
         //            RequestBotListView.Instance.SetUIInteractivity();
         //        }
@@ -421,61 +419,66 @@ namespace SongRequestManagerV2.Bots
         //    }
         //}
 
+        #region Unity methods
+        void Awake()
+        {
+            DontDestroyOnLoad(this);
+        }
+
+        void FixedUpdate()
+        {
+            if (this._botMessageQueue.TryDequeue(out var message)) {
+                _ = this.SendChatMessage(message);
+            }
+            else if (this._unverifiedRequestQueue.TryDequeue(out var requestInfo)) {
+                _ = this.ProcessRequestQueue(requestInfo);
+            }
+        }
+        #endregion
+
         // if (!silence) QueueChatMessage($"{request.Key.song["songName"].Value}/{request.Key.song["authorName"].Value} ({songId}) added to the blacklist.");
-        internal void SendChatMessage(string message)
+        private async Task SendChatMessage(string message)
         {
-            Task.Run(() =>
-            {
-                Plugin.Log($"Sending message: \"{message}\"");
+            try {
+                await Task.Run(() =>
+                {
+                    Plugin.Log($"Sending message: \"{message}\"");
 
-                if (this.TwitchService != null) {
-                    foreach (var channel in this.TwitchService.Channels) {
-                        this.TwitchService.SendTextMessage($"{message}", channel.Value);
-                    }
-                }
-            }).Await(() => { Plugin.Log("Finish send chat message"); },
-            e =>
-            {
-                Plugin.Log($"Exception was caught when trying to send bot message. {e}");
-            }, null);
-        }
-
-        public void QueueChatMessage(string message)
-        {
-            Task.Run(() =>
-            {
-                if (this.TwitchService != null) {
-                    foreach (var channel in this.TwitchService.Channels) {
-                        this.TwitchService.SendTextMessage($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}", channel.Value);
-                    }
-                }
-            }).Await(() => { Plugin.Log("Finish Quere chat message"); },
-            e =>
-            {
-                Plugin.Log($"Exception was caught when trying to send bot message. {e}");
-            }, null);
-        }
-
-        internal void ProcessRequestQueue()
-        {
-            lock (_lockObject) {
-                while (!UnverifiedRequestQueue.IsEmpty) {
-                    try {
-                        if (UnverifiedRequestQueue.TryDequeue(out var requestInfo)) {
-                            CheckRequest(requestInfo).Await(() =>
-                            {
-                                Plugin.Log("ProcessRequestQueue()");
-                                UpdateRequestUI();
-                                RefreshSongQuere();
-                                RefreshQueue = true;
-                                Plugin.Log("end ProcessRequestQueue()");
-                            }, e => { Plugin.Log($"{e}"); }, null);
+                    if (this.TwitchService != null) {
+                        foreach (var channel in this.TwitchService.Channels) {
+                            this.TwitchService.SendTextMessage($"{message}", channel.Value);
                         }
                     }
-                    catch (Exception e) {
-                        Plugin.Log($"{e}");
-                    }
-                }
+                });
+                Plugin.Log("Finish send chat message");
+
+            }
+            catch (Exception e) {
+                Plugin.Log($"Exception was caught when trying to send bot message. {e}");
+            }
+        }
+
+        /// <summary>
+        /// メッセージを送信キューへ追加します。
+        /// </summary>
+        /// <param name="message">ストリームサービスへ送信したい文字列</param>
+        public void QueueChatMessage(string message)
+        {
+            this._botMessageQueue.Enqueue($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}");
+        }
+
+        private async Task ProcessRequestQueue(RequestInfo requestInfo)
+        {
+            try {
+                await CheckRequest(requestInfo);
+                Plugin.Log("ProcessRequestQueue()");
+                UpdateRequestUI();
+                RefreshSongQuere();
+                RefreshQueue = true;
+                Plugin.Log("end ProcessRequestQueue()");
+            }
+            catch (Exception e) {
+                Plugin.Log($"{e}");
             }
         }
 
@@ -647,7 +650,7 @@ namespace SongRequestManagerV2.Bots
 
         internal async Task ProcessSongRequest(int index, bool fromHistory = false)
         {
-            if ((RequestManager.RequestSongs.Count > 0 && !fromHistory) || (RequestManager.HistorySongs.Count > 0 && fromHistory)) {
+            if ((RequestManager.RequestSongs.Any() && !fromHistory) || (RequestManager.HistorySongs.Any() && fromHistory)) {
                 SongRequest request = null;
                 if (!fromHistory) {
                     Plugin.Log("Set status to request");
@@ -995,37 +998,34 @@ namespace SongRequestManagerV2.Bots
                     if (state._user.IsModerator) limit = Math.Max(limit, RequestBotConfig.Instance.ModRequestLimit);
                 }
 
-                if (!state._user.IsBroadcaster) {
-                    if (RequestTracker[state._user.Id].numRequests >= limit) {
-                        if (RequestBotConfig.Instance.LimitUserRequestsToSession) {
-                            _textFactory.Create().Add("Requests", RequestTracker[state._user.Id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You've already used %Requests% requests this stream. Subscribers are limited to %RequestLimit%.");
-                        }
-                        else {
-                            _textFactory.Create().Add("Requests", RequestTracker[state._user.Id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You already have %Requests% on the queue. You can add another once one is played. Subscribers are limited to %RequestLimit%.");
-                        }
-
-                        return success;
+                if (!state._user.IsBroadcaster && RequestTracker[state._user.Id].numRequests >= limit) {
+                    if (RequestBotConfig.Instance.LimitUserRequestsToSession) {
+                        _textFactory.Create().Add("Requests", RequestTracker[state._user.Id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You've already used %Requests% requests this stream. Subscribers are limited to %RequestLimit%.");
                     }
+                    else {
+                        _textFactory.Create().Add("Requests", RequestTracker[state._user.Id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You already have %Requests% on the queue. You can add another once one is played. Subscribers are limited to %RequestLimit%.");
+                    }
+
+                    return success;
                 }
 
                 // BUG: Need to clean up the new request pipeline
                 string testrequest = Normalize.RemoveSymbols(ref state._parameter, Normalize._SymbolsNoDash);
 
-                RequestInfo newRequest = new RequestInfo(state._user, state._parameter, DateTime.UtcNow, _digitRegex.IsMatch(testrequest) || _beatSaverRegex.IsMatch(testrequest), state, state._flags, state._info);
+                var newRequest = new RequestInfo(state._user, state._parameter, DateTime.UtcNow, _digitRegex.IsMatch(testrequest) || _beatSaverRegex.IsMatch(testrequest), state, state._flags, state._info);
 
                 if (!newRequest.isBeatSaverId && state._parameter.Length < 2) {
                     QueueChatMessage($"Request \"{state._parameter}\" is too short- Beat Saver searches must be at least 3 characters!");
                 }
 
-                if (!UnverifiedRequestQueue.Contains(newRequest)) {
-                    UnverifiedRequestQueue.Enqueue(newRequest);
-                    this.ProcessRequestQueue();
+                if (!_unverifiedRequestQueue.Contains(newRequest)) {
+                    _unverifiedRequestQueue.Enqueue(newRequest);
                 }
                 return success;
             }
             catch (Exception ex) {
                 Plugin.Log(ex.ToString());
-                throw;
+                return ex.ToString();
             }
             finally {
                 this.RecevieRequest?.Invoke();
@@ -1565,7 +1565,7 @@ namespace SongRequestManagerV2.Bots
             if (PluginManager.GetPlugin("WobbleSaber") != null) {
                 string wobblestate = "off";
                 if (state._parameter == "enable") wobblestate = "on";
-                SendChatMessage($"!wadmin toggle {wobblestate} ");
+                Dispatcher.RunOnMainThread(() => { _ = SendChatMessage($"!wadmin toggle {wobblestate} "); });
             }
 
             state.Msg($"The !bomb command is now {state._parameter}d.");
