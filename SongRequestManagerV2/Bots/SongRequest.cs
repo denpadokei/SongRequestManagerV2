@@ -37,9 +37,6 @@ namespace SongRequestManagerV2
         [Inject]
         DynamicText.DynamicTextFactory _textFactory;
 
-        //[Inject]
-        //private PhysicsRaycasterWithCache _physicsRaycaster;
-
         /// <summary>説明 を取得、設定</summary>
         private string hint_;
         /// <summary>説明 を取得、設定</summary>

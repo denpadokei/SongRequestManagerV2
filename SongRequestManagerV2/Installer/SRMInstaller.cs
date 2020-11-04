@@ -42,7 +42,7 @@ namespace SongRequestManagerV2.Installers
             Container.Bind<ListCollectionManager>().AsSingle();
             Container.Bind<RequestManager>().AsSingle();
 
-            Container.BindInterfacesAndSelfTo<RequestBot>().FromNewComponentOnNewGameObject("SRMBot").AsSingle();
+            Container.BindInterfacesAndSelfTo<RequestBot>().FromNewComponentOnNewGameObject("SRMBot").AsCached();
 
             Container.BindViewController<RequestBotListView>();
             Container.BindViewController<KeyboardViewController>();
