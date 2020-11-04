@@ -5,7 +5,7 @@
   "gameVersion": "1.12.2",
   "id": "SongRequestManagerV2",
   "name": "Song Request Manager V2",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "dependsOn": {
     "BSIPA": "^4.1.3",
     "ChatCore": "^2.0.0",

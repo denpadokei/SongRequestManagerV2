@@ -20,14 +20,13 @@ namespace SongRequestManagerV2.Interfaces
 {
     public interface IRequestBot
     {
-        ChatServiceMultiplexer MultiplexerInstance { get; }
         SongListUtils SongListUtils { get; }
         StringNormalization Normalize { get; }
         MapDatabase MapDatabase { get; }
         SongRequest Currentsong { get; set; }
-        TwitchService TwitchService { get; }
         ListCollectionManager ListCollectionManager { get; }
         Progress<double> DownloadProgress { get; }
+        IChatManager ChatManager { get; }
         bool RefreshQueue { get; }
 
         event Action ReceviedRequest;

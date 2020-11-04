@@ -226,6 +226,8 @@
     <Compile Include="Bots\RequestBot.cs" />
     <Compile Include="Bots\SongMap.cs" />
     <Compile Include="Bots\StringListManager.cs" />
+    <Compile Include="Installer\SRMAppInstaller.cs" />
+    <Compile Include="Interfaces\IChatManager.cs" />
     <Compile Include="Interfaces\IRequestBot.cs" />
     <Compile Include="Interfaces\ISRMCommand.cs" />
     <Compile Include="Models\SRMCommand.cs" />
@@ -233,6 +235,7 @@
     <Compile Include="Models\ParseState.cs" />
     <Compile Include="Statics\Enums.cs" />
     <Compile Include="Statics\StringFormat.cs" />
+    <Compile Include="Utils\ChatManager.cs" />
     <Compile Include="Utils\StringNormalization.cs" />
     <Compile Include="Views\RequestBotListView.cs" />
     <Compile Include="Bots\RequestFlowCoordinator.cs" />

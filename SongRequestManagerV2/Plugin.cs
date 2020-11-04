@@ -21,6 +21,7 @@ using SiraUtil.Zenject;
 using SongRequestManagerV2.Installers;
 using Zenject;
 using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Installer;
 
 namespace SongRequestManagerV2
 {
@@ -34,7 +35,7 @@ namespace SongRequestManagerV2
 
         public static IPALogger Logger { get; internal set; }
 
-        public static ChatCoreInstance CoreInstance { get; internal set; }
+        
 
         public bool IsAtMainMenu = true;
         public bool IsApplicationExiting = false;
@@ -52,6 +53,7 @@ namespace SongRequestManagerV2
             _meta = meta;
             Logger = log;
             Logger.Debug("Logger initialized.");
+            zenjector.OnApp<SRMAppInstaller>();
             zenjector.OnMenu<SRMInstaller>();
         }
 
@@ -72,7 +74,7 @@ namespace SongRequestManagerV2
             if (!Directory.Exists(DataPath)) {
                 Directory.CreateDirectory(DataPath);
             }
-            CoreInstance = ChatCoreInstance.Create();
+            
             SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
             // setup handle for fresh menu scene changes
             BSEvents.OnLoad();
