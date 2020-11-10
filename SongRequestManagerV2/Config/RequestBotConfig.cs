@@ -69,7 +69,7 @@ namespace SongRequestManagerV2
 
         public bool IsStartServer = false;
         public string ReceivePort = "50001";
-        public bool IsSendBouyomi = true;
+        public bool IsSendBouyomi = false;
         public string SendPort = "50005";
 
         public bool PerformanceMode = false;
