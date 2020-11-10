@@ -25,7 +25,9 @@ namespace SongRequestManagerV2.Models
         [Inject]
         DynamicText.DynamicTextFactory _textFactory;
         [Inject]
-        IRequestBot _bot;
+        IRequestBot _bot { get; }
+        [Inject]
+        IChatManager _chatManager;
         [Inject]
         DiContainer _diContainer;
         [Inject]
@@ -416,7 +418,7 @@ namespace SongRequestManagerV2.Models
                 msg.Header("Usage: help < ");
                 foreach (var entry in this.Aliases) {
                     var botcmd = entry.Value;
-                    if (_bot.HasRights(botcmd, state._user, 0) && !botcmd.Flags.HasFlag(FlagParameter.Subcmd) && !botcmd.Flags.HasFlag(FlagParameter.Var))
+                    if (Utility.HasRights(botcmd, state._user, 0) && !botcmd.Flags.HasFlag(FlagParameter.Subcmd) && !botcmd.Flags.HasFlag(FlagParameter.Var))
 
                         msg.Add($"{entry.Key.TrimStart('!')}", " "); // BUG: Removes the built in ! in the commands, letting it slide... for now 
                 }
@@ -434,7 +436,7 @@ namespace SongRequestManagerV2.Models
                 ShowHelpMessage(BotCmd, state._user, state._parameter, true);
             }
             else {
-                _bot.QueueChatMessage($"Unable to find help for {state._parameter}.");
+                this._chatManager.QueueChatMessage($"Unable to find help for {state._parameter}.");
             }
             return success;
         }
@@ -446,7 +448,7 @@ namespace SongRequestManagerV2.Models
         {
             state._botcmd.Flags &= ~CmdFlags.Disabled;
             state._botcmd.UpdateCommand(ChangedFlags.Flags);
-            _bot.QueueChatMessage($"{state._command} Enabled.");
+            this._chatManager.QueueChatMessage($"{state._command} Enabled.");
             return endcommand;
         }
 
@@ -485,7 +487,7 @@ namespace SongRequestManagerV2.Models
         {
             state._botcmd.Flags |= CmdFlags.Disabled;
             state._botcmd.UpdateCommand(ChangedFlags.Flags);
-            _bot.QueueChatMessage($"{state._command} Disabled.");
+            this._chatManager.QueueChatMessage($"{state._command} Disabled.");
             return endcommand;
         }
 
@@ -585,7 +587,7 @@ namespace SongRequestManagerV2.Models
         public string SubcmdShowflags(ParseState state)
         {
             if (state._subparameter == "") {
-                _bot.QueueChatMessage($"{state._command} flags: {state._botcmd.Flags.ToString()}");
+                this._chatManager.QueueChatMessage($"{state._command} flags: {state._botcmd.Flags.ToString()}");
             }
             else {
 
@@ -605,7 +607,7 @@ namespace SongRequestManagerV2.Models
                 state._botcmd.Flags |= flag;
                 state._botcmd.UpdateCommand(ChangedFlags.Flags);
 
-                if (!state._flags.HasFlag(CmdFlags.SilentResult)) _bot.QueueChatMessage($"{state._command} flags: {state._botcmd.Flags.ToString()}");
+                if (!state._flags.HasFlag(CmdFlags.SilentResult)) this._chatManager.QueueChatMessage($"{state._command} flags: {state._botcmd.Flags.ToString()}");
 
             }
             catch {
@@ -624,7 +626,7 @@ namespace SongRequestManagerV2.Models
             state._botcmd.Flags &= ~flag;
 
             state._botcmd.UpdateCommand(ChangedFlags.Flags);
-            if (!state._flags.HasFlag(CmdFlags.SilentResult)) _bot.QueueChatMessage($"{state._command} flags: {state._botcmd.Flags.ToString()}");
+            if (!state._flags.HasFlag(CmdFlags.SilentResult)) this._chatManager.QueueChatMessage($"{state._command} flags: {state._botcmd.Flags.ToString()}");
 
             return endcommand;
         }
@@ -635,7 +637,7 @@ namespace SongRequestManagerV2.Models
             // BUG: No parameter checking
             string key = state._subparameter.ToLower();
             state._botcmd.Permittedusers = key;
-            if (!state._flags.HasFlag(CmdFlags.SilentResult)) _bot.QueueChatMessage($"Permit custom userlist set to  {key}.");
+            if (!state._flags.HasFlag(CmdFlags.SilentResult)) this._chatManager.QueueChatMessage($"Permit custom userlist set to  {key}.");
             return endcommand;
         }
 
@@ -664,7 +666,7 @@ namespace SongRequestManagerV2.Models
             state._botcmd.ShortHelp = state._subparameter + state._parameter; // This one's different
             state._botcmd.UpdateCommand(ChangedFlags.Help);
 
-            if (!state._flags.HasFlag(CmdFlags.SilentResult)) _bot.QueueChatMessage($"{state._command} help: {state._botcmd.ShortHelp}");
+            if (!state._flags.HasFlag(CmdFlags.SilentResult)) this._chatManager.QueueChatMessage($"{state._command} help: {state._botcmd.ShortHelp}");
             return endcommand;
         }
 
@@ -752,7 +754,7 @@ namespace SongRequestManagerV2.Models
             foreach (var entry in Aliases) {
                 var botcmd = entry.Value;
                 // BUG: Please refactor this its getting too damn long
-                if (_bot.HasRights(botcmd, requestor, 0) && !botcmd.Flags.HasFlag(FlagParameter.Var) && !botcmd.Flags.HasFlag(FlagParameter.Subcmd)) msg.Add($"{entry.Key}", " "); // Only show commands you're allowed to use
+                if (Utility.HasRights(botcmd, requestor, 0) && !botcmd.Flags.HasFlag(FlagParameter.Var) && !botcmd.Flags.HasFlag(FlagParameter.Subcmd)) msg.Add($"{entry.Key}", " "); // Only show commands you're allowed to use
             }
             msg.End("...", $"No commands available.");
         }
@@ -765,7 +767,7 @@ namespace SongRequestManagerV2.Models
             foreach (var entry in Aliases) {
                 var botcmd = entry.Value;
                 // BUG: Please refactor this its getting too damn long
-                if (_bot.HasRights(botcmd, requestor, 0) && botcmd.Flags.HasFlag(FlagParameter.Var)) msg.Add($"{entry.Key}", ", "); // Only show commands you're allowed to use
+                if (Utility.HasRights(botcmd, requestor, 0) && botcmd.Flags.HasFlag(FlagParameter.Var)) msg.Add($"{entry.Key}", ", "); // Only show commands you're allowed to use
             }
             msg.End("...", $"No commands available.");
         }

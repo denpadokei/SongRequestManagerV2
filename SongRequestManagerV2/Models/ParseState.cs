@@ -3,6 +3,7 @@ using ChatCore.Models.Twitch;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Statics;
+using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,11 +29,12 @@ namespace SongRequestManagerV2.Models
         public string _subparameter = "";
 
         const string notsubcommand = "NotSubcmd";
-
         [Inject]
-        IRequestBot _bot;
+        IChatManager _chatManager;
         [Inject]
         CommandManager _commandManager;
+        [Inject]
+        ListCollectionManager _listCollectionManager;
         [Inject]
         DynamicText.DynamicTextFactory _textFactory;
 
@@ -94,7 +96,7 @@ namespace SongRequestManagerV2.Models
             if (!subcmd.Flags.HasFlag(CmdFlags.Subcommand)) return notsubcommand;
             // BUG: Need to check subcmd permissions here.     
 
-            if (!_bot.HasRights(subcmd, _user, _flags)) return Error($"No permission to use {subcommand}");
+            if (!Utility.HasRights(subcmd, _user, _flags)) return Error($"No permission to use {subcommand}");
 
             if (subcmd.Flags.HasFlag(CmdFlags.NoParameter)) {
                 _parameter = _parameter.Substring(subcommandend).Trim(' ');
@@ -161,7 +163,7 @@ namespace SongRequestManagerV2.Models
                         continue;
                     }
                     else {
-                        _bot.QueueChatMessage(errormsg);
+                        this._chatManager.QueueChatMessage(errormsg);
                         //ShowHelpMessage(ref botcmd, ref user, parameter, false);
                     }
                     return;
@@ -177,13 +179,13 @@ namespace SongRequestManagerV2.Models
 
             // Check permissions first
 
-            bool allow = _bot.HasRights(_botcmd, _user, _flags);
+            bool allow = Utility.HasRights(_botcmd, _user, _flags);
 
 
             // Num is Nani?
-            if (!allow && !_botcmd.Flags.HasFlag(CmdFlags.BypassRights) && ! _bot.ListCollectionManager.Contains(_botcmd.Permittedusers, _user.UserName.ToLower())) {
+            if (!allow && !_botcmd.Flags.HasFlag(CmdFlags.BypassRights) && ! this._listCollectionManager.Contains(_botcmd.Permittedusers, _user.UserName.ToLower())) {
                 CmdFlags twitchpermission = _botcmd.Flags & CmdFlags.TwitchLevel;
-                if (!_botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) _bot?.QueueChatMessage($"{_command} is restricted to {twitchpermission.ToString()}");
+                if (!_botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) this._chatManager.QueueChatMessage($"{_command} is restricted to {twitchpermission.ToString()}");
                 return;
             }
 
@@ -203,7 +205,7 @@ namespace SongRequestManagerV2.Models
             try {
                 string errormsg = await _botcmd.Execute(this); // Call the command
                 if (errormsg != "" && !_flags.HasFlag(CmdFlags.SilentError)) {
-                    _bot.QueueChatMessage(errormsg);
+                    this._chatManager.QueueChatMessage(errormsg);
                 }
             }
             catch (Exception ex) {

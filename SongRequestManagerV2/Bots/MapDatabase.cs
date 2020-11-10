@@ -27,7 +27,10 @@ namespace SongRequestManagerV2.Bots
         public static bool DatabaseLoading = false;
 
         [Inject]
-        IRequestBot _bot;
+        IRequestBot _bot { get; }
+        [Inject]
+        IChatManager _chatManager;
+
         [Inject]
         StringNormalization normalize;
         [Inject]
@@ -75,7 +78,7 @@ namespace SongRequestManagerV2.Bots
                     result.Add(MapDatabase.MapLibrary[map.ToString("x")]);
                 }
                 catch {
-                    _bot.QueueChatMessage($"map fail = {map}");
+                    _chatManager.QueueChatMessage($"map fail = {map}");
                 }
 
             next:
@@ -109,7 +112,7 @@ namespace SongRequestManagerV2.Bots
                 foreach (var entry in MapLibrary)
                     arr.Add(entry.Value.Song["id"], entry.Value.Song);
                 File.WriteAllText(Path.Combine(Plugin.DataPath, "SongDatabase.dat"), arr.ToString());
-                _bot.QueueChatMessage($"Saved Song Databse in  {(DateTime.Now - start).Seconds} secs.");
+                _chatManager.QueueChatMessage($"Saved Song Databse in  {(DateTime.Now - start).Seconds} secs.");
             }
             catch (Exception ex) {
                 Plugin.Log(ex.ToString());
@@ -141,14 +144,14 @@ namespace SongRequestManagerV2.Bots
 
                         json = 0; // BUG: This doesn't actually help. The problem is that the json object is still being referenced.
 
-                        _bot.QueueChatMessage($"Finished reading {Count} in {(DateTime.Now - start).Seconds} secs.");
+                        _chatManager.QueueChatMessage($"Finished reading {Count} in {(DateTime.Now - start).Seconds} secs.");
                     }
                 }
             }
             catch (Exception ex) {
 
                 Plugin.Log(ex.ToString());
-                _bot.QueueChatMessage($"{ex}");
+                _chatManager.QueueChatMessage($"{ex}");
             }
         }
 
@@ -182,7 +185,7 @@ namespace SongRequestManagerV2.Bots
 
                 var startingmem = GC.GetTotalMemory(true);
 
-                _bot.QueueChatMessage($"Starting to read archive.");
+                _chatManager.QueueChatMessage($"Starting to read archive.");
                 int addcount = 0;
                 var StarTime = DateTime.Now;
 
@@ -241,16 +244,16 @@ namespace SongRequestManagerV2.Bots
 
                     }
                     catch (Exception) {
-                        _bot.QueueChatMessage($"Failed to process {f.FullName}");
+                        _chatManager.QueueChatMessage($"Failed to process {f.FullName}");
                         //Instance.QueueChatMessage(ex.ToString());
                     }
 
 
                 }
-                _bot.QueueChatMessage($"Archive indexing done, {addcount} files added. ({(DateTime.Now - StarTime).TotalSeconds} secs.");
+                _chatManager.QueueChatMessage($"Archive indexing done, {addcount} files added. ({(DateTime.Now - StarTime).TotalSeconds} secs.");
                 GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
                 GC.Collect();
-                _bot.QueueChatMessage($"hashentries: {SongMap.HashCount} memory: {(GC.GetTotalMemory(false) - startingmem) / 1048576} MB");
+                _chatManager.QueueChatMessage($"hashentries: {SongMap.HashCount} memory: {(GC.GetTotalMemory(false) - startingmem) / 1048576} MB");
 
 
             });
@@ -270,7 +273,7 @@ namespace SongRequestManagerV2.Bots
             DatabaseLoading = true;
             return Task.Run(() =>
             {
-                if (songid == "") _bot.QueueChatMessage($"Starting song indexing {folder}");
+                if (songid == "") _chatManager.QueueChatMessage($"Starting song indexing {folder}");
 
                 var StarTime = DateTime.UtcNow;
 
@@ -309,7 +312,7 @@ namespace SongRequestManagerV2.Bots
                 // This might need some optimization
 
 
-                _bot.QueueChatMessage($"Processing {files.Count} maps. ");
+                _chatManager.QueueChatMessage($"Processing {files.Count} maps. ");
                 foreach (var item in files) {
 
                     //msg.Add(item.FullName,", ");
@@ -354,12 +357,12 @@ namespace SongRequestManagerV2.Bots
                         _songMapFactory.Create(song, levelId, item.DirectoryName);
                     }
                     catch (Exception) {
-                        _bot.QueueChatMessage($"Failed to process {item}.");
+                        _chatManager.QueueChatMessage($"Failed to process {item}.");
                     }
 
                 }
                 var duration = DateTime.UtcNow - StarTime;
-                if (songid == "") _bot.QueueChatMessage($"Song indexing done. ({duration.TotalSeconds} secs.");
+                if (songid == "") _chatManager.QueueChatMessage($"Song indexing done. ({duration.TotalSeconds} secs.");
 
                 DatabaseImported = true;
                 DatabaseLoading = false;

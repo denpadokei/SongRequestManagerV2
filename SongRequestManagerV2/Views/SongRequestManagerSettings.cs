@@ -1,14 +1,18 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.ViewControllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SongRequestManagerV2.UI
+namespace SongRequestManagerV2.Views
 {
-    public class SongRequestManagerSettings : PersistentSingleton<SongRequestManagerSettings>
+    [HotReload]
+    public class SongRequestManagerSettings : BSMLAutomaticViewController
     {
+        public string ResourceName => "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml";
+
         [UIValue("autopick-first-song")]
         public bool AutopickFirstSong
         {
@@ -91,6 +95,13 @@ namespace SongRequestManagerV2.UI
         {
             get => RequestBotConfig.Instance.SessionResetAfterXHours;
             set => RequestBotConfig.Instance.SessionResetAfterXHours = value;
+        }
+
+        [UIValue("performance-mode")]
+        public bool PerformanceMode
+        {
+            get => RequestBotConfig.Instance.PerformanceMode;
+            set => RequestBotConfig.Instance.PerformanceMode = value;
         }
     }
 }

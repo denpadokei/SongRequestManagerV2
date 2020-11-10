@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
@@ -12,9 +17,12 @@ using ChatCore.Services;
 using ChatCore.Services.Twitch;
 using HMUI;
 using IPA.Utilities;
+using SongCore;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Interfaces;
+using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.UI;
+using SongRequestManagerV2.Utils;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -40,10 +48,19 @@ namespace SongRequestManagerV2.Views
         public SearchFilterParamsViewController _searchFilterParamsViewController;
         [Inject]
         private IRequestBot _bot;
+        [Inject]
+        IChatManager ChatManager { get; }
+        [Inject]
+        DynamicText.DynamicTextFactory _textFactory;
+        [Inject]
+        StringNormalization Normalize;
+        [Inject]
+        SongListUtils SongListUtils;
 
         private Button _button;
 
-        
+        public Progress<double> DownloadProgress { get; } = new Progress<double>();
+
         //[Inject]
         //protected PhysicsRaycasterWithCache _physicsRaycaster;
         public HMUI.Screen Screen { get; set; }
@@ -110,6 +127,11 @@ namespace SongRequestManagerV2.Views
             _bot.ChangeButtonColor += this.SetButtonColor;
             _bot.DismissRequest += this.BackButtonPressed;
             _bot.RefreshListRequest += this.RefreshListRequest;
+            _requestFlow.PlayProcessEvent += this.ProcessSongRequest;
+
+            this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
+            this.DownloadProgress.ProgressChanged += this.Progress_ProgressChanged;
+
             if (this.Screen == null) {
                 this.Screen = FloatingScreen.CreateFloatingScreen(new Vector2(20f, 20f), false, new Vector3(1.2f, 2.2f, 2.2f), Quaternion.Euler(Vector3.zero));
                 var canvas = this.Screen.GetComponent<Canvas>();
@@ -119,24 +141,139 @@ namespace SongRequestManagerV2.Views
             Plugin.Logger.Debug($"{_button == null}");
             if (_button == null) {
                 _button = UIHelper.CreateUIButton(this.Screen.transform, "OkButton", Vector2.zero, Vector2.zero, Action, "SRM", null);
-                DontDestroyOnLoad(_button.gameObject);
             }
+
+            this._bot.UpdateRequestUI();
 
             Plugin.Log("Created request button!");
             Plugin.Logger.Debug("Start() end");
         }
+
+        private void Progress_ProgressChanged(object sender, double e)
+        {
+            this._requestFlow.ChangeProgressText(e);
+        }
+
         protected override void OnDestroy()
         {
             Plugin.Logger.Debug("OnDestroy");
             _bot.ChangeButtonColor -= this.SetButtonColor;
             _bot.DismissRequest -= this.BackButtonPressed;
             _bot.RefreshListRequest -= this.RefreshListRequest;
+            _requestFlow.PlayProcessEvent -= this.ProcessSongRequest;
+            this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
             base.OnDestroy();
         }
 
         private void RefreshListRequest(bool obj)
         {
             this._requestFlow.RefreshSongList(obj);
+        }
+
+        async void ProcessSongRequest(int index, bool fromHistory = false)
+        {
+            if ((RequestManager.RequestSongs.Any() && !fromHistory) || (RequestManager.HistorySongs.Any() && fromHistory)) {
+                SongRequest request = null;
+                if (!fromHistory) {
+                    Plugin.Log("Set status to request");
+                    _bot.SetRequestStatus(index, RequestStatus.Played);
+                    request = _bot.DequeueRequest(index);
+                }
+                else {
+                    request = RequestManager.HistorySongs.ElementAt(index) as SongRequest;
+                }
+
+                if (request == null) {
+                    Plugin.Log("Can't process a null request! Aborting!");
+                    return;
+                }
+                else
+                    Plugin.Log($"Processing song request {request._song["songName"].Value}");
+                string songName = request._song["songName"].Value;
+                string songIndex = Regex.Replace($"{request._song["id"].Value} ({request._song["songName"].Value} - {request._song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
+                songIndex = Normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
+
+                string currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
+                string songHash = request._song["hash"].Value.ToUpper();
+
+                if (Loader.GetLevelByHash(songHash) == null) {
+                    Utility.EmptyDirectory(".requestcache", false);
+
+                    if (Directory.Exists(currentSongDirectory)) {
+                        Utility.EmptyDirectory(currentSongDirectory, true);
+                        Plugin.Log($"Deleting {currentSongDirectory}");
+                    }
+                    string localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request._song["id"].Value}.zip");
+#if UNRELEASED
+                    // Direct download hack
+                    var ext = Path.GetExtension(request.song["coverURL"].Value);
+                    var k = request.song["coverURL"].Value.Replace(ext, ".zip");
+
+                    var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
+#else
+                    var result = await WebClient.DownloadSong($"https://beatsaver.com{request._song["downloadURL"].Value}", System.Threading.CancellationToken.None, this.DownloadProgress);
+                    if (result == null) {
+                        this.ChatManager.QueueChatMessage("BeatSaver is down now.");
+                    }
+                    using (var zipStream = new MemoryStream(result))
+                    using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
+                        try {
+                            // open zip archive from memory stream
+                            archive.ExtractToDirectory(currentSongDirectory);
+                        }
+                        catch (Exception e) {
+                            Plugin.Log($"Unable to extract ZIP! Exception: {e}");
+                            return;
+                        }
+                        zipStream.Close();
+                    }
+                    Dispatcher.RunCoroutine(WaitForRefreshAndSchroll(request));
+#if UNRELEASED
+                        //if (!request.song.IsNull) // Experimental!
+                        //{
+                        //TwitchWebSocketClient.SendCommand("/marker "+ _textFactory.Create().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
+                        //}
+#endif
+#endif
+                }
+                else {
+                    Plugin.Log($"Song {songName} already exists!");
+                    this.BackButtonPressed();
+                    bool success = false;
+                    Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
+                    Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(songHash, (s) =>
+                    {
+                        success = s;
+                        _bot.UpdateRequestUI();
+                    }, false));
+                    if (!request._song.IsNull) {
+                        // Display next song message
+                        _textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
+                    }
+                }
+            }
+        }
+
+        IEnumerator WaitForRefreshAndSchroll(SongRequest request)
+        {
+            yield return null;
+            yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
+            Loader.Instance.RefreshSongs(false);
+            yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
+            Utility.EmptyDirectory(".requestcache", true);
+            Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
+            bool success = false;
+            Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), (s) =>
+            {
+                success = s;
+                _bot.UpdateRequestUI();
+            }, false));
+
+            ((IProgress<double>)this.DownloadProgress).Report(0d);
+            if (!request._song.IsNull) {
+                // Display next song message
+                _textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
+            }
         }
     }
 }

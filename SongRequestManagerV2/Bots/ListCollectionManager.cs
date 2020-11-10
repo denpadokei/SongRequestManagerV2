@@ -1,5 +1,6 @@
 ﻿using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Statics;
+using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,9 +17,6 @@ namespace SongRequestManagerV2.Bots
     /// </summary>
     public class ListCollectionManager
     {
-        [Inject]
-        IRequestBot _bot;
-
         // BUG: DoNotCreate flags currently do nothing
         // BUG: List name case normalization is inconsistent. I'll probably fix it by changing the list interface (its currently just the filename)
 
@@ -34,7 +32,7 @@ namespace SongRequestManagerV2.Bots
         public StringListManager ClearOldList(string request, TimeSpan delta, ListFlags flags = ListFlags.Unchanged)
         {
             string listfilename = Path.Combine(Plugin.DataPath, request);
-            TimeSpan UpdatedAge = _bot.GetFileAgeDifference(listfilename);
+            TimeSpan UpdatedAge = Utility.GetFileAgeDifference(listfilename);
 
             StringListManager list = OpenList(request, flags);
 

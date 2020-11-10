@@ -72,6 +72,8 @@ namespace SongRequestManagerV2
         public bool IsSendBouyomi = true;
         public string SendPort = "50005";
 
+        public bool PerformanceMode = false;
+
         public event Action<RequestBotConfig> ConfigChangedEvent;
         public event PropertyChangedEventHandler PropertyChanged;
 

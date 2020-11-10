@@ -27,22 +27,9 @@ namespace SongRequestManagerV2.Installers
         public override void InstallBindings()
         {
             Container.BindFactory<KEYBOARD, KEYBOARD.KEYBOARDFactiry>().AsCached();
-            Container.BindFactory<QueueLongMessage, QueueLongMessage.QueueLongMessageFactroy>().AsCached();
-            Container.BindFactory<DynamicText, DynamicText.DynamicTextFactory>().AsCached();
-            Container.BindFactory<SongRequest, SongRequest.SongRequestFactory>().AsCached();
-            Container.BindFactory<ParseState, ParseState.ParseStateFactory>().AsCached();
-            Container.BindFactory<SRMCommand, SRMCommand.SRMCommandFactory>().AsCached();
-            Container.BindFactory<JSONObject, string, string, SongMap, SongMap.SongMapFactory>().AsCached();
             
-            Container.BindInterfacesAndSelfTo<CommandManager>().AsSingle();
             
             Container.Bind<SongListUtils>().AsCached();
-            Container.Bind<MapDatabase>().AsSingle();
-            Container.Bind<StringNormalization>().AsSingle();
-            Container.Bind<ListCollectionManager>().AsSingle();
-            Container.Bind<RequestManager>().AsSingle();
-
-            Container.BindInterfacesAndSelfTo<RequestBot>().FromNewComponentOnNewGameObject("SRMBot").AsCached();
 
             Container.BindViewController<RequestBotListView>();
             Container.BindViewController<KeyboardViewController>();

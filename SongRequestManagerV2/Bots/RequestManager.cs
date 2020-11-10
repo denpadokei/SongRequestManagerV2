@@ -15,7 +15,7 @@ namespace SongRequestManagerV2
         [Inject]
         SongRequest.SongRequestFactory factory;
         [Inject]
-        IRequestBot _bot;
+        IChatManager _chatManager;
 
         public static List<object> RequestSongs { get; } = new List<object>();
         private static string requestsPath = Path.Combine(Plugin.DataPath, "SongRequestQueue.dat");
@@ -82,7 +82,7 @@ namespace SongRequestManagerV2
             }
             catch (Exception e) {
                 Plugin.Log($"{e}");
-                _bot.QueueChatMessage("There was an error reading the request queue.");
+                this._chatManager.QueueChatMessage("There was an error reading the request queue.");
             }
 
         }
@@ -103,7 +103,7 @@ namespace SongRequestManagerV2
                 }
             }
             catch {
-                _bot.QueueChatMessage("There was an error reading the request history.");
+                this._chatManager.QueueChatMessage("There was an error reading the request history.");
             }
 
         }
