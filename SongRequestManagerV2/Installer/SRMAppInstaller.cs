@@ -27,7 +27,7 @@ namespace SongRequestManagerV2.Installer
             this.Container.BindInterfacesAndSelfTo<ChatManager>().AsSingle();
             this.Container.BindInterfacesAndSelfTo<StringNormalization>().AsSingle();
             this.Container.Bind<ListCollectionManager>().AsSingle();
-            Container.BindInterfacesAndSelfTo<RequestBot>().FromNewComponentOnNewGameObject("SRMBot").AsSingle();
+            Container.BindInterfacesAndSelfTo<RequestBot>().AsSingle();
         }
     }
 }

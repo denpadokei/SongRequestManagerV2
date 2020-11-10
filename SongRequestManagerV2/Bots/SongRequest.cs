@@ -33,9 +33,6 @@ namespace SongRequestManagerV2
         public TextMeshProUGUI _authorNameText;
 
         [Inject]
-        IRequestBot _bot;
-
-        [Inject]
         DynamicText.DynamicTextFactory _textFactory;
 
         /// <summary>説明 を取得、設定</summary>

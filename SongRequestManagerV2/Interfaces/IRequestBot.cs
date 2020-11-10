@@ -27,7 +27,6 @@ namespace SongRequestManagerV2.Interfaces
         IChatManager ChatManager { get; }
         bool RefreshQueue { get; }
         event Action ReceviedRequest;
-        event Action DismissRequest;
         event Action<bool> RefreshListRequest;
         event Action<bool> UpdateUIRequest;
         event Action<bool> SetButtonIntactivityRequest;
