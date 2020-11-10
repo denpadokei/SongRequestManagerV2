@@ -215,6 +215,13 @@ namespace SongRequestManagerV2.Views
 [Random song!]/0'!decklist draw%CR%'";
 #endif
 
+        
+
+        public event Action<int, bool> PlayProcessEvent;
+
+        [Inject]
+        IChatManager _chatManager;
+
         public static void InvokeBeatSaberButton(String buttonName)
         {
             Button buttonInstance = Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == buttonName));
@@ -224,8 +231,7 @@ namespace SongRequestManagerV2.Views
         [Inject]
         void Constractor()
         {
-            this._bot.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
-            this._bot.DownloadProgress.ProgressChanged += this.Progress_ProgressChanged;
+            
             this._bot.UpdateUIRequest -= this.UpdateRequestUI;
             this._bot.UpdateUIRequest += this.UpdateRequestUI;
             this._bot.SetButtonIntactivityRequest -= this.SetUIInteractivity;
@@ -234,10 +240,8 @@ namespace SongRequestManagerV2.Views
 
         protected override void OnDestroy()
         {
-            this._bot.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
             this._bot.UpdateUIRequest -= this.UpdateRequestUI;
             this._bot.SetButtonIntactivityRequest -= this.SetUIInteractivity;
-            
             base.OnDestroy();
         }
 
@@ -486,7 +490,7 @@ namespace SongRequestManagerV2.Views
                 _bot.WriteJSON(RequestBot.playedfilename, RequestBot.Played);
 
                 SetUIInteractivity(false);
-                _bot.Process(SelectedRow, IsShowHistory);
+                this.PlayProcessEvent?.Invoke(this.SelectedRow, this.IsShowHistory);
                 this._requestTable.tableView.SelectCellWithIdx(-1);
             }
         }
@@ -497,15 +501,13 @@ namespace SongRequestManagerV2.Views
             RequestBotConfig.Instance.RequestQueueOpen = !RequestBotConfig.Instance.RequestQueueOpen;
             RequestBotConfig.Instance.Save();
             _bot.WriteQueueStatusToFile(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
-            _bot.QueueChatMessage(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
+            this._chatManager.QueueChatMessage(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
             UpdateRequestUI();
         }
 
         [UIAction("selected-cell")]
         private void SelectedCell(TableView tableView, object row)
         {
-            Plugin.Logger.Debug($"Selected cell : {tableView}({row})");
-
             SelectedRow = this.Songs.IndexOf(row);
             //if (row != _lastSelection) {
             //    _lastSelection = 0;

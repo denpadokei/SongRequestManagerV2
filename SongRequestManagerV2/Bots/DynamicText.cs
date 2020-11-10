@@ -3,6 +3,7 @@ using ChatCore.Utilities;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
+using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace SongRequestManagerV2.Bots
     public class DynamicText
     {
         [Inject]
-        IRequestBot _bot;
+        IChatManager _chatManager;
 
         public Dictionary<string, string> Dynamicvariables { get; } = new Dictionary<string, string>();  // A list of the variables available to us, we're using a list of pairs because the match we use uses BeginsWith,since the name of the string is unknown. The list is very short, so no biggie
 
@@ -99,8 +100,8 @@ namespace SongRequestManagerV2.Bots
 
             if (song["pp"].AsFloat > 0) Add("PP", song["pp"].AsInt.ToString() + " PP"); else Add("PP", "");
 
-            Add("StarRating", _bot.GetStarRating(song)); // Add additional dynamic properties
-            Add("Rating", _bot.GetRating(song));
+            Add("StarRating", Utility.GetStarRating(song)); // Add additional dynamic properties
+            Add("Rating", Utility.GetRating(song));
             Add("BeatsaverLink", $"https://beatsaver.com/beatmap/{song["id"].Value}");
             Add("BeatsaberLink", $"https://bsaber.com/songs/{song["id"].Value}");
             return this;
@@ -149,7 +150,7 @@ namespace SongRequestManagerV2.Bots
 
         public DynamicText QueueMessage(string text, bool parselong = false)
         {
-            _bot.QueueChatMessage(Parse(text, parselong));
+            this._chatManager.QueueChatMessage(Parse(text, parselong));
             return this;
         }
 

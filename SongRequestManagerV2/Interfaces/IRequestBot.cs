@@ -20,23 +20,18 @@ namespace SongRequestManagerV2.Interfaces
 {
     public interface IRequestBot
     {
-        SongListUtils SongListUtils { get; }
         StringNormalization Normalize { get; }
         MapDatabase MapDatabase { get; }
         SongRequest Currentsong { get; set; }
         ListCollectionManager ListCollectionManager { get; }
-        Progress<double> DownloadProgress { get; }
         IChatManager ChatManager { get; }
         bool RefreshQueue { get; }
-
         event Action ReceviedRequest;
         event Action DismissRequest;
         event Action<bool> RefreshListRequest;
         event Action<bool> UpdateUIRequest;
         event Action<bool> SetButtonIntactivityRequest;
         event Action<Color> ChangeButtonColor;
-
-        bool HasRights(ISRMCommand botcmd, IChatUser user, CmdFlags flags);
         string QueueMessage(bool QueueState);
         List<JSONObject> ReadJSON(string path);
         void SetRequestStatus(int index, RequestStatus status, bool fromHistory = false);
@@ -71,12 +66,9 @@ namespace SongRequestManagerV2.Interfaces
         string Every(ParseState state);
         bool Filtersong(JSONObject song);
         string GetBeatSaverId(string request);
-        TimeSpan GetFileAgeDifference(string filename);
         string GetGCCount(ParseState state);
         Task GetPPData();
-        string GetRating(JSONObject song, bool mode = true);
         List<JSONObject> GetSongListFromResults(JSONNode result, string SearchString, ref string errorMessage, SongFilter filter = (SongFilter)(-1), string sortby = "-rating", int reverse = 1);
-        string GetStarRating(JSONObject song, bool mode = true);
         string IsRequestInQueue(string request, bool fast = false);
         string Listaccess(ParseState state);
         void ListList(IChatUser requestor, string request);
@@ -91,13 +83,10 @@ namespace SongRequestManagerV2.Interfaces
         void MSD(KEYBOARD.KEY key);
         bool MyChatMessageHandler(IChatMessage msg);
         void Newest(KEYBOARD.KEY key);
-        void Next();
         void OpenList(IChatUser requestor, string request);
         string OpenQueue(ParseState state);
-        void Parse(IChatUser user, string request, CmdFlags flags = CmdFlags.None, string info = "");
-        void Process(int index, bool fromHistory);
+        Task Parse(IChatUser user, string request, CmdFlags flags = CmdFlags.None, string info = "");
         string ProcessSongRequest(ParseState state);
-        void QueueChatMessage(string message);
         string Queueduration();
         string Queuelist(ParseState state);
         string QueueLottery(ParseState state);
@@ -130,7 +119,6 @@ namespace SongRequestManagerV2.Interfaces
         void Unmap(IChatUser requestor, string request);
         string Unqueuelist(ParseState state);
         void UpdateRequestUI(bool writeSummary = true);
-        string Variable(ParseState state);
         void WhiteList(IChatUser requestor, string request);
         string Who(ParseState state);
         void Writedeck(IChatUser requestor, string request);

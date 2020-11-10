@@ -13,9 +13,9 @@ namespace SongRequestManagerV2.Bots
     public class SongMap
     {
         [Inject]
-        IRequestBot _bot;
-        [Inject]
         StringNormalization _normalize;
+        [Inject]
+        IChatManager _chatManager;
 
         public JSONObject Song { get; set; }
         public string Path { get; set; }
@@ -149,7 +149,7 @@ namespace SongRequestManagerV2.Bots
                 //MapDatabase.LevelId.TryAdd(LevelId, this);
             }
             catch (Exception ex) {
-                _bot.QueueChatMessage(ex.ToString());
+                this._chatManager.QueueChatMessage(ex.ToString());
             }
         }
 

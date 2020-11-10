@@ -9,6 +9,7 @@ using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Statics;
+using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -108,7 +109,7 @@ namespace SongRequestManagerV2
         [UIAction("#post-parse")]
         internal void Setup()
         {
-            this.SongName = $"{_songName} <size=50%>{_bot.GetRating(_song)}";
+            this.SongName = $"{_songName} <size=50%>{Utility.GetRating(_song)}";
             this.SetCover();
         }
 

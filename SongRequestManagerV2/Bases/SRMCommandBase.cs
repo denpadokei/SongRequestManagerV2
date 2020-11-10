@@ -50,10 +50,10 @@ namespace SongRequestManagerV2.Bases
         public ChangedFlags ChangedParameters { get; set; } = 0; // Indicates if any prameters were changed by the user
 
         [Inject]
-        protected IRequestBot _bot;
+        public abstract void Constractor();
 
         [Inject]
-        public abstract void Constractor();
+        IChatManager _chatManager;
 
         public ISRMCommand AddAliases(IEnumerable<string> aliases)
         {
@@ -122,7 +122,7 @@ namespace SongRequestManagerV2.Bases
             Flags = CmdFlags.Variable | CmdFlags.Broadcaster;
             Aliases.Clear();
             Aliases.Add(variablename.ToLower());
-            Subcommand = _bot.Variable;
+            Subcommand = this.Variable;
             Regexfilter = _anything;
             ShortHelp = "the = operator currently requires a space after it";
             UserString = reference.ToString(); // Save a backup
@@ -195,5 +195,11 @@ namespace SongRequestManagerV2.Bases
             return String.Join(",", Aliases.ToArray());
         }
         #endregion
+
+        string Variable(ParseState state) // Basically show the value of a variable without parsing
+        {
+            this._chatManager.QueueChatMessage(state._botcmd.UserParameter.ToString());
+            return "";
+        }
     }
 }

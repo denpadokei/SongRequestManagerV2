@@ -21,7 +21,7 @@ namespace SongRequestManagerV2.Bots
         public int Count = 0;
 
         [Inject]
-        IRequestBot _bot;
+        IChatManager _chatManager;
 
         // BUG: This version doesn't reallly strings > twitchmessagelength well, will support
         public QueueLongMessage() // Constructor supports setting max messages
@@ -59,7 +59,7 @@ namespace SongRequestManagerV2.Bots
                     Count = overflowcount;
                     return true;
                 }
-                _bot.QueueChatMessage(msgBuilder.ToString(0, msgBuilder.Length - separatorlength));
+                _chatManager.QueueChatMessage(msgBuilder.ToString(0, msgBuilder.Length - separatorlength));
                 msgBuilder.Clear();
             }
 
@@ -74,12 +74,12 @@ namespace SongRequestManagerV2.Bots
         public void End(string overflowtext = "", string emptymsg = "")
         {
             if (Count == 0)
-                _bot.QueueChatMessage(emptymsg); // Note, this means header doesn't get printed either for empty lists                
+                this._chatManager.QueueChatMessage(emptymsg); // Note, this means header doesn't get printed either for empty lists                
             else if (messageCount > maxMessages && overflowcount > 0)
-                _bot.QueueChatMessage(msgBuilder.ToString() + overflowtext);
+                this._chatManager.QueueChatMessage(msgBuilder.ToString() + overflowtext);
             else {
                 msgBuilder.Length -= separatorlength;
-                _bot.QueueChatMessage(msgBuilder.ToString());
+                this._chatManager.QueueChatMessage(msgBuilder.ToString());
             }
 
             // Reset the class for reuse

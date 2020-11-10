@@ -262,7 +262,7 @@
     <Compile Include="UI\ListTable.cs" />
     <Compile Include="UI\Settings.cs" />
     <Compile Include="UI\SongListUtils.cs" />
-    <Compile Include="UI\SongRequestManagerSettings.cs" />
+    <Compile Include="Views\SongRequestManagerSettings.cs" />
     <Compile Include="UI\UIHelper.cs" />
     <Compile Include="Utils\HistoryManager.cs" />
     <Compile Include="Utils\Utility.cs" />
