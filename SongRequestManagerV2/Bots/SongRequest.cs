@@ -116,19 +116,19 @@ namespace SongRequestManagerV2
         [UIAction("selected")]
         private void Selected()
         {
-            Plugin.Logger.Debug($"Selected : {this._songName}");
+            Logger.Debug($"Selected : {this._songName}");
         }
 
         [UIAction("hovered")]
         private void Hovered()
         {
-            Plugin.Logger.Debug($"Hovered : {this._songName}");
+            Logger.Debug($"Hovered : {this._songName}");
         }
 
         [UIAction("un-selected-un-hovered")]
         private void UnSelectedUnHovered()
         {
-            Plugin.Logger.Debug($"UnSelectedUnHovered : {this._songName}");
+            Logger.Debug($"UnSelectedUnHovered : {this._songName}");
         }
 
         private IPreviewBeatmapLevel GetCustomLevel()
@@ -155,7 +155,7 @@ namespace SongRequestManagerV2
                     if (SongCore.Loader.AreSongsLoaded) {
                         var level = GetCustomLevel();
                         if (level != null) {
-                            //Plugin.Log("custom level found");
+                            //Logger.Debug("custom level found");
                             // set image from song's cover image
                             var tex = await level.GetCoverImageAsync(System.Threading.CancellationToken.None);
                             _coverImage.sprite = tex;
@@ -176,14 +176,14 @@ namespace SongRequestManagerV2
                                 _cachedTextures.AddOrUpdate(url, tex, (s, v) => tex);
                             }
                             catch (Exception e) {
-                                Plugin.Logger.Error(e);
+                                Logger.Error(e);
                             }
                         }
                         _coverImage.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
                     }
                 }
                 catch (Exception e) {
-                    Plugin.Logger.Error(e);
+                    Logger.Error(e);
                 }
                 finally {
                     _coverImage.enabled = true;
@@ -203,7 +203,7 @@ namespace SongRequestManagerV2
                 return obj;
             }
             catch (Exception ex) {
-                Plugin.Log($"{ex}\r\n{ex.Message}");
+                Logger.Debug($"{ex}\r\n{ex.Message}");
                 return null;
             }
         }
@@ -215,7 +215,7 @@ namespace SongRequestManagerV2
                 return temp;
             }
             catch (Exception e) {
-                Plugin.Log($"{e}");
+                Logger.Debug($"{e}");
                 return new UnknownChatUser(obj["requestor"].AsObject.ToString());
             }
         }

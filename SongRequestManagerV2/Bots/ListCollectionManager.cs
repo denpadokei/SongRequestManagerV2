@@ -67,7 +67,7 @@ namespace SongRequestManagerV2.Bots
                 StringListManager list = OpenList(listname);
                 return list.Contains(key);
             }
-            catch (Exception ex) { Plugin.Log(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
 
             return false;
         }
@@ -89,7 +89,7 @@ namespace SongRequestManagerV2.Bots
                 return true;
 
             }
-            catch (Exception ex) { Plugin.Log(ex.ToString()); }
+            catch (Exception ex) { Logger.Debug(ex.ToString()); }
 
             return false;
         }
@@ -110,7 +110,7 @@ namespace SongRequestManagerV2.Bots
                 return false;
 
             }
-            catch (Exception ex) { Plugin.Log(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
 
             return false;
         }
@@ -121,7 +121,7 @@ namespace SongRequestManagerV2.Bots
                 OpenList(listname, flags).Runscript();
 
             }
-            catch (Exception ex) { Plugin.Log(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
         }
 
         public void ClearList(string listname, ListFlags flags = ListFlags.Unchanged)
@@ -129,7 +129,7 @@ namespace SongRequestManagerV2.Bots
             try {
                 OpenList(listname).Clear();
             }
-            catch (Exception ex) { Plugin.Log(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
         }
 
     }

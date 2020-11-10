@@ -111,19 +111,19 @@ namespace SongRequestManagerV2.Bots
 
         public void Initialize()
         {
-            Plugin.Log("Start Initialize");
+            Logger.Debug("Start Initialize");
             
             RequestBotConfig.Instance.Save(true);
-            Plugin.Log("End Initialize");
+            Logger.Debug("End Initialize");
         }
 
         [Inject]
         async void Constractor()
         {
             if (RequestBotConfig.Instance.PPSearch) await GetPPData(); // Start loading PP data
-            Plugin.Log("try load database");
+            Logger.Debug("try load database");
             MapDatabase.LoadDatabase();
-            Plugin.Log("end load database");
+            Logger.Debug("end load database");
             if (RequestBotConfig.Instance.LocalSearch) await MapDatabase.LoadCustomSongs(); // This is a background process
         }
 
@@ -189,7 +189,7 @@ namespace SongRequestManagerV2.Bots
 
         internal async Task RecievedMessages(IChatMessage msg)
         {
-            Plugin.Log($"Received Message : {msg.Message}");
+            Logger.Debug($"Received Message : {msg.Message}");
 #if DEBUG
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -197,7 +197,7 @@ namespace SongRequestManagerV2.Bots
             await Parse(msg.Sender, msg.Message.Replace("！", "!"));
 #if DEBUG
             stopwatch.Stop();
-            Plugin.Logger.Debug($"{stopwatch.ElapsedMilliseconds} ms");
+            Logger.Debugger.Debug($"{stopwatch.ElapsedMilliseconds} ms");
 #endif
         }
 
@@ -243,7 +243,7 @@ namespace SongRequestManagerV2.Bots
         #region Unity methods
         void Awake()
         {
-            Plugin.Logger.Debug("Awake call");
+            Logger.Debug("Awake call");
             SceneManager.activeSceneChanged += this.SceneManager_activeSceneChanged;
             this.StartCoroutine(this.Setup());
         }
@@ -267,7 +267,7 @@ namespace SongRequestManagerV2.Bots
 
         void OnDestroy()
         {
-            Plugin.Logger.Debug("OnDestroy call");
+            Logger.Debug("OnDestroy call");
             SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
         }
         #endregion
@@ -340,11 +340,11 @@ namespace SongRequestManagerV2.Bots
             //NOTJSON.UNITTEST();
 #endif
             playedfilename = Path.Combine(Plugin.DataPath, "played.dat"); // Record of all the songs played in the current session
-            Plugin.Log("create playd path");
+            Logger.Debug("create playd path");
             try {
                 string filesToDelete = Path.Combine(Environment.CurrentDirectory, "FilesToDelete");
                 if (Directory.Exists(filesToDelete)) {
-                    Plugin.Log("files delete");
+                    Logger.Debug("files delete");
                     Utility.EmptyDirectory(filesToDelete);
                 }
 
@@ -352,13 +352,13 @@ namespace SongRequestManagerV2.Bots
                     if (!DateTime.TryParse(RequestBotConfig.Instance.LastBackup, out var LastBackup)) LastBackup = DateTime.MinValue;
                     TimeSpan TimeSinceBackup = DateTime.Now - LastBackup;
                     if (TimeSinceBackup > TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours)) {
-                        Plugin.Log("try buck up");
+                        Logger.Debug("try buck up");
                         Backup();
-                        Plugin.Log("end buck up");
+                        Logger.Debug("end buck up");
                     }
                 }
                 catch (Exception ex) {
-                    Plugin.Log(ex.ToString());
+                    Logger.Debug(ex.ToString());
                     this.ChatManager.QueueChatMessage("Failed to run Backup");
 
                 }
@@ -368,7 +368,7 @@ namespace SongRequestManagerV2.Bots
                     if (PlayedAge < TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours)) Played = ReadJSON(playedfilename); // Read the songsplayed file if less than x hours have passed 
                 }
                 catch (Exception ex) {
-                    Plugin.Log(ex.ToString());
+                    Logger.Debug(ex.ToString());
                     this.ChatManager.QueueChatMessage("Failed to clear played file");
 
                 }
@@ -392,7 +392,7 @@ namespace SongRequestManagerV2.Bots
                 RequestBotConfig.Instance.ConfigChangedEvent += OnConfigChangedEvent;
             }
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
                 this.ChatManager.QueueChatMessage(ex.ToString());
             }
 
@@ -417,7 +417,7 @@ namespace SongRequestManagerV2.Bots
             try {
                 await Task.Run(() =>
                 {
-                    Plugin.Log($"Sending message: \"{message}\"");
+                    Logger.Debug($"Sending message: \"{message}\"");
 
                     if (this.ChatManager.TwitchService != null) {
                         foreach (var channel in this.ChatManager.TwitchService.Channels) {
@@ -425,11 +425,11 @@ namespace SongRequestManagerV2.Bots
                         }
                     }
                 });
-                Plugin.Log("Finish send chat message");
+                Logger.Debug("Finish send chat message");
 
             }
             catch (Exception e) {
-                Plugin.Log($"Exception was caught when trying to send bot message. {e}");
+                Logger.Debug($"Exception was caught when trying to send bot message. {e}");
             }
         }
 
@@ -439,14 +439,14 @@ namespace SongRequestManagerV2.Bots
         {
             try {
                 await CheckRequest(requestInfo);
-                Plugin.Log("ProcessRequestQueue()");
+                Logger.Debug("ProcessRequestQueue()");
                 UpdateRequestUI();
                 RefreshSongQuere();
                 RefreshQueue = true;
-                Plugin.Log("end ProcessRequestQueue()");
+                Logger.Debug("end ProcessRequestQueue()");
             }
             catch (Exception e) {
-                Plugin.Log($"{e}");
+                Logger.Debug($"{e}");
             }
         }
 
@@ -609,7 +609,7 @@ namespace SongRequestManagerV2.Bots
         internal IEnumerator LoadOfflineDataBase(string id)
         {
             foreach (string directory in Directory.GetDirectories(RequestBotConfig.Instance.offlinepath, id + "*")) {
-                MapDatabase.LoadCustomSongs(directory, id).Await(null, e => { Plugin.Log($"{e}"); }, null);
+                MapDatabase.LoadCustomSongs(directory, id).Await(null, e => { Logger.Debug($"{e}"); }, null);
                 Task.Delay(25).Wait();
                 yield return new WaitWhile(() => MapDatabase.DatabaseLoading);
                 // break;
@@ -617,7 +617,7 @@ namespace SongRequestManagerV2.Bots
         }
         public void UpdateRequestUI(bool writeSummary = true)
         {
-            Plugin.Log("start updateUI");
+            Logger.Debug("start updateUI");
             try {
                 if (writeSummary) {
                     WriteQueueSummaryToFile(); // Write out queue status to file, do it first
@@ -625,7 +625,7 @@ namespace SongRequestManagerV2.Bots
                 Dispatcher.RunOnMainThread(() =>
                 {
                     try {
-                        Plugin.Log("Invoke Change Color");
+                        Logger.Debug("Invoke Change Color");
                         if (RequestManager.RequestSongs.Any()) {
                             ChangeButtonColor?.Invoke(Color.green);
                         }
@@ -634,15 +634,15 @@ namespace SongRequestManagerV2.Bots
                         }
                     }
                     catch (Exception e) {
-                        Plugin.Logger.Error(e);
+                        Logger.Error(e);
                     }
                 });
             }
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
             }
             finally {
-                Plugin.Log("end update UI");
+                Logger.Debug("end update UI");
             }
         }
 
@@ -658,7 +658,7 @@ namespace SongRequestManagerV2.Bots
 
         public void DequeueRequest(SongRequest request, bool updateUI = true)
         {
-            Plugin.Log("start to deque request");
+            Logger.Debug("start to deque request");
             try {
                 if (request._status != RequestStatus.Wrongsong && request._status != RequestStatus.SongSearch) RequestManager.HistorySongs.Insert(0, request); // Wrong song requests are not logged into history, is it possible that other status states shouldn't be moved either?
 
@@ -682,12 +682,12 @@ namespace SongRequestManagerV2.Bots
                 if (updateUI == false) return;
             }
             catch (Exception e) {
-                Plugin.Log($"{e}");
+                Logger.Debug($"{e}");
             }
             finally {
                 UpdateRequestUI();
                 RefreshQueue = true;
-                Plugin.Log("end Deque");
+                Logger.Debug("end Deque");
             }
         }
 
@@ -704,7 +704,7 @@ namespace SongRequestManagerV2.Bots
             {
                 if (RequestBotConfig.Instance.RequestQueueOpen && updateUI == true && RequestManager.RequestSongs.Count == 0) RequestBot.listcollection.runscript("emptyqueue.script");
             }
-            catch (Exception ex) { Plugin.Log(ex.ToString()); }
+            catch (Exception ex) { Logger.Debug(ex.ToString()); }
 #endif
             return request;
         }
@@ -829,7 +829,7 @@ namespace SongRequestManagerV2.Bots
                 return success;
             }
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
                 return ex.ToString();
             }
             finally {
@@ -863,12 +863,12 @@ namespace SongRequestManagerV2.Bots
         public async Task Parse(IChatUser user, string request, CmdFlags flags = 0, string info = "")
         {
             if (string.IsNullOrEmpty(request)) {
-                Plugin.Log($"request strings is null : {request}");
+                Logger.Debug($"request strings is null : {request}");
                 return;
             }
 
             if (!string.IsNullOrEmpty(user.Id) && ListCollectionManager.Contains(_blockeduser, user.Id.ToLower())) {
-                Plugin.Log($"Sender is contain blacklist : {user.UserName}");
+                Logger.Debug($"Sender is contain blacklist : {user.UserName}");
                 return;
             }
 
@@ -909,7 +909,7 @@ namespace SongRequestManagerV2.Bots
                 dt.AddSong((RequestManager.HistorySongs[0] as SongRequest)._song); // Exposing the current song 
             }
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
             }
 
             dt.QueueMessage(state._parameter);
@@ -1035,7 +1035,7 @@ namespace SongRequestManagerV2.Bots
                         result = resp.ConvertToJsonNode();
                     }
                     else {
-                        Plugin.Log($"Ban: Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
+                        Logger.Debug($"Ban: Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
                     }
                 }
 
@@ -1266,7 +1266,7 @@ namespace SongRequestManagerV2.Bots
                     item.Dispose();
                 }
                 catch (Exception e) {
-                    Plugin.Logger.Error(e);
+                    Logger.Error(e);
                 }
             }
             Events.Clear();
@@ -1391,7 +1391,7 @@ namespace SongRequestManagerV2.Bots
 
                 }
                 else {
-                    Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
+                    Logger.Debug($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
                     return;
                 }
 
@@ -1454,7 +1454,7 @@ namespace SongRequestManagerV2.Bots
                     }
                 }
                 else {
-                    Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
+                    Logger.Debug($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
                     return;
                 }
                 offset += 1;
@@ -1497,7 +1497,7 @@ namespace SongRequestManagerV2.Bots
 
                 }
                 else {
-                    Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {state._parameter}!");
+                    Logger.Debug($"Error {resp.ReasonPhrase} occured when trying to request song {state._parameter}!");
                     errorMessage = $"Invalid BeatSaver ID \"{state._parameter}\" specified.";
                 }
             }
@@ -1638,7 +1638,7 @@ namespace SongRequestManagerV2.Bots
                 File.WriteAllText(statusfile, count > 0 ? queuesummary.ToString() : "Queue is empty.");
             }
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
             }
         }
 
@@ -1650,7 +1650,7 @@ namespace SongRequestManagerV2.Bots
             }
 
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
             }
         }
 
@@ -1768,7 +1768,7 @@ namespace SongRequestManagerV2.Bots
                 File.WriteAllText(remapfile, sb.ToString());
             }
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
             }
         }
 
@@ -1790,7 +1790,7 @@ namespace SongRequestManagerV2.Bots
                 }
             }
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
             }
         }
         #endregion
@@ -1822,7 +1822,7 @@ namespace SongRequestManagerV2.Bots
                 if (!song.IsNull) _textFactory.Create().AddSong(ref song).QueueMessage(StringFormat.LinkSonglink.ToString());
             }
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
             }
 
             return success;
@@ -1961,7 +1961,7 @@ namespace SongRequestManagerV2.Bots
                 StringListManager list = ListCollectionManager.OpenList(state._parameter);
                 foreach (var entry in list.list) ProcessSongRequest(_stateFactory.Create().Setup(state, entry)); // Must use copies here, since these are all threads
             }
-            catch (Exception ex) { Plugin.Log(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
             return success;
         }
 
@@ -2057,7 +2057,7 @@ namespace SongRequestManagerV2.Bots
             DateTime Now = DateTime.Now;
             string BackupName = Path.Combine(RequestBotConfig.Instance.backuppath, $"SRMBACKUP-{Now.ToString("yyyy-MM-dd-HHmm")}.zip");
 
-            Plugin.Log($"Backing up {Plugin.DataPath}");
+            Logger.Debug($"Backing up {Plugin.DataPath}");
             try {
                 if (!Directory.Exists(RequestBotConfig.Instance.backuppath))
                     Directory.CreateDirectory(RequestBotConfig.Instance.backuppath);
@@ -2066,13 +2066,13 @@ namespace SongRequestManagerV2.Bots
                 RequestBotConfig.Instance.LastBackup = DateTime.Now.ToString();
                 RequestBotConfig.Instance.Save();
 
-                Plugin.Log($"Backup success writing {BackupName}");
+                Logger.Debug($"Backup success writing {BackupName}");
                 return success;
             }
             catch {
 
             }
-            Plugin.Log($"Backup failed writing {BackupName}");
+            Logger.Debug($"Backup failed writing {BackupName}");
             return $"Failed to backup to {BackupName}";
         }
         #endregion
@@ -2136,7 +2136,7 @@ namespace SongRequestManagerV2.Bots
             }
             catch (Exception e) {
                 //this.ChatManager.QueueChatMessage($"Exception {e} sorting song list");
-                Plugin.Log($"Exception sorting a returned song list. {e.ToString()}");
+                Logger.Debug($"Exception sorting a returned song list. {e.ToString()}");
             }
 
             foreach (var song in list) {
@@ -2271,7 +2271,7 @@ namespace SongRequestManagerV2.Bots
         public async Task GetPPData()
         {
             if (pploading) {
-                Plugin.Log("PPloaded");
+                Logger.Debug("PPloaded");
                 return;
             }
 
@@ -2291,7 +2291,7 @@ namespace SongRequestManagerV2.Bots
                 result = resp.ContentToString();
             }
             else {
-                Plugin.Log("Failed to get pp");
+                Logger.Debug("Failed to get pp");
                 pploading = false;
                 return;
             }
@@ -2341,7 +2341,7 @@ namespace SongRequestManagerV2.Bots
                     }
                 }
             }
-            Parse(GetLoginUser(), "!deck pp", CmdFlags.Local);
+            await Parse(GetLoginUser(), "!deck pp", CmdFlags.Local);
 
             this.ChatManager.QueueChatMessage("PP Data indexed");
             pploading = false;

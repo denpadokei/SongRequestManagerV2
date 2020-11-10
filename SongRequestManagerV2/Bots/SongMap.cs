@@ -108,7 +108,7 @@ namespace SongRequestManagerV2.Bots
                     if (degrees360 || degrees90) this.Song.Add("maptype", "360");
                 }
                 catch (Exception e) {
-                    Plugin.Logger.Error(e);
+                    Logger.Error(e);
                 }
             }
 

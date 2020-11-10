@@ -69,7 +69,7 @@ namespace SongRequestManagerV2.Models
 
         public string ExecuteSubcommand() // BUG: Only one supported for now (till I finalize the parse logic) ,we'll make it all work eventually
         {
-            Plugin.Log("Execute SubCommand");
+            Logger.Debug("Execute SubCommand");
             int commandstart = 0;
 
             if (_parameter.Length < 2) return notsubcommand;
@@ -109,7 +109,7 @@ namespace SongRequestManagerV2.Models
                 return subcmd.Subcommand(this);
             }
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
             }
 
             return "";
@@ -142,7 +142,7 @@ namespace SongRequestManagerV2.Models
         public async void ExecuteCommand()
         {
             if (!_commandManager.Aliases.TryGetValue(_command, out _botcmd)) {
-                Plugin.Logger.Info("Unknown command");
+                Logger.Debug("Unknown command");
                 return; // Unknown command
             }
 
@@ -155,7 +155,7 @@ namespace SongRequestManagerV2.Models
             //
             while (true) {
                 string errormsg = ExecuteSubcommand();
-                Plugin.Log($"errormsg : {errormsg}");
+                Logger.Debug($"errormsg : {errormsg}");
                 if (errormsg == notsubcommand) break;
                 if (errormsg != "") {
                     if (errormsg == _done) {
@@ -210,7 +210,7 @@ namespace SongRequestManagerV2.Models
             }
             catch (Exception ex) {
                 // Display failure message, and lock out command for a time period. Not yet.
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
             }
         }
 
@@ -228,8 +228,8 @@ namespace SongRequestManagerV2.Models
         {
             return Task.Run(() =>
             {
-                Plugin.Logger.Info("Start ParceCommand in ParseCommand()");
-                Plugin.Logger.Info($"request : {this._request}");
+                Logger.Debug("Start ParceCommand in ParseCommand()");
+                Logger.Debug($"request : {this._request}");
 
                 // Notes for later.
                 //var match = Regex.Match(request, "^!(?<command>[^ ^/]*?<parameter>.*)");
@@ -245,21 +245,21 @@ namespace SongRequestManagerV2.Models
                 if (commandlength == 0) return this;
 
                 _command = _request.Substring(commandstart, commandlength).ToLower();
-                Plugin.Logger.Info($"command : {this._command}");
+                Logger.Debug($"command : {this._command}");
                 if (_commandManager.Aliases.ContainsKey(_command)) {
-                    Plugin.Log("Contain ailias commad");
+                    Logger.Debug("Contain ailias commad");
                     _parameter = _request.Substring(parameterstart);
 
                     try {
-                        Plugin.Log("Start command");
+                        Logger.Debug("Start command");
                         ExecuteCommand();
                     }
                     catch (Exception ex) {
-                        Plugin.Log(ex.ToString());
+                        Logger.Debug(ex.ToString());
                     }
                 }
                 else {
-                    Plugin.Log("Not Contain ailias commad");
+                    Logger.Debug("Not Contain ailias commad");
                 }
 
                 return this;

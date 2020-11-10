@@ -131,7 +131,7 @@ namespace SongRequestManagerV2.Networks
                 }).ConfigureAwait(false);
             }
             catch (Exception e) {
-                Plugin.Log($"{e}");
+                Logger.Debug($"{e}");
             }
         }
         #endregion

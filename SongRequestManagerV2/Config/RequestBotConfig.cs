@@ -93,7 +93,7 @@ namespace SongRequestManagerV2
                 while (!Directory.Exists(Path.GetDirectoryName(FilePath)))
                     Thread.Sleep(100);
 
-                Plugin.Log("FilePath exists! Continuing initialization!");
+                Logger.Debug("FilePath exists! Continuing initialization!");
 
                 if (File.Exists(FilePath)) {
                     Load();
@@ -129,7 +129,7 @@ namespace SongRequestManagerV2
                 ConfigSerializer.SaveConfig(this, FilePath);
             }
             catch (Exception e) {
-                Plugin.Log($"faild to save : {e}\r\n{e.Message}");
+                Logger.Debug($"faild to save : {e}\r\n{e.Message}");
             }
         }
 

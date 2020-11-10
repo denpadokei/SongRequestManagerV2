@@ -62,7 +62,7 @@ namespace SongRequestManagerV2
                 _client?.Dispose();
             }
             catch (Exception e) {
-                Plugin.Log($"{e}");
+                Logger.Debug($"{e}");
             }
             
 
@@ -79,7 +79,7 @@ namespace SongRequestManagerV2
                 return await SendAsync(HttpMethod.Get, url, token);
             }
             catch (Exception e) {
-                Plugin.Log($"{e}");
+                Logger.Debug($"{e}");
                 return null;
             }
         }
@@ -94,7 +94,7 @@ namespace SongRequestManagerV2
                 return null;
             }
             catch (Exception e) {
-                Plugin.Log($"{e}");
+                Logger.Debug($"{e}");
                 return null;
             }
         }
@@ -115,14 +115,14 @@ namespace SongRequestManagerV2
                 return null;
             }
             catch (Exception e) {
-                Plugin.Log($"{e}");
+                Logger.Debug($"{e}");
                 return null;
             }
         }
 
         internal static async Task<WebResponse> SendAsync(HttpMethod methodType, string url, CancellationToken token, IProgress<double> progress = null)
         {
-            Plugin.Log($"{methodType.ToString()}: {url}");
+            Logger.Debug($"{methodType.ToString()}: {url}");
             
             // send request
             try {
@@ -137,11 +137,11 @@ namespace SongRequestManagerV2
                         }
                         retryCount++;
                         resp = await Client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
-                        Plugin.Log($"resp code : {resp.StatusCode}");
+                        Logger.Debug($"resp code : {resp.StatusCode}");
                     }
                     catch (Exception e) {
-                        Plugin.Log($"Error : {e}");
-                        Plugin.Log($"{resp?.StatusCode}");
+                        Logger.Debug($"Error : {e}");
+                        Logger.Debug($"{resp?.StatusCode}");
                     }
                 } while (resp?.StatusCode != HttpStatusCode.NotFound && resp?.IsSuccessStatusCode != true && retryCount <= RETRY_COUNT);
                 
@@ -177,7 +177,7 @@ namespace SongRequestManagerV2
                 }
             }
             catch (Exception e) {
-                Plugin.Log($"{e}");
+                Logger.Debug($"{e}");
                 throw;
             }
         }

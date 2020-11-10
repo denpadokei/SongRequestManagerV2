@@ -115,7 +115,7 @@ namespace SongRequestManagerV2.Bots
                 _chatManager.QueueChatMessage($"Saved Song Databse in  {(DateTime.Now - start).Seconds} secs.");
             }
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
             }
 
         }
@@ -150,7 +150,7 @@ namespace SongRequestManagerV2.Bots
             }
             catch (Exception ex) {
 
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
                 _chatManager.QueueChatMessage($"{ex}");
             }
         }
