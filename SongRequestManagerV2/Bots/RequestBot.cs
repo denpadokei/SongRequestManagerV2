@@ -26,6 +26,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Timers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -35,7 +36,7 @@ using TMPro;
 
 namespace SongRequestManagerV2.Bots
 {
-    internal class RequestBot : MonoBehaviour, IRequestBot, IInitializable
+    internal class RequestBot : IRequestBot, IInitializable, IDisposable
     {
         public static Dictionary<string, RequestUserTracker> RequestTracker { get; } = new Dictionary<string, RequestUserTracker>();
         //private ChatServiceMultiplexer _chatService { get; set; }
@@ -69,6 +70,9 @@ namespace SongRequestManagerV2.Bots
         private static readonly Regex _beatSaverRegex = new Regex("^[0-9]+-[0-9]+$", RegexOptions.Compiled);
         private static readonly Regex _deck = new Regex("^(current|draw|first|last|random|unload)$|$^", RegexOptions.Compiled); // Checks deck command parameters
         private static readonly Regex _drawcard = new Regex("($^)|(^[0-9a-zA-Z]+$)", RegexOptions.Compiled);
+
+        private Timer timer = new Timer(0.3);
+
         [Inject]
         public StringNormalization Normalize { get; private set; }
         [Inject]
@@ -92,7 +96,6 @@ namespace SongRequestManagerV2.Bots
 
         public static string playedfilename = "";
         public event Action ReceviedRequest;
-        public event Action DismissRequest;
         public event Action<bool> RefreshListRequest;
         public event Action<bool> UpdateUIRequest;
         public event Action<bool> SetButtonIntactivityRequest;
@@ -109,23 +112,63 @@ namespace SongRequestManagerV2.Bots
         const string endcommand = "X";
         const string notsubcommand = "NotSubcmd";
 
-        public void Initialize()
-        {
-            Logger.Debug("Start Initialize");
-            
-            RequestBotConfig.Instance.Save(true);
-            Logger.Debug("End Initialize");
-        }
-
+        #region 構築・破棄
         [Inject]
         async void Constractor()
         {
+            Logger.Debug("Constractor call");
             if (RequestBotConfig.Instance.PPSearch) await GetPPData(); // Start loading PP data
+            this.Setup();
             Logger.Debug("try load database");
             MapDatabase.LoadDatabase();
             Logger.Debug("end load database");
             if (RequestBotConfig.Instance.LocalSearch) await MapDatabase.LoadCustomSongs(); // This is a background process
         }
+        public void Initialize()
+        {
+            Logger.Debug("Start Initialize");
+            RequestBotConfig.Instance.Save(true);
+            Logger.Debug("Awake call");
+            SceneManager.activeSceneChanged += this.SceneManager_activeSceneChanged;
+            this.timer.Elapsed += this.Timer_Elapsed;
+            this.timer.Start();
+            Logger.Debug("End Initialize");
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue) {
+                if (disposing) {
+                    // TODO: マネージド状態を破棄します (マネージド オブジェクト)
+                    Logger.Debug("Dispose call");
+                    this.timer.Elapsed -= this.Timer_Elapsed;
+                    this.timer.Dispose();
+                    SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
+                    BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
+                }
+
+                // TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
+                // TODO: 大きなフィールドを null に設定します
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: 'Dispose(bool disposing)' にアンマネージド リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします
+        // ~RequestBot()
+        // {
+        //     // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
+
+        
 
         public void Newest(KEYBOARD.KEY key)
         {
@@ -197,7 +240,7 @@ namespace SongRequestManagerV2.Bots
             await Parse(msg.Sender, msg.Message.Replace("！", "!"));
 #if DEBUG
             stopwatch.Stop();
-            Logger.Debugger.Debug($"{stopwatch.ElapsedMilliseconds} ms");
+            Logger.Debug($"{stopwatch.ElapsedMilliseconds} ms");
 #endif
         }
 
@@ -240,42 +283,26 @@ namespace SongRequestManagerV2.Bots
         {
             this._isGameCore = arg1.name == "GameCore";
         }
-        #region Unity methods
-        void Awake()
-        {
-            Logger.Debug("Awake call");
-            SceneManager.activeSceneChanged += this.SceneManager_activeSceneChanged;
-            this.StartCoroutine(this.Setup());
-        }
-
-        void Update()
+        
+        private async void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (RequestBotConfig.Instance.PerformanceMode && this._isGameCore) {
                 return;
             }
 
             if (this.ChatManager.SendMessageQueue.TryDequeue(out var message)) {
-                _ = this.SendChatMessage(message);
+                await this.SendChatMessage(message);
             }
             else if (this.ChatManager.RequestInfos.TryDequeue(out var requestInfo)) {
-                _ = this.ProcessRequestQueue(requestInfo);
+                await this.ProcessRequestQueue(requestInfo);
             }
             else if (this.ChatManager.RecieveChatMessage.TryDequeue(out var chatMessage)) {
-                _ = this.RecievedMessages(chatMessage);
+                await this.RecievedMessages(chatMessage);
             }
         }
 
-        void OnDestroy()
+        void Setup()
         {
-            Logger.Debug("OnDestroy call");
-            SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
-        }
-        #endregion
-
-        IEnumerator Setup()
-        {
-            yield return new WaitWhile(() => this.ChatManager == null);
-            yield return new WaitWhile(() => this._requestManager == null);
 #if UNRELEASED
             var startingmem = GC.GetTotalMemory(true);
 
@@ -372,10 +399,6 @@ namespace SongRequestManagerV2.Bots
                     this.ChatManager.QueueChatMessage("Failed to clear played file");
 
                 }
-
-
-
-
                 _requestManager.ReadRequest(); // Might added the timespan check for this too. To be decided later.
                 _requestManager.ReadHistory();
                 ListCollectionManager.OpenList("banlist.unique");
@@ -2267,6 +2290,7 @@ namespace SongRequestManagerV2.Bots
 
 
         public static bool pploading = false;
+        private bool disposedValue;
 
         public async Task GetPPData()
         {

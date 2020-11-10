@@ -125,7 +125,6 @@ namespace SongRequestManagerV2.Views
             Logger.Debug("Start()");
 
             _bot.ChangeButtonColor += this.SetButtonColor;
-            _bot.DismissRequest += this.BackButtonPressed;
             _bot.RefreshListRequest += this.RefreshListRequest;
             _requestFlow.PlayProcessEvent += this.ProcessSongRequest;
 
@@ -158,7 +157,6 @@ namespace SongRequestManagerV2.Views
         {
             Logger.Debug("OnDestroy");
             _bot.ChangeButtonColor -= this.SetButtonColor;
-            _bot.DismissRequest -= this.BackButtonPressed;
             _bot.RefreshListRequest -= this.RefreshListRequest;
             _requestFlow.PlayProcessEvent -= this.ProcessSongRequest;
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
