@@ -279,7 +279,7 @@ namespace SongRequestManagerV2.Views
 #endif
                 }
                 catch (Exception e) {
-                    Plugin.Log($"{e}");
+                    Logger.Debug($"{e}");
                 }
                 try {
                     try {
@@ -287,16 +287,16 @@ namespace SongRequestManagerV2.Views
                         CenterKeys.AddKeyboard("CenterPanel.kbd");
                     }
                     catch (Exception e) {
-                        Plugin.Logger.Error(e);
+                        Logger.Error(e);
                     }
-                    Plugin.Logger.Debug($"Songs is null? : {this.Songs == null}");
+                    Logger.Debug($"Songs is null? : {this.Songs == null}");
                     //this.Songs.CollectionChanged += this.Songs_CollectionChanged;
                     this.Songs.Clear();
                     foreach (var item in RequestManager.RequestSongs) {
-                        Plugin.Logger.Debug($"{item}");
+                        Logger.Debug($"{item}");
                         this.Songs.Add(item);
                     }
-                    Plugin.Logger.Debug($"_requestTable is null : {this._requestTable == null}");
+                    Logger.Debug($"_requestTable is null : {this._requestTable == null}");
 #if UNRELEASED
                 // BUG: Need additional modes disabling one shot buttons
                 // BUG: Need to make sure the buttons are usable on older headsets
@@ -329,7 +329,7 @@ namespace SongRequestManagerV2.Views
 #endregion
                     }
                     catch (Exception e) {
-                        Plugin.Log($"{e}");
+                        Logger.Debug($"{e}");
                     }
                     try {
 #region Blacklist button
@@ -338,7 +338,7 @@ namespace SongRequestManagerV2.Views
 #endregion
                     }
                     catch (Exception e) {
-                        Plugin.Log($"{e}");
+                        Logger.Debug($"{e}");
                     }
                     try {
 #region Skip button
@@ -346,7 +346,7 @@ namespace SongRequestManagerV2.Views
 #endregion
                     }
                     catch (Exception e) {
-                        Plugin.Log($"{e}");
+                        Logger.Debug($"{e}");
                     }
                     try {
 #region Play button
@@ -355,7 +355,7 @@ namespace SongRequestManagerV2.Views
 #endregion
                     }
                     catch (Exception e) {
-                        Plugin.Log($"{e}");
+                        Logger.Debug($"{e}");
                     }
                     try {
 #region Queue button
@@ -364,7 +364,7 @@ namespace SongRequestManagerV2.Views
 #endregion
                     }
                     catch (Exception e) {
-                        Plugin.Log($"{e}");
+                        Logger.Debug($"{e}");
                     }
                     try {
 #region Progress
@@ -372,13 +372,13 @@ namespace SongRequestManagerV2.Views
 #endregion
                     }
                     catch (Exception e) {
-                        Plugin.Log($"{e}");
+                        Logger.Debug($"{e}");
                     }
                     // Set default RequestFlowCoordinator title
                     ChangeTitle?.Invoke(IsShowHistory ? "Song Request History" : "Song Request Queue");
                 }
                 catch (Exception e) {
-                    Plugin.Log($"{e}");
+                    Logger.Debug($"{e}");
                 }
             }
 
@@ -587,7 +587,7 @@ namespace SongRequestManagerV2.Views
                     RefreshSongQueueList(selectRowCallback);
                 }
                 catch (Exception e) {
-                    Plugin.Logger.Error(e);
+                    Logger.Error(e);
                 }
             });
         }
@@ -612,7 +612,7 @@ namespace SongRequestManagerV2.Views
                 if (SelectedRow >= (IsShowHistory ? RequestManager.HistorySongs : RequestManager.RequestSongs).Count()) SelectedRow = -1;
 
                 if (_requestTable.NumberOfCells() == 0 || SelectedRow == -1 || SelectedRow >= Songs.Count()) {
-                    Plugin.Log("Nothing selected, or empty list, buttons should be off");
+                    Logger.Debug("Nothing selected, or empty list, buttons should be off");
                     toggled = false;
                 }
 
@@ -643,7 +643,7 @@ namespace SongRequestManagerV2.Views
                 this.IsHistoryButtonEnable = true;
             }
             catch (Exception e) {
-                Plugin.Logger.Error(e);
+                Logger.Error(e);
             }
         }
 
@@ -670,7 +670,7 @@ namespace SongRequestManagerV2.Views
                 }
             }
             catch (Exception e) {
-                Plugin.Logger.Error(e);
+                Logger.Error(e);
             }
         }
 
@@ -687,7 +687,7 @@ namespace SongRequestManagerV2.Views
         private SongRequest SongInfoForRow(int row)
         {
             if (this.Songs.Count < (uint)row) {
-                Plugin.Logger.Debug($"row : {row}, Songs Count : {this.Songs.Count}");
+                Logger.Debug($"row : {row}, Songs Count : {this.Songs.Count}");
                 return this.Songs.FirstOrDefault() as SongRequest;
             }
             return this.Songs[row] as SongRequest;

@@ -39,7 +39,7 @@ namespace SongRequestManagerV2
                             }
                         }
                         catch (Exception e) {
-                            Plugin.Log($"{e}");
+                            Logger.Debug($"{e}");
                         }
                     }   
                 }
@@ -49,7 +49,7 @@ namespace SongRequestManagerV2
 
         public void Write(string path, IEnumerable<object> songs)
         {
-            Plugin.Log($"Start write");
+            Logger.Debug($"Start write");
             try {
                 if (!Directory.Exists(Path.GetDirectoryName(path)))
                     Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -58,19 +58,19 @@ namespace SongRequestManagerV2
                 foreach (var song in songs.Where(x => x != null).Select(x => x as SongRequest)) {
                     try {
                         arr.Add(song.ToJson());
-                        //Plugin.Log($"Added {song.song}");
+                        //Logger.Debug($"Added {song.song}");
                     }
                     catch (Exception ex) {
-                        Plugin.Log($"{ex}\r\n{song}");
+                        Logger.Debug($"{ex}\r\n{song}");
                     }
                 }
                 File.WriteAllText(path, arr.ToString());
             }
             catch (Exception ex) {
-                Plugin.Log($"{ex}");
+                Logger.Debug($"{ex}");
             }
             finally {
-                Plugin.Log($"End write");
+                Logger.Debug($"End write");
             }
         }
 
@@ -81,7 +81,7 @@ namespace SongRequestManagerV2
                 RequestSongs.AddRange(Read(requestsPath));
             }
             catch (Exception e) {
-                Plugin.Log($"{e}");
+                Logger.Debug($"{e}");
                 this._chatManager.QueueChatMessage("There was an error reading the request queue.");
             }
 

@@ -53,7 +53,7 @@ namespace SongRequestManagerV2.Networks
 
         private void OnServerPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            Plugin.Log("PropertyChanged Server.");
+            Logger.Debug("PropertyChanged Server.");
             if (sender is Server server) {
                 if (args.PropertyName == nameof(server.resBytes)) {
                     if (int.TryParse(RequestBotConfig.Instance.SendPort, out var port)) {
@@ -67,7 +67,7 @@ namespace SongRequestManagerV2.Networks
                     }
                 }
                 else if (args.PropertyName == nameof(server.Message)) {
-                    Plugin.Log(server.Message);
+                    Logger.Debug(server.Message);
                     this.ReceiveMessege?.Invoke(server.Message);
                 }
             }

@@ -85,7 +85,7 @@ namespace SongRequestManagerV2.Bots
             get 
             {
                 foreach (KEY key in keys) if (key.name == index) return key;
-                Plugin.Log($"Keyboard: Unable to set property of Key  [{index}]");
+                Logger.Debug($"Keyboard: Unable to set property of Key  [{index}]");
 
                 return dummy;
             }
@@ -108,7 +108,7 @@ namespace SongRequestManagerV2.Bots
                 //key.shifted = value;
             }
 
-            if (!found) Plugin.Log($"Keyboard: Unable to set property of Key  [{keylabel}]");
+            if (!found) Logger.Debug($"Keyboard: Unable to set property of Key  [{keylabel}]");
         }
 
         public void SetAction(string keyname, Action<KEY> action)
@@ -121,7 +121,7 @@ namespace SongRequestManagerV2.Bots
             }
 
             // BUG: This message was annoying if the keyboard didn't include those keys.
-            if (!found) Plugin.Log($"Keyboard: Unable to set action of Key  [{keyname}]");
+            if (!found) Logger.Debug($"Keyboard: Unable to set action of Key  [{keyname}]");
         }
 
         KEY AddKey(string keylabel, float width = 12,float height=10,int color=0xffffff)
@@ -301,7 +301,7 @@ namespace SongRequestManagerV2.Bots
 
 
                         default:
-                            Plugin.Log($"Unable to parse keyboard at position {p} char [{Keyboard[p]}]: [{Keyboard}]");
+                            Logger.Debug($"Unable to parse keyboard at position {p} char [{Keyboard[p]}]: [{Keyboard}]");
                             return this;
                     }
 
@@ -313,8 +313,8 @@ namespace SongRequestManagerV2.Bots
             }
             catch (Exception ex)
             {
-                Plugin.Log($"Unable to parse keyboard at position {p} : [{Keyboard}]");
-                Plugin.Log(ex.ToString());
+                Logger.Debug($"Unable to parse keyboard at position {p} : [{Keyboard}]");
+                Logger.Debug(ex.ToString());
             }
 
             return this;

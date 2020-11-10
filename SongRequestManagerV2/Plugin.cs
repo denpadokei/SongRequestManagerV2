@@ -35,7 +35,7 @@ namespace SongRequestManagerV2
 
         private static PluginMetadata _meta;
 
-        public static IPALogger Logger { get; internal set; }
+        public static IPALogger Logger { get; private set; }
         public bool IsApplicationExiting = false;
         public static Plugin Instance { get; private set; }
 
@@ -51,14 +51,6 @@ namespace SongRequestManagerV2
             Logger.Debug("Logger initialized.");
             zenjector.OnApp<SRMAppInstaller>();
             zenjector.OnMenu<SRMInstaller>();
-        }
-
-        public static void Log(string text,
-                        [CallerFilePath] string file = "",
-                        [CallerMemberName] string member = "",
-                        [CallerLineNumber] int line = 0)
-        {
-            Logger.Info($"[SongRequestManagerV2] {Path.GetFileName(file)}->{member}({line}): {text}");
         }
 
         [OnStart]
@@ -90,7 +82,7 @@ namespace SongRequestManagerV2
                     }
                 }
                 else {
-                    Plugin.Log("There was a problem obtaining SongBrowserUI object, unable to reset filters");
+                    Logger.Debug("There was a problem obtaining SongBrowserUI object, unable to reset filters");
                 }
             }
         }

@@ -70,12 +70,12 @@ namespace SongRequestManagerV2.Views
         public void Action()
         {
             try {
-                Plugin.Log("action");
+                Logger.Debug("action");
                 _button.interactable = false;
                 SRMButtonPressed();
             }
             catch (Exception e) {
-                Plugin.Logger.Error(e);
+                Logger.Error(e);
             }
             finally {
                 _button.interactable = true;
@@ -93,10 +93,10 @@ namespace SongRequestManagerV2.Views
 
         internal void SetButtonColor(Color color)
         {
-            Plugin.Logger.Debug($"Change button color : {color}");
+            Logger.Debug($"Change button color : {color}");
             var imageview = this._button.GetComponentsInChildren<ImageView>(true).FirstOrDefault(x => x?.name == "BG");
             if (imageview == null) {
-                Plugin.Logger.Debug("ImageView is null.");
+                Logger.Debug("ImageView is null.");
                 return;
             }
             imageview.color = color;
@@ -107,22 +107,22 @@ namespace SongRequestManagerV2.Views
 
         internal void BackButtonPressed()
         {
-            Plugin.Logger.Debug($"{Current.name} : {_requestFlow.name}");
+            Logger.Debug($"{Current.name} : {_requestFlow.name}");
             if (Current.name != _requestFlow.name) {
-                Plugin.Logger.Debug($"{Current.name != _requestFlow.name}");
+                Logger.Debug($"{Current.name != _requestFlow.name}");
                 return;
             }
             try {
                 Current.GetField<FlowCoordinator, FlowCoordinator>("_parentFlowCoordinator")?.DismissFlowCoordinator(Current, null, AnimationDirection.Horizontal, true);
             }
             catch (Exception e) {
-                Plugin.Logger.Error(e);
+                Logger.Error(e);
             }
         }
 
         void Start()
         {
-            Plugin.Logger.Debug("Start()");
+            Logger.Debug("Start()");
 
             _bot.ChangeButtonColor += this.SetButtonColor;
             _bot.DismissRequest += this.BackButtonPressed;
@@ -138,15 +138,15 @@ namespace SongRequestManagerV2.Views
                 canvas.sortingOrder = 3;
                 this.Screen.SetRootViewController(this, AnimationType.None);
             }
-            Plugin.Logger.Debug($"{_button == null}");
+            Logger.Debug($"{_button == null}");
             if (_button == null) {
                 _button = UIHelper.CreateUIButton(this.Screen.transform, "OkButton", Vector2.zero, Vector2.zero, Action, "SRM", null);
             }
 
             this._bot.UpdateRequestUI();
 
-            Plugin.Log("Created request button!");
-            Plugin.Logger.Debug("Start() end");
+            Logger.Debug("Created request button!");
+            Logger.Debug("Start() end");
         }
 
         private void Progress_ProgressChanged(object sender, double e)
@@ -156,7 +156,7 @@ namespace SongRequestManagerV2.Views
 
         protected override void OnDestroy()
         {
-            Plugin.Logger.Debug("OnDestroy");
+            Logger.Debug("OnDestroy");
             _bot.ChangeButtonColor -= this.SetButtonColor;
             _bot.DismissRequest -= this.BackButtonPressed;
             _bot.RefreshListRequest -= this.RefreshListRequest;
@@ -175,7 +175,7 @@ namespace SongRequestManagerV2.Views
             if ((RequestManager.RequestSongs.Any() && !fromHistory) || (RequestManager.HistorySongs.Any() && fromHistory)) {
                 SongRequest request = null;
                 if (!fromHistory) {
-                    Plugin.Log("Set status to request");
+                    Logger.Debug("Set status to request");
                     _bot.SetRequestStatus(index, RequestStatus.Played);
                     request = _bot.DequeueRequest(index);
                 }
@@ -184,11 +184,11 @@ namespace SongRequestManagerV2.Views
                 }
 
                 if (request == null) {
-                    Plugin.Log("Can't process a null request! Aborting!");
+                    Logger.Debug("Can't process a null request! Aborting!");
                     return;
                 }
                 else
-                    Plugin.Log($"Processing song request {request._song["songName"].Value}");
+                    Logger.Debug($"Processing song request {request._song["songName"].Value}");
                 string songName = request._song["songName"].Value;
                 string songIndex = Regex.Replace($"{request._song["id"].Value} ({request._song["songName"].Value} - {request._song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
                 songIndex = Normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
@@ -201,7 +201,7 @@ namespace SongRequestManagerV2.Views
 
                     if (Directory.Exists(currentSongDirectory)) {
                         Utility.EmptyDirectory(currentSongDirectory, true);
-                        Plugin.Log($"Deleting {currentSongDirectory}");
+                        Logger.Debug($"Deleting {currentSongDirectory}");
                     }
                     string localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request._song["id"].Value}.zip");
 #if UNRELEASED
@@ -222,7 +222,7 @@ namespace SongRequestManagerV2.Views
                             archive.ExtractToDirectory(currentSongDirectory);
                         }
                         catch (Exception e) {
-                            Plugin.Log($"Unable to extract ZIP! Exception: {e}");
+                            Logger.Debug($"Unable to extract ZIP! Exception: {e}");
                             return;
                         }
                         zipStream.Close();
@@ -237,7 +237,7 @@ namespace SongRequestManagerV2.Views
 #endif
                 }
                 else {
-                    Plugin.Log($"Song {songName} already exists!");
+                    Logger.Debug($"Song {songName} already exists!");
                     this.BackButtonPressed();
                     bool success = false;
                     Dispatcher.RunOnMainThread(() => this.BackButtonPressed());

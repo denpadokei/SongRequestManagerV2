@@ -20,7 +20,7 @@ namespace SongRequestManagerV2
                     action?.Invoke(value);
                 }
                 catch (Exception e) {
-                    Plugin.Logger.Error(e);
+                    Logger.Error(e);
                 }
             });
         }

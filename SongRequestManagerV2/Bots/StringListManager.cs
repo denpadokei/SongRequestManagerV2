@@ -64,7 +64,7 @@ namespace SongRequestManagerV2.Bots
                 foreach (var line in list) _bot.Parse(null, line, CmdFlags.Local);
             }
             catch (Exception ex) {
-                Plugin.Log(ex.ToString());
+                Logger.Debug(ex.ToString());
             } // Going to try this form, to reduce code verbosity.            
         }
 

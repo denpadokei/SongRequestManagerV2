@@ -44,7 +44,7 @@ namespace SongRequestManagerV2
                     ProvideInitialViewControllers(_requestBotListViewController, null, _keyboardViewController);
                 }
                 catch (System.Exception e) {
-                    Plugin.Logger.Error(e);
+                    Logger.Error(e);
                 }
             }
         }

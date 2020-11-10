@@ -51,7 +51,7 @@ namespace SongRequestManagerV2.Utils
 
         void MultiplexerInstance_OnJoinChannel(IChatService arg1, IChatChannel arg2)
         {
-            Plugin.Log($"Joined! : [{arg1.DisplayName}][{arg2.Name}]");
+            Logger.Debug($"Joined! : [{arg1.DisplayName}][{arg2.Name}]");
             if (arg1 is TwitchService twitchService) {
                 this.TwitchService = twitchService;
             }
@@ -59,7 +59,7 @@ namespace SongRequestManagerV2.Utils
 
         void MultiplexerInstance_OnLogin(IChatService obj)
         {
-            Plugin.Log($"Loged in! : [{obj.DisplayName}]");
+            Logger.Debug($"Loged in! : [{obj.DisplayName}]");
             if (obj is TwitchService twitchService) {
                 this.TwitchService = twitchService;
             }

@@ -42,13 +42,13 @@ namespace SongRequestManagerV2
                     //_songBrowserInstalled = Utilities.IsModInstalled("Song Browser");
                     //_songDownloaderInstalled = IPA.Loader.PluginManager.GetPlugin("BeatSaver Downloader") != null;
 
-                    //Plugin.Log($"Song Browser installed: {_songBrowserInstalled}");
-                    //Plugin.Log($"Downloader installed: {_songDownloaderInstalled}");
+                    //Logger.Debug($"Song Browser installed: {_songBrowserInstalled}");
+                    //Logger.Debug($"Downloader installed: {_songDownloaderInstalled}");
                     _initialized = true;
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log($"Exception {e}");
+                    Logger.Debug($"Exception {e}");
                 }
             }
         }
@@ -153,7 +153,7 @@ namespace SongRequestManagerV2
         {
             if (_levelCollectionViewController)
             {
-                Plugin.Log($"Scrolling to {levelID}! Retry={isRetry}");
+                Logger.Debug($"Scrolling to {levelID}! Retry={isRetry}");
 
                 // handle if song browser is present
                 if (Plugin.SongBrowserPluginPresent)
@@ -172,7 +172,7 @@ namespace SongRequestManagerV2
 
                 var song = Loader.GetLevelByHash(levelID.Split('_').Last());
                 if (song == null) {
-                    Plugin.Logger.Debug("Song not find.");
+                    Logger.Debug("Song not find.");
                     yield break;
                 }
                 // get the table view

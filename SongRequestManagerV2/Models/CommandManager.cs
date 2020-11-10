@@ -276,9 +276,9 @@ namespace SongRequestManagerV2.Models
                 Accesslist("mapperban.list");
             }
             catch (Exception e) {
-                Plugin.Logger.Error(e);
+                Logger.Error(e);
             }
-            Plugin.Log("End InitializeCommands()");
+            Logger.Debug("End InitializeCommands()");
         }
 
         public string SaveCommands(ParseState state)
@@ -788,7 +788,7 @@ namespace SongRequestManagerV2.Models
                     result = resp.ConvertToJsonNode();
                 }
                 else {
-                    Plugin.Log($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
+                    Logger.Debug($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
                 }
             }
 

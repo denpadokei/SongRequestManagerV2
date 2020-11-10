@@ -230,6 +230,7 @@
     <Compile Include="Interfaces\IChatManager.cs" />
     <Compile Include="Interfaces\IRequestBot.cs" />
     <Compile Include="Interfaces\ISRMCommand.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="Models\SRMCommand.cs" />
     <Compile Include="Models\CommandManager.cs" />
     <Compile Include="Models\ParseState.cs" />

@@ -94,7 +94,7 @@ namespace SongRequestManagerV2.Networks
                             return;
                         }
 
-                        Plugin.Log("Connect Client.");
+                        Logger.Debug("Connect Client.");
 
                         using (var ns = client.GetStream())
                         using (var ms = new MemoryStream()) {
@@ -121,14 +121,14 @@ namespace SongRequestManagerV2.Networks
                                 enc = Encoding.GetEncoding("shift_jis");
                             }
                             this.Message = enc.GetString(ms.GetBuffer(), 15, (int)ms.Length).Replace("。", "").Replace("\0", "");
-                            Plugin.Log($"{this.Message}");
+                            Logger.Debug($"{this.Message}");
                         }
                     }
                 });
                 this.IsRunning = false;
             }
             catch (Exception e) {
-                Plugin.Log($"{e}");
+                Logger.Debug($"{e}");
             }
         }
 
