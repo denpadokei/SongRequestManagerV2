@@ -71,7 +71,7 @@ namespace SongRequestManagerV2.Bots
         private static readonly Regex _deck = new Regex("^(current|draw|first|last|random|unload)$|$^", RegexOptions.Compiled); // Checks deck command parameters
         private static readonly Regex _drawcard = new Regex("($^)|(^[0-9a-zA-Z]+$)", RegexOptions.Compiled);
 
-        private Timer timer = new Timer(0.3);
+        private Timer timer = new Timer(300);
 
         [Inject]
         public StringNormalization Normalize { get; private set; }
