@@ -26,6 +26,7 @@ using SongRequestManagerV2.Utils;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using VRUIControls;
 using Zenject;
@@ -91,8 +92,9 @@ namespace SongRequestManagerV2.Views
             Current.PresentFlowCoordinator(_requestFlow, null, AnimationDirection.Horizontal, false, false);
         }
 
-        internal void SetButtonColor(Color color)
+        internal void SetButtonColor()
         {
+            var color = RequestManager.RequestSongs.Any() ? Color.green : Color.red;
             Logger.Debug($"Change button color : {color}");
             var imageview = this._button.GetComponentsInChildren<ImageView>(true).FirstOrDefault(x => x?.name == "BG");
             if (imageview == null) {
@@ -165,6 +167,9 @@ namespace SongRequestManagerV2.Views
 
         private void RefreshListRequest(bool obj)
         {
+            if (SceneManager.GetActiveScene().name == "GameCore") {
+                return;
+            }
             this._requestFlow.RefreshSongList(obj);
         }
 

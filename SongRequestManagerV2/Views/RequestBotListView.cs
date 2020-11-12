@@ -152,6 +152,17 @@ namespace SongRequestManagerV2.Views
             set => this.SetProperty(ref this.isBlacklistButtonEnable_, value);
         }
 
+        /// <summary>説明 を取得、設定</summary>
+        private bool isPerformanceMode_;
+        /// <summary>説明 を取得、設定</summary>
+        [UIValue("performance-mode")]
+        public bool PerformanceMode
+        {
+            get => this.isPerformanceMode_;
+
+            set => this.SetProperty(ref this.isPerformanceMode_, value);
+        }
+
         [UIComponent("request-list")]
         private CustomCellListTableData _requestTable;
 
@@ -383,6 +394,10 @@ namespace SongRequestManagerV2.Views
                 UpdateRequestUI();
                 SetUIInteractivity();
             }
+            else if (args.PropertyName == nameof(this.PerformanceMode)) {
+                RequestBotConfig.Instance.PerformanceMode = this.PerformanceMode;
+                RequestBotConfig.Instance.Save();
+            }
         }
 
         [UIAction("history-click")]
@@ -543,6 +558,7 @@ namespace SongRequestManagerV2.Views
                     this.HistoryHoverHint = IsShowHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
                     HistoryButtonText = IsShowHistory ? "Requests" : "History";
                     PlayButtonText = IsShowHistory ? "Replay" : "Play";
+                    this.PerformanceMode = RequestBotConfig.Instance.PerformanceMode;
                     RefreshSongQueueList(selectRowCallback);
                 }
                 catch (Exception e) {

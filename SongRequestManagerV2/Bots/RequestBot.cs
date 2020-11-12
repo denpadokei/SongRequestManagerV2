@@ -65,7 +65,7 @@ namespace SongRequestManagerV2.Bots
         private static readonly Regex _deck = new Regex("^(current|draw|first|last|random|unload)$|$^", RegexOptions.Compiled); // Checks deck command parameters
         private static readonly Regex _drawcard = new Regex("($^)|(^[0-9a-zA-Z]+$)", RegexOptions.Compiled);
 
-        private readonly Timer timer = new Timer(300);
+        private readonly Timer timer = new Timer(500);
 
         [Inject]
         public StringNormalization Normalize { get; private set; }
@@ -93,7 +93,7 @@ namespace SongRequestManagerV2.Bots
         public event Action<bool> RefreshListRequest;
         public event Action<bool> UpdateUIRequest;
         public event Action<bool> SetButtonIntactivityRequest;
-        public event Action<Color> ChangeButtonColor;
+        public event Action ChangeButtonColor;
 
         private static readonly object _lockObject = new object();
 
@@ -283,14 +283,17 @@ namespace SongRequestManagerV2.Bots
             }
             this.timer.Stop();
             try {
-                if (this.ChatManager.SendMessageQueue.TryDequeue(out var message)) {
-                    this.SendChatMessage(message);
+                if (this.ChatManager.RequestInfos.TryDequeue(out var requestInfo)) {
+                    await CheckRequest(requestInfo);
+                    UpdateRequestUI();
+                    RefreshSongQuere();
+                    RefreshQueue = true;
                 }
                 else if (this.ChatManager.RecieveChatMessage.TryDequeue(out var chatMessage)) {
                     this.RecievedMessages(chatMessage);
                 }
-                else if (this.ChatManager.RequestInfos.TryDequeue(out var requestInfo)) {
-                    await this.ProcessRequestQueue(requestInfo);
+                else if (this.ChatManager.SendMessageQueue.TryDequeue(out var message)) {
+                    this.SendChatMessage(message);
                 }
             }
             catch (Exception ex) {
@@ -452,23 +455,6 @@ namespace SongRequestManagerV2.Bots
             }
         }
 
-
-
-        private async Task ProcessRequestQueue(RequestInfo requestInfo)
-        {
-            try {
-                await CheckRequest(requestInfo);
-                Logger.Debug("ProcessRequestQueue()");
-                UpdateRequestUI();
-                RefreshSongQuere();
-                RefreshQueue = true;
-                Logger.Debug("end ProcessRequestQueue()");
-            }
-            catch (Exception e) {
-                Logger.Debug($"{e}");
-            }
-        }
-
         int CompareSong(JSONObject song2, JSONObject song1, ref string[] sortorder)
         {
             int result = 0;
@@ -521,110 +507,127 @@ namespace SongRequestManagerV2.Bots
         // BUG: Testing major changes. This will get seriously refactored soon.
         internal async Task CheckRequest(RequestInfo requestInfo)
         {
+#if DEBUG
+            Logger.Debug("Start CheckRequest");
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+#endif
             var requestor = requestInfo.requestor;
             var request = requestInfo.request;
 
             var normalrequest = Normalize.NormalizeBeatSaverString(requestInfo.request);
 
             var id = GetBeatSaverId(Normalize.RemoveSymbols(ref request, Normalize._SymbolsNoDash));
+            try {
+                if (id != "") {
+                    // Remap song id if entry present. This is one time, and not correct as a result. No recursion right now, could be confusing to the end user.
+                    if (songremap.ContainsKey(id) && !requestInfo.flags.HasFlag(CmdFlags.NoFilter)) {
+                        request = songremap[id];
+                        this.ChatManager.QueueChatMessage($"Remapping request {requestInfo.request} to {request}");
+                    }
 
-            if (id != "") {
-                // Remap song id if entry present. This is one time, and not correct as a result. No recursion right now, could be confusing to the end user.
-                if (songremap.ContainsKey(id) && !requestInfo.flags.HasFlag(CmdFlags.NoFilter)) {
-                    request = songremap[id];
-                    this.ChatManager.QueueChatMessage($"Remapping request {requestInfo.request} to {request}");
+                    string requestcheckmessage = IsRequestInQueue(Normalize.RemoveSymbols(ref request, Normalize._SymbolsNoDash));               // Check if requested ID is in Queue  
+                    if (requestcheckmessage != "") {
+                        this.ChatManager.QueueChatMessage(requestcheckmessage);
+                        return;
+                    }
+
+                    if (RequestBotConfig.Instance.OfflineMode && RequestBotConfig.Instance.offlinepath != "" && !MapDatabase.MapLibrary.ContainsKey(id)) {
+                        Dispatcher.RunCoroutine(this.LoadOfflineDataBase(id));
+                    }
                 }
 
-                string requestcheckmessage = IsRequestInQueue(Normalize.RemoveSymbols(ref request, Normalize._SymbolsNoDash));               // Check if requested ID is in Queue  
-                if (requestcheckmessage != "") {
-                    this.ChatManager.QueueChatMessage(requestcheckmessage);
+                JSONNode result = null;
+
+                var errorMessage = "";
+
+                // Get song query results from beatsaver.com
+                if (!RequestBotConfig.Instance.OfflineMode) {
+                    var requestUrl = (id != "") ? $"https://beatsaver.com/api/maps/detail/{Normalize.RemoveSymbols(ref request, Normalize._SymbolsNoDash)}" : $"https://beatsaver.com/api/search/text/0?q={normalrequest}";
+#if DEBUG
+                    Logger.Debug($"Start get map detial : {stopwatch.ElapsedMilliseconds} ms");
+#endif
+                    var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
+                    if (resp == null) {
+                        errorMessage = $"BeatSaver is down now.";
+                    }
+                    else if (resp.IsSuccessStatusCode) {
+                        result = resp.ConvertToJsonNode();
+                    }
+                    else {
+                        errorMessage = $"Invalid BeatSaver ID \"{request}\" specified. {requestUrl}";
+                    }
+                }
+
+                var filter = SongFilter.All;
+                if (requestInfo.flags.HasFlag(CmdFlags.NoFilter)) filter = SongFilter.Queue;
+                var songs = GetSongListFromResults(result, request, ref errorMessage, filter, requestInfo.state._sort != "" ? requestInfo.state._sort : StringFormat.AddSortOrder.ToString());
+
+                var autopick = RequestBotConfig.Instance.AutopickFirstSong || requestInfo.flags.HasFlag(CmdFlags.Autopick);
+
+                // Filter out too many or too few results
+                if (songs.Count == 0) {
+                    if (errorMessage == "") {
+                        errorMessage = $"No results found for request \"{request}\"";
+                    }
+                }
+                else if (!autopick && songs.Count >= 4) {
+                    errorMessage = $"Request for '{request}' produces {songs.Count} results, narrow your search by adding a mapper name, or use https://beatsaver.com to look it up.";
+                }
+                else if (!autopick && songs.Count > 1 && songs.Count < 4) {
+                    var msg = this._messageFactroy.Create().SetUp(1, 5);
+                    //ToDo: Support Mixer whisper
+                    if (requestor is TwitchUser) {
+                        msg.Header($"@{requestor.UserName}, please choose: ");
+                    }
+                    else {
+                        msg.Header($"@{requestor.UserName}, please choose: ");
+                    }
+                    foreach (var eachsong in songs) {
+                        msg.Add(_textFactory.Create().AddSong(eachsong).Parse(StringFormat.BsrSongDetail), ", ");
+                    }
+                    msg.End("...", $"No matching songs for for {request}");
                     return;
                 }
-
-                if (RequestBotConfig.Instance.OfflineMode && RequestBotConfig.Instance.offlinepath != "" && !MapDatabase.MapLibrary.ContainsKey(id)) {
-                    Dispatcher.RunCoroutine(this.LoadOfflineDataBase(id));
+                else {
+                    if (!requestInfo.flags.HasFlag(CmdFlags.NoFilter)) errorMessage = SongSearchFilter(songs[0], false);
                 }
-            }
 
-            JSONNode result = null;
-
-            var errorMessage = "";
-
-            // Get song query results from beatsaver.com
-            if (!RequestBotConfig.Instance.OfflineMode) {
-                var requestUrl = (id != "") ? $"https://beatsaver.com/api/maps/detail/{Normalize.RemoveSymbols(ref request, Normalize._SymbolsNoDash)}" : $"https://beatsaver.com/api/search/text/0?q={normalrequest}";
-
-                var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
-                if (resp == null) {
-                    errorMessage = $"BeatSaver is down now.";
+                // Display reason why chosen song was rejected, if filter is triggered. Do not add filtered songs
+                if (errorMessage != "") {
+                    this.ChatManager.QueueChatMessage(errorMessage);
+                    return;
                 }
-                else if (resp.IsSuccessStatusCode) {
-                    result = resp.ConvertToJsonNode();
+                var song = songs[0];
+                RequestTracker[requestor.Id].numRequests++;
+                ListCollectionManager.Add(duplicatelist, song["id"].Value);
+                var req = _songRequestFactory.Create();
+                req.Init(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo);
+                if ((requestInfo.flags.HasFlag(CmdFlags.MoveToTop))) {
+                    var reqs = new object[1] { req };
+                    var newList = reqs.Union(RequestManager.RequestSongs);
+                    RequestManager.RequestSongs.Clear();
+                    RequestManager.RequestSongs.AddRange(newList);
                 }
                 else {
-                    errorMessage = $"Invalid BeatSaver ID \"{request}\" specified. {requestUrl}";
+                    RequestManager.RequestSongs.Add(req);
+                }
+                _requestManager.WriteRequest();
+
+                Writedeck(requestor, "savedqueue"); // This can be used as a backup if persistent Queue is turned off.
+
+                if (!requestInfo.flags.HasFlag(CmdFlags.SilentResult)) {
+                    _textFactory.Create().AddSong(ref song).QueueMessage(StringFormat.AddSongToQueueText.ToString());
                 }
             }
-
-            var filter = SongFilter.All;
-            if (requestInfo.flags.HasFlag(CmdFlags.NoFilter)) filter = SongFilter.Queue;
-            var songs = GetSongListFromResults(result, request, ref errorMessage, filter, requestInfo.state._sort != "" ? requestInfo.state._sort : StringFormat.AddSortOrder.ToString());
-
-            var autopick = RequestBotConfig.Instance.AutopickFirstSong || requestInfo.flags.HasFlag(CmdFlags.Autopick);
-
-            // Filter out too many or too few results
-            if (songs.Count == 0) {
-                if (errorMessage == "") {
-                    errorMessage = $"No results found for request \"{request}\"";
-                }
+            catch (Exception e) {
+                Logger.Error(e);
             }
-            else if (!autopick && songs.Count >= 4) {
-                errorMessage = $"Request for '{request}' produces {songs.Count} results, narrow your search by adding a mapper name, or use https://beatsaver.com to look it up.";
-            }
-            else if (!autopick && songs.Count > 1 && songs.Count < 4) {
-                var msg = this._messageFactroy.Create().SetUp(1, 5);
-                //ToDo: Support Mixer whisper
-                if (requestor is TwitchUser) {
-                    msg.Header($"@{requestor.UserName}, please choose: ");
-                }
-                else {
-                    msg.Header($"@{requestor.UserName}, please choose: ");
-                }
-                foreach (var eachsong in songs) {
-                    msg.Add(_textFactory.Create().AddSong(eachsong).Parse(StringFormat.BsrSongDetail), ", ");
-                }
-                msg.End("...", $"No matching songs for for {request}");
-                return;
-            }
-            else {
-                if (!requestInfo.flags.HasFlag(CmdFlags.NoFilter)) errorMessage = SongSearchFilter(songs[0], false);
-            }
-
-            // Display reason why chosen song was rejected, if filter is triggered. Do not add filtered songs
-            if (errorMessage != "") {
-                this.ChatManager.QueueChatMessage(errorMessage);
-                return;
-            }
-            var song = songs[0];
-            RequestTracker[requestor.Id].numRequests++;
-            ListCollectionManager.Add(duplicatelist, song["id"].Value);
-            var req = _songRequestFactory.Create();
-            req.Init(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo);
-            if ((requestInfo.flags.HasFlag(CmdFlags.MoveToTop))) {
-                var reqs = new object[1] { req };
-                var newList = reqs.Union(RequestManager.RequestSongs);
-                RequestManager.RequestSongs.Clear();
-                RequestManager.RequestSongs.AddRange(newList);
-            }
-            else {
-                RequestManager.RequestSongs.Add(req);
-            }
-            _requestManager.WriteRequest();
-
-            Writedeck(requestor, "savedqueue"); // This can be used as a backup if persistent Queue is turned off.
-
-            if (!requestInfo.flags.HasFlag(CmdFlags.SilentResult)) {
-                _textFactory.Create().AddSong(ref song).QueueMessage(StringFormat.AddSongToQueueText.ToString());
+            finally {
+#if DEBUG
+                stopwatch.Stop();
+                Logger.Debug($"Finish CheckRequest : {stopwatch.ElapsedMilliseconds} ms");
+#endif
             }
         }
 
@@ -648,12 +651,7 @@ namespace SongRequestManagerV2.Bots
                 {
                     try {
                         Logger.Debug("Invoke Change Color");
-                        if (RequestManager.RequestSongs.Any()) {
-                            ChangeButtonColor?.Invoke(Color.green);
-                        }
-                        else {
-                            ChangeButtonColor?.Invoke(Color.red);
-                        }
+                        ChangeButtonColor?.Invoke();
                     }
                     catch (Exception e) {
                         Logger.Error(e);
@@ -661,7 +659,7 @@ namespace SongRequestManagerV2.Bots
                 });
             }
             catch (Exception ex) {
-                Logger.Debug(ex.ToString());
+                Logger.Error(ex);
             }
             finally {
                 Logger.Debug("end update UI");
@@ -1684,7 +1682,7 @@ namespace SongRequestManagerV2.Bots
                 File.WriteAllText(statusfile, count > 0 ? queuesummary.ToString() : "Queue is empty.");
             }
             catch (Exception ex) {
-                Logger.Debug(ex.ToString());
+                Logger.Error(ex);
             }
         }
 

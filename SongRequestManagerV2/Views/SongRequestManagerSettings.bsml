@@ -13,7 +13,6 @@
       <bool-setting text='Full moderator rights' value='mod-full-rights' bind-value='true' hover-hint='Allow moderators access to ALL bot commands. Do you trust your mods?' preferred-width='80'></bool-setting>
       <bool-setting text='LimitUserRequestsToSession' value='limit-user-requests-to-session' bind-value='true' hover-hint='Request limits do not reset after a song is played.' preferred-width='80'></bool-setting>
       <slider-setting text='SessionResetAfterXHours' min='1' max='12' increment='1' integer-only='true' value='session-reset-after-xhours' hover-hint='Number of hours before persistent session properties are reset (ie: Queue, Played , Duplicate List)' preferred-width='80'></slider-setting>
-      <checkbox text='PerformanceMode' value='performance-mode' bind-value='true' hover-hint='Only execute command in menu.' preferred-width='80'></checkbox>
     </scrollable-settings-container>
   </vertical>
 </bg>
