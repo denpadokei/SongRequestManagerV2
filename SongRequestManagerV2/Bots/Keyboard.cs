@@ -429,7 +429,7 @@ namespace SongRequestManagerV2.Bots
         {
             for (int i = 0; i < RequestManager.RequestSongs.Count; i++)
             {
-                var entry = (RequestManager.RequestSongs[i] as SongRequest);
+                var entry = (RequestManager.RequestSongs.GetConsumingEnumerable().ElementAt(i) as SongRequest);
                 if (entry._status == RequestStatus.SongSearch)
                 {
                     _bot.DequeueRequest(i, false);

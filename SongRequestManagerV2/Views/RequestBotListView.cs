@@ -6,6 +6,7 @@ using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Interfaces;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -96,9 +97,6 @@ namespace SongRequestManagerV2.Views
         /// <summary>説明 を取得、設定</summary>
         [UIValue("requests")]
         public List<object> Songs { get; } = new List<object>();
-
-        //public ObservableCollection<object> Songs { get; } = new ObservableCollection<object>();
-
         /// <summary>説明 を取得、設定</summary>
         private string progressText_;
         /// <summary>説明 を取得、設定</summary>
@@ -152,6 +150,17 @@ namespace SongRequestManagerV2.Views
             get => this.isBlacklistButtonEnable_;
 
             set => this.SetProperty(ref this.isBlacklistButtonEnable_, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private bool isPerformanceMode_;
+        /// <summary>説明 を取得、設定</summary>
+        [UIValue("performance-mode")]
+        public bool PerformanceMode
+        {
+            get => this.isPerformanceMode_;
+
+            set => this.SetProperty(ref this.isPerformanceMode_, value);
         }
 
         [UIComponent("request-list")]
@@ -289,14 +298,6 @@ namespace SongRequestManagerV2.Views
                     catch (Exception e) {
                         Logger.Error(e);
                     }
-                    Logger.Debug($"Songs is null? : {this.Songs == null}");
-                    //this.Songs.CollectionChanged += this.Songs_CollectionChanged;
-                    this.Songs.Clear();
-                    foreach (var item in RequestManager.RequestSongs) {
-                        Logger.Debug($"{item}");
-                        this.Songs.Add(item);
-                    }
-                    Logger.Debug($"_requestTable is null : {this._requestTable == null}");
 #if UNRELEASED
                 // BUG: Need additional modes disabling one shot buttons
                 // BUG: Need to make sure the buttons are usable on older headsets
@@ -390,20 +391,12 @@ namespace SongRequestManagerV2.Views
         {
             base.OnPropertyChanged(args);
             if (args.PropertyName == nameof(this.IsShowHistory)) {
-                this.Songs.Clear();
-                if (this.IsShowHistory) {
-                    foreach (var item in RequestManager.HistorySongs) {
-                        this.Songs.Add(item);
-                    }
-                }
-                else {
-                    foreach (var item in RequestManager.RequestSongs) {
-                        this.Songs.Add(item);
-                    }
-                }
                 UpdateRequestUI();
                 SetUIInteractivity();
-                //_lastSelection = -1;
+            }
+            else if (args.PropertyName == nameof(this.PerformanceMode)) {
+                RequestBotConfig.Instance.PerformanceMode = this.PerformanceMode;
+                RequestBotConfig.Instance.Save();
             }
         }
 
@@ -413,17 +406,6 @@ namespace SongRequestManagerV2.Views
             IsShowHistory = !IsShowHistory;
 
             ChangeTitle?.Invoke(IsShowHistory ? "Song Request History" : "Song Request Queue");
-            this.Songs.Clear();
-            if (this.IsShowHistory) {
-                foreach (var item in RequestManager.HistorySongs) {
-                    this.Songs.Add(item);
-                }
-            }
-            else {
-                foreach (var item in RequestManager.RequestSongs) {
-                    this.Songs.Add(item);
-                }
-            }
             UpdateRequestUI(true);
             SetUIInteractivity();
             this._requestTable.tableView.SelectCellWithIdx(-1);
@@ -444,7 +426,6 @@ namespace SongRequestManagerV2.Views
                     if (SelectedRow > 0) {
                         SelectedRow--;
                     }
-
                     // indicate dialog is no longer active
                     confirmDialogActive = false;
                 }
@@ -509,19 +490,12 @@ namespace SongRequestManagerV2.Views
         private void SelectedCell(TableView tableView, object row)
         {
             SelectedRow = this.Songs.IndexOf(row);
-            //if (row != _lastSelection) {
-            //    _lastSelection = 0;
-            //}
-
-            // if not in history, disable play button if request is a challenge
             if (!IsShowHistory) {
                 var request = SongInfoForRow(SelectedRow);
                 var isChallenge = request._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
                 this.IsPlayButtonEnable = !isChallenge;
             }
-
             UpdateSelectSongInfo();
-
             SetUIInteractivity();
         }
 
@@ -546,7 +520,7 @@ namespace SongRequestManagerV2.Views
         {
             get
             {
-                var currentsong = RequestManager.HistorySongs[0];
+                var currentsong = RequestManager.HistorySongs.FirstOrDefault();
 
                 if (SelectedRow != -1 && _requestTable.NumberOfCells() > SelectedRow) {
                     currentsong = SongInfoForRow(SelectedRow);
@@ -584,6 +558,7 @@ namespace SongRequestManagerV2.Views
                     this.HistoryHoverHint = IsShowHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
                     HistoryButtonText = IsShowHistory ? "Requests" : "History";
                     PlayButtonText = IsShowHistory ? "Replay" : "Play";
+                    this.PerformanceMode = RequestBotConfig.Instance.PerformanceMode;
                     RefreshSongQueueList(selectRowCallback);
                 }
                 catch (Exception e) {
@@ -651,14 +626,16 @@ namespace SongRequestManagerV2.Views
         {
             try {
                 UpdateSelectSongInfo();
-                this.Songs.Clear();
-                if (this.IsShowHistory) {
-                    this.Songs.AddRange(RequestManager.HistorySongs);
+                lock (this) {
+                    this.Songs.Clear();
+                    if (this.IsShowHistory) {
+                        this.Songs.AddRange(RequestManager.HistorySongs);
+                    }
+                    else {
+                        this.Songs.AddRange(RequestManager.RequestSongs);
+                    }
+                    Dispatcher.RunOnMainThread(() => this._requestTable?.tableView?.ReloadData());
                 }
-                else {
-                    this.Songs.AddRange(RequestManager.RequestSongs);
-                }
-                Dispatcher.RunOnMainThread(() => this._requestTable?.tableView?.ReloadData());
                 if (SelectedRow == -1) return;
 
                 if (_requestTable?.NumberOfCells() > this.SelectedRow) {
@@ -674,15 +651,17 @@ namespace SongRequestManagerV2.Views
             }
         }
 
-        //private CustomPreviewBeatmapLevel CustomLevelForRow(int row)
-        //{
-        //    // get level id from hash
-        //    var levelIds = SongCore.Collections.levelIDsForHash(SongInfoForRow(row)._song["hash"]);
-        //    if (levelIds.Count == 0) return null;
+#if UNRELEASED
+        private IPreviewBeatmapLevel CustomLevelForRow(int row)
+        {
+            // get level id from hash
+            var levelIds = SongCore.Collections.levelIDsForHash(SongInfoForRow(row)._song["hash"]);
+            if (levelIds.Count == 0) return null;
 
-        //    // lookup song from level id
-        //    return SongCore.Loader.CustomLevels.FirstOrDefault(s => string.Equals(s.Value.levelID, levelIds.First(), StringComparison.OrdinalIgnoreCase)).Value ?? null;
-        //}
+            // lookup song from level id
+            return SongCore.Loader.CustomLevels.FirstOrDefault(s => string.Equals(s.Value.levelID, levelIds.First(), StringComparison.OrdinalIgnoreCase)).Value ?? null;
+        }
+#endif
 
         private SongRequest SongInfoForRow(int row)
         {
@@ -750,7 +729,7 @@ namespace SongRequestManagerV2.Views
 
             modal.Show(true);
         }
-        #endregion
+#endregion
 
 #if UNRELEASED
         private void PlayPreview(IPreviewBeatmapLevel level)

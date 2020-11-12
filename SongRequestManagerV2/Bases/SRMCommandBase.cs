@@ -1,5 +1,6 @@
 ﻿using ChatCore.Interfaces;
 using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
@@ -86,7 +87,7 @@ namespace SongRequestManagerV2.Bases
             Permittedusers = fixedname;
         }
 
-        public async Task<string> Execute(ParseState state)
+        public string Execute(ParseState state)
         {
             // BUG: Most of these will be replaced.  
 
@@ -96,7 +97,7 @@ namespace SongRequestManagerV2.Bases
             else if (func1 != null) Dispatcher.RunCoroutine(func1(state));
             else if (Subcommand != null) return Subcommand(state); // Recommended.
             else if (Subcommand2 != null) Subcommand(state);
-            else if (AsyncSubCommand != null) await AsyncSubCommand(state);
+            else if (AsyncSubCommand != null) AsyncSubCommand(state).Await(null, null, null);
             return success;
         }
 

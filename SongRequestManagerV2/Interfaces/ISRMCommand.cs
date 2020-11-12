@@ -36,7 +36,7 @@ namespace SongRequestManagerV2.Interfaces
         void Constractor();
         void UpdateCommand(ChangedFlags changed);
         void SetPermittedUsers(string listname);
-        Task<string> Execute(ParseState state);
+        string Execute(ParseState state);
         ISRMCommand Setup(string alias);
         ISRMCommand Setup(IEnumerable<string> alias);
         ISRMCommand Setup(string variablename, StringBuilder reference);

@@ -1,8 +1,10 @@
 ﻿using ChatCore.Utilities;
 using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Utils;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,10 +19,10 @@ namespace SongRequestManagerV2
         [Inject]
         IChatManager _chatManager;
 
-        public static List<object> RequestSongs { get; } = new List<object>();
+        public static BlockingCollection<object> RequestSongs { get; } = new BlockingCollection<object>();
         private static string requestsPath = Path.Combine(Plugin.DataPath, "SongRequestQueue.dat");
 
-        public static List<object> HistorySongs { get; } = new List<object>();
+        public static BlockingCollection<object> HistorySongs { get; } = new BlockingCollection<object>();
         private static string historyPath = Path.Combine(Plugin.DataPath, "SongRequestHistory.dat");
 
         public List<object> Read(string path)
@@ -58,7 +60,6 @@ namespace SongRequestManagerV2
                 foreach (var song in songs.Where(x => x != null).Select(x => x as SongRequest)) {
                     try {
                         arr.Add(song.ToJson());
-                        //Logger.Debug($"Added {song.song}");
                     }
                     catch (Exception ex) {
                         Logger.Debug($"{ex}\r\n{song}");

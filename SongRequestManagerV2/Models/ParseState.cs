@@ -139,7 +139,7 @@ namespace SongRequestManagerV2.Models
 
 
         static readonly string _done = "X";
-        public async void ExecuteCommand()
+        public void ExecuteCommand()
         {
             if (!_commandManager.Aliases.TryGetValue(_command, out _botcmd)) {
                 Logger.Debug("Unknown command");
@@ -203,7 +203,7 @@ namespace SongRequestManagerV2.Models
             }
 
             try {
-                string errormsg = await _botcmd.Execute(this); // Call the command
+                string errormsg = _botcmd.Execute(this); // Call the command
                 if (errormsg != "" && !_flags.HasFlag(CmdFlags.SilentError)) {
                     this._chatManager.QueueChatMessage(errormsg);
                 }
@@ -224,46 +224,43 @@ namespace SongRequestManagerV2.Models
             return request.Substring(0, commandlength).ToLower();
         }
 
-        public Task<ParseState> ParseCommand()
+        public ParseState ParseCommand()
         {
-            return Task.Run(() =>
-            {
-                Logger.Debug("Start ParceCommand in ParseCommand()");
-                Logger.Debug($"request : {this._request}");
+            Logger.Debug("Start ParceCommand in ParseCommand()");
+            Logger.Debug($"request : {this._request}");
 
-                // Notes for later.
-                //var match = Regex.Match(request, "^!(?<command>[^ ^/]*?<parameter>.*)");
-                //string username = match.Success ? match.Groups["command"].Value : null;
+            // Notes for later.
+            //var match = Regex.Match(request, "^!(?<command>[^ ^/]*?<parameter>.*)");
+            //string username = match.Success ? match.Groups["command"].Value : null;
 
-                int commandstart = 0;
-                int parameterstart = 0;
+            int commandstart = 0;
+            int parameterstart = 0;
 
-                // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
-                while (parameterstart < _request.Length && (_request[parameterstart] != '=' && _request[parameterstart] != '/' && _request[parameterstart] != ' ')) parameterstart++;  // Command name ends with #... for now, I'll clean up some more later           
-                int commandlength = parameterstart - commandstart;
-                while (parameterstart < _request.Length && _request[parameterstart] == ' ') parameterstart++; // Eat the space(s) if that's the separator after the command
-                if (commandlength == 0) return this;
+            // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
+            while (parameterstart < _request.Length && (_request[parameterstart] != '=' && _request[parameterstart] != '/' && _request[parameterstart] != ' ')) parameterstart++;  // Command name ends with #... for now, I'll clean up some more later           
+            int commandlength = parameterstart - commandstart;
+            while (parameterstart < _request.Length && _request[parameterstart] == ' ') parameterstart++; // Eat the space(s) if that's the separator after the command
+            if (commandlength == 0) return this;
 
-                _command = _request.Substring(commandstart, commandlength).ToLower();
-                Logger.Debug($"command : {this._command}");
-                if (_commandManager.Aliases.ContainsKey(_command)) {
-                    Logger.Debug("Contain ailias commad");
-                    _parameter = _request.Substring(parameterstart);
+            _command = _request.Substring(commandstart, commandlength).ToLower();
+            Logger.Debug($"command : {this._command}");
+            if (_commandManager.Aliases.ContainsKey(_command)) {
+                Logger.Debug("Contain ailias commad");
+                _parameter = _request.Substring(parameterstart);
 
-                    try {
-                        Logger.Debug("Start command");
-                        ExecuteCommand();
-                    }
-                    catch (Exception ex) {
-                        Logger.Debug(ex.ToString());
-                    }
+                try {
+                    Logger.Debug("Start command");
+                    ExecuteCommand();
                 }
-                else {
-                    Logger.Debug("Not Contain ailias commad");
+                catch (Exception ex) {
+                    Logger.Debug(ex.ToString());
                 }
+            }
+            else {
+                Logger.Debug("Not Contain ailias commad");
+            }
 
-                return this;
-            });
+            return this;
         }
 
         public class ParseStateFactory : PlaceholderFactory<ParseState>
