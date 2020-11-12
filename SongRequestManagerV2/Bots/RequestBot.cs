@@ -1,18 +1,12 @@
-﻿using BeatSaberMarkupLanguage.Settings;
-using BS_Utils.Utilities;
-using ChatCore.Interfaces;
+﻿using ChatCore.Interfaces;
 using ChatCore.Models.Twitch;
-using ChatCore.Services;
-using ChatCore.Services.Twitch;
 using ChatCore.Utilities;
 using IPA.Loader;
-using SongCore;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Networks;
 using SongRequestManagerV2.Statics;
-using SongRequestManagerV2.UI;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections;
@@ -51,7 +45,7 @@ namespace SongRequestManagerV2.Bots
         public static System.Random Generator { get; } = new System.Random(); // BUG: Should at least seed from unity?
         public static List<JSONObject> Played { get; private set; } = new List<JSONObject>(); // Played list
         public static List<BotEvent> Events { get; } = new List<BotEvent>();
-        
+
 
         private static StringListManager mapperwhitelist = new StringListManager(); // BUG: This needs to switch to list manager interface
         private static StringListManager mapperBanlist = new StringListManager(); // BUG: This needs to switch to list manager interface
@@ -71,7 +65,7 @@ namespace SongRequestManagerV2.Bots
         private static readonly Regex _deck = new Regex("^(current|draw|first|last|random|unload)$|$^", RegexOptions.Compiled); // Checks deck command parameters
         private static readonly Regex _drawcard = new Regex("($^)|(^[0-9a-zA-Z]+$)", RegexOptions.Compiled);
 
-        private Timer timer = new Timer(300);
+        private readonly Timer timer = new Timer(300);
 
         [Inject]
         public StringNormalization Normalize { get; private set; }
@@ -168,12 +162,12 @@ namespace SongRequestManagerV2.Bots
         }
         #endregion
 
-        
+
 
         public void Newest(KEYBOARD.KEY key)
         {
             ClearSearches();
-            _ = Parse(GetLoginUser(), $"!addnew/top", CmdFlags.Local);
+            Parse(GetLoginUser(), $"!addnew/top", CmdFlags.Local);
         }
 
         public void Search(KEYBOARD.KEY key)
@@ -182,7 +176,7 @@ namespace SongRequestManagerV2.Bots
                 key.kb.Enter(key);
             }
             ClearSearches();
-            _ = Parse(GetLoginUser(), $"!addsongs/top {key.kb.KeyboardText.text}", CmdFlags.Local);
+            Parse(GetLoginUser(), $"!addsongs/top {key.kb.KeyboardText.text}", CmdFlags.Local);
             key.kb.Clear(key);
         }
 
@@ -192,7 +186,7 @@ namespace SongRequestManagerV2.Bots
                 key.kb.Enter(key);
             }
             ClearSearches();
-            _ = Parse(GetLoginUser(), $"!makesearchdeck {key.kb.KeyboardText.text}", CmdFlags.Local);
+            Parse(GetLoginUser(), $"!makesearchdeck {key.kb.KeyboardText.text}", CmdFlags.Local);
             key.kb.Clear(key);
         }
 
@@ -202,17 +196,15 @@ namespace SongRequestManagerV2.Bots
                 key.kb.Enter(key);
             }
             ClearSearches();
-            _ = Parse(GetLoginUser(), $"!addsongs/top/mod {key.kb.KeyboardText.text}", CmdFlags.Local);
+            Parse(GetLoginUser(), $"!addsongs/top/mod {key.kb.KeyboardText.text}", CmdFlags.Local);
             key.kb.Clear(key);
         }
 
         public void ClearSearches()
         {
-            for (int i = 0; i < RequestManager.RequestSongs.Count; i++) {
-                var entry = (RequestManager.RequestSongs[i] as SongRequest);
-                if (entry._status == RequestStatus.SongSearch) {
-                    DequeueRequest(i, false);
-                    i--;
+            foreach (var item in RequestManager.RequestSongs) {
+                if (item is SongRequest request && request._status == RequestStatus.SongSearch) {
+                    DequeueRequest(request, false);
                 }
             }
         }
@@ -230,14 +222,14 @@ namespace SongRequestManagerV2.Bots
             return ListCollectionManager.Contains(excludefilename, msg.Sender.UserName.ToLower(), ListFlags.Uncached);
         }
 
-        internal async Task RecievedMessages(IChatMessage msg)
+        internal void RecievedMessages(IChatMessage msg)
         {
             Logger.Debug($"Received Message : {msg.Message}");
 #if DEBUG
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 #endif
-            await Parse(msg.Sender, msg.Message.Replace("！", "!"));
+            Parse(msg.Sender, msg.Message.Replace("！", "!"));
 #if DEBUG
             stopwatch.Stop();
             Logger.Debug($"{stopwatch.ElapsedMilliseconds} ms");
@@ -256,7 +248,7 @@ namespace SongRequestManagerV2.Bots
 
         public void ScheduledCommand(string command, System.Timers.ElapsedEventArgs e)
         {
-            _ = Parse(GetLoginUser(), command);
+            Parse(GetLoginUser(), command);
         }
 
         public void RunStartupScripts()
@@ -283,21 +275,29 @@ namespace SongRequestManagerV2.Bots
         {
             this._isGameCore = arg1.name == "GameCore";
         }
-        
+
         private async void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (RequestBotConfig.Instance.PerformanceMode && this._isGameCore) {
                 return;
             }
-
-            if (this.ChatManager.SendMessageQueue.TryDequeue(out var message)) {
-                await this.SendChatMessage(message);
+            this.timer.Stop();
+            try {
+                if (this.ChatManager.SendMessageQueue.TryDequeue(out var message)) {
+                    this.SendChatMessage(message);
+                }
+                else if (this.ChatManager.RecieveChatMessage.TryDequeue(out var chatMessage)) {
+                    this.RecievedMessages(chatMessage);
+                }
+                else if (this.ChatManager.RequestInfos.TryDequeue(out var requestInfo)) {
+                    await this.ProcessRequestQueue(requestInfo);
+                }
             }
-            else if (this.ChatManager.RequestInfos.TryDequeue(out var requestInfo)) {
-                await this.ProcessRequestQueue(requestInfo);
+            catch (Exception ex) {
+                Logger.Error(ex);
             }
-            else if (this.ChatManager.RecieveChatMessage.TryDequeue(out var chatMessage)) {
-                await this.RecievedMessages(chatMessage);
+            finally {
+                this.timer.Start();
             }
         }
 
@@ -435,28 +435,24 @@ namespace SongRequestManagerV2.Bots
 
 
         // if (!silence) this.ChatManager.QueueChatMessage($"{request.Key.song["songName"].Value}/{request.Key.song["authorName"].Value} ({songId}) added to the blacklist.");
-        private async Task SendChatMessage(string message)
+        private void SendChatMessage(string message)
         {
             try {
-                await Task.Run(() =>
-                {
-                    Logger.Debug($"Sending message: \"{message}\"");
+                Logger.Debug($"Sending message: \"{message}\"");
 
-                    if (this.ChatManager.TwitchService != null) {
-                        foreach (var channel in this.ChatManager.TwitchService.Channels) {
-                            this.ChatManager.TwitchService.SendTextMessage($"{message}", channel.Value);
-                        }
+                if (this.ChatManager.TwitchService != null) {
+                    foreach (var channel in this.ChatManager.TwitchService.Channels) {
+                        this.ChatManager.TwitchService.SendTextMessage($"{message}", channel.Value);
                     }
-                });
+                }
                 Logger.Debug("Finish send chat message");
-
             }
             catch (Exception e) {
                 Logger.Debug($"Exception was caught when trying to send bot message. {e}");
             }
         }
 
-        
+
 
         private async Task ProcessRequestQueue(RequestInfo requestInfo)
         {
@@ -615,7 +611,10 @@ namespace SongRequestManagerV2.Bots
             var req = _songRequestFactory.Create();
             req.Init(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo);
             if ((requestInfo.flags.HasFlag(CmdFlags.MoveToTop))) {
-                RequestManager.RequestSongs.Insert(0, req);
+                var reqs = new object[1] { req };
+                var newList = reqs.Union(RequestManager.RequestSongs);
+                RequestManager.RequestSongs.Clear();
+                RequestManager.RequestSongs.AddRange(newList);
             }
             else {
                 RequestManager.RequestSongs.Add(req);
@@ -683,13 +682,26 @@ namespace SongRequestManagerV2.Bots
         {
             Logger.Debug("start to deque request");
             try {
-                if (request._status != RequestStatus.Wrongsong && request._status != RequestStatus.SongSearch) RequestManager.HistorySongs.Insert(0, request); // Wrong song requests are not logged into history, is it possible that other status states shouldn't be moved either?
+                if (request._status != RequestStatus.Wrongsong && request._status != RequestStatus.SongSearch) {
+                    var reqs = new object[1] { request };
+                    var newList = reqs.Union(RequestManager.HistorySongs);
+                    RequestManager.HistorySongs.Clear();
+                    RequestManager.HistorySongs.AddRange(newList);
+                    // Wrong song requests are not logged into history, is it possible that other status states shouldn't be moved either?
+                }
+
 
                 if (RequestManager.HistorySongs.Count > RequestBotConfig.Instance.RequestHistoryLimit) {
                     int diff = RequestManager.HistorySongs.Count - RequestBotConfig.Instance.RequestHistoryLimit;
-                    RequestManager.HistorySongs.RemoveRange(RequestManager.HistorySongs.Count - diff - 1, diff);
+                    var songs = RequestManager.HistorySongs.ToList();
+                    songs.RemoveRange(RequestManager.HistorySongs.Count - diff - 1, diff);
+                    RequestManager.HistorySongs.Clear();
+                    RequestManager.HistorySongs.AddRange(songs);
                 }
-                RequestManager.RequestSongs.RemoveAt(RequestManager.RequestSongs.IndexOf(request));
+                var requests = RequestManager.RequestSongs.ToList();
+                requests.RemoveAt(requests.IndexOf(request));
+                RequestManager.RequestSongs.Clear();
+                RequestManager.RequestSongs.AddRange(requests);
                 _requestManager.WriteHistory();
 
                 HistoryManager.AddSong(request);
@@ -735,9 +747,9 @@ namespace SongRequestManagerV2.Bots
         public void SetRequestStatus(int index, RequestStatus status, bool fromHistory = false)
         {
             if (!fromHistory)
-                (RequestManager.RequestSongs[index] as SongRequest)._status = status;
+                (RequestManager.RequestSongs.ToArray()[index] as SongRequest)._status = status;
             else
-                (RequestManager.HistorySongs[index] as SongRequest)._status = status;
+                (RequestManager.HistorySongs.ToArray()[index] as SongRequest)._status = status;
         }
 
         public void Blacklist(int index, bool fromHistory, bool skip)
@@ -883,7 +895,7 @@ namespace SongRequestManagerV2.Bots
                 return new TwitchUser(JsonUtility.ToJson(obj));
             }
         }
-        public async Task Parse(IChatUser user, string request, CmdFlags flags = 0, string info = "")
+        public void Parse(IChatUser user, string request, CmdFlags flags = 0, string info = "")
         {
             if (string.IsNullOrEmpty(request)) {
                 Logger.Debug($"request strings is null : {request}");
@@ -896,7 +908,7 @@ namespace SongRequestManagerV2.Bots
             }
 
             // This will be used for all parsing type operations, allowing subcommands efficient access to parse state logic
-            await _stateFactory.Create().Setup(user, request, flags, info).ParseCommand();
+            _stateFactory.Create().Setup(user, request, flags, info).ParseCommand();
         }
         private void Instance_ReceiveMessege(string obj)
         {
@@ -905,7 +917,7 @@ namespace SongRequestManagerV2.Bots
                 Message = obj
             };
 
-            _ = RecievedMessages(message);
+            RecievedMessages(message);
         }
 
         #region ChatCommand
@@ -929,7 +941,7 @@ namespace SongRequestManagerV2.Bots
         {
             var dt = _textFactory.Create().AddUser(state._user);
             try {
-                dt.AddSong((RequestManager.HistorySongs[0] as SongRequest)._song); // Exposing the current song 
+                dt.AddSong((RequestManager.HistorySongs.FirstOrDefault() as SongRequest)._song); // Exposing the current song 
             }
             catch (Exception ex) {
                 Logger.Debug(ex.ToString());
@@ -1179,10 +1191,10 @@ namespace SongRequestManagerV2.Bots
             var songId = GetBeatSaverId(state._parameter);
             for (int i = RequestManager.RequestSongs.Count - 1; i >= 0; i--) {
                 bool dequeueSong = false;
-                var song = (RequestManager.RequestSongs[i] as SongRequest)._song;
+                var song = (RequestManager.RequestSongs.ToArray()[i] as SongRequest)._song;
 
                 if (songId == "") {
-                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["version"].Value, (RequestManager.RequestSongs[i] as SongRequest)._requestor.UserName };
+                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["version"].Value, (RequestManager.RequestSongs.ToArray()[i] as SongRequest)._requestor.UserName };
 
                     if (DoesContainTerms(state._parameter, ref terms))
                         dequeueSong = true;
@@ -1366,7 +1378,7 @@ namespace SongRequestManagerV2.Bots
             if (PluginManager.GetPlugin("WobbleSaber") != null) {
                 string wobblestate = "off";
                 if (state._parameter == "enable") wobblestate = "on";
-                Dispatcher.RunOnMainThread(() => { _ = SendChatMessage($"!wadmin toggle {wobblestate} "); });
+                this.ChatManager.QueueChatMessage($"!wadmin toggle {wobblestate} ");
             }
 
             state.Msg($"The !bomb command is now {state._parameter}d.");
@@ -1543,10 +1555,15 @@ namespace SongRequestManagerV2.Bots
             var req = _songRequestFactory.Create();
             req.Init(song, state._user, DateTime.UtcNow, RequestStatus.SongSearch, "search result");
 
-            if ((state._flags.HasFlag(CmdFlags.MoveToTop)))
-                RequestManager.RequestSongs.Insert(0, req);
-            else
+            if ((state._flags.HasFlag(CmdFlags.MoveToTop))) {
+                var newList = (new object[1] { req }).Union(RequestManager.RequestSongs);
+                RequestManager.RequestSongs.Clear();
+                RequestManager.RequestSongs.AddRange(newList);
+            }
+            else {
                 RequestManager.RequestSongs.Add(req);
+            }
+
         }
 
         #region Move Request To Top/Bottom
@@ -1571,7 +1588,7 @@ namespace SongRequestManagerV2.Bots
 
                 bool moveRequest = false;
                 if (moveId == "") {
-                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, (RequestManager.RequestSongs[i] as SongRequest)._requestor.UserName };
+                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"].Value, song["version"].Value, (RequestManager.RequestSongs.ToArray()[i] as SongRequest)._requestor.UserName };
                     if (DoesContainTerms(request, ref terms))
                         moveRequest = true;
                 }
@@ -1582,11 +1599,17 @@ namespace SongRequestManagerV2.Bots
 
                 if (moveRequest) {
                     // Remove the request from the queue
-                    RequestManager.RequestSongs.RemoveAt(i);
+                    var songs = RequestManager.RequestSongs.ToList();
+                    songs.RemoveAt(i);
+                    RequestManager.RequestSongs.Clear();
+                    RequestManager.RequestSongs.AddRange(songs);
 
                     // Then readd it at the appropriate position
-                    if (top)
-                        RequestManager.RequestSongs.Insert(0, req);
+                    if (top) {
+                        var tmp = (new SongRequest[1] { req }).Union(RequestManager.RequestSongs);
+                        RequestManager.RequestSongs.Clear();
+                        RequestManager.RequestSongs.AddRange(tmp);
+                    }
                     else
                         RequestManager.RequestSongs.Add(req);
 
@@ -1692,10 +1715,11 @@ namespace SongRequestManagerV2.Bots
         public string QueueLottery(ParseState state)
         {
             Int32.TryParse(state._parameter, out int entrycount);
-
-            Shuffle(RequestManager.RequestSongs);
-
             var list = RequestManager.RequestSongs.OfType<SongRequest>().ToList();
+            Shuffle(list);
+
+
+            //var list = RequestManager.RequestSongs.OfType<SongRequest>().ToList();
             for (int i = entrycount; i < list.Count; i++) {
                 try {
                     if (RequestTracker.ContainsKey(list[i]._requestor.Id)) RequestTracker[list[i]._requestor.Id].numRequests--;
@@ -1707,11 +1731,12 @@ namespace SongRequestManagerV2.Bots
             if (entrycount > 0) {
                 try {
                     Writedeck(state._user, "prelotto");
-                    RequestManager.RequestSongs.RemoveRange(entrycount, RequestManager.RequestSongs.Count - entrycount);
+                    list.RemoveRange(entrycount, RequestManager.RequestSongs.Count - entrycount);
                 }
                 catch { }
             }
-
+            RequestManager.RequestSongs.Clear();
+            RequestManager.RequestSongs.AddRange(list);
             _requestManager.WriteRequest();
 
             // Notify the chat that the queue was cleared
@@ -1823,8 +1848,8 @@ namespace SongRequestManagerV2.Bots
         {
             // Note: Scanning backwards to remove LastIn, for loop is best known way.
             for (int i = RequestManager.RequestSongs.Count - 1; i >= 0; i--) {
-                var song = (RequestManager.RequestSongs[i] as SongRequest)._song;
-                if ((RequestManager.RequestSongs[i] as SongRequest)._requestor.Id == requestor.Id) {
+                var song = (RequestManager.RequestSongs.ToArray()[i] as SongRequest)._song;
+                if ((RequestManager.RequestSongs.ToArray()[i] as SongRequest)._requestor.Id == requestor.Id) {
                     this.ChatManager.QueueChatMessage($"{song["songName"].Value} ({song["version"].Value}) removed.");
 
                     ListCollectionManager.Remove(duplicatelist, song["id"].Value);
@@ -1841,7 +1866,7 @@ namespace SongRequestManagerV2.Bots
         {
             try  // We're accessing an element across threads, and currentsong doesn't need to be defined
             {
-                var song = (RequestManager.RequestSongs[0] as SongRequest)._song;
+                var song = (RequestManager.RequestSongs.FirstOrDefault() as SongRequest)._song;
                 if (!song.IsNull) _textFactory.Create().AddSong(ref song).QueueMessage(StringFormat.LinkSonglink.ToString());
             }
             catch (Exception ex) {
@@ -2365,7 +2390,7 @@ namespace SongRequestManagerV2.Bots
                     }
                 }
             }
-            await Parse(GetLoginUser(), "!deck pp", CmdFlags.Local);
+            Parse(GetLoginUser(), "!deck pp", CmdFlags.Local);
 
             this.ChatManager.QueueChatMessage("PP Data indexed");
             pploading = false;

@@ -13,8 +13,10 @@ using Zenject;
 
 namespace SongRequestManagerV2.Utils
 {
-    public class ChatManager : IChatManager
+    public class ChatManager : IChatManager, IDisposable
     {
+        private bool disposedValue;
+
         public ChatCoreInstance CoreInstance { get; private set; }
         public ChatServiceMultiplexer MultiplexerInstance { get; private set; }
         public TwitchService TwitchService { get; private set; }
@@ -25,6 +27,7 @@ namespace SongRequestManagerV2.Utils
 
         public void Initialize()
         {
+            Logger.Debug("Initialize call");
             this.CoreInstance = ChatCoreInstance.Create();
             this.MultiplexerInstance = this.CoreInstance.RunAllServices();
             this.MultiplexerInstance.OnLogin -= this.MultiplexerInstance_OnLogin;
@@ -63,6 +66,37 @@ namespace SongRequestManagerV2.Utils
             if (obj is TwitchService twitchService) {
                 this.TwitchService = twitchService;
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue) {
+                if (disposing) {
+                    // TODO: マネージド状態を破棄します (マネージド オブジェクト)
+                    Logger.Debug("Dispose call");
+                    this.MultiplexerInstance.OnLogin -= this.MultiplexerInstance_OnLogin;
+                    this.MultiplexerInstance.OnJoinChannel -= this.MultiplexerInstance_OnJoinChannel;
+                    this.MultiplexerInstance.OnTextMessageReceived += this.MultiplexerInstance_OnTextMessageReceived;
+                }
+
+                // TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
+                // TODO: 大きなフィールドを null に設定します
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: 'Dispose(bool disposing)' にアンマネージド リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします
+        // ~ChatManager()
+        // {
+        //     // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

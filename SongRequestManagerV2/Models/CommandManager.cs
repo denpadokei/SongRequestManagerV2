@@ -514,7 +514,7 @@ namespace SongRequestManagerV2.Models
         {
             try {
                 if (state._parameter != "") state._parameter += " ";
-                state._parameter += (RequestManager.HistorySongs[0] as SongRequest)._song["version"];
+                state._parameter += (RequestManager.HistorySongs.FirstOrDefault() as SongRequest)._song["version"];
                 return "";
             }
             catch {
@@ -559,7 +559,7 @@ namespace SongRequestManagerV2.Models
         {
             try {
                 if (state._parameter != "") state._parameter += " ";
-                state._parameter += (RequestManager.HistorySongs[1] as SongRequest)._song["version"];
+                state._parameter += (RequestManager.HistorySongs.GetConsumingEnumerable().ElementAt(1) as SongRequest)._song["version"];
                 return "";
             }
             catch {
@@ -573,7 +573,7 @@ namespace SongRequestManagerV2.Models
         {
             try {
                 if (state._parameter != "") state._parameter += " ";
-                state._parameter += (RequestManager.RequestSongs[0] as SongRequest)._song["version"];
+                state._parameter += (RequestManager.RequestSongs.FirstOrDefault() as SongRequest)._song["version"];
                 return "";
             }
             catch {

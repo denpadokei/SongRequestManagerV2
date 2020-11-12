@@ -84,7 +84,7 @@ namespace SongRequestManagerV2.Interfaces
         void Newest(KEYBOARD.KEY key);
         void OpenList(IChatUser requestor, string request);
         string OpenQueue(ParseState state);
-        Task Parse(IChatUser user, string request, CmdFlags flags = CmdFlags.None, string info = "");
+        void Parse(IChatUser user, string request, CmdFlags flags = CmdFlags.None, string info = "");
         string ProcessSongRequest(ParseState state);
         string Queueduration();
         string Queuelist(ParseState state);
