@@ -9,6 +9,7 @@ using SongRequestManagerV2.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,11 +19,11 @@ using UnityEngine;
 
 namespace SongRequestManagerV2.Interfaces
 {
-    public interface IRequestBot
+    public interface IRequestBot : INotifyPropertyChanged
     {
         StringNormalization Normalize { get; }
         MapDatabase MapDatabase { get; }
-        SongRequest Currentsong { get; set; }
+        SongRequest CurrentSong { get; set; }
         ListCollectionManager ListCollectionManager { get; }
         IChatManager ChatManager { get; }
         bool RefreshQueue { get; }
@@ -33,7 +34,7 @@ namespace SongRequestManagerV2.Interfaces
         event Action ChangeButtonColor;
         string QueueMessage(bool QueueState);
         List<JSONObject> ReadJSON(string path);
-        void SetRequestStatus(int index, RequestStatus status, bool fromHistory = false);
+        void SetRequestStatus(SongRequest request, RequestStatus status, bool fromHistory = false);
         void Shuffle<T>(List<T> list);
         void WriteJSON(string path, List<JSONObject> objs);
         void WriteQueueStatusToFile(string status);
@@ -44,7 +45,7 @@ namespace SongRequestManagerV2.Interfaces
         string Backup();
         string BackupStreamcore(ParseState state);
         Task Ban(ParseState state);
-        void Blacklist(int index, bool fromHistory, bool skip);
+        void Blacklist(SongRequest request, bool fromHistory, bool skip);
         void BlockedUserList(IChatUser requestor, string request);
         string ChatMessage(ParseState state);
         string ClearDuplicateList(ParseState state);
@@ -57,7 +58,6 @@ namespace SongRequestManagerV2.Interfaces
         void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target);
         bool CreateMD5FromFile(string path, out string hash);
         string CreateMD5FromString(string input);
-        SongRequest DequeueRequest(int index, bool updateUI = true);
         void DequeueRequest(SongRequest request, bool updateUI = true);
         string DequeueSong(ParseState state);
         bool DoesContainTerms(string request, ref string[] terms);
@@ -108,7 +108,7 @@ namespace SongRequestManagerV2.Interfaces
         IEnumerator SetBombState(ParseState state);
         void Showlists(IChatUser requestor, string request);
         string ShowSongLink(ParseState state);
-        void Skip(int index, RequestStatus status = RequestStatus.Skipped);
+        void Skip(SongRequest songRequest, RequestStatus status = RequestStatus.Skipped);
         string SongMsg(ParseState state);
         string SongSearchFilter(JSONObject song, bool fast = false, SongFilter filter = (SongFilter)(-1));
         void ToggleQueue(IChatUser requestor, string request, bool state);

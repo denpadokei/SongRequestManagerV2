@@ -2,6 +2,7 @@
 using ChatCore.Models.Twitch;
 using ChatCore.Utilities;
 using IPA.Loader;
+using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
@@ -30,7 +31,7 @@ using TMPro;
 
 namespace SongRequestManagerV2.Bots
 {
-    internal class RequestBot : IRequestBot, IInitializable, IDisposable
+    internal class RequestBot : BindableBase, IRequestBot, IInitializable, IDisposable
     {
         public static Dictionary<string, RequestUserTracker> RequestTracker { get; } = new Dictionary<string, RequestUserTracker>();
         //private ChatServiceMultiplexer _chatService { get; set; }
@@ -95,9 +96,17 @@ namespace SongRequestManagerV2.Bots
         public event Action<bool> SetButtonIntactivityRequest;
         public event Action ChangeButtonColor;
 
-        private static readonly object _lockObject = new object();
+        
 
-        public SongRequest Currentsong { get; set; }
+        /// <summary>SongRequest を取得、設定</summary>
+        private SongRequest currentSong_;
+        /// <summary>SongRequest を取得、設定</summary>
+        public SongRequest CurrentSong
+        {
+            get => this.currentSong_;
+
+            set => this.SetProperty(ref this.currentSong_, value);
+        }
 
         /// <summary>
         /// This is string empty.
@@ -604,8 +613,8 @@ namespace SongRequestManagerV2.Bots
                 var req = _songRequestFactory.Create();
                 req.Init(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo);
                 if ((requestInfo.flags.HasFlag(CmdFlags.MoveToTop))) {
-                    var reqs = new object[1] { req };
-                    var newList = reqs.Union(RequestManager.RequestSongs);
+                    var reqs = new List<object>() { req };
+                    var newList = reqs.Union(RequestManager.RequestSongs.ToArray());
                     RequestManager.RequestSongs.Clear();
                     RequestManager.RequestSongs.AddRange(newList);
                 }
@@ -681,8 +690,8 @@ namespace SongRequestManagerV2.Bots
             Logger.Debug("start to deque request");
             try {
                 if (request._status != RequestStatus.Wrongsong && request._status != RequestStatus.SongSearch) {
-                    var reqs = new object[1] { request };
-                    var newList = reqs.Union(RequestManager.HistorySongs);
+                    var reqs = new List<object>() { request };
+                    var newList = reqs.Union(RequestManager.HistorySongs.ToArray());
                     RequestManager.HistorySongs.Clear();
                     RequestManager.HistorySongs.AddRange(newList);
                     // Wrong song requests are not logged into history, is it possible that other status states shouldn't be moved either?
@@ -697,13 +706,15 @@ namespace SongRequestManagerV2.Bots
                     RequestManager.HistorySongs.AddRange(songs);
                 }
                 var requests = RequestManager.RequestSongs.ToList();
-                requests.RemoveAt(requests.IndexOf(request));
+                requests.Remove(request);
                 RequestManager.RequestSongs.Clear();
                 RequestManager.RequestSongs.AddRange(requests);
                 _requestManager.WriteHistory();
 
                 HistoryManager.AddSong(request);
                 _requestManager.WriteRequest();
+
+                this.CurrentSong = null;
 
 
                 // Decrement the requestors request count, since their request is now out of the queue
@@ -724,56 +735,33 @@ namespace SongRequestManagerV2.Bots
             }
         }
 
-        public SongRequest DequeueRequest(int index, bool updateUI = true)
+        public void SetRequestStatus(SongRequest request, RequestStatus status, bool fromHistory = false)
         {
-            SongRequest request = RequestManager.RequestSongs.OfType<SongRequest>().ToList().ElementAt(index);
-
-            if (request != null)
-                DequeueRequest(request, updateUI);
-
-#if UNRELEASED
-            // If the queue is empty, Execute a custom command, the could be a chat message, a deck request, or nothing
-            try
-            {
-                if (RequestBotConfig.Instance.RequestQueueOpen && updateUI == true && RequestManager.RequestSongs.Count == 0) RequestBot.listcollection.runscript("emptyqueue.script");
-            }
-            catch (Exception ex) { Logger.Debug(ex.ToString()); }
-#endif
-            return request;
+            request._status = status;
         }
 
-        public void SetRequestStatus(int index, RequestStatus status, bool fromHistory = false)
-        {
-            if (!fromHistory)
-                (RequestManager.RequestSongs.ToArray()[index] as SongRequest)._status = status;
-            else
-                (RequestManager.HistorySongs.ToArray()[index] as SongRequest)._status = status;
-        }
-
-        public void Blacklist(int index, bool fromHistory, bool skip)
+        public void Blacklist(SongRequest request, bool fromHistory, bool skip)
         {
             // Add the song to the blacklist
-            SongRequest request = fromHistory ? RequestManager.HistorySongs.OfType<SongRequest>().ToList().ElementAt(index) : RequestManager.RequestSongs.OfType<SongRequest>().ToList().ElementAt(index);
-
             ListCollectionManager.Add(banlist, request._song["id"].Value);
 
             this.ChatManager.QueueChatMessage($"{request._song["songName"].Value} by {request._song["authorName"].Value} ({request._song["id"].Value}) added to the blacklist.");
 
             if (!fromHistory) {
                 if (skip)
-                    Skip(index, RequestStatus.Blacklisted);
+                    Skip(request, RequestStatus.Blacklisted);
             }
             else
-                SetRequestStatus(index, RequestStatus.Blacklisted, fromHistory);
+                SetRequestStatus(request, RequestStatus.Blacklisted, fromHistory);
         }
 
-        public void Skip(int index, RequestStatus status = RequestStatus.Skipped)
+        public void Skip(SongRequest request, RequestStatus status = RequestStatus.Skipped)
         {
             // Set the final status of the request
-            SetRequestStatus(index, status);
+            SetRequestStatus(request, status);
 
             // Then dequeue it
-            DequeueRequest(index);
+            DequeueRequest(request);
 
             UpdateRequestUI();
             RefreshSongQuere();
@@ -1189,23 +1177,23 @@ namespace SongRequestManagerV2.Bots
             var songId = GetBeatSaverId(state._parameter);
             for (int i = RequestManager.RequestSongs.Count - 1; i >= 0; i--) {
                 bool dequeueSong = false;
-                var song = (RequestManager.RequestSongs.ToArray()[i] as SongRequest)._song;
+                if (RequestManager.RequestSongs.ToArray()[i] is SongRequest song) {
+                    if (songId == "") {
+                        string[] terms = new string[] { song._song["songName"].Value, song._song["songSubName"].Value, song._song["authorName"].Value, song._song["version"].Value, song._requestor.UserName };
 
-                if (songId == "") {
-                    string[] terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["version"].Value, (RequestManager.RequestSongs.ToArray()[i] as SongRequest)._requestor.UserName };
+                        if (DoesContainTerms(state._parameter, ref terms))
+                            dequeueSong = true;
+                    }
+                    else {
+                        if (song._song["id"].Value == songId)
+                            dequeueSong = true;
+                    }
 
-                    if (DoesContainTerms(state._parameter, ref terms))
-                        dequeueSong = true;
-                }
-                else {
-                    if (song["id"].Value == songId)
-                        dequeueSong = true;
-                }
-
-                if (dequeueSong) {
-                    this.ChatManager.QueueChatMessage($"{song["songName"].Value} ({song["version"].Value}) removed.");
-                    Skip(i);
-                    return success;
+                    if (dequeueSong) {
+                        this.ChatManager.QueueChatMessage($"{song._song["songName"].Value} ({song._song["version"].Value}) removed.");
+                        Skip(song);
+                        return success;
+                    }
                 }
             }
             return $"{state._parameter} was not found in the queue.";
@@ -1554,7 +1542,7 @@ namespace SongRequestManagerV2.Bots
             req.Init(song, state._user, DateTime.UtcNow, RequestStatus.SongSearch, "search result");
 
             if ((state._flags.HasFlag(CmdFlags.MoveToTop))) {
-                var newList = (new object[1] { req }).Union(RequestManager.RequestSongs);
+                var newList = (new List<object>() { req }).Union(RequestManager.RequestSongs.ToArray());
                 RequestManager.RequestSongs.Clear();
                 RequestManager.RequestSongs.AddRange(newList);
             }
@@ -1604,7 +1592,7 @@ namespace SongRequestManagerV2.Bots
 
                     // Then readd it at the appropriate position
                     if (top) {
-                        var tmp = (new SongRequest[1] { req }).Union(RequestManager.RequestSongs);
+                        var tmp = (new List<object>() { req }).Union(RequestManager.RequestSongs.ToArray());
                         RequestManager.RequestSongs.Clear();
                         RequestManager.RequestSongs.AddRange(tmp);
                     }
@@ -1755,7 +1743,7 @@ namespace SongRequestManagerV2.Bots
 
             // Cycle through each song in the final request queue, adding them to the song history
 
-            while (RequestManager.RequestSongs.Count > 0) DequeueRequest(0, false); // More correct now, previous version did not keep track of user requests 
+            while (RequestManager.RequestSongs.Count > 0) DequeueRequest(RequestManager.RequestSongs.FirstOrDefault() as SongRequest, false); // More correct now, previous version did not keep track of user requests 
 
             _requestManager.WriteRequest();
 
@@ -1846,14 +1834,16 @@ namespace SongRequestManagerV2.Bots
         {
             // Note: Scanning backwards to remove LastIn, for loop is best known way.
             for (int i = RequestManager.RequestSongs.Count - 1; i >= 0; i--) {
-                var song = (RequestManager.RequestSongs.ToArray()[i] as SongRequest)._song;
-                if ((RequestManager.RequestSongs.ToArray()[i] as SongRequest)._requestor.Id == requestor.Id) {
-                    this.ChatManager.QueueChatMessage($"{song["songName"].Value} ({song["version"].Value}) removed.");
+                if (RequestManager.RequestSongs.ToArray()[i] is SongRequest song) {
+                    if (song._requestor.Id == requestor.Id) {
+                        this.ChatManager.QueueChatMessage($"{song._song["songName"].Value} ({song._song["version"].Value}) removed.");
 
-                    ListCollectionManager.Remove(duplicatelist, song["id"].Value);
-                    Skip(i, RequestStatus.Wrongsong);
-                    return;
+                        ListCollectionManager.Remove(duplicatelist, song._song["id"].Value);
+                        Skip(song, RequestStatus.Wrongsong);
+                        return;
+                    }
                 }
+                
             }
             this.ChatManager.QueueChatMessage($"You have no requests in the queue.");
         }

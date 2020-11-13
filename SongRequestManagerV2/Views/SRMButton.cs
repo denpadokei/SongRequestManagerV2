@@ -173,17 +173,13 @@ namespace SongRequestManagerV2.Views
             this._requestFlow.RefreshSongList(obj);
         }
 
-        async void ProcessSongRequest(int index, bool fromHistory = false)
+        async void ProcessSongRequest(SongRequest request, bool fromHistory = false)
         {
             if ((RequestManager.RequestSongs.Any() && !fromHistory) || (RequestManager.HistorySongs.Any() && fromHistory)) {
-                SongRequest request = null;
                 if (!fromHistory) {
                     Logger.Debug("Set status to request");
-                    _bot.SetRequestStatus(index, RequestStatus.Played);
-                    request = _bot.DequeueRequest(index);
-                }
-                else {
-                    request = RequestManager.HistorySongs.ElementAt(index) as SongRequest;
+                    _bot.SetRequestStatus(request, RequestStatus.Played);
+                    _bot.DequeueRequest(request);
                 }
 
                 if (request == null) {

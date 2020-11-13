@@ -427,13 +427,9 @@ namespace SongRequestManagerV2.Bots
 
         void ClearSearches()
         {
-            for (int i = 0; i < RequestManager.RequestSongs.Count; i++)
-            {
-                var entry = (RequestManager.RequestSongs.GetConsumingEnumerable().ElementAt(i) as SongRequest);
-                if (entry._status == RequestStatus.SongSearch)
-                {
-                    _bot.DequeueRequest(i, false);
-                    i--;
+            foreach (var item in RequestManager.RequestSongs.GetConsumingEnumerable()) {
+                if (item is SongRequest entry && entry._status == RequestStatus.SongSearch) {
+                    _bot.DequeueRequest(entry, false);
                 }
             }
         }
