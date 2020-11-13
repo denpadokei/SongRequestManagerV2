@@ -528,7 +528,7 @@ namespace SongRequestManagerV2.Models
         {
             try {
                 if (state._parameter != "") state._parameter += " ";
-                state._parameter += _bot.Currentsong._song["version"];
+                state._parameter += _bot.CurrentSong._song["version"];
                 return "";
             }
             catch {

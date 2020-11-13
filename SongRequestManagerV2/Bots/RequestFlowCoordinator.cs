@@ -16,7 +16,7 @@ namespace SongRequestManagerV2
         [Inject]
         private KeyboardViewController _keyboardViewController;
 
-        public event Action<int, bool> PlayProcessEvent;
+        public event Action<SongRequest, bool> PlayProcessEvent;
 
         public void RefreshSongList(bool obj) => _requestBotListViewController.RefreshSongQueueList(obj);
 
