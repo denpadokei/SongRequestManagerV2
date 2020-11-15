@@ -51,6 +51,12 @@ namespace SongRequestManagerV2.Networks
             _server.PropertyChanged += this.OnServerPropertyChanged;
         }
 
+        protected override void OnDestroy()
+        {
+            _server.PropertyChanged -= this.OnServerPropertyChanged;
+            base.OnDestroy();
+        }
+
         private void OnServerPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             Logger.Debug("PropertyChanged Server.");

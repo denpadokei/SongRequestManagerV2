@@ -147,7 +147,12 @@ namespace SongRequestManagerV2.Bots
                     this.timer.Elapsed -= this.Timer_Elapsed;
                     this.timer.Dispose();
                     SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
-                    BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
+                    try {
+                        BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
+                    }
+                    catch (Exception e) {
+                        Logger.Error(e);
+                    }
                 }
 
                 // TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします

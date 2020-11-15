@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Zenject;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace SongRequestManagerV2
 {
@@ -26,6 +27,8 @@ namespace SongRequestManagerV2
         private LevelFilteringNavigationController _levelFilteringNavigationController;
         [Inject]
         private AnnotatedBeatmapLevelCollectionsViewController _annotatedBeatmapLevelCollectionsViewController;
+        [Inject]
+        ResultsViewController _resultsViewController;
 
         private static bool _initialized = false;
         //private static bool _songBrowserInstalled = false;
@@ -151,6 +154,11 @@ namespace SongRequestManagerV2
 
         public IEnumerator ScrollToLevel(string levelID, Action<bool> callback, bool animated, bool isRetry = false)
         {
+            if (_resultsViewController.isActivated) {
+                var button = _resultsViewController.GetComponentsInChildren<Button>().FirstOrDefault(x => x.name.Contains("Continue"));
+                button.onClick?.Invoke();
+            }
+
             if (_levelCollectionViewController)
             {
                 Logger.Debug($"Scrolling to {levelID}! Retry={isRetry}");

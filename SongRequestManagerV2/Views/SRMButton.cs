@@ -1,20 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using BeatSaberMarkupLanguage;
+﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.FloatingScreen;
 using BeatSaberMarkupLanguage.ViewControllers;
-using ChatCore.Interfaces;
-using ChatCore.Services;
-using ChatCore.Services.Twitch;
 using HMUI;
 using IPA.Utilities;
 using SongCore;
@@ -23,12 +10,15 @@ using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.UI;
 using SongRequestManagerV2.Utils;
-using Unity.Collections.LowLevel.Unsafe;
+using System;
+using System.Collections;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using VRUIControls;
 using Zenject;
 
 namespace SongRequestManagerV2.Views
@@ -38,17 +28,13 @@ namespace SongRequestManagerV2.Views
     {
         // For this method of setting the ResourceName, this class must be the first class in the file.
         [Inject]
-        public MainFlowCoordinator _mainFlowCoordinator;
+        MainFlowCoordinator _mainFlowCoordinator;
         [Inject]
-        public SoloFreePlayFlowCoordinator _soloFreeFlow;
+        SoloFreePlayFlowCoordinator _soloFreeFlow;
         [Inject]
-        public LevelCollectionNavigationController _levelCollectionNavigationController;
+        RequestFlowCoordinator _requestFlow;
         [Inject]
-        public RequestFlowCoordinator _requestFlow;
-        [Inject]
-        public SearchFilterParamsViewController _searchFilterParamsViewController;
-        [Inject]
-        private IRequestBot _bot;
+        IRequestBot _bot;
         [Inject]
         IChatManager ChatManager { get; }
         [Inject]
@@ -81,7 +67,7 @@ namespace SongRequestManagerV2.Views
             finally {
                 _button.interactable = true;
             }
-            
+
         }
 
         internal void SRMButtonPressed()
