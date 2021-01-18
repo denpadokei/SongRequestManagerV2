@@ -96,8 +96,6 @@ namespace SongRequestManagerV2.Bots
         public event Action<bool> SetButtonIntactivityRequest;
         public event Action ChangeButtonColor;
 
-        
-
         /// <summary>SongRequest を取得、設定</summary>
         private SongRequest currentSong_;
         /// <summary>SongRequest を取得、設定</summary>

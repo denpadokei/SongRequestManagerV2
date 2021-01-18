@@ -1,5 +1,6 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.FloatingScreen;
 using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
@@ -16,6 +17,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -31,6 +33,9 @@ namespace SongRequestManagerV2.Views
         MainFlowCoordinator _mainFlowCoordinator;
         [Inject]
         SoloFreePlayFlowCoordinator _soloFreeFlow;
+
+        MultiplayerLevelSelectionFlowCoordinator multiplayerLevelSelectionFlowCoordinator;
+
         [Inject]
         RequestFlowCoordinator _requestFlow;
         [Inject]
@@ -48,11 +53,21 @@ namespace SongRequestManagerV2.Views
 
         public Progress<double> DownloadProgress { get; } = new Progress<double>();
 
-        //[Inject]
-        //protected PhysicsRaycasterWithCache _physicsRaycaster;
         public HMUI.Screen Screen { get; set; }
 
         public FlowCoordinator Current => _mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
+
+        [Inject]
+        void Constractor(DiContainer container)
+        {
+            try {
+                multiplayerLevelSelectionFlowCoordinator = container.Resolve<MultiplayerLevelSelectionFlowCoordinator>();
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
+        }
+
         [UIAction("action")]
         public void Action()
         {
@@ -72,7 +87,9 @@ namespace SongRequestManagerV2.Views
 
         internal void SRMButtonPressed()
         {
-            if (Current.name != _soloFreeFlow.name) {
+            if (Current.name != _soloFreeFlow.name
+                && Current.name != multiplayerLevelSelectionFlowCoordinator.name) {
+                Logger.Debug($"{Current.name}");
                 return;
             }
             Current.PresentFlowCoordinator(_requestFlow, null, AnimationDirection.Horizontal, false, false);
@@ -97,7 +114,6 @@ namespace SongRequestManagerV2.Views
         {
             Logger.Debug($"{Current.name} : {_requestFlow.name}");
             if (Current.name != _requestFlow.name) {
-                Logger.Debug($"{Current.name != _requestFlow.name}");
                 return;
             }
             try {
@@ -108,12 +124,14 @@ namespace SongRequestManagerV2.Views
             }
         }
 
+        #region Unity message
         void Start()
         {
             Logger.Debug("Start()");
 
             _bot.ChangeButtonColor += this.SetButtonColor;
             _bot.RefreshListRequest += this.RefreshListRequest;
+            _requestFlow.QueueStatusChanged += this.OnQueueStatusChanged;
             _requestFlow.PlayProcessEvent += this.ProcessSongRequest;
 
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
@@ -127,7 +145,7 @@ namespace SongRequestManagerV2.Views
             }
             Logger.Debug($"{_button == null}");
             if (_button == null) {
-                _button = UIHelper.CreateUIButton(this.Screen.transform, "OkButton", Vector2.zero, Vector2.zero, Action, "SRM", null);
+                _button = UIHelper.CreateUIButton(this.Screen.transform, "OkButton", Vector2.zero, Vector2.zero, Action, "OPEN", null);
             }
 
             this._bot.UpdateRequestUI();
@@ -136,19 +154,39 @@ namespace SongRequestManagerV2.Views
             Logger.Debug("Start() end");
         }
 
-        private void Progress_ProgressChanged(object sender, double e)
-        {
-            this._requestFlow.ChangeProgressText(e);
-        }
-
         protected override void OnDestroy()
         {
             Logger.Debug("OnDestroy");
             _bot.ChangeButtonColor -= this.SetButtonColor;
             _bot.RefreshListRequest -= this.RefreshListRequest;
+            _requestFlow.QueueStatusChanged -= this.OnQueueStatusChanged;
             _requestFlow.PlayProcessEvent -= this.ProcessSongRequest;
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
             base.OnDestroy();
+        }
+        #endregion
+
+        private void OnQueueStatusChanged()
+        {
+            try {
+                var externalComponents = _button.gameObject.GetComponentsInChildren<ExternalComponents>(true).FirstOrDefault();
+                var textMesh = externalComponents.components.FirstOrDefault(x => x as TextMeshProUGUI) as TextMeshProUGUI;
+
+                if (RequestBotConfig.Instance.RequestQueueOpen) {
+                    textMesh.text = "OPEN";
+                }
+                else {
+                    textMesh.text = "CLOSE";
+                }
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
+        }
+
+        private void Progress_ProgressChanged(object sender, double e)
+        {
+            this._requestFlow.ChangeProgressText(e);
         }
 
         private void RefreshListRequest(bool obj)

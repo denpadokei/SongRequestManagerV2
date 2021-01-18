@@ -17,6 +17,7 @@ namespace SongRequestManagerV2
         private KeyboardViewController _keyboardViewController;
 
         public event Action<SongRequest, bool> PlayProcessEvent;
+        public event Action QueueStatusChanged;
 
         public void RefreshSongList(bool obj) => _requestBotListViewController.RefreshSongQueueList(obj);
 
@@ -31,6 +32,21 @@ namespace SongRequestManagerV2
         {
             _requestBotListViewController.ChangeTitle += s => this.SetTitle(s);
             _requestBotListViewController.PlayProcessEvent += (i, b) => this.PlayProcessEvent?.Invoke(i, b);
+            _requestBotListViewController.PropertyChanged += this.OnRequestBotListViewController_PropertyChanged;
+        }
+
+        void OnDestroy()
+        {
+            _requestBotListViewController.ChangeTitle -= s => this.SetTitle(s);
+            _requestBotListViewController.PlayProcessEvent -= (i, b) => this.PlayProcessEvent?.Invoke(i, b);
+            _requestBotListViewController.PropertyChanged -= this.OnRequestBotListViewController_PropertyChanged;
+        }
+
+        private void OnRequestBotListViewController_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (sender is RequestBotListView view && e.PropertyName == nameof(view.QueueButtonText)) {
+                this.QueueStatusChanged?.Invoke();
+            }
         }
 
         public void ChangeProgressText(double value) => this._requestBotListViewController.ChangeProgressText(value);

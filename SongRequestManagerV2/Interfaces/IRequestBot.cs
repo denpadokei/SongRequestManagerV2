@@ -32,6 +32,7 @@ namespace SongRequestManagerV2.Interfaces
         event Action<bool> UpdateUIRequest;
         event Action<bool> SetButtonIntactivityRequest;
         event Action ChangeButtonColor;
+
         string QueueMessage(bool QueueState);
         List<JSONObject> ReadJSON(string path);
         void SetRequestStatus(SongRequest request, RequestStatus status, bool fromHistory = false);
