@@ -3,6 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.FloatingScreen;
 using BeatSaberMarkupLanguage.ViewControllers;
+using BS_Utils.Utilities;
 using HMUI;
 using IPA.Utilities;
 using SongCore;
@@ -21,6 +22,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using VRUIControls;
 using Zenject;
 
 namespace SongRequestManagerV2.Views
@@ -32,10 +34,7 @@ namespace SongRequestManagerV2.Views
         [Inject]
         MainFlowCoordinator _mainFlowCoordinator;
         [Inject]
-        SoloFreePlayFlowCoordinator _soloFreeFlow;
-
-        MultiplayerLevelSelectionFlowCoordinator multiplayerLevelSelectionFlowCoordinator;
-
+        LevelCollectionNavigationController levelCollectionNavigationController;
         [Inject]
         RequestFlowCoordinator _requestFlow;
         [Inject]
@@ -49,24 +48,15 @@ namespace SongRequestManagerV2.Views
         [Inject]
         SongListUtils SongListUtils;
 
-        private Button _button;
+        private NoTransitionsButton _button;
 
         public Progress<double> DownloadProgress { get; } = new Progress<double>();
 
         public HMUI.Screen Screen { get; set; }
 
-        public FlowCoordinator Current => _mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
+        public Canvas ButtonCanvas { get; set; }
 
-        [Inject]
-        void Constractor(DiContainer container)
-        {
-            try {
-                multiplayerLevelSelectionFlowCoordinator = container.Resolve<MultiplayerLevelSelectionFlowCoordinator>();
-            }
-            catch (Exception e) {
-                Logger.Error(e);
-            }
-        }
+        public FlowCoordinator Current => _mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
 
         [UIAction("action")]
         public void Action()
@@ -87,26 +77,17 @@ namespace SongRequestManagerV2.Views
 
         internal void SRMButtonPressed()
         {
-            if (Current.name != _soloFreeFlow.name
-                && Current.name != multiplayerLevelSelectionFlowCoordinator.name) {
-                Logger.Debug($"{Current.name}");
-                return;
+            if (Current is LevelSelectionFlowCoordinator) {
+                Current.PresentFlowCoordinator(_requestFlow, null, AnimationDirection.Horizontal, false, false);
             }
-            Current.PresentFlowCoordinator(_requestFlow, null, AnimationDirection.Horizontal, false, false);
+            Logger.Debug($"{Current.name}");
+            return;
         }
 
         internal void SetButtonColor()
         {
             var color = RequestManager.RequestSongs.Any() ? Color.green : Color.red;
-            Logger.Debug($"Change button color : {color}");
-            var imageview = this._button.GetComponentsInChildren<ImageView>(true).FirstOrDefault(x => x?.name == "BG");
-            if (imageview == null) {
-                Logger.Debug("ImageView is null.");
-                return;
-            }
-            imageview.color = color;
-            imageview.color0 = color;
-            imageview.color1 = color;
+            this._button.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = color;
             this._button.interactable = true;
         }
 
@@ -136,22 +117,36 @@ namespace SongRequestManagerV2.Views
 
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
             this.DownloadProgress.ProgressChanged += this.Progress_ProgressChanged;
+            try {
+                var screen = new GameObject("SRMButton", typeof(CanvasScaler), typeof(RectMask2D), typeof(VRGraphicRaycaster), typeof(CurvedCanvasSettings));
+                screen.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", BeatSaberUI.PhysicsRaycasterWithCache);
+                (screen.transform as RectTransform).sizeDelta = new Vector2(30f, 10f);
+                (screen.transform as RectTransform).SetParent(levelCollectionNavigationController.transform as RectTransform, false);
+                (screen.transform as RectTransform).anchoredPosition = new Vector2(70f, 80f);
+                screen.transform.localScale = new Vector3(2f, 2f, 2f);
 
-            if (this.Screen == null) {
-                this.Screen = FloatingScreen.CreateFloatingScreen(new Vector2(20f, 20f), false, new Vector3(1.2f, 2.2f, 2.2f), Quaternion.Euler(Vector3.zero));
-                var canvas = this.Screen.GetComponent<Canvas>();
-                canvas.sortingOrder = 3;
-                this.Screen.SetRootViewController(this, AnimationType.None);
+                Logger.Debug($"{_button == null}");
+                if (_button == null) {
+                    _button = UIHelper.CreateUIButton((screen.transform as RectTransform), "CancelButton", Vector2.zero, Vector2.zero, Action, "OPEN", null) as NoTransitionsButton;
+                    _button.selectionStateDidChangeEvent += this._button_selectionStateDidChangeEvent;
+                }
+                Logger.Debug($"screem size : {(screen.transform as RectTransform).sizeDelta}");
+                Logger.Debug($"button size : {(_button.transform as RectTransform).sizeDelta}");
+                Logger.Debug($"button position : {_button.transform.localPosition}");
             }
-            Logger.Debug($"{_button == null}");
-            if (_button == null) {
-                _button = UIHelper.CreateUIButton(this.Screen.transform, "OkButton", Vector2.zero, Vector2.zero, Action, "OPEN", null);
+            catch (Exception e) {
+                Logger.Error(e);
             }
-
+            
             this._bot.UpdateRequestUI();
 
             Logger.Debug("Created request button!");
             Logger.Debug("Start() end");
+        }
+
+        private void _button_selectionStateDidChangeEvent(NoTransitionsButton.SelectionState obj)
+        {
+            this.SetButtonColor();
         }
 
         protected override void OnDestroy()
@@ -284,8 +279,8 @@ namespace SongRequestManagerV2.Views
             Loader.Instance.RefreshSongs(false);
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
             Utility.EmptyDirectory(".requestcache", true);
-            Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
             bool success = false;
+            Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
             Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), (s) =>
             {
                 success = s;
