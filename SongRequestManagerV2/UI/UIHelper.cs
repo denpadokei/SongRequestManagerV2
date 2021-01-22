@@ -36,6 +36,7 @@ namespace SongRequestManagerV2.UI
             TextMeshProUGUI textMesh = button.GetComponentInChildren<TextMeshProUGUI>();
             textMesh.richText = true;
             textMesh.text = buttonText;
+            //textMesh.fontSize = 0.1f;
             externalComponents.components.Add(textMesh);
 
             GameObject.Destroy(button.transform.Find("Content").GetComponent<LayoutElement>());

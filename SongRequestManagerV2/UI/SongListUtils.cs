@@ -12,6 +12,7 @@ using System.Threading;
 using Zenject;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using BS_Utils.Utilities;
 
 namespace SongRequestManagerV2
 {
@@ -171,13 +172,15 @@ namespace SongRequestManagerV2
 
                 // Make sure our custom songpack is selected
                 SelectCustomSongPack(2);
+                
                 _levelFilteringNavigationController.UpdateCustomSongs();
+                
+                yield return new WaitWhile(() => _levelFilteringNavigationController.GetField<CancellationTokenSource>("_cancellationTokenSource") != null);
                 var tableView = _annotatedBeatmapLevelCollectionsViewController.GetField<AnnotatedBeatmapLevelCollectionsTableView, AnnotatedBeatmapLevelCollectionsViewController>("_annotatedBeatmapLevelCollectionsTableView");
                 tableView.SelectAndScrollToCellWithIdx(0);
+                
                 var customSong = tableView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsTableView>("_annotatedBeatmapLevelCollections").FirstOrDefault();
                 _levelFilteringNavigationController.HandleAnnotatedBeatmapLevelCollectionsViewControllerDidSelectAnnotatedBeatmapLevelCollection(customSong);
-
-
                 var song = Loader.GetLevelByHash(levelID.Split('_').Last());
                 if (song == null) {
                     Logger.Debug("Song not find.");
@@ -186,13 +189,11 @@ namespace SongRequestManagerV2
                 // get the table view
                 var levelsTableView = _levelCollectionViewController.GetField<LevelCollectionTableView, LevelCollectionViewController>("_levelCollectionTableView");
                 levelsTableView.SelectLevel(song);
-                
             }
             callback?.Invoke(false);
-
             if (RequestBotConfig.Instance?.ClearNoFail == true) {
                 var gameplayModifiersPanelController = this._gameplaySetupViewController.GetField<GameplayModifiersPanelController, GameplaySetupViewController>("_gameplayModifiersPanelController");
-                gameplayModifiersPanelController.gameplayModifiers.SetField("_noFail", false);
+                gameplayModifiersPanelController.gameplayModifiers.SetField("_noFailOn0Energy", false);
                 this._gameplaySetupViewController.RefreshActivePanel();
             }
         }

@@ -1,13 +1,7 @@
 ﻿using ChatCore.Utilities;
-using SiraUtil;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SongRequestManagerV2.Installer
 {

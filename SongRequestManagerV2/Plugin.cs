@@ -1,29 +1,19 @@
-﻿using IPA;
-using IPALogger = IPA.Logging.Logger;
+﻿using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage.Settings;
+using BS_Utils.Utilities;
+using IPA;
+using IPA.Loader;
+using IPA.Utilities;
+using SiraUtil.Zenject;
+using SongRequestManagerV2.Installer;
+using SongRequestManagerV2.Installers;
+using SongRequestManagerV2.Networks;
+using SongRequestManagerV2.UI;
+using SongRequestManagerV2.Views;
 using System;
 using System.IO;
-using System.Runtime.CompilerServices;
-using SongRequestManagerV2.UI;
-using BeatSaberMarkupLanguage.Settings;
-using IPA.Utilities;
-using ChatCore.Interfaces;
-using ChatCore;
-using ChatCore.Services;
-using IPA.Loader;
 using System.Reflection;
-using BS_Utils.Utilities;
-using ChatCore.Services.Twitch;
-using ChatCore.Models.Twitch;
-using SongRequestManagerV2.Networks;
-using ChatCore.Models;
-using SongRequestManagerV2.Models;
-using SiraUtil.Zenject;
-using SongRequestManagerV2.Installers;
-using Zenject;
-using SongRequestManagerV2.Bots;
-using SongRequestManagerV2.Installer;
-using BeatSaberMarkupLanguage;
-using SongRequestManagerV2.Views;
+using IPALogger = IPA.Logging.Logger;
 
 namespace SongRequestManagerV2
 {
@@ -59,7 +49,7 @@ namespace SongRequestManagerV2
             if (!Directory.Exists(DataPath)) {
                 Directory.CreateDirectory(DataPath);
             }
-            
+
             SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
             BSEvents.lateMenuSceneLoadedFresh += this.BSEvents_lateMenuSceneLoadedFresh;
             // init sprites
