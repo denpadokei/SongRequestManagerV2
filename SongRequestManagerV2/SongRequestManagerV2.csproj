@@ -185,6 +185,16 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <Private>False</Private>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <Private>False</Private>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="UnityEngine.VideoModule">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
       <Private>False</Private>
@@ -232,6 +242,7 @@
     <Compile Include="Interfaces\IRequestBot.cs" />
     <Compile Include="Interfaces\ISRMCommand.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Models\NotifySound.cs" />
     <Compile Include="Models\SRMCommand.cs" />
     <Compile Include="Models\CommandManager.cs" />
     <Compile Include="Models\ParseState.cs" />
@@ -278,6 +289,11 @@
     <None Include="packages.config" />
     <EmbeddedResource Include="Views\SRMButton.bsml" />
     <EmbeddedResource Include="Views\RequestBotListView.bsml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Sound\NotifySound.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="BuildTargets.targets" />

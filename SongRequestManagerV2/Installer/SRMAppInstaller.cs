@@ -2,6 +2,7 @@
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Utils;
+using SiraUtil;
 
 namespace SongRequestManagerV2.Installer
 {
@@ -20,6 +21,7 @@ namespace SongRequestManagerV2.Installer
             this.Container.BindFactory<DynamicText, DynamicText.DynamicTextFactory>().AsCached();
             this.Container.BindInterfacesAndSelfTo<ChatManager>().AsSingle();
             this.Container.BindInterfacesAndSelfTo<StringNormalization>().AsSingle();
+            this.Container.BindInterfacesAndSelfTo<NotifySound>().FromNewComponentOnNewGameObject("NotifySound").AsSingle();
             this.Container.Bind<ListCollectionManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<RequestBot>().AsSingle();
         }

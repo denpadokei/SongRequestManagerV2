@@ -21,6 +21,7 @@
       <Output TaskParameter="CommitShortHash" PropertyName="CommitShortHash" />
     </GetCommitHash>
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFiles="$(IntermediateOutputPath)zip\Plugins\$(AssemblyName).dll" />
+    <Copy SourceFiles="$(OutputPath)Sound\NotifySound.wav" DestinationFiles="$(IntermediateOutputPath)zip\UserData\Song Request ManagerV2\NotifySound\NotifySound.wav" />
     <GetManifestInfo ErrorOnMismatch="False">
       <Output TaskParameter="PluginVersion" PropertyName="PluginVersion" />
       <Output TaskParameter="GameVersion" PropertyName="GameVersion" />
