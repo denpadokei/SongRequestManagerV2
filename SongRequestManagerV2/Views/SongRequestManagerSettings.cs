@@ -103,5 +103,19 @@ namespace SongRequestManagerV2.Views
             get => RequestBotConfig.Instance.PerformanceMode;
             set => RequestBotConfig.Instance.PerformanceMode = value;
         }
+
+        [UIValue("is-sound-enable")]
+        public bool IsSoundEnable
+        {
+            get => RequestBotConfig.Instance.NotifySound;
+            set => RequestBotConfig.Instance.NotifySound = value;
+        }
+
+        [UIValue("volume")]
+        public int Volume
+        {
+            get => RequestBotConfig.Instance.SoundVolume;
+            set => RequestBotConfig.Instance.SoundVolume = value;
+        }
     }
 }

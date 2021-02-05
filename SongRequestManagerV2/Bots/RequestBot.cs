@@ -79,6 +79,8 @@ namespace SongRequestManagerV2.Bots
         [Inject]
         RequestManager _requestManager;
         [Inject]
+        NotifySound notifySound;
+        [Inject]
         QueueLongMessage.QueueLongMessageFactroy _messageFactroy;
         [Inject]
         SongRequest.SongRequestFactory _songRequestFactory;
@@ -615,6 +617,9 @@ namespace SongRequestManagerV2.Bots
                 ListCollectionManager.Add(duplicatelist, song["id"].Value);
                 var req = _songRequestFactory.Create();
                 req.Init(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo);
+                if (RequestBotConfig.Instance.NotifySound) {
+                    notifySound.PlaySound();
+                }
                 if ((requestInfo.flags.HasFlag(CmdFlags.MoveToTop))) {
                     var reqs = new List<object>() { req };
                     var newList = reqs.Union(RequestManager.RequestSongs.ToArray());

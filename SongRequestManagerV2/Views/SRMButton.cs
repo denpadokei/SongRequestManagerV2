@@ -50,6 +50,10 @@ namespace SongRequestManagerV2.Views
 
         private NoTransitionsButton _button;
 
+        private WaitForSeconds waitForSeconds = new WaitForSeconds(0.07f);
+
+        private volatile bool isChangeing = false;
+
         public Progress<double> DownloadProgress { get; } = new Progress<double>();
 
         public HMUI.Screen Screen { get; set; }
@@ -86,9 +90,21 @@ namespace SongRequestManagerV2.Views
 
         internal void SetButtonColor()
         {
-            var color = RequestManager.RequestSongs.Any() ? Color.green : Color.red;
-            this._button.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = color;
-            this._button.interactable = true;
+            if (DateTime.Now.Month == 4 && DateTime.Now.Day == 1) {
+                if (RequestManager.RequestSongs.Any()) {
+                    Dispatcher.RunCoroutine(this.ChangeButtonColor());
+                }
+                else {
+                    this.isChangeing = false;
+                    var color = Color.red;
+                    this._button.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = color;
+                }
+            }
+            else {
+                var color = RequestManager.RequestSongs.Any() ? Color.green : Color.red;
+                this._button.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = color;
+                this._button.interactable = true;
+            }
         }
 
         internal void BackButtonPressed()
@@ -117,6 +133,7 @@ namespace SongRequestManagerV2.Views
 
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
             this.DownloadProgress.ProgressChanged += this.Progress_ProgressChanged;
+            SceneManager.activeSceneChanged += this.SceneManager_activeSceneChanged;
             try {
                 var screen = new GameObject("SRMButton", typeof(CanvasScaler), typeof(RectMask2D), typeof(VRGraphicRaycaster), typeof(CurvedCanvasSettings));
                 screen.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", BeatSaberUI.PhysicsRaycasterWithCache);
@@ -139,9 +156,17 @@ namespace SongRequestManagerV2.Views
             }
             
             this._bot.UpdateRequestUI();
+            this.SetButtonColor();
 
             Logger.Debug("Created request button!");
             Logger.Debug("Start() end");
+        }
+
+        private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1)
+        {
+            if (arg1.name == "MenuCore") {
+                this.SetButtonColor();
+            }
         }
 
         private void _button_selectionStateDidChangeEvent(NoTransitionsButton.SelectionState obj)
@@ -157,6 +182,7 @@ namespace SongRequestManagerV2.Views
             _requestFlow.QueueStatusChanged -= this.OnQueueStatusChanged;
             _requestFlow.PlayProcessEvent -= this.ProcessSongRequest;
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
+            SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
             base.OnDestroy();
         }
         #endregion
@@ -291,6 +317,22 @@ namespace SongRequestManagerV2.Views
             if (!request._song.IsNull) {
                 // Display next song message
                 _textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
+            }
+        }
+
+        private IEnumerator ChangeButtonColor()
+        {
+            if (this.isChangeing) {
+                yield break;
+            }
+            this.isChangeing = true;
+            while (this.isChangeing) {
+                var red = UnityEngine.Random.Range(0f, 1f);
+                var green = UnityEngine.Random.Range(0f, 1f);
+                var blue = UnityEngine.Random.Range(0f, 1f);
+                var color = new Color(red, green, blue);
+                this._button.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = color;
+                yield return this.waitForSeconds;
             }
         }
     }

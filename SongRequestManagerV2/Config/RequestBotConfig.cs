@@ -74,6 +74,9 @@ namespace SongRequestManagerV2
 
         public bool PerformanceMode = false;
 
+        public bool NotifySound = false;
+        public int SoundVolume = 50;
+
         public event Action<RequestBotConfig> ConfigChangedEvent;
         public event PropertyChangedEventHandler PropertyChanged;
 

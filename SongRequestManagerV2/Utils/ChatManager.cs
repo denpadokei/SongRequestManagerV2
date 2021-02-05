@@ -44,7 +44,7 @@ namespace SongRequestManagerV2.Utils
         /// <param name="message">ストリームサービスへ送信したい文字列</param>
         public void QueueChatMessage(string message)
         {
-            this.SendMessageQueue.Enqueue($"{RequestBotConfig.Instance.BotPrefix}\uFEFF{message}");
+            this.SendMessageQueue.Enqueue($"{RequestBotConfig.Instance.BotPrefix} {message}");
         }
 
         private void MultiplexerInstance_OnTextMessageReceived(IChatService arg1, IChatMessage arg2)
