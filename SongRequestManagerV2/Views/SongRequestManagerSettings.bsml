@@ -13,8 +13,8 @@
       <bool-setting text='Full moderator rights' value='mod-full-rights' bind-value='true' hover-hint='Allow moderators access to ALL bot commands. Do you trust your mods?' preferred-width='80'></bool-setting>
       <bool-setting text='LimitUserRequestsToSession' value='limit-user-requests-to-session' bind-value='true' hover-hint='Request limits do not reset after a song is played.' preferred-width='80'></bool-setting>
       <slider-setting text='SessionResetAfterXHours' min='1' max='12' increment='1' integer-only='true' value='session-reset-after-xhours' hover-hint='Number of hours before persistent session properties are reset (ie: Queue, Played , Duplicate List)' preferred-width='80'></slider-setting>
-      <checkbox text='Notify Sound' value='is-sound-enable'></checkbox>
-      <slider-setting text='Volume' increment='10' integer-only='true' min='0' max='100' value='volume'></slider-setting>
+      <checkbox text='Notify Sound' value='is-sound-enable' preferred-width='80'></checkbox>
+      <slider-setting text='Volume' increment='10' integer-only='true' min='0' max='100' value='volume' preferred-width='80'></slider-setting>
     </scrollable-settings-container>
   </vertical>
 </bg>
