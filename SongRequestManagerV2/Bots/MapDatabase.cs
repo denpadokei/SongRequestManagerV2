@@ -177,9 +177,13 @@ namespace SongRequestManagerV2.Bots
 
 
         // Early code... index a full zip archive.
-        public async Task LoadZIPDirectory(string folder = @"d:\beatsaver")
+        public async Task LoadZIPDirectory(string folder = "")
         {
             if (MapDatabase.DatabaseLoading) return;
+
+            if (string.IsNullOrEmpty(folder)) {
+                folder = Environment.CurrentDirectory;
+            }
 
             await Task.Run(() =>
             {

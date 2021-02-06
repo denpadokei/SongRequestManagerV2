@@ -2210,11 +2210,9 @@ namespace SongRequestManagerV2.Bots
         }
 
 
-        public IEnumerator ReadArchive(ParseState state)
+        public Task ReadArchive(ParseState state)
         {
-
-            MapDatabase.LoadZIPDirectory();
-            yield break;
+            return MapDatabase.LoadZIPDirectory();
         }
 
         public IEnumerator SaveSongDatabase(ParseState state)

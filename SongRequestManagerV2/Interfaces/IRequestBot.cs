@@ -92,7 +92,7 @@ namespace SongRequestManagerV2.Interfaces
         string QueueLottery(ParseState state);
         void QueueSong(ParseState state, JSONObject song);
         string QueueStatus(ParseState state);
-        IEnumerator ReadArchive(ParseState state);
+        Task ReadArchive(ParseState state);
         string Readdeck(ParseState state);
         void ReadRemapList();
         void RefreshSongQuere();
