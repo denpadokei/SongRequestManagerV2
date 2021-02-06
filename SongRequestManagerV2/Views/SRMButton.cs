@@ -48,7 +48,7 @@ namespace SongRequestManagerV2.Views
         [Inject]
         SongListUtils SongListUtils;
 
-        private NoTransitionsButton _button;
+        private Button _button;
 
         private WaitForSeconds waitForSeconds = new WaitForSeconds(0.07f);
 
@@ -103,8 +103,8 @@ namespace SongRequestManagerV2.Views
             else {
                 var color = RequestManager.RequestSongs.Any() ? Color.green : Color.red;
                 this._button.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = color;
-                this._button.interactable = true;
             }
+            this._button.interactable = true;
         }
 
         internal void BackButtonPressed()
@@ -133,7 +133,6 @@ namespace SongRequestManagerV2.Views
 
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
             this.DownloadProgress.ProgressChanged += this.Progress_ProgressChanged;
-            SceneManager.activeSceneChanged += this.SceneManager_activeSceneChanged;
             try {
                 var screen = new GameObject("SRMButton", typeof(CanvasScaler), typeof(RectMask2D), typeof(VRGraphicRaycaster), typeof(CurvedCanvasSettings));
                 screen.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", BeatSaberUI.PhysicsRaycasterWithCache);
@@ -141,11 +140,8 @@ namespace SongRequestManagerV2.Views
                 (screen.transform as RectTransform).SetParent(levelCollectionNavigationController.transform as RectTransform, false);
                 (screen.transform as RectTransform).anchoredPosition = new Vector2(70f, 80f);
                 screen.transform.localScale = new Vector3(2f, 2f, 2f);
-
-                Logger.Debug($"{_button == null}");
                 if (_button == null) {
                     _button = UIHelper.CreateUIButton((screen.transform as RectTransform), "CancelButton", Vector2.zero, Vector2.zero, Action, "OPEN", null) as NoTransitionsButton;
-                    _button.selectionStateDidChangeEvent += this._button_selectionStateDidChangeEvent;
                 }
                 Logger.Debug($"screem size : {(screen.transform as RectTransform).sizeDelta}");
                 Logger.Debug($"button size : {(_button.transform as RectTransform).sizeDelta}");
@@ -161,19 +157,6 @@ namespace SongRequestManagerV2.Views
             Logger.Debug("Created request button!");
             Logger.Debug("Start() end");
         }
-
-        private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1)
-        {
-            if (arg1.name == "MenuCore") {
-                this.SetButtonColor();
-            }
-        }
-
-        private void _button_selectionStateDidChangeEvent(NoTransitionsButton.SelectionState obj)
-        {
-            this.SetButtonColor();
-        }
-
         protected override void OnDestroy()
         {
             Logger.Debug("OnDestroy");
@@ -181,8 +164,7 @@ namespace SongRequestManagerV2.Views
             _bot.RefreshListRequest -= this.RefreshListRequest;
             _requestFlow.QueueStatusChanged -= this.OnQueueStatusChanged;
             _requestFlow.PlayProcessEvent -= this.ProcessSongRequest;
-            this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
-            SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
+            this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;;
             base.OnDestroy();
         }
         #endregion

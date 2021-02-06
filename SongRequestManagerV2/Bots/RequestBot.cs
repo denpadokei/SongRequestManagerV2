@@ -66,6 +66,8 @@ namespace SongRequestManagerV2.Bots
         private static readonly Regex _deck = new Regex("^(current|draw|first|last|random|unload)$|$^", RegexOptions.Compiled); // Checks deck command parameters
         private static readonly Regex _drawcard = new Regex("($^)|(^[0-9a-zA-Z]+$)", RegexOptions.Compiled);
 
+        public const string SCRAPED_SCORE_SABER_ALL_JSON_URL = "https://cdn.wes.cloud/beatstar/bssb/v2-ranked.json";
+
         private readonly Timer timer = new Timer(500);
 
         [Inject]
@@ -125,7 +127,7 @@ namespace SongRequestManagerV2.Bots
             Logger.Debug("try load database");
             MapDatabase.LoadDatabase();
             Logger.Debug("end load database");
-            if (RequestBotConfig.Instance.LocalSearch) await MapDatabase.LoadCustomSongs(); // This is a background process
+            if (RequestBotConfig.Instance.LocalSearch) _ = MapDatabase.LoadCustomSongs(); // This is a background process
         }
         public void Initialize()
         {
@@ -148,7 +150,9 @@ namespace SongRequestManagerV2.Bots
                     this.timer.Dispose();
                     SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
                     try {
-                        BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
+                        if (BouyomiPipeline.instance != null) {
+                            BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
+                        }
                     }
                     catch (Exception e) {
                         Logger.Error(e);
@@ -2305,91 +2309,58 @@ namespace SongRequestManagerV2.Bots
 
         //SongLoader.Instance.RemoveSongWithLevelID(level.levelID);
         //SongLoader.CustomLevelCollectionSO.beatmapLevels.FirstOrDefault(x => x.levelID == levelId) as BeatmapLevelSO;
-
-        public static ConcurrentDictionary<String, float> PPmap { get; } = new ConcurrentDictionary<string, float>();
-
-
-
         public static bool pploading = false;
         private bool disposedValue;
 
         public async Task GetPPData()
         {
-            if (pploading) {
-                Logger.Debug("PPloaded");
-                return;
-            }
-
-            pploading = true;
-
-            //Instance.this.ChatManager.QueueChatMessage("Getting PP Data");
-            //var StarTime = DateTime.UtcNow;
-            string requestUrl = "https://cdn.wes.cloud/beatstar/bssb/v2-ranked.json";
-            //public const String SCRAPED_SCORE_SABER_ALL_JSON_URL = "https://cdn.wes.cloud/beatstar/bssb/v2-all.json";
-
-            string result;
-
-            System.Globalization.NumberStyles style = System.Globalization.NumberStyles.AllowDecimalPoint;
-            var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
-
-            if (resp.IsSuccessStatusCode) {
-                result = resp.ContentToString();
-            }
-            else {
-                Logger.Debug("Failed to get pp");
-                pploading = false;
-                return;
-            }
-
-            //Instance.this.ChatManager.QueueChatMessage($"Parsing PP Data {result.Length}");
-
-            JSONNode rootNode = JSON.Parse(result);
-
-            ListCollectionManager.ClearList("pp.deck");
-
-            foreach (KeyValuePair<string, JSONNode> kvp in rootNode) {
-                JSONNode difficultyNodes = kvp.Value;
-
-                float maxpp = 0;
-                float maxstar = 0;
-
-                //Instance.this.ChatManager.QueueChatMessage($"{kvp.Value}");
-
-                var id = difficultyNodes["key"];
-
-                //Instance.this.ChatManager.QueueChatMessage($"{id}");
-
-                foreach (var innerKvp in difficultyNodes["diffs"]) {
-                    JSONNode node = innerKvp.Value;
-
-                    //Instance.this.ChatManager.QueueChatMessage($"{node}");
-
-                    float.TryParse(node["pp"], style, System.Globalization.CultureInfo.InvariantCulture, out float pp);
-                    if (pp > maxpp) maxpp = pp;
-
-                    float.TryParse(node["star"], style, System.Globalization.CultureInfo.InvariantCulture, out float starDifficulty);
-                    if (starDifficulty > maxstar) maxstar = starDifficulty;
+            try {
+                if (pploading) {
+                    Logger.Debug("PPloaded");
+                    return;
                 }
+                pploading = true;
+                var resp = await WebClient.GetAsync(SCRAPED_SCORE_SABER_ALL_JSON_URL, System.Threading.CancellationToken.None);
 
-                if (maxpp > 0) {
-                    //Instance.this.ChatManager.QueueChatMessage($"{id} = {maxpp}");
+                if (!resp.IsSuccessStatusCode) {
+                    Logger.Debug("Failed to get pp");
+                    pploading = false;
+                    return;
+                }
+                //Instance.this.ChatManager.QueueChatMessage($"Parsing PP Data {result.Length}");
 
-                    PPmap.TryAdd(id, (int)(maxpp));
+                var rootNode = resp.ConvertToJsonNode();
 
-                    if (id != "" && maxpp > 200) ListCollectionManager.Add("pp.deck", id);
+                ListCollectionManager.ClearList("pp.deck");
 
-                    if (MapDatabase.MapLibrary.TryGetValue(id, out SongMap map)) {
-                        map.PP = (int)(maxpp);
-                        map.Song.Add("pp", maxpp);
-                        map.IndexSong(map.Song);
+                foreach (var kvp in rootNode) {
+                    var difficultyNodes = kvp.Value;
+                    var key = difficultyNodes["key"].Value;
 
+                    //Instance.this.ChatManager.QueueChatMessage($"{id}");
+                    var maxpp = difficultyNodes["diffs"].AsArray.Linq.Max(x => x.Value["pp"].AsFloat);
+                    var maxstar = difficultyNodes["diffs"].AsArray.Linq.Max(x => x.Value["star"].AsFloat);
+                    if (maxpp > 0) {
+                        //Instance.this.ChatManager.QueueChatMessage($"{id} = {maxpp}");
+                        MapDatabase.PPMap.TryAdd(key, maxpp);
+                        if (key != "" && maxpp > 100) ListCollectionManager.Add("pp.deck", key);
+
+                        if (MapDatabase.MapLibrary.TryGetValue(key, out SongMap map)) {
+                            map.PP = maxpp;
+                            map.Song.Add("pp", maxpp);
+                            map.IndexSong(map.Song);
+                        }
                     }
                 }
-            }
-            Parse(GetLoginUser(), "!deck pp", CmdFlags.Local);
+                Parse(GetLoginUser(), "!deck pp", CmdFlags.Local);
 
-            this.ChatManager.QueueChatMessage("PP Data indexed");
-            pploading = false;
+                // this.ChatManager.QueueChatMessage("PP Data indexed");
+                Logger.Debug("PP Data indexed");
+                pploading = false;
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
         }
         #endregion
     }

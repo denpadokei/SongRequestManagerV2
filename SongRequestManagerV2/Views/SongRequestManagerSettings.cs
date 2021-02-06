@@ -117,5 +117,11 @@ namespace SongRequestManagerV2.Views
             get => RequestBotConfig.Instance.SoundVolume;
             set => RequestBotConfig.Instance.SoundVolume = value;
         }
+        [UIValue("pp-sarch")]
+        public bool PPSerch
+        {
+            get => RequestBotConfig.Instance.PPSearch;
+            set => RequestBotConfig.Instance.PPSearch = value;
+        }
     }
 }
