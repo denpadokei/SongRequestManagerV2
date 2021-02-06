@@ -20,6 +20,7 @@ namespace SongRequestManagerV2.Bots
         public static ConcurrentDictionary<string, SongMap> MapLibrary { get; } = new ConcurrentDictionary<string, SongMap>();
         public static ConcurrentDictionary<string, SongMap> LevelId { get; } = new ConcurrentDictionary<string, SongMap>();
         public static ConcurrentDictionary<string, HashSet<int>> SearchDictionary { get; } = new ConcurrentDictionary<string, HashSet<int>>();
+        public static ConcurrentDictionary<string, float> PPMap { get; } = new ConcurrentDictionary<string, float>();
 
         static int tempid = 100000; // For now, we use these for local ID less songs
 
@@ -176,7 +177,7 @@ namespace SongRequestManagerV2.Bots
 
 
         // Early code... index a full zip archive.
-        public async void LoadZIPDirectory(string folder = @"d:\beatsaver")
+        public async Task LoadZIPDirectory(string folder = @"d:\beatsaver")
         {
             if (MapDatabase.DatabaseLoading) return;
 

@@ -62,7 +62,7 @@ namespace SongRequestManagerV2
         public string offlinepath = "d:\\customsongs";
 
         public bool LocalSearch = false;
-        public bool PPSearch = false;
+        public bool PPSearch = true;
         public string additionalsongpath = "";
         public string songdownloadpath = "";
         public string LocalUserName = "";

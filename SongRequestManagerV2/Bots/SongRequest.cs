@@ -34,7 +34,7 @@ namespace SongRequestManagerV2
 
         [Inject]
         DynamicText.DynamicTextFactory _textFactory;
-
+        
         /// <summary>説明 を取得、設定</summary>
         private string hint_;
         /// <summary>説明 を取得、設定</summary>
@@ -73,7 +73,6 @@ namespace SongRequestManagerV2
         public DateTime _requestTime;
         public RequestStatus _status;
         public string _requestInfo; // Contains extra song info, Like : Sub/Donation request, Deck pick, Empty Queue pick,Mapper request, etc.
-
         public string _songName;
         public string _authorName;
 
@@ -106,7 +105,13 @@ namespace SongRequestManagerV2
         [UIAction("#post-parse")]
         internal void Setup()
         {
-            this.SongName = $"{_songName} <size=50%>{Utility.GetRating(_song)}";
+            if (RequestBotConfig.Instance.PPSearch && MapDatabase.PPMap.TryGetValue(this._song["key"].Value, out var pp) && 0 < pp) {
+                this.SongName = $"{_songName} <size=50%>{Utility.GetRating(_song)} <color=#4169e1>{pp:0.00} PP</color></size>";
+            }
+            else {
+                this.SongName = $"{_songName} <size=50%>{Utility.GetRating(_song)}</size>";
+            }
+            
             this.SetCover();
         }
 

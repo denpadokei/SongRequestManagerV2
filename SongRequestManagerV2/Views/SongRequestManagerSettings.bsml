@@ -15,6 +15,7 @@
       <slider-setting text='SessionResetAfterXHours' min='1' max='12' increment='1' integer-only='true' value='session-reset-after-xhours' hover-hint='Number of hours before persistent session properties are reset (ie: Queue, Played , Duplicate List)' preferred-width='80'></slider-setting>
       <checkbox text='Notify Sound' value='is-sound-enable' preferred-width='80'></checkbox>
       <slider-setting text='Volume' increment='10' integer-only='true' min='0' max='100' value='volume' preferred-width='80'></slider-setting>
+      <bool-setting text='PP Serch' value='pp-sarch' bind-value='true' preferred-width='80'></bool-setting>
     </scrollable-settings-container>
   </vertical>
 </bg>

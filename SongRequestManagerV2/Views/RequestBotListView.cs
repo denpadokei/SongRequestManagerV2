@@ -610,9 +610,14 @@ namespace SongRequestManagerV2.Views
                     Dispatcher.RunOnMainThread(() =>
                     {
                         this._requestTable?.tableView?.ReloadData();
-                        if (this._requestTable?.tableView?.numberOfCells > (uint)this.SelectedRow) {
-                            this._requestTable?.tableView?.SelectCellWithIdx(this.SelectedRow, selectRowCallback);
-                            this._requestTable?.tableView?.ScrollToCellWithIdx(this.SelectedRow, TableViewScroller.ScrollPositionType.Center, true);
+                        if (!selectRowCallback || this._requestTable?.tableView?.numberOfCells > (uint)this.SelectedRow) {
+                            try {
+                                this._requestTable?.tableView?.SelectCellWithIdx(this.SelectedRow, selectRowCallback);
+                                this._requestTable?.tableView?.ScrollToCellWithIdx(this.SelectedRow, TableViewScroller.ScrollPositionType.Center, true);
+                            }
+                            catch (Exception e) {
+                                Logger.Error(e);
+                            }
                         }
                     });
                 }

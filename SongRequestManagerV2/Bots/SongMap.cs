@@ -112,7 +112,7 @@ namespace SongRequestManagerV2.Bots
                 }
             }
 
-            if (RequestBot.PPmap.TryGetValue(this.Song["id"].Value, out var songpp)) {
+            if (MapDatabase.PPMap.TryGetValue(this.Song["id"].Value, out var songpp)) {
                 this.Song.Add("pp", songpp);
             }
             IndexSong(this.Song);
