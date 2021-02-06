@@ -14,10 +14,10 @@ namespace SongRequestManagerV2.Installers
 
             Container.Bind<SongListUtils>().AsCached();
 
-            Container.BindViewController<RequestBotListView>();
-            Container.BindViewController<KeyboardViewController>();
-            Container.BindFlowCoordinator<RequestFlowCoordinator>();
-            Container.BindViewController<SRMButton>();
+            Container.BindInterfacesAndSelfTo<RequestBotListView>().FromNewComponentAsViewController().AsSingle();
+            Container.BindInterfacesAndSelfTo<KeyboardViewController>().FromNewComponentAsViewController().AsSingle();
+            Container.BindInterfacesAndSelfTo<RequestFlowCoordinator>().FromNewComponentOnNewGameObject(nameof(RequestFlowCoordinator)).AsSingle();
+            Container.BindInterfacesAndSelfTo<SRMButton>().FromNewComponentAsViewController().AsSingle().NonLazy();
         }
     }
 }
