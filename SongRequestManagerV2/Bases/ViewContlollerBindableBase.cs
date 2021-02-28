@@ -1,4 +1,5 @@
-﻿using BeatSaberMarkupLanguage.ViewControllers;
+﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.ViewControllers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace SongRequestManagerV2.Bases
 {
+    [HotReload]
     public abstract class ViewContlollerBindableBase : BSMLAutomaticViewController
     {
         /// <summary>
