@@ -22,13 +22,11 @@ using KEYBOARD = SongRequestManagerV2.Bots.KEYBOARD;
 namespace SongRequestManagerV2.Views
 {
     [HotReload]
-    public class RequestBotListView : ViewContlollerBindableBase
+    public class RequestBotListView : ViewContlollerBindableBase, IInitializable
     {
-        private static readonly object _lockObject = new object();
-
-        private bool confirmDialogActive = false;
+        //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
+        #region // プロパティ
         // ui elements
-
         /// <summary>説明 を取得、設定</summary>
         private string playButtonName_;
         /// <summary>説明 を取得、設定</summary>
@@ -164,26 +162,6 @@ namespace SongRequestManagerV2.Views
             set => this.SetProperty(ref this.isPerformanceMode_, value);
         }
 
-        [UIComponent("request-list")]
-        private CustomCellListTableData _requestTable;
-
-        [UIComponent("queue-button")]
-        private NoTransitionsButton _queueButton;
-        [UIComponent("play-button")]
-        private NoTransitionsButton _playButton;
-        [Inject]
-        protected PhysicsRaycasterWithCache _physicsRaycaster;
-        [Inject]
-        KEYBOARD.KEYBOARDFactiry _factiry;
-        [Inject]
-        IRequestBot _bot;
-#if UNRELEASED
-        private TextMeshProUGUI _CurrentSongName;
-        private TextMeshProUGUI _CurrentSongName2;
-        private SongPreviewPlayer _songPreviewPlayer;
-#endif
-        public event Action<string> ChangeTitle;
-
         /// <summary>説明 を取得、設定</summary>
         private bool isShowHistory_ = false;
         /// <summary>説明 を取得、設定</summary>
@@ -207,52 +185,180 @@ namespace SongRequestManagerV2.Views
             }
         }
 
-        private KEYBOARD CenterKeys;
-#if UNRELEASED
-        string SONGLISTKEY = @"
-[blacklist last]/0'!block/current%CR%'
+        /// <summary>説明 を取得、設定</summary>
+        private bool isActiveButton_;
+        [UIValue("is-active-button")]
+        /// <summary>説明 を取得、設定</summary>
+        public bool IsActiveButton
+        {
+            get => this.isActiveButton_;
 
-[fun +]/25'!fun/current/toggle%CR%' [hard +]/25'!hard/current/toggle%CR%'
-[dance +]/25'!dance/current/toggle%CR%' [chill +]/25'!chill/current/toggle%CR%'
-[brutal +]/25'!brutal/current/toggle%CR%' [sehria +]/25'!sehria/current/toggle%CR%'
-
-[rock +]/25'!rock/current/toggle%CR%' [metal +]/25'!metal/current/toggle%CR%'  
-[anime +]/25'!anime/current/toggle%CR%' [pop +]/25'!pop/current/toggle%CR%' 
-
-[Random song!]/0'!decklist draw%CR%'";
-#endif
-
-        
-
+            set => this.SetProperty(ref this.isActiveButton_, value);
+        }
+        #endregion
+        //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
+        #region // コマンド
+        public event Action<string> ChangeTitle;
         public event Action<SongRequest, bool> PlayProcessEvent;
-
-        [Inject]
-        IChatManager _chatManager;
-
-        public static void InvokeBeatSaberButton(String buttonName)
-        {
-            Button buttonInstance = Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == buttonName));
-            buttonInstance.onClick.Invoke();
-        }
-
-        [Inject]
-        void Constractor()
-        {
-            
-            this._bot.UpdateUIRequest -= this.UpdateRequestUI;
-            this._bot.UpdateUIRequest += this.UpdateRequestUI;
-            this._bot.SetButtonIntactivityRequest -= this.SetUIInteractivity;
-            this._bot.SetButtonIntactivityRequest += this.SetUIInteractivity;
-            this._bot.PropertyChanged -= this.OnBotPropertyChanged;
-            this._bot.PropertyChanged += this.OnBotPropertyChanged;
-        }
-
+        #endregion
+        //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
+        #region // Unity Message
         protected override void OnDestroy()
         {
             this._bot.UpdateUIRequest -= this.UpdateRequestUI;
             this._bot.SetButtonIntactivityRequest -= this.SetUIInteractivity;
             this._bot.PropertyChanged -= this.OnBotPropertyChanged;
+            Loader.SongsLoadedEvent -= SongLoader_SongsLoadedEvent;
             base.OnDestroy();
+        }
+        #endregion
+        //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
+        #region // オーバーライドメソッド
+        protected override void OnPropertyChanged(PropertyChangedEventArgs args)
+        {
+            base.OnPropertyChanged(args);
+            if (args.PropertyName == nameof(this.IsShowHistory)) {
+                this.UpdateRequestUI(true);
+                this.SetUIInteractivity();
+            }
+            else if (args.PropertyName == nameof(this.PerformanceMode)) {
+                RequestBotConfig.Instance.PerformanceMode = this.PerformanceMode;
+                RequestBotConfig.Instance.Save();
+            }
+        }
+
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        {
+            base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+            this.UpdateRequestUI(true);
+            this.SetUIInteractivity(true);
+            this.IsActiveButton = true;
+        }
+
+        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+        {
+            if (!confirmDialogActive) {
+                this.IsShowHistory = false;
+            }
+            this.UpdateRequestUI();
+            this.SetUIInteractivity(true);
+            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+        }
+        #endregion
+        //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
+        #region // パブリックメソッド
+        public void ChangeProgressText(double progress)
+        {
+            HMMainThreadDispatcher.instance?.Enqueue(() =>
+            {
+                this.ProgressText = $"Download Progress - {progress * 100:0.00} %";
+            });
+        }
+        public void UpdateRequestUI(bool selectRowCallback = false)
+        {
+            if (SceneManager.GetActiveScene().name == "GameCore") {
+                return;
+            }
+            Dispatcher.RunOnMainThread(() =>
+            {
+                try {
+                    this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed";
+                    this._queueButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red; ;
+                    this.HistoryHoverHint = IsShowHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
+                    HistoryButtonText = IsShowHistory ? "Requests" : "History";
+                    PlayButtonText = IsShowHistory ? "Replay" : "Play";
+                    this.PerformanceMode = RequestBotConfig.Instance.PerformanceMode;
+                    RefreshSongQueueList(selectRowCallback);
+                }
+                catch (Exception e) {
+                    Logger.Error(e);
+                }
+            });
+            Dispatcher.RunOnMainThread(() => this._playButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = this.SelectedRow >= 0 ? Color.green : Color.red);
+        }
+        /// <summary>
+        /// Alter the state of the buttons based on selection
+        /// </summary>
+        /// <param name="interactive">Set to false to force disable all buttons, true to auto enable buttons based on states</param>
+        public void SetUIInteractivity(bool interactive = true)
+        {
+            if (!this.isActivated) {
+                return;
+            }
+            try {
+                var toggled = interactive;
+
+                if (_requestTable.NumberOfCells() == 0 || SelectedRow == -1 || SelectedRow >= Songs.Count()) {
+                    Logger.Debug("Nothing selected, or empty list, buttons should be off");
+                    toggled = false;
+                }
+
+                var playButtonEnabled = toggled;
+                if (toggled && !IsShowHistory) {
+                    var isChallenge = _bot.CurrentSong._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
+                    playButtonEnabled = isChallenge ? false : toggled;
+                }
+                this.IsPlayButtonEnable = playButtonEnabled;
+
+                var skipButtonEnabled = toggled;
+                if (toggled && IsShowHistory) {
+                    skipButtonEnabled = false;
+                }
+                this.IsSkipButtonEnable = skipButtonEnabled;
+
+                this.IsBlacklistButtonEnable = toggled;
+
+                // history button can be enabled even if others are disabled
+                this.IsHistoryButtonEnable = true;
+                this.IsHistoryButtonEnable = interactive;
+
+                this.IsPlayButtonEnable = interactive;
+                this.IsSkipButtonEnable = interactive;
+                this.IsBlacklistButtonEnable = interactive;
+                // history button can be enabled even if others are disabled
+                this.IsHistoryButtonEnable = true;
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
+        }
+        public void RefreshSongQueueList(bool selectRowCallback = false)
+        {
+            try {
+                //UpdateSelectSongInfo();
+                lock (_lockObject) {
+                    this.Songs.Clear();
+                    if (this.IsShowHistory) {
+                        this.Songs.AddRange(RequestManager.HistorySongs);
+                    }
+                    else {
+                        this.Songs.AddRange(RequestManager.RequestSongs);
+                    }
+                    Dispatcher.RunOnMainThread(() =>
+                    {
+                        this._requestTable?.tableView?.ReloadData();
+                        if (!selectRowCallback || this._requestTable?.tableView?.numberOfCells > (uint)this.SelectedRow) {
+                            try {
+                                this._requestTable?.tableView?.SelectCellWithIdx(this.SelectedRow, selectRowCallback);
+                                this._requestTable?.tableView?.ScrollToCellWithIdx(this.SelectedRow, TableViewScroller.ScrollPositionType.Center, true);
+                            }
+                            catch (Exception e) {
+                                Logger.Error(e);
+                            }
+                        }
+                    });
+                }
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
+        }
+
+#if UNRELEASED
+        public void InvokeBeatSaberButton(String buttonName)
+        {
+            Button buttonInstance = Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == buttonName));
+            buttonInstance.onClick.Invoke();
         }
 
         public void ColorDeckButtons(KEYBOARD kb, Color basecolor, Color Present)
@@ -269,130 +375,25 @@ namespace SongRequestManagerV2.Views
                 }
             }
         }
-        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+
+        public void UpdateSelectSongInfo()
         {
-            base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            if (firstActivation) {
-                try {
-                    if (!Loader.AreSongsLoaded) {
-                        Loader.SongsLoadedEvent += SongLoader_SongsLoadedEvent;
-                    }
 
-#if UNRELEASED
-                    _songPreviewPlayer = Resources.FindObjectsOfTypeAll<SongPreviewPlayer>().FirstOrDefault();
-#endif
-                }
-                catch (Exception e) {
-                    Logger.Debug($"{e}");
-                }
-                try {
-                    try {
-                        CenterKeys = _factiry.Create().Setup(this.rectTransform, "", false, -15, 15);
-                        CenterKeys.AddKeyboard("CenterPanel.kbd");
-                    }
-                    catch (Exception e) {
-                        Logger.Error(e);
-                    }
-#if UNRELEASED
-                // BUG: Need additional modes disabling one shot buttons
-                // BUG: Need to make sure the buttons are usable on older headsets
+            if (RequestManager.HistorySongs.Count > 0)
+            {
+                var currentsong = CurrentlySelectedSong();
 
-                _CurrentSongName = BeatSaberUI.CreateText(container, "", new Vector2(-35, 37f));
-                _CurrentSongName.fontSize = 3f;
-                _CurrentSongName.color = Color.cyan;
-                _CurrentSongName.alignment = TextAlignmentOptions.Left;
-                _CurrentSongName.enableWordWrapping = false;
-                _CurrentSongName.text = "";
+                _CurrentSongName.text = currentsong.song["songName"].Value;
+                _CurrentSongName2.text = $"{currentsong.song["authorName"].Value} ({currentsong.song["version"].Value})";
 
-                _CurrentSongName2 = BeatSaberUI.CreateText(container, "", new Vector2(-35, 34f));
-                _CurrentSongName2.fontSize = 3f;
-                _CurrentSongName2.color = Color.cyan;
-                _CurrentSongName2.alignment = TextAlignmentOptions.Left;
-                _CurrentSongName2.enableWordWrapping = false;
-                _CurrentSongName2.text = "";
-                
-                //CenterKeys.AddKeys(SONGLISTKEY);
-                RequestBot.AddKeyboard(CenterKeys, "mainpanel.kbd");
                 ColorDeckButtons(CenterKeys, Color.white, Color.magenta);
+            }
+
+        }
 #endif
-                    CenterKeys.DefaultActions();
-                    try {
-#region History button
-                        // History button
-                        HistoryButtonText = "HISTORY";
-#endregion
-                    }
-                    catch (Exception e) {
-                        Logger.Debug($"{e}");
-                    }
-                    try {
-#region Blacklist button
-                        // Blacklist button
-                        this.BlackListButtonText = "Blacklist";
-#endregion
-                    }
-                    catch (Exception e) {
-                        Logger.Debug($"{e}");
-                    }
-                    try {
-#region Skip button
-                        this.SkipButtonName = "Skip";
-#endregion
-                    }
-                    catch (Exception e) {
-                        Logger.Debug($"{e}");
-                    }
-                    try {
-#region Play button
-                        // Play button
-                        this.PlayButtonText = "Play";
-#endregion
-                    }
-                    catch (Exception e) {
-                        Logger.Debug($"{e}");
-                    }
-                    try {
-#region Queue button
-                        // Queue button
-                        this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed";
-#endregion
-                    }
-                    catch (Exception e) {
-                        Logger.Debug($"{e}");
-                    }
-                    try {
-#region Progress
-                        this.ChangeProgressText(0f);
-#endregion
-                    }
-                    catch (Exception e) {
-                        Logger.Debug($"{e}");
-                    }
-                    this._requestTable.tableView.selectionType = TableViewSelectionType.Single;
-                    // Set default RequestFlowCoordinator title
-                    ChangeTitle?.Invoke(this.IsShowHistory ? "Song Request History" : "Song Request Queue");
-                }
-                catch (Exception e) {
-                    Logger.Debug($"{e}");
-                }
-            }
-            UpdateRequestUI(true);
-            SetUIInteractivity(true);            
-        }
-
-        protected override void OnPropertyChanged(PropertyChangedEventArgs args)
-        {
-            base.OnPropertyChanged(args);
-            if (args.PropertyName == nameof(this.IsShowHistory)) {
-                UpdateRequestUI(true);
-                SetUIInteractivity();
-            }
-            else if (args.PropertyName == nameof(this.PerformanceMode)) {
-                RequestBotConfig.Instance.PerformanceMode = this.PerformanceMode;
-                RequestBotConfig.Instance.Save();
-            }
-        }
-
+        #endregion
+        //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
+        #region // プライベートメソッド
         private void OnBotPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (sender is IRequestBot bot) {
@@ -401,7 +402,12 @@ namespace SongRequestManagerV2.Views
                 }
             }
         }
-
+        [UIAction("#post-parse")]
+        private void PostParse()
+        {
+            // Set default RequestFlowCoordinator title
+            ChangeTitle?.Invoke(this.IsShowHistory ? "Song Request History" : "Song Request Queue");
+        }
         [UIAction("history-click")]
         private void HistoryButtonClick()
         {
@@ -478,153 +484,17 @@ namespace SongRequestManagerV2.Views
         {
             _bot.CurrentSong = row as SongRequest;
             this._playButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = this.SelectedRow >= 0 ? Color.green : Color.red;
-            
+
             if (!IsShowHistory) {
                 var isChallenge = _bot.CurrentSong._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
                 this.IsPlayButtonEnable = !isChallenge;
             }
-            UpdateSelectSongInfo();
+            //UpdateSelectSongInfo();
             SetUIInteractivity();
         }
-
-
-        internal void ChangeProgressText(double progress)
-        {
-            HMMainThreadDispatcher.instance?.Enqueue(() =>
-            {
-                this.ProgressText = $"Download Progress - {progress * 100:0.00} %";
-            });
-        }
-
-        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
-        {
-            if (!confirmDialogActive) {
-                this.IsShowHistory = false;
-            }
-            this.UpdateRequestUI();
-            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-        }
-
-        public void UpdateSelectSongInfo()
-        {
-#if UNRELEASED
-            if (RequestManager.HistorySongs.Count > 0)
-            {
-                var currentsong = CurrentlySelectedSong();
-
-                _CurrentSongName.text = currentsong.song["songName"].Value;
-                _CurrentSongName2.text = $"{currentsong.song["authorName"].Value} ({currentsong.song["version"].Value})";
-
-                ColorDeckButtons(CenterKeys, Color.white, Color.magenta);
-            }
-#endif
-        }
-
-        public void UpdateRequestUI(bool selectRowCallback = false)
-        {
-            if (SceneManager.GetActiveScene().name == "GameCore") {
-                return;
-            }
-            Dispatcher.RunOnMainThread(() =>
-            {
-                try {
-                    this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed";
-                    this._queueButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red; ;
-                    this.HistoryHoverHint = IsShowHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
-                    HistoryButtonText = IsShowHistory ? "Requests" : "History";
-                    PlayButtonText = IsShowHistory ? "Replay" : "Play";
-                    this.PerformanceMode = RequestBotConfig.Instance.PerformanceMode;
-                    RefreshSongQueueList(selectRowCallback);
-                }
-                catch (Exception e) {
-                    Logger.Error(e);
-                }
-            });
-            Dispatcher.RunOnMainThread(() => this._playButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = this.SelectedRow >= 0 ? Color.green : Color.red);
-        }
-
         private void SongLoader_SongsLoadedEvent(Loader arg1, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> arg2)
         {
             _requestTable?.tableView?.ReloadData();
-        }
-
-        /// <summary>
-        /// Alter the state of the buttons based on selection
-        /// </summary>
-        /// <param name="interactive">Set to false to force disable all buttons, true to auto enable buttons based on states</param>
-        public void SetUIInteractivity(bool interactive = true)
-        {
-            if (!this.isActivated) {
-                return;
-            }
-            try {
-                var toggled = interactive;
-
-                if (_requestTable.NumberOfCells() == 0 || SelectedRow == -1 || SelectedRow >= Songs.Count()) {
-                    Logger.Debug("Nothing selected, or empty list, buttons should be off");
-                    toggled = false;
-                }
-
-                var playButtonEnabled = toggled;
-                if (toggled && !IsShowHistory) {
-                    var isChallenge = _bot.CurrentSong._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
-                    playButtonEnabled = isChallenge ? false : toggled;
-                }
-                this.IsPlayButtonEnable = playButtonEnabled;
-
-                var skipButtonEnabled = toggled;
-                if (toggled && IsShowHistory) {
-                    skipButtonEnabled = false;
-                }
-                this.IsSkipButtonEnable = skipButtonEnabled;
-
-                this.IsBlacklistButtonEnable = toggled;
-
-                // history button can be enabled even if others are disabled
-                this.IsHistoryButtonEnable = true;
-                this.IsHistoryButtonEnable = interactive;
-
-                this.IsPlayButtonEnable = interactive;
-                this.IsSkipButtonEnable = interactive;
-                this.IsBlacklistButtonEnable = interactive;
-                // history button can be enabled even if others are disabled
-                this.IsHistoryButtonEnable = true;
-            }
-            catch (Exception e) {
-                Logger.Error(e);
-            }
-        }
-
-        public void RefreshSongQueueList(bool selectRowCallback = false)
-        {
-            try {
-                UpdateSelectSongInfo();
-                lock (_lockObject) {
-                    this.Songs.Clear();
-                    if (this.IsShowHistory) {
-                        this.Songs.AddRange(RequestManager.HistorySongs);
-                    }
-                    else {
-                        this.Songs.AddRange(RequestManager.RequestSongs);
-                    }
-                    Dispatcher.RunOnMainThread(() =>
-                    {
-                        this._requestTable?.tableView?.ReloadData();
-                        if (!selectRowCallback || this._requestTable?.tableView?.numberOfCells > (uint)this.SelectedRow) {
-                            try {
-                                this._requestTable?.tableView?.SelectCellWithIdx(this.SelectedRow, selectRowCallback);
-                                this._requestTable?.tableView?.ScrollToCellWithIdx(this.SelectedRow, TableViewScroller.ScrollPositionType.Center, true);
-                            }
-                            catch (Exception e) {
-                                Logger.Error(e);
-                            }
-                        }
-                    });
-                }
-            }
-            catch (Exception e) {
-                Logger.Error(e);
-            }
         }
 
 #if UNRELEASED
@@ -637,16 +507,174 @@ namespace SongRequestManagerV2.Views
             // lookup song from level id
             return SongCore.Loader.CustomLevels.FirstOrDefault(s => string.Equals(s.Value.levelID, levelIds.First(), StringComparison.OrdinalIgnoreCase)).Value ?? null;
         }
+        private void PlayPreview(IPreviewBeatmapLevel level)
+        {
+            _songPreviewPlayer.CrossfadeTo(level.previewAudioClip, level.previewStartTime, level.previewDuration);
+        }
 #endif
+        #endregion
+        //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
+        #region // メンバ変数
+        private static readonly object _lockObject = new object();
+        private bool confirmDialogActive = false;
+        private KEYBOARD CenterKeys;
 
-#region Modal
+        [UIComponent("request-list")]
+        private CustomCellListTableData _requestTable;
+        [UIComponent("queue-button")]
+        private NoTransitionsButton _queueButton;
+        [UIComponent("play-button")]
+        private NoTransitionsButton _playButton;
+
+        [Inject]
+        protected PhysicsRaycasterWithCache _physicsRaycaster;
+        [Inject]
+        KEYBOARD.KEYBOARDFactiry _factiry;
+        [Inject]
+        IRequestBot _bot;
+        [Inject]
+        IChatManager _chatManager;
+#if UNRELEASED
+        private TextMeshProUGUI _CurrentSongName;
+        private TextMeshProUGUI _CurrentSongName2;
+        private SongPreviewPlayer _songPreviewPlayer;
+        string SONGLISTKEY = @"
+[blacklist last]/0'!block/current%CR%'
+
+[fun +]/25'!fun/current/toggle%CR%' [hard +]/25'!hard/current/toggle%CR%'
+[dance +]/25'!dance/current/toggle%CR%' [chill +]/25'!chill/current/toggle%CR%'
+[brutal +]/25'!brutal/current/toggle%CR%' [sehria +]/25'!sehria/current/toggle%CR%'
+
+[rock +]/25'!rock/current/toggle%CR%' [metal +]/25'!metal/current/toggle%CR%'  
+[anime +]/25'!anime/current/toggle%CR%' [pop +]/25'!pop/current/toggle%CR%' 
+
+[Random song!]/0'!decklist draw%CR%'";
+#endif
+        #endregion
+        //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
+        #region // 構築・破棄
+        [Inject]
+        void Constractor()
+        {
+
+            this._bot.UpdateUIRequest -= this.UpdateRequestUI;
+            this._bot.UpdateUIRequest += this.UpdateRequestUI;
+            this._bot.SetButtonIntactivityRequest -= this.SetUIInteractivity;
+            this._bot.SetButtonIntactivityRequest += this.SetUIInteractivity;
+            this._bot.PropertyChanged -= this.OnBotPropertyChanged;
+            this._bot.PropertyChanged += this.OnBotPropertyChanged;
+        }
+
+        public void Initialize()
+        {
+            try {
+                Loader.SongsLoadedEvent += SongLoader_SongsLoadedEvent;
+#if UNRELEASED
+                    _songPreviewPlayer = Resources.FindObjectsOfTypeAll<SongPreviewPlayer>().FirstOrDefault();
+#endif
+            }
+            catch (Exception e) {
+                Logger.Debug($"{e}");
+            }
+            try {
+                try {
+                    CenterKeys = _factiry.Create().Setup(this.rectTransform, "", false, -15, 15);
+                    CenterKeys.AddKeyboard("CenterPanel.kbd");
+                }
+                catch (Exception e) {
+                    Logger.Error(e);
+                }
+#if UNRELEASED
+                // BUG: Need additional modes disabling one shot buttons
+                // BUG: Need to make sure the buttons are usable on older headsets
+
+                _CurrentSongName = BeatSaberUI.CreateText(container, "", new Vector2(-35, 37f));
+                _CurrentSongName.fontSize = 3f;
+                _CurrentSongName.color = Color.cyan;
+                _CurrentSongName.alignment = TextAlignmentOptions.Left;
+                _CurrentSongName.enableWordWrapping = false;
+                _CurrentSongName.text = "";
+
+                _CurrentSongName2 = BeatSaberUI.CreateText(container, "", new Vector2(-35, 34f));
+                _CurrentSongName2.fontSize = 3f;
+                _CurrentSongName2.color = Color.cyan;
+                _CurrentSongName2.alignment = TextAlignmentOptions.Left;
+                _CurrentSongName2.enableWordWrapping = false;
+                _CurrentSongName2.text = "";
+                
+                //CenterKeys.AddKeys(SONGLISTKEY);
+                RequestBot.AddKeyboard(CenterKeys, "mainpanel.kbd");
+                ColorDeckButtons(CenterKeys, Color.white, Color.magenta);
+#endif
+                CenterKeys.DefaultActions();
+                try {
+                    #region History button
+                    // History button
+                    this.HistoryButtonText = "HISTORY";
+                    #endregion
+                }
+                catch (Exception e) {
+                    Logger.Debug($"{e}");
+                }
+                try {
+                    #region Blacklist button
+                    // Blacklist button
+                    this.BlackListButtonText = "Blacklist";
+                    #endregion
+                }
+                catch (Exception e) {
+                    Logger.Debug($"{e}");
+                }
+                try {
+                    #region Skip button
+                    this.SkipButtonName = "Skip";
+                    #endregion
+                }
+                catch (Exception e) {
+                    Logger.Debug($"{e}");
+                }
+                try {
+                    #region Play button
+                    // Play button
+                    this.PlayButtonText = "Play";
+                    #endregion
+                }
+                catch (Exception e) {
+                    Logger.Debug($"{e}");
+                }
+                try {
+                    #region Queue button
+                    // Queue button
+                    this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed";
+                    #endregion
+                }
+                catch (Exception e) {
+                    Logger.Debug($"{e}");
+                }
+                try {
+                    #region Progress
+                    this.ChangeProgressText(0f);
+                    #endregion
+                }
+                catch (Exception e) {
+                    Logger.Debug($"{e}");
+                }
+                this._requestTable.tableView.selectionType = TableViewSelectionType.Single;
+
+            }
+            catch (Exception e) {
+                Logger.Debug($"{e}");
+            }
+        }
+
+        #endregion
+        //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
+        #region Modal
         private Action OnConfirm;
         private Action OnDecline;
 
         [UIComponent("modal")]
         internal ModalView modal;
-
-
         /// <summary>説明 を取得、設定</summary>
         private string title_;
         /// <summary>説明 を取得、設定</summary>
@@ -696,13 +724,6 @@ namespace SongRequestManagerV2.Views
 
             modal.Show(true);
         }
-#endregion
-
-#if UNRELEASED
-        private void PlayPreview(IPreviewBeatmapLevel level)
-        {
-            _songPreviewPlayer.CrossfadeTo(level.previewAudioClip, level.previewStartTime, level.previewDuration);
-        }
-#endif
+        #endregion
     }
 }
