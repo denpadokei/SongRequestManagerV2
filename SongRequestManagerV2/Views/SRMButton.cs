@@ -28,13 +28,15 @@ using Zenject;
 namespace SongRequestManagerV2.Views
 {
     [HotReload]
-    public class SRMButton : BSMLAutomaticViewController
+    public class SRMButton : BSMLAutomaticViewController, IInitializable
     {
         // For this method of setting the ResourceName, this class must be the first class in the file.
         [Inject]
         MainFlowCoordinator _mainFlowCoordinator;
         [Inject]
         LevelCollectionNavigationController levelCollectionNavigationController;
+        [Inject]
+        LevelSelectionNavigationController levelSelectionNavigationController;
         [Inject]
         RequestFlowCoordinator _requestFlow;
         [Inject]
@@ -120,9 +122,7 @@ namespace SongRequestManagerV2.Views
                 Logger.Error(e);
             }
         }
-
-        #region Unity message
-        void Start()
+        public void Initialize()
         {
             Logger.Debug("Start()");
 
@@ -136,27 +136,34 @@ namespace SongRequestManagerV2.Views
             try {
                 var screen = new GameObject("SRMButton", typeof(CanvasScaler), typeof(RectMask2D), typeof(VRGraphicRaycaster), typeof(CurvedCanvasSettings));
                 screen.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", BeatSaberUI.PhysicsRaycasterWithCache);
-                (screen.transform as RectTransform).sizeDelta = new Vector2(30f, 10f);
-                (screen.transform as RectTransform).SetParent(levelCollectionNavigationController.transform as RectTransform, false);
+                var vertical = screen.AddComponent<VerticalLayoutGroup>();
+                var fitter = vertical.gameObject.AddComponent<ContentSizeFitter>();
+                fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+                fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+                (screen.transform as RectTransform).sizeDelta = new Vector2(40f, 30f);
+                (screen.transform as RectTransform).SetParent(this.levelCollectionNavigationController.transform as RectTransform, false);
                 (screen.transform as RectTransform).anchoredPosition = new Vector2(70f, 80f);
-                screen.transform.localScale = new Vector3(2f, 2f, 2f);
+                screen.transform.localScale = Vector3.one * 2;
                 if (_button == null) {
                     _button = UIHelper.CreateUIButton((screen.transform as RectTransform), "CancelButton", Vector2.zero, Vector2.zero, Action, "OPEN", null) as NoTransitionsButton;
                 }
                 Logger.Debug($"screem size : {(screen.transform as RectTransform).sizeDelta}");
                 Logger.Debug($"button size : {(_button.transform as RectTransform).sizeDelta}");
-                Logger.Debug($"button position : {_button.transform.localPosition}");
+                Logger.Debug($"button position : {_button.transform.position}");
             }
             catch (Exception e) {
                 Logger.Error(e);
             }
-            
+
             this._bot.UpdateRequestUI();
             this.SetButtonColor();
 
             Logger.Debug("Created request button!");
             Logger.Debug("Start() end");
         }
+
+        #region Unity message
         protected override void OnDestroy()
         {
             Logger.Debug("OnDestroy");
@@ -317,5 +324,7 @@ namespace SongRequestManagerV2.Views
                 yield return this.waitForSeconds;
             }
         }
+
+        
     }
 }

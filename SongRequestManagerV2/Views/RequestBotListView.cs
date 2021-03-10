@@ -340,7 +340,7 @@ namespace SongRequestManagerV2.Views
                         if (!selectRowCallback || this._requestTable?.tableView?.numberOfCells > (uint)this.SelectedRow) {
                             try {
                                 this._requestTable?.tableView?.SelectCellWithIdx(this.SelectedRow, selectRowCallback);
-                                this._requestTable?.tableView?.ScrollToCellWithIdx(this.SelectedRow, TableViewScroller.ScrollPositionType.Center, true);
+                                this._requestTable?.tableView?.ScrollToCellWithIdx(this.SelectedRow, TableView.ScrollPositionType.Center, true);
                             }
                             catch (Exception e) {
                                 Logger.Error(e);
@@ -659,7 +659,7 @@ namespace SongRequestManagerV2.Views
                 catch (Exception e) {
                     Logger.Debug($"{e}");
                 }
-                this._requestTable.tableView.selectionType = TableViewSelectionType.Single;
+                //this._requestTable.tableView.selectionType = TableViewSelectionType.Single;
 
             }
             catch (Exception e) {
