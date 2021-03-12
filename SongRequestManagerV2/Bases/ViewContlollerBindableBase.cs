@@ -1,14 +1,8 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SongRequestManagerV2.Bases
 {
@@ -32,7 +26,7 @@ namespace SongRequestManagerV2.Bases
             if (EqualityComparer<T>.Default.Equals(storage, value)) return false;
 
             storage = value;
-            RaisePropertyChanged(propertyName);
+            this.RaisePropertyChanged(propertyName);
             return true;
         }
 
@@ -42,9 +36,9 @@ namespace SongRequestManagerV2.Bases
         /// <param name="propertyName">Name of the property used to notify listeners. This
         /// value is optional and can be provided automatically when invoked from compilers
         /// that support <see cref="CallerMemberNameAttribute"/>.</param>
-        protected void RaisePropertyChanged([CallerMemberName]string propertyName = null)
+        protected void RaisePropertyChanged([CallerMemberName] string propertyName = null)
         {
-            OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+            this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
         }
         /// <summary>
         /// Raises this object's PropertyChanged event.
@@ -52,7 +46,7 @@ namespace SongRequestManagerV2.Bases
         /// <param name="args">The PropertyChangedEventArgs</param>
         protected virtual void OnPropertyChanged(PropertyChangedEventArgs args)
         {
-            HMMainThreadDispatcher.instance?.Enqueue(() => { NotifyPropertyChanged(args.PropertyName); });
+            HMMainThreadDispatcher.instance?.Enqueue(() => { this.NotifyPropertyChanged(args.PropertyName); });
         }
     }
 }

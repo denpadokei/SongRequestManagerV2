@@ -22,20 +22,20 @@ namespace SongRequestManagerV2
 
         internal WebResponse(HttpResponseMessage resp, byte[] body)
         {
-            StatusCode = resp.StatusCode;
-            ReasonPhrase = resp.ReasonPhrase;
-            Headers = resp.Headers;
-            RequestMessage = resp.RequestMessage;
-            IsSuccessStatusCode = resp.IsSuccessStatusCode;
+            this.StatusCode = resp.StatusCode;
+            this.ReasonPhrase = resp.ReasonPhrase;
+            this.Headers = resp.Headers;
+            this.RequestMessage = resp.RequestMessage;
+            this.IsSuccessStatusCode = resp.IsSuccessStatusCode;
 
-            _content = body;
+            this._content = body;
         }
 
-        public byte[] ContentToBytes() => _content;
-        public string ContentToString() => Encoding.UTF8.GetString(_content);
+        public byte[] ContentToBytes() => this._content;
+        public string ContentToString() => Encoding.UTF8.GetString(this._content);
         public JSONNode ConvertToJsonNode()
         {
-            return JSONNode.Parse(ContentToString());
+            return JSONNode.Parse(this.ContentToString());
         }
     }
 
@@ -64,7 +64,7 @@ namespace SongRequestManagerV2
             catch (Exception e) {
                 Logger.Debug($"{e}");
             }
-            
+
 
             _client = new HttpClient()
             {
@@ -102,8 +102,7 @@ namespace SongRequestManagerV2
         internal static async Task<byte[]> DownloadSong(string url, CancellationToken token, IProgress<double> progress = null)
         {
             // check if beatsaver url needs to be pre-pended
-            if (!url.StartsWith(@"https://beatsaver.com/"))
-            {
+            if (!url.StartsWith(@"https://beatsaver.com/")) {
                 url = $"https://beatsaver.com/{url}";
             }
             try {
@@ -123,7 +122,7 @@ namespace SongRequestManagerV2
         internal static async Task<WebResponse> SendAsync(HttpMethod methodType, string url, CancellationToken token, IProgress<double> progress = null)
         {
             Logger.Debug($"{methodType.ToString()}: {url}");
-            
+
             // send request
             try {
                 HttpResponseMessage resp = null;
@@ -144,7 +143,7 @@ namespace SongRequestManagerV2
                         Logger.Debug($"{resp?.StatusCode}");
                     }
                 } while (resp?.StatusCode != HttpStatusCode.NotFound && resp?.IsSuccessStatusCode != true && retryCount <= RETRY_COUNT);
-                
+
 
                 if (token.IsCancellationRequested) throw new TaskCanceledException();
 

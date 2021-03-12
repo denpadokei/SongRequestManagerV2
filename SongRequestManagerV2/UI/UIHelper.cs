@@ -1,12 +1,11 @@
-﻿using HMUI;
+﻿using BeatSaberMarkupLanguage.Components;
+using HMUI;
+using IPA.Utilities;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using IPA.Utilities;
-using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.Components;
-using TMPro;
 
 namespace SongRequestManagerV2.UI
 {

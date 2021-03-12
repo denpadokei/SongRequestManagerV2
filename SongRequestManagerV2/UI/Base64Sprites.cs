@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SongRequestManagerV2.UI
 {
-    class Base64Sprites
+    internal class Base64Sprites
     {
         public static Sprite InfoIcon;
         public static Sprite VersusChallengeIcon;
@@ -38,13 +38,11 @@ namespace SongRequestManagerV2.UI
             base64 = r.Replace(base64, "");
 
             Sprite s = null;
-            try
-            {
+            try {
                 Texture2D tex = Base64ToTexture2D(base64);
                 s = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), (Vector2.one / 2f));
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 Console.WriteLine("Exception loading texture from base64 data.");
                 s = null;
             }

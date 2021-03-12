@@ -1,5 +1,4 @@
 ﻿using ChatCore.Interfaces;
-using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
@@ -8,7 +7,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -54,7 +52,7 @@ namespace SongRequestManagerV2.Bases
         public abstract void Constractor();
 
         [Inject]
-        IChatManager _chatManager;
+        private readonly IChatManager _chatManager;
 
         public ISRMCommand AddAliases(IEnumerable<string> aliases)
         {
@@ -71,8 +69,8 @@ namespace SongRequestManagerV2.Bases
 
         public void UpdateCommand(ChangedFlags changed)
         {
-            ChangedParameters |= changed;
-            ChangedParameters &= ~ChangedFlags.Saved;
+            this.ChangedParameters |= changed;
+            this.ChangedParameters &= ~ChangedFlags.Saved;
         }
 
 
@@ -84,65 +82,65 @@ namespace SongRequestManagerV2.Bases
 
             string fixedname = listname.ToLower();
             if (!fixedname.EndsWith(".users")) fixedname += ".users";
-            Permittedusers = fixedname;
+            this.Permittedusers = fixedname;
         }
 
         public string Execute(ParseState state)
         {
             // BUG: Most of these will be replaced.  
 
-            if (Method2 != null) Method2(state._user, state._parameter, state._flags, state._info);
-            else if (Method != null) Method(state._user, state._parameter);
+            if (this.Method2 != null) this.Method2(state._user, state._parameter, state._flags, state._info);
+            else if (this.Method != null) this.Method(state._user, state._parameter);
             //else if (Method3 != null) return Method3(this, state.user, state.parameter, state.flags, state.info);
-            else if (func1 != null) Dispatcher.RunCoroutine(func1(state));
-            else if (Subcommand != null) return Subcommand(state); // Recommended.
-            else if (Subcommand2 != null) Subcommand(state);
-            else if (AsyncSubCommand != null) AsyncSubCommand(state).Await(null, null, null);
+            else if (this.func1 != null) Dispatcher.RunCoroutine(this.func1(state));
+            else if (this.Subcommand != null) return this.Subcommand(state); // Recommended.
+            else if (this.Subcommand2 != null) this.Subcommand(state);
+            else if (this.AsyncSubCommand != null) this.AsyncSubCommand(state).Await(null, null, null);
             return success;
         }
 
         public ISRMCommand Setup(string alias)
         {
-            Aliases.Clear();
-            Aliases.Add(alias.ToLower());
+            this.Aliases.Clear();
+            this.Aliases.Add(alias.ToLower());
             return this;
         }
 
         public ISRMCommand Setup(IEnumerable<string> alias)
         {
-            Aliases.Clear();
+            this.Aliases.Clear();
             foreach (var element in alias) {
-                Aliases.Add(element.ToLower());
+                this.Aliases.Add(element.ToLower());
             }
             return this;
         }
 
         public ISRMCommand Setup(string variablename, StringBuilder reference)
         {
-            UserParameter = reference;
-            Flags = CmdFlags.Variable | CmdFlags.Broadcaster;
-            Aliases.Clear();
-            Aliases.Add(variablename.ToLower());
-            Subcommand = this.Variable;
-            Regexfilter = _anything;
-            ShortHelp = "the = operator currently requires a space after it";
-            UserString = reference.ToString(); // Save a backup
+            this.UserParameter = reference;
+            this.Flags = CmdFlags.Variable | CmdFlags.Broadcaster;
+            this.Aliases.Clear();
+            this.Aliases.Add(variablename.ToLower());
+            this.Subcommand = this.Variable;
+            this.Regexfilter = _anything;
+            this.ShortHelp = "the = operator currently requires a space after it";
+            this.UserString = reference.ToString(); // Save a backup
             return this;
         }
 
         public ISRMCommand Action(Func<ParseState, string> action)
         {
-            Subcommand = action;
+            this.Subcommand = action;
             return this;
         }
         public ISRMCommand Action(Func<ParseState> action)
         {
-            Subcommand2 = action;
+            this.Subcommand2 = action;
             return this;
         }
         public ISRMCommand AsyncAction(Func<ParseState, Task> action)
         {
-            AsyncSubCommand = action;
+            this.AsyncSubCommand = action;
             return this;
         }
         public ISRMCommand Help(CmdFlags flags = FlagParameter.Broadcaster, string ShortHelp = "", Regex regexfilter = null)
@@ -156,25 +154,25 @@ namespace SongRequestManagerV2.Bases
 
         public ISRMCommand User(string userstring)
         {
-            UserParameter.Clear().Append(userstring);
+            this.UserParameter.Clear().Append(userstring);
             return this;
         }
 
         public ISRMCommand Action(Action<IChatUser, string, CmdFlags, string> action)
         {
-            Method2 = action;
+            this.Method2 = action;
             return this;
         }
 
         public ISRMCommand Action(Action<IChatUser, string> action)
         {
-            Method = action;
+            this.Method = action;
             return this;
         }
 
         public ISRMCommand Coroutine(Func<ParseState, IEnumerator> action)
         {
-            func1 = action;
+            this.func1 = action;
             return this;
         }
 
@@ -183,21 +181,21 @@ namespace SongRequestManagerV2.Bases
         #region Command List Save / Load functionality
         public string GetHelpText()
         {
-            return ShortHelp;
+            return this.ShortHelp;
         }
 
         public string GetFlags()
         {
-            return Flags.ToString();
+            return this.Flags.ToString();
         }
 
         public string GetAliases()
         {
-            return String.Join(",", Aliases.ToArray());
+            return String.Join(",", this.Aliases.ToArray());
         }
         #endregion
 
-        string Variable(ParseState state) // Basically show the value of a variable without parsing
+        private string Variable(ParseState state) // Basically show the value of a variable without parsing
         {
             this._chatManager.QueueChatMessage(state._botcmd.UserParameter.ToString());
             return "";

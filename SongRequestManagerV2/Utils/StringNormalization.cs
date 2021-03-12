@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SongRequestManagerV2.Utils
 {
@@ -31,7 +29,7 @@ namespace SongRequestManagerV2.Utils
 
         public string RemoveDirectorySymbols(ref string text)
         {
-            var mask = _SymbolsValidDirectory;
+            var mask = this._SymbolsValidDirectory;
             var o = new StringBuilder(text.Length);
 
             foreach (var c in text) {
@@ -43,7 +41,7 @@ namespace SongRequestManagerV2.Utils
         // This function takes a user search string, and fixes it for beatsaber.
         public string NormalizeBeatSaverString(string text)
         {
-            var words = Split(text);
+            var words = this.Split(text);
             StringBuilder result = new StringBuilder();
             foreach (var word in words) {
                 if (word.Length < 3) continue;
@@ -62,7 +60,7 @@ namespace SongRequestManagerV2.Utils
         public string[] Split(string text)
         {
             var sb = new StringBuilder(text);
-            ReplaceSymbols(sb, _SymbolsMap);
+            this.ReplaceSymbols(sb, this._SymbolsMap);
             string[] result = sb.ToString().ToLower().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             return result;
@@ -75,25 +73,25 @@ namespace SongRequestManagerV2.Utils
         public StringNormalization()
         {
             for (char i = (char)0; i < 128; i++) {
-                _SymbolsMap[i] = i;
-                _SymbolsNoDash[i] = i;
-                _SymbolsValidDirectory[i] = i;
+                this._SymbolsMap[i] = i;
+                this._SymbolsNoDash[i] = i;
+                this._SymbolsValidDirectory[i] = i;
             }
 
-            foreach (var c in new char[] { '@', '*', '+', ':', '-', '<', '~', '>', '(', ')', '[', ']', '/', '\\', '.', ',' }) if (c < 128) _SymbolsMap[c] = ' ';
-            foreach (var c in new char[] { '@', '*', '+', ':', '<', '~', '>', '(', ')', '[', ']', '/', '\\', '.', ',' }) if (c < 128) _SymbolsNoDash[c] = ' ';
-            foreach (var c in Path.GetInvalidPathChars()) if (c < 128) _SymbolsValidDirectory[c] = '\0';
-            _SymbolsValidDirectory[':'] = '\0';
-            _SymbolsValidDirectory['\\'] = '\0';
-            _SymbolsValidDirectory['/'] = '\0';
-            _SymbolsValidDirectory['+'] = '\0';
-            _SymbolsValidDirectory['*'] = '\0';
-            _SymbolsValidDirectory['?'] = '\0';
-            _SymbolsValidDirectory[';'] = '\0';
-            _SymbolsValidDirectory['$'] = '\0';
-            _SymbolsValidDirectory['.'] = '\0';
-            _SymbolsValidDirectory['('] = '\0';
-            _SymbolsValidDirectory[')'] = '\0';
+            foreach (var c in new char[] { '@', '*', '+', ':', '-', '<', '~', '>', '(', ')', '[', ']', '/', '\\', '.', ',' }) if (c < 128) this._SymbolsMap[c] = ' ';
+            foreach (var c in new char[] { '@', '*', '+', ':', '<', '~', '>', '(', ')', '[', ']', '/', '\\', '.', ',' }) if (c < 128) this._SymbolsNoDash[c] = ' ';
+            foreach (var c in Path.GetInvalidPathChars()) if (c < 128) this._SymbolsValidDirectory[c] = '\0';
+            this._SymbolsValidDirectory[':'] = '\0';
+            this._SymbolsValidDirectory['\\'] = '\0';
+            this._SymbolsValidDirectory['/'] = '\0';
+            this._SymbolsValidDirectory['+'] = '\0';
+            this._SymbolsValidDirectory['*'] = '\0';
+            this._SymbolsValidDirectory['?'] = '\0';
+            this._SymbolsValidDirectory[';'] = '\0';
+            this._SymbolsValidDirectory['$'] = '\0';
+            this._SymbolsValidDirectory['.'] = '\0';
+            this._SymbolsValidDirectory['('] = '\0';
+            this._SymbolsValidDirectory[')'] = '\0';
 
             // Incomplete list of words that BeatSaver.com filters out for no good reason. No longer applies!
             foreach (var word in new string[] { "pp" }) {

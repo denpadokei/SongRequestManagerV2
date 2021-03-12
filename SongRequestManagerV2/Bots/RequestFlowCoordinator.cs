@@ -3,8 +3,6 @@ using HMUI;
 using IPA.Utilities;
 using SongRequestManagerV2.Views;
 using System;
-using System.Linq;
-using UnityEngine;
 using Zenject;
 
 namespace SongRequestManagerV2
@@ -12,14 +10,14 @@ namespace SongRequestManagerV2
     public class RequestFlowCoordinator : FlowCoordinator
     {
         [Inject]
-        private RequestBotListView _requestBotListViewController;
+        private readonly RequestBotListView _requestBotListViewController;
         [Inject]
-        private KeyboardViewController _keyboardViewController;
+        private readonly KeyboardViewController _keyboardViewController;
 
         public event Action<SongRequest, bool> PlayProcessEvent;
         public event Action QueueStatusChanged;
 
-        public void RefreshSongList(bool obj) => _requestBotListViewController.RefreshSongQueueList(obj);
+        public void RefreshSongList(bool obj) => this._requestBotListViewController.RefreshSongQueueList(obj);
 
         protected override void BackButtonWasPressed(ViewController topViewController)
         {
@@ -30,16 +28,16 @@ namespace SongRequestManagerV2
         [Inject]
         public void Const()
         {
-            _requestBotListViewController.ChangeTitle += s => this.SetTitle(s);
-            _requestBotListViewController.PlayProcessEvent += (i, b) => this.PlayProcessEvent?.Invoke(i, b);
-            _requestBotListViewController.PropertyChanged += this.OnRequestBotListViewController_PropertyChanged;
+            this._requestBotListViewController.ChangeTitle += s => this.SetTitle(s);
+            this._requestBotListViewController.PlayProcessEvent += (i, b) => this.PlayProcessEvent?.Invoke(i, b);
+            this._requestBotListViewController.PropertyChanged += this.OnRequestBotListViewController_PropertyChanged;
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
-            _requestBotListViewController.ChangeTitle -= s => this.SetTitle(s);
-            _requestBotListViewController.PlayProcessEvent -= (i, b) => this.PlayProcessEvent?.Invoke(i, b);
-            _requestBotListViewController.PropertyChanged -= this.OnRequestBotListViewController_PropertyChanged;
+            this._requestBotListViewController.ChangeTitle -= s => this.SetTitle(s);
+            this._requestBotListViewController.PlayProcessEvent -= (i, b) => this.PlayProcessEvent?.Invoke(i, b);
+            this._requestBotListViewController.PropertyChanged -= this.OnRequestBotListViewController_PropertyChanged;
         }
 
         private void OnRequestBotListViewController_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -55,9 +53,9 @@ namespace SongRequestManagerV2
         {
             if (firstActivation) {
                 this.SetTitle("Song Request Manager");
-                showBackButton = true;
+                this.showBackButton = true;
                 try {
-                    ProvideInitialViewControllers(_requestBotListViewController, null, _keyboardViewController);
+                    this.ProvideInitialViewControllers(this._requestBotListViewController, null, this._keyboardViewController);
                 }
                 catch (System.Exception e) {
                     Logger.Error(e);

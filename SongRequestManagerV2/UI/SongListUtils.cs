@@ -1,35 +1,33 @@
 ﻿//using StreamCore.Utils;
+using BS_Utils.Utilities;
 using HMUI;
+using IPA.Utilities;
+using SongCore;
 using System;
 using System.Collections;
-using System.Linq;
-using UnityEngine;
-using IPA.Utilities;
-using IPA.Loader;
-using SongCore;
-using System.Threading.Tasks;
-using System.Threading;
-using Zenject;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using UnityEngine;
 using UnityEngine.UI;
-using BS_Utils.Utilities;
+using Zenject;
 
 namespace SongRequestManagerV2
 {
     public class SongListUtils
     {
         [Inject]
-        private LevelCollectionViewController _levelCollectionViewController;
+        private readonly LevelCollectionViewController _levelCollectionViewController;
         [Inject]
-        private SelectLevelCategoryViewController _selectLevelCategoryViewController;
+        private readonly SelectLevelCategoryViewController _selectLevelCategoryViewController;
         [Inject]
-        private GameplaySetupViewController _gameplaySetupViewController;
+        private readonly GameplaySetupViewController _gameplaySetupViewController;
         [Inject]
-        private LevelFilteringNavigationController _levelFilteringNavigationController;
+        private readonly LevelFilteringNavigationController _levelFilteringNavigationController;
         [Inject]
-        private AnnotatedBeatmapLevelCollectionsViewController _annotatedBeatmapLevelCollectionsViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController _annotatedBeatmapLevelCollectionsViewController;
         [Inject]
-        ResultsViewController _resultsViewController;
+        private readonly ResultsViewController _resultsViewController;
 
         private static bool _initialized = false;
         //private static bool _songBrowserInstalled = false;
@@ -37,12 +35,10 @@ namespace SongRequestManagerV2
         [Inject]
         public void Initialize()
         {
-            
 
-            if (!_initialized)
-            {
-                try
-                {
+
+            if (!_initialized) {
+                try {
                     //_songBrowserInstalled = Utilities.IsModInstalled("Song Browser");
                     //_songDownloaderInstalled = IPA.Loader.PluginManager.GetPlugin("BeatSaver Downloader") != null;
 
@@ -50,8 +46,7 @@ namespace SongRequestManagerV2
                     //Logger.Debug($"Downloader installed: {_songDownloaderInstalled}");
                     _initialized = true;
                 }
-                catch (Exception e)
-                {
+                catch (Exception e) {
                     Logger.Debug($"Exception {e}");
                 }
             }
@@ -134,9 +129,9 @@ namespace SongRequestManagerV2
             // get the Level Filtering Nav Controller, the top bar
             // get the tab bar
             //var selectLevelCategoryViewController = Resources.FindObjectsOfTypeAll<SelectLevelCategoryViewController>().First();
-            var segcontrol = _selectLevelCategoryViewController.GetField<IconSegmentedControl, SelectLevelCategoryViewController>("_levelFilterCategoryIconSegmentedControl");
+            var segcontrol = this._selectLevelCategoryViewController.GetField<IconSegmentedControl, SelectLevelCategoryViewController>("_levelFilterCategoryIconSegmentedControl");
             segcontrol.SelectCellWithNumber(index);
-            _selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(segcontrol, index);
+            this._selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(segcontrol, index);
         }
 
         //public static SongCore.OverrideClasses.SongCoreCustomLevelCollection BeatSaverDownloaderGetLevelPackWithLevels()
@@ -155,39 +150,37 @@ namespace SongRequestManagerV2
 
         public IEnumerator ScrollToLevel(string levelID, Action<bool> callback, bool animated, bool isRetry = false)
         {
-            if (_resultsViewController.isActivated) {
-                var button = _resultsViewController.GetComponentsInChildren<Button>().FirstOrDefault(x => x.name.Contains("Continue"));
+            if (this._resultsViewController.isActivated) {
+                var button = this._resultsViewController.GetComponentsInChildren<Button>().FirstOrDefault(x => x.name.Contains("Continue"));
                 button.onClick?.Invoke();
             }
 
-            if (_levelCollectionViewController)
-            {
+            if (this._levelCollectionViewController) {
                 Logger.Debug($"Scrolling to {levelID}! Retry={isRetry}");
 
                 // handle if song browser is present
-                if (Plugin.SongBrowserPluginPresent)
-                {
+                if (Plugin.SongBrowserPluginPresent) {
                     Plugin.SongBrowserCancelFilter();
                 }
 
                 // Make sure our custom songpack is selected
-                SelectCustomSongPack(2);
-                
-                _levelFilteringNavigationController.UpdateCustomSongs();
-                
-                yield return new WaitWhile(() => _levelFilteringNavigationController.GetField<CancellationTokenSource>("_cancellationTokenSource") != null);
-                var tableView = _annotatedBeatmapLevelCollectionsViewController.GetField<AnnotatedBeatmapLevelCollectionsTableView, AnnotatedBeatmapLevelCollectionsViewController>("_annotatedBeatmapLevelCollectionsTableView");
+                this.SelectCustomSongPack(2);
+
+                this._levelFilteringNavigationController.UpdateCustomSongs();
+
+                yield return new WaitWhile(() => this._levelFilteringNavigationController.GetField<CancellationTokenSource>("_cancellationTokenSource") != null);
+                var tableView = this._annotatedBeatmapLevelCollectionsViewController.GetField<AnnotatedBeatmapLevelCollectionsTableView, AnnotatedBeatmapLevelCollectionsViewController>("_annotatedBeatmapLevelCollectionsTableView");
                 tableView.SelectAndScrollToCellWithIdx(0);
-                
+
                 var customSong = tableView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsTableView>("_annotatedBeatmapLevelCollections").FirstOrDefault();
-                _levelFilteringNavigationController.HandleAnnotatedBeatmapLevelCollectionsViewControllerDidSelectAnnotatedBeatmapLevelCollection(customSong);
+                this._levelFilteringNavigationController.HandleAnnotatedBeatmapLevelCollectionsViewControllerDidSelectAnnotatedBeatmapLevelCollection(customSong);
                 var song = Loader.GetLevelByHash(levelID.Split('_').Last());
                 if (song == null) {
                     Logger.Debug("Song not find.");
                     yield break;
                 }
                 // get the table view
-                var levelsTableView = _levelCollectionViewController.GetField<LevelCollectionTableView, LevelCollectionViewController>("_levelCollectionTableView");
+                var levelsTableView = this._levelCollectionViewController.GetField<LevelCollectionTableView, LevelCollectionViewController>("_levelCollectionTableView");
                 levelsTableView.SelectLevel(song);
             }
             callback?.Invoke(false);

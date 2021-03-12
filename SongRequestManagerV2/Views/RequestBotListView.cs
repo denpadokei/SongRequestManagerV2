@@ -6,17 +6,13 @@ using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Interfaces;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using VRUIControls;
 using Zenject;
-using Image = UnityEngine.UI.Image;
 using KEYBOARD = SongRequestManagerV2.Bots.KEYBOARD;
 
 namespace SongRequestManagerV2.Views
@@ -208,7 +204,7 @@ namespace SongRequestManagerV2.Views
             this._bot.UpdateUIRequest -= this.UpdateRequestUI;
             this._bot.SetButtonIntactivityRequest -= this.SetUIInteractivity;
             this._bot.PropertyChanged -= this.OnBotPropertyChanged;
-            Loader.SongsLoadedEvent -= SongLoader_SongsLoadedEvent;
+            Loader.SongsLoadedEvent -= this.SongLoader_SongsLoadedEvent;
             base.OnDestroy();
         }
         #endregion
@@ -237,7 +233,7 @@ namespace SongRequestManagerV2.Views
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            if (!confirmDialogActive) {
+            if (!this.confirmDialogActive) {
                 this.IsShowHistory = false;
             }
             this.UpdateRequestUI();
@@ -264,11 +260,11 @@ namespace SongRequestManagerV2.Views
                 try {
                     this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed";
                     this._queueButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red; ;
-                    this.HistoryHoverHint = IsShowHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
-                    HistoryButtonText = IsShowHistory ? "Requests" : "History";
-                    PlayButtonText = IsShowHistory ? "Replay" : "Play";
+                    this.HistoryHoverHint = this.IsShowHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
+                    this.HistoryButtonText = this.IsShowHistory ? "Requests" : "History";
+                    this.PlayButtonText = this.IsShowHistory ? "Replay" : "Play";
                     this.PerformanceMode = RequestBotConfig.Instance.PerformanceMode;
-                    RefreshSongQueueList(selectRowCallback);
+                    this.RefreshSongQueueList(selectRowCallback);
                 }
                 catch (Exception e) {
                     Logger.Error(e);
@@ -288,20 +284,20 @@ namespace SongRequestManagerV2.Views
             try {
                 var toggled = interactive;
 
-                if (_requestTable.NumberOfCells() == 0 || SelectedRow == -1 || SelectedRow >= Songs.Count()) {
+                if (this._requestTable.NumberOfCells() == 0 || this.SelectedRow == -1 || this.SelectedRow >= this.Songs.Count()) {
                     Logger.Debug("Nothing selected, or empty list, buttons should be off");
                     toggled = false;
                 }
 
                 var playButtonEnabled = toggled;
-                if (toggled && !IsShowHistory) {
-                    var isChallenge = _bot.CurrentSong._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
-                    playButtonEnabled = isChallenge ? false : toggled;
+                if (toggled && !this.IsShowHistory) {
+                    var isChallenge = this._bot.CurrentSong._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
+                    playButtonEnabled = !isChallenge && toggled;
                 }
                 this.IsPlayButtonEnable = playButtonEnabled;
 
                 var skipButtonEnabled = toggled;
-                if (toggled && IsShowHistory) {
+                if (toggled && this.IsShowHistory) {
                     skipButtonEnabled = false;
                 }
                 this.IsSkipButtonEnable = skipButtonEnabled;
@@ -411,61 +407,61 @@ namespace SongRequestManagerV2.Views
         [UIAction("history-click")]
         private void HistoryButtonClick()
         {
-            IsShowHistory = !IsShowHistory;
+            this.IsShowHistory = !this.IsShowHistory;
 
-            ChangeTitle?.Invoke(IsShowHistory ? "Song Request History" : "Song Request Queue");
+            ChangeTitle?.Invoke(this.IsShowHistory ? "Song Request History" : "Song Request Queue");
         }
         [UIAction("skip-click")]
         private void SkipButtonClick()
         {
-            if (_requestTable.NumberOfCells() > 0) {
+            if (this._requestTable.NumberOfCells() > 0) {
                 void _onConfirm()
                 {
                     // skip it
-                    _bot.Skip(_bot.CurrentSong);
+                    this._bot.Skip(this._bot.CurrentSong);
                     // indicate dialog is no longer active
-                    confirmDialogActive = false;
+                    this.confirmDialogActive = false;
                 }
 
                 // get song
-                var song = _bot.CurrentSong._song;
+                var song = this._bot.CurrentSong._song;
 
                 // indicate dialog is active
-                confirmDialogActive = true;
+                this.confirmDialogActive = true;
 
                 // show dialog
-                this.ShowDialog("Skip Song Warning", $"Skipping {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { confirmDialogActive = false; });
+                this.ShowDialog("Skip Song Warning", $"Skipping {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { this.confirmDialogActive = false; });
             }
         }
         [UIAction("blacklist-click")]
         private void BlacklistButtonClick()
         {
-            if (_requestTable.NumberOfCells() > 0) {
+            if (this._requestTable.NumberOfCells() > 0) {
                 void _onConfirm()
                 {
-                    _bot.Blacklist(_bot.CurrentSong, IsShowHistory, true);
-                    confirmDialogActive = false;
+                    this._bot.Blacklist(this._bot.CurrentSong, this.IsShowHistory, true);
+                    this.confirmDialogActive = false;
                 }
 
                 // get song
-                var song = _bot.CurrentSong._song;
+                var song = this._bot.CurrentSong._song;
 
                 // indicate dialog is active
-                confirmDialogActive = true;
+                this.confirmDialogActive = true;
 
                 // show dialog
-                this.ShowDialog("Blacklist Song Warning", $"Blacklisting {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { confirmDialogActive = false; });
+                this.ShowDialog("Blacklist Song Warning", $"Blacklisting {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { this.confirmDialogActive = false; });
             }
         }
         [UIAction("play-click")]
         private void PlayButtonClick()
         {
-            if (_requestTable.NumberOfCells() > 0) {
-                RequestBot.Played.Add(_bot.CurrentSong._song);
-                _bot.WriteJSON(RequestBot.playedfilename, RequestBot.Played);
+            if (this._requestTable.NumberOfCells() > 0) {
+                RequestBot.Played.Add(this._bot.CurrentSong._song);
+                this._bot.WriteJSON(RequestBot.playedfilename, RequestBot.Played);
 
-                SetUIInteractivity(false);
-                this.PlayProcessEvent?.Invoke(_bot.CurrentSong, this.IsShowHistory);
+                this.SetUIInteractivity(false);
+                this.PlayProcessEvent?.Invoke(this._bot.CurrentSong, this.IsShowHistory);
             }
         }
 
@@ -474,27 +470,27 @@ namespace SongRequestManagerV2.Views
         {
             RequestBotConfig.Instance.RequestQueueOpen = !RequestBotConfig.Instance.RequestQueueOpen;
             RequestBotConfig.Instance.Save();
-            _bot.WriteQueueStatusToFile(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
+            this._bot.WriteQueueStatusToFile(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
             this._chatManager.QueueChatMessage(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
-            UpdateRequestUI();
+            this.UpdateRequestUI();
         }
 
         [UIAction("selected-cell")]
         private void SelectedCell(TableView tableView, object row)
         {
-            _bot.CurrentSong = row as SongRequest;
+            this._bot.CurrentSong = row as SongRequest;
             this._playButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = this.SelectedRow >= 0 ? Color.green : Color.red;
 
-            if (!IsShowHistory) {
-                var isChallenge = _bot.CurrentSong._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (!this.IsShowHistory) {
+                var isChallenge = this._bot.CurrentSong._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
                 this.IsPlayButtonEnable = !isChallenge;
             }
             //UpdateSelectSongInfo();
-            SetUIInteractivity();
+            this.SetUIInteractivity();
         }
         private void SongLoader_SongsLoadedEvent(Loader arg1, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> arg2)
         {
-            _requestTable?.tableView?.ReloadData();
+            this._requestTable?.tableView?.ReloadData();
         }
 
 #if UNRELEASED
@@ -520,20 +516,20 @@ namespace SongRequestManagerV2.Views
         private KEYBOARD CenterKeys;
 
         [UIComponent("request-list")]
-        private CustomCellListTableData _requestTable;
+        private readonly CustomCellListTableData _requestTable;
         [UIComponent("queue-button")]
-        private NoTransitionsButton _queueButton;
+        private readonly NoTransitionsButton _queueButton;
         [UIComponent("play-button")]
-        private NoTransitionsButton _playButton;
+        private readonly NoTransitionsButton _playButton;
 
         [Inject]
         protected PhysicsRaycasterWithCache _physicsRaycaster;
         [Inject]
-        KEYBOARD.KEYBOARDFactiry _factiry;
+        private readonly KEYBOARD.KEYBOARDFactiry _factiry;
         [Inject]
-        IRequestBot _bot;
+        private readonly IRequestBot _bot;
         [Inject]
-        IChatManager _chatManager;
+        private readonly IChatManager _chatManager;
 #if UNRELEASED
         private TextMeshProUGUI _CurrentSongName;
         private TextMeshProUGUI _CurrentSongName2;
@@ -554,7 +550,7 @@ namespace SongRequestManagerV2.Views
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄
         [Inject]
-        void Constractor()
+        private void Constractor()
         {
 
             this._bot.UpdateUIRequest -= this.UpdateRequestUI;
@@ -568,7 +564,7 @@ namespace SongRequestManagerV2.Views
         public void Initialize()
         {
             try {
-                Loader.SongsLoadedEvent += SongLoader_SongsLoadedEvent;
+                Loader.SongsLoadedEvent += this.SongLoader_SongsLoadedEvent;
 #if UNRELEASED
                     _songPreviewPlayer = Resources.FindObjectsOfTypeAll<SongPreviewPlayer>().FirstOrDefault();
 #endif
@@ -578,8 +574,8 @@ namespace SongRequestManagerV2.Views
             }
             try {
                 try {
-                    CenterKeys = _factiry.Create().Setup(this.rectTransform, "", false, -15, 15);
-                    CenterKeys.AddKeyboard("CenterPanel.kbd");
+                    this.CenterKeys = this._factiry.Create().Setup(this.rectTransform, "", false, -15, 15);
+                    this.CenterKeys.AddKeyboard("CenterPanel.kbd");
                 }
                 catch (Exception e) {
                     Logger.Error(e);
@@ -606,7 +602,7 @@ namespace SongRequestManagerV2.Views
                 RequestBot.AddKeyboard(CenterKeys, "mainpanel.kbd");
                 ColorDeckButtons(CenterKeys, Color.white, Color.magenta);
 #endif
-                CenterKeys.DefaultActions();
+                this.CenterKeys.DefaultActions();
                 try {
                     #region History button
                     // History button
@@ -700,17 +696,17 @@ namespace SongRequestManagerV2.Views
         [UIAction("yes-click")]
         private void YesClick()
         {
-            modal.Hide(true);
-            OnConfirm?.Invoke();
-            OnConfirm = null;
+            this.modal.Hide(true);
+            this.OnConfirm?.Invoke();
+            this.OnConfirm = null;
         }
 
         [UIAction("no-click")]
         private void NoClick()
         {
-            modal.Hide(true);
-            OnDecline?.Invoke();
-            OnDecline = null;
+            this.modal.Hide(true);
+            this.OnDecline?.Invoke();
+            this.OnDecline = null;
         }
 
         [UIAction("show-dialog")]
@@ -719,10 +715,10 @@ namespace SongRequestManagerV2.Views
             this.Title = title;
             this.Message = message;
 
-            OnConfirm = onConfirm;
-            OnDecline = onDecline;
+            this.OnConfirm = onConfirm;
+            this.OnDecline = onDecline;
 
-            modal.Show(true);
+            this.modal.Show(true);
         }
         #endregion
     }

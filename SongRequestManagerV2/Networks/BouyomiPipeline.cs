@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SongRequestManagerV2.Networks
@@ -28,32 +24,32 @@ namespace SongRequestManagerV2.Networks
         public void Start()
         {
             if (int.TryParse(RequestBotConfig.Instance.ReceivePort, out var port)) {
-                _server.Port = port;
+                this._server.Port = port;
             }
             else {
-                _server.Port = 50001;
+                this._server.Port = 50001;
             }
-            _ =_server.RunServer();
+            _ = this._server.RunServer();
         }
 
         public void Stop()
         {
-            _server.StopServer();
+            this._server.StopServer();
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
         private void Awake()
         {
-            _server = new GameObject().AddComponent<Server>();
-            _client = new GameObject().AddComponent<Client>();
+            this._server = new GameObject().AddComponent<Server>();
+            this._client = new GameObject().AddComponent<Client>();
 
-            _server.PropertyChanged += this.OnServerPropertyChanged;
+            this._server.PropertyChanged += this.OnServerPropertyChanged;
         }
 
         protected override void OnDestroy()
         {
-            _server.PropertyChanged -= this.OnServerPropertyChanged;
+            this._server.PropertyChanged -= this.OnServerPropertyChanged;
             base.OnDestroy();
         }
 
@@ -81,8 +77,8 @@ namespace SongRequestManagerV2.Networks
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
-        Server _server;
-        Client _client;
+        private Server _server;
+        private Client _client;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄

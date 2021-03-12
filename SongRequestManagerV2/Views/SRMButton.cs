@@ -1,7 +1,6 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
-using BeatSaberMarkupLanguage.FloatingScreen;
 using BeatSaberMarkupLanguage.ViewControllers;
 using BS_Utils.Utilities;
 using HMUI;
@@ -32,27 +31,27 @@ namespace SongRequestManagerV2.Views
     {
         // For this method of setting the ResourceName, this class must be the first class in the file.
         [Inject]
-        MainFlowCoordinator _mainFlowCoordinator;
+        private readonly MainFlowCoordinator _mainFlowCoordinator;
         [Inject]
-        LevelCollectionNavigationController levelCollectionNavigationController;
+        private readonly LevelCollectionNavigationController levelCollectionNavigationController;
         [Inject]
-        LevelSelectionNavigationController levelSelectionNavigationController;
+        private readonly LevelSelectionNavigationController levelSelectionNavigationController;
         [Inject]
-        RequestFlowCoordinator _requestFlow;
+        private readonly RequestFlowCoordinator _requestFlow;
         [Inject]
-        IRequestBot _bot;
+        private readonly IRequestBot _bot;
         [Inject]
-        IChatManager ChatManager { get; }
+        private IChatManager ChatManager { get; }
         [Inject]
-        DynamicText.DynamicTextFactory _textFactory;
+        private readonly DynamicText.DynamicTextFactory _textFactory;
         [Inject]
-        StringNormalization Normalize;
+        private readonly StringNormalization Normalize;
         [Inject]
-        SongListUtils SongListUtils;
+        private readonly SongListUtils SongListUtils;
 
         private Button _button;
 
-        private WaitForSeconds waitForSeconds = new WaitForSeconds(0.07f);
+        private readonly WaitForSeconds waitForSeconds = new WaitForSeconds(0.07f);
 
         private volatile bool isChangeing = false;
 
@@ -62,31 +61,31 @@ namespace SongRequestManagerV2.Views
 
         public Canvas ButtonCanvas { get; set; }
 
-        public FlowCoordinator Current => _mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
+        public FlowCoordinator Current => this._mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
 
         [UIAction("action")]
         public void Action()
         {
             try {
                 Logger.Debug("action");
-                _button.interactable = false;
-                SRMButtonPressed();
+                this._button.interactable = false;
+                this.SRMButtonPressed();
             }
             catch (Exception e) {
                 Logger.Error(e);
             }
             finally {
-                _button.interactable = true;
+                this._button.interactable = true;
             }
 
         }
 
         internal void SRMButtonPressed()
         {
-            if (Current is LevelSelectionFlowCoordinator) {
-                Current.PresentFlowCoordinator(_requestFlow, null, AnimationDirection.Horizontal, false, false);
+            if (this.Current is LevelSelectionFlowCoordinator) {
+                this.Current.PresentFlowCoordinator(this._requestFlow, null, AnimationDirection.Horizontal, false, false);
             }
-            Logger.Debug($"{Current.name}");
+            Logger.Debug($"{this.Current.name}");
             return;
         }
 
@@ -111,12 +110,12 @@ namespace SongRequestManagerV2.Views
 
         internal void BackButtonPressed()
         {
-            Logger.Debug($"{Current.name} : {_requestFlow.name}");
-            if (Current.name != _requestFlow.name) {
+            Logger.Debug($"{this.Current.name} : {this._requestFlow.name}");
+            if (this.Current.name != this._requestFlow.name) {
                 return;
             }
             try {
-                Current.GetField<FlowCoordinator, FlowCoordinator>("_parentFlowCoordinator")?.DismissFlowCoordinator(Current, null, AnimationDirection.Horizontal, true);
+                this.Current.GetField<FlowCoordinator, FlowCoordinator>("_parentFlowCoordinator")?.DismissFlowCoordinator(this.Current, null, AnimationDirection.Horizontal, true);
             }
             catch (Exception e) {
                 Logger.Error(e);
@@ -126,10 +125,10 @@ namespace SongRequestManagerV2.Views
         {
             Logger.Debug("Start()");
 
-            _bot.ChangeButtonColor += this.SetButtonColor;
-            _bot.RefreshListRequest += this.RefreshListRequest;
-            _requestFlow.QueueStatusChanged += this.OnQueueStatusChanged;
-            _requestFlow.PlayProcessEvent += this.ProcessSongRequest;
+            this._bot.ChangeButtonColor += this.SetButtonColor;
+            this._bot.RefreshListRequest += this.RefreshListRequest;
+            this._requestFlow.QueueStatusChanged += this.OnQueueStatusChanged;
+            this._requestFlow.PlayProcessEvent += this.ProcessSongRequest;
 
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
             this.DownloadProgress.ProgressChanged += this.Progress_ProgressChanged;
@@ -145,12 +144,12 @@ namespace SongRequestManagerV2.Views
                 (screen.transform as RectTransform).SetParent(this.levelCollectionNavigationController.transform as RectTransform, false);
                 (screen.transform as RectTransform).anchoredPosition = new Vector2(70f, 80f);
                 screen.transform.localScale = Vector3.one * 2;
-                if (_button == null) {
-                    _button = UIHelper.CreateUIButton((screen.transform as RectTransform), "CancelButton", Vector2.zero, Vector2.zero, Action, "OPEN", null) as NoTransitionsButton;
+                if (this._button == null) {
+                    this._button = UIHelper.CreateUIButton((screen.transform as RectTransform), "CancelButton", Vector2.zero, Vector2.zero, this.Action, "OPEN", null) as NoTransitionsButton;
                 }
                 Logger.Debug($"screem size : {(screen.transform as RectTransform).sizeDelta}");
-                Logger.Debug($"button size : {(_button.transform as RectTransform).sizeDelta}");
-                Logger.Debug($"button position : {_button.transform.position}");
+                Logger.Debug($"button size : {(this._button.transform as RectTransform).sizeDelta}");
+                Logger.Debug($"button position : {this._button.transform.position}");
             }
             catch (Exception e) {
                 Logger.Error(e);
@@ -167,11 +166,11 @@ namespace SongRequestManagerV2.Views
         protected override void OnDestroy()
         {
             Logger.Debug("OnDestroy");
-            _bot.ChangeButtonColor -= this.SetButtonColor;
-            _bot.RefreshListRequest -= this.RefreshListRequest;
-            _requestFlow.QueueStatusChanged -= this.OnQueueStatusChanged;
-            _requestFlow.PlayProcessEvent -= this.ProcessSongRequest;
-            this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;;
+            this._bot.ChangeButtonColor -= this.SetButtonColor;
+            this._bot.RefreshListRequest -= this.RefreshListRequest;
+            this._requestFlow.QueueStatusChanged -= this.OnQueueStatusChanged;
+            this._requestFlow.PlayProcessEvent -= this.ProcessSongRequest;
+            this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged; ;
             base.OnDestroy();
         }
         #endregion
@@ -179,7 +178,7 @@ namespace SongRequestManagerV2.Views
         private void OnQueueStatusChanged()
         {
             try {
-                var externalComponents = _button.gameObject.GetComponentsInChildren<ExternalComponents>(true).FirstOrDefault();
+                var externalComponents = this._button.gameObject.GetComponentsInChildren<ExternalComponents>(true).FirstOrDefault();
                 var textMesh = externalComponents.components.FirstOrDefault(x => x as TextMeshProUGUI) as TextMeshProUGUI;
 
                 if (RequestBotConfig.Instance.RequestQueueOpen) {
@@ -207,13 +206,13 @@ namespace SongRequestManagerV2.Views
             this._requestFlow.RefreshSongList(obj);
         }
 
-        async void ProcessSongRequest(SongRequest request, bool fromHistory = false)
+        private async void ProcessSongRequest(SongRequest request, bool fromHistory = false)
         {
             if ((RequestManager.RequestSongs.Any() && !fromHistory) || (RequestManager.HistorySongs.Any() && fromHistory)) {
                 if (!fromHistory) {
                     Logger.Debug("Set status to request");
-                    _bot.SetRequestStatus(request, RequestStatus.Played);
-                    _bot.DequeueRequest(request);
+                    this._bot.SetRequestStatus(request, RequestStatus.Played);
+                    this._bot.DequeueRequest(request);
                 }
 
                 if (request == null) {
@@ -224,7 +223,7 @@ namespace SongRequestManagerV2.Views
                     Logger.Debug($"Processing song request {request._song["songName"].Value}");
                 string songName = request._song["songName"].Value;
                 string songIndex = Regex.Replace($"{request._song["id"].Value} ({request._song["songName"].Value} - {request._song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
-                songIndex = Normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
+                songIndex = this.Normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
 
                 string currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
                 string songHash = request._song["hash"].Value.ToUpper();
@@ -260,7 +259,7 @@ namespace SongRequestManagerV2.Views
                         }
                         zipStream.Close();
                     }
-                    Dispatcher.RunCoroutine(WaitForRefreshAndSchroll(request));
+                    Dispatcher.RunCoroutine(this.WaitForRefreshAndSchroll(request));
 #if UNRELEASED
                         //if (!request.song.IsNull) // Experimental!
                         //{
@@ -274,20 +273,20 @@ namespace SongRequestManagerV2.Views
                     this.BackButtonPressed();
                     bool success = false;
                     Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
-                    Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(songHash, (s) =>
+                    Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(songHash, (s) =>
                     {
                         success = s;
-                        _bot.UpdateRequestUI();
+                        this._bot.UpdateRequestUI();
                     }, false));
                     if (!request._song.IsNull) {
                         // Display next song message
-                        _textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
+                        this._textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
                     }
                 }
             }
         }
 
-        IEnumerator WaitForRefreshAndSchroll(SongRequest request)
+        private IEnumerator WaitForRefreshAndSchroll(SongRequest request)
         {
             yield return null;
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
@@ -296,16 +295,16 @@ namespace SongRequestManagerV2.Views
             Utility.EmptyDirectory(".requestcache", true);
             bool success = false;
             Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
-            Dispatcher.RunCoroutine(SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), (s) =>
+            Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), (s) =>
             {
                 success = s;
-                _bot.UpdateRequestUI();
+                this._bot.UpdateRequestUI();
             }, false));
 
             ((IProgress<double>)this.DownloadProgress).Report(0d);
             if (!request._song.IsNull) {
                 // Display next song message
-                _textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
+                this._textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
             }
         }
 
@@ -325,6 +324,6 @@ namespace SongRequestManagerV2.Views
             }
         }
 
-        
+
     }
 }

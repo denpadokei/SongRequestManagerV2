@@ -4,9 +4,6 @@ using ChatCore.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SongRequestManagerV2.Models
 {
@@ -34,12 +31,12 @@ namespace SongRequestManagerV2.Models
 
         public MessageEntity()
         {
-            Id = "";
-            Message = "";
-            Sender = new RequesterEntity();
-            Channel = new UnknownChatChannel();
-            Emotes = new IChatEmote[0];
-            Metadata = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
+            this.Id = "";
+            this.Message = "";
+            this.Sender = new RequesterEntity();
+            this.Channel = new UnknownChatChannel();
+            this.Emotes = new IChatEmote[0];
+            this.Metadata = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
         }
 
         public JSONObject ToJson()

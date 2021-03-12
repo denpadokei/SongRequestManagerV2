@@ -1,5 +1,4 @@
 ﻿using ChatCore.Utilities;
-using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Utils;
@@ -15,24 +14,22 @@ namespace SongRequestManagerV2
     public class RequestManager
     {
         [Inject]
-        SongRequest.SongRequestFactory factory;
+        private readonly SongRequest.SongRequestFactory factory;
         [Inject]
-        IChatManager _chatManager;
+        private readonly IChatManager _chatManager;
 
         public static BlockingCollection<object> RequestSongs { get; } = new BlockingCollection<object>();
-        private static string requestsPath = Path.Combine(Plugin.DataPath, "SongRequestQueue.dat");
+        private static readonly string requestsPath = Path.Combine(Plugin.DataPath, "SongRequestQueue.dat");
 
         public static BlockingCollection<object> HistorySongs { get; } = new BlockingCollection<object>();
-        private static string historyPath = Path.Combine(Plugin.DataPath, "SongRequestHistory.dat");
+        private static readonly string historyPath = Path.Combine(Plugin.DataPath, "SongRequestHistory.dat");
 
         public List<object> Read(string path)
         {
             var songs = new List<object>();
-            if (File.Exists(path))
-            {
+            if (File.Exists(path)) {
                 var json = JSON.Parse(File.ReadAllText(path));
-                if (!json.IsNull)
-                {
+                if (!json.IsNull) {
                     foreach (var j in json.AsArray) {
                         try {
                             if (!j.Value.IsNull && j.Value is JSONObject obj) {
@@ -43,7 +40,7 @@ namespace SongRequestManagerV2
                         catch (Exception e) {
                             Logger.Debug($"{e}");
                         }
-                    }   
+                    }
                 }
             }
             return songs;
@@ -79,7 +76,7 @@ namespace SongRequestManagerV2
         {
             try {
                 RequestSongs.Clear();
-                RequestSongs.AddRange(Read(requestsPath));
+                RequestSongs.AddRange(this.Read(requestsPath));
             }
             catch (Exception e) {
                 Logger.Debug($"{e}");
@@ -90,15 +87,15 @@ namespace SongRequestManagerV2
 
         public void WriteRequest()
         {
-            Write(requestsPath, RequestSongs);
+            this.Write(requestsPath, RequestSongs);
         }
 
         public void ReadHistory()
         {
             try {
                 HistorySongs.Clear();
-                var list = Read(historyPath);
-                HistorySongs.AddRange(Read(historyPath));
+                var list = this.Read(historyPath);
+                HistorySongs.AddRange(this.Read(historyPath));
                 foreach (var item in list) {
                     HistoryManager.AddSong(item as SongRequest);
                 }
@@ -111,7 +108,7 @@ namespace SongRequestManagerV2
 
         public void WriteHistory()
         {
-            Write(historyPath, HistorySongs);
+            this.Write(historyPath, HistorySongs);
         }
     }
 }

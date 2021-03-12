@@ -1,19 +1,15 @@
 ﻿using SongRequestManagerV2.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Zenject;
 
 namespace SongRequestManagerV2.Bots
 {
     public class QueueLongMessage
     {
-        private StringBuilder msgBuilder = new StringBuilder();
+        private readonly StringBuilder msgBuilder = new StringBuilder();
         private int messageCount = 1;
         private int maxMessages = 2;
-        int maxoverflowtextlength = 60; // We don't know ahead of time, so we're going to do a safe estimate. 
+        private int maxoverflowtextlength = 60; // We don't know ahead of time, so we're going to do a safe estimate. 
 
         private int maxoverflowpoint = 0; // The offset in the string where the overflow message needs to go
         private int overflowcount = 0; // We need to save Count
@@ -21,7 +17,7 @@ namespace SongRequestManagerV2.Bots
         public int Count = 0;
 
         [Inject]
-        IChatManager _chatManager;
+        private readonly IChatManager _chatManager;
 
         // BUG: This version doesn't reallly strings > twitchmessagelength well, will support
         public QueueLongMessage() // Constructor supports setting max messages
@@ -31,14 +27,14 @@ namespace SongRequestManagerV2.Bots
 
         public QueueLongMessage SetUp(int maximummessageallowed = 2, int maxoverflowtext = 60)
         {
-            maxMessages = maximummessageallowed;
-            maxoverflowtextlength = maxoverflowtext;
+            this.maxMessages = maximummessageallowed;
+            this.maxoverflowtextlength = maxoverflowtext;
             return this;
         }
 
         public void Header(string text)
         {
-            msgBuilder.Append(text);
+            this.msgBuilder.Append(text);
         }
 
         // BUG: Only works form string < MaximumTwitchMessageLength
@@ -46,46 +42,46 @@ namespace SongRequestManagerV2.Bots
         {
 
             // Save the point where we would put the overflow message
-            if (messageCount >= maxMessages && maxoverflowpoint == 0 && msgBuilder.Length + text.Length > RequestBot.MaximumTwitchMessageLength - maxoverflowtextlength) {
-                maxoverflowpoint = msgBuilder.Length - separatorlength;
-                overflowcount = Count;
+            if (this.messageCount >= this.maxMessages && this.maxoverflowpoint == 0 && this.msgBuilder.Length + text.Length > RequestBot.MaximumTwitchMessageLength - this.maxoverflowtextlength) {
+                this.maxoverflowpoint = this.msgBuilder.Length - this.separatorlength;
+                this.overflowcount = this.Count;
             }
 
-            if (msgBuilder.Length + text.Length > RequestBot.MaximumTwitchMessageLength) {
-                messageCount++;
+            if (this.msgBuilder.Length + text.Length > RequestBot.MaximumTwitchMessageLength) {
+                this.messageCount++;
 
-                if (maxoverflowpoint > 0) {
-                    msgBuilder.Length = maxoverflowpoint;
-                    Count = overflowcount;
+                if (this.maxoverflowpoint > 0) {
+                    this.msgBuilder.Length = this.maxoverflowpoint;
+                    this.Count = this.overflowcount;
                     return true;
                 }
-                _chatManager.QueueChatMessage(msgBuilder.ToString(0, msgBuilder.Length - separatorlength));
-                msgBuilder.Clear();
+                this._chatManager.QueueChatMessage(this.msgBuilder.ToString(0, this.msgBuilder.Length - this.separatorlength));
+                this.msgBuilder.Clear();
             }
 
-            Count++;
-            msgBuilder.Append(text);
-            msgBuilder.Append(separator);
-            separatorlength = separator.Length;
+            this.Count++;
+            this.msgBuilder.Append(text);
+            this.msgBuilder.Append(separator);
+            this.separatorlength = separator.Length;
 
             return false;
         }
 
         public void End(string overflowtext = "", string emptymsg = "")
         {
-            if (Count == 0)
+            if (this.Count == 0)
                 this._chatManager.QueueChatMessage(emptymsg); // Note, this means header doesn't get printed either for empty lists                
-            else if (messageCount > maxMessages && overflowcount > 0)
-                this._chatManager.QueueChatMessage(msgBuilder.ToString() + overflowtext);
+            else if (this.messageCount > this.maxMessages && this.overflowcount > 0)
+                this._chatManager.QueueChatMessage(this.msgBuilder.ToString() + overflowtext);
             else {
-                msgBuilder.Length -= separatorlength;
-                this._chatManager.QueueChatMessage(msgBuilder.ToString());
+                this.msgBuilder.Length -= this.separatorlength;
+                this._chatManager.QueueChatMessage(this.msgBuilder.ToString());
             }
 
             // Reset the class for reuse
-            maxoverflowpoint = 0;
-            messageCount = 1;
-            msgBuilder.Clear();
+            this.maxoverflowpoint = 0;
+            this.messageCount = 1;
+            this.msgBuilder.Clear();
         }
 
         public class QueueLongMessageFactroy : PlaceholderFactory<QueueLongMessage>

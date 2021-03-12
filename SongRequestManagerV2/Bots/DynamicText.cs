@@ -1,14 +1,11 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Utilities;
 using SongRequestManagerV2.Interfaces;
-using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Zenject;
 
 namespace SongRequestManagerV2.Bots
@@ -16,7 +13,7 @@ namespace SongRequestManagerV2.Bots
     public class DynamicText
     {
         [Inject]
-        IChatManager _chatManager;
+        private readonly IChatManager _chatManager;
 
         public Dictionary<string, string> Dynamicvariables { get; } = new Dictionary<string, string>();  // A list of the variables available to us, we're using a list of pairs because the match we use uses BeginsWith,since the name of the string is unknown. The list is very short, so no biggie
 
@@ -25,13 +22,13 @@ namespace SongRequestManagerV2.Bots
 
         public DynamicText Add(string key, string value)
         {
-            Dynamicvariables.Add(key, value); // Make the code slower but more readable :(
+            this.Dynamicvariables.Add(key, value); // Make the code slower but more readable :(
             return this;
         }
         public DynamicText AddUser(IChatUser user)
         {
             try {
-                Add("user", user.DisplayName);
+                this.Add("user", user.DisplayName);
             }
             catch {
                 // Don't care. Twitch user doesn't HAVE to be defined.
@@ -41,15 +38,15 @@ namespace SongRequestManagerV2.Bots
 
         public DynamicText AddLinks()
         {
-            if (AllowLinks) {
-                Add("beatsaver", "https://beatsaver.com");
-                Add("beatsaber", "https://beatsaber.com");
-                Add("scoresaber", "https://scoresaber.com");
+            if (this.AllowLinks) {
+                this.Add("beatsaver", "https://beatsaver.com");
+                this.Add("beatsaber", "https://beatsaber.com");
+                this.Add("scoresaber", "https://scoresaber.com");
             }
             else {
-                Add("beatsaver", "beatsaver site");
-                Add("beatsaver", "beatsaber site");
-                Add("scoresaber", "scoresaber site");
+                this.Add("beatsaver", "beatsaver site");
+                this.Add("beatsaver", "beatsaber site");
+                this.Add("scoresaber", "scoresaber site");
             }
 
             return this;
@@ -61,31 +58,31 @@ namespace SongRequestManagerV2.Bots
 
             StringBuilder aliastext = new StringBuilder();
             foreach (var alias in botcmd.Aliases) aliastext.Append($"{alias} ");
-            Add("alias", aliastext.ToString());
+            this.Add("alias", aliastext.ToString());
 
             aliastext.Clear();
             aliastext.Append('[');
             aliastext.Append(botcmd.Flags & CmdFlags.TwitchLevel).ToString();
             aliastext.Append(']');
-            Add("rights", aliastext.ToString());
+            this.Add("rights", aliastext.ToString());
             return this;
         }
 
         // Adds a JSON object to the dictionary. You can define a prefix to make the object identifiers unique if needed.
         public DynamicText AddJSON(ref JSONObject json, string prefix = "")
         {
-            foreach (var element in json) Add(prefix + element.Key, element.Value);
+            foreach (var element in json) this.Add(prefix + element.Key, element.Value);
             return this;
         }
 
         public DynamicText AddSong(JSONObject json, string prefix = "") // Alternate call for direct object
         {
-            return AddSong(ref json, prefix);
+            return this.AddSong(ref json, prefix);
         }
 
         public DynamicText AddSong(ref JSONObject song, string prefix = "")
         {
-            AddJSON(ref song, prefix); // Add the song JSON
+            this.AddJSON(ref song, prefix); // Add the song JSON
 
             //SongMap map;
             //if (MapDatabase.MapLibrary.TryGetValue(song["version"].Value, out map) && map.pp>0)
@@ -98,18 +95,18 @@ namespace SongRequestManagerV2.Bots
             //}
 
 
-            if (song["pp"].AsFloat > 0) Add("PP", song["pp"].AsInt.ToString() + " PP"); else Add("PP", "");
+            if (song["pp"].AsFloat > 0) this.Add("PP", song["pp"].AsInt.ToString() + " PP"); else this.Add("PP", "");
 
-            Add("StarRating", Utility.GetStarRating(song)); // Add additional dynamic properties
-            Add("Rating", Utility.GetRating(song));
-            Add("BeatsaverLink", $"https://beatsaver.com/beatmap/{song["id"].Value}");
-            Add("BeatsaberLink", $"https://bsaber.com/songs/{song["id"].Value}");
+            this.Add("StarRating", Utility.GetStarRating(song)); // Add additional dynamic properties
+            this.Add("Rating", Utility.GetRating(song));
+            this.Add("BeatsaverLink", $"https://beatsaver.com/beatmap/{song["id"].Value}");
+            this.Add("BeatsaberLink", $"https://bsaber.com/songs/{song["id"].Value}");
             return this;
         }
 
         public string Parse(StringBuilder text, bool parselong = false) // We implement a path for ref or nonref
         {
-            return Parse(text.ToString(), parselong);
+            return this.Parse(text.ToString(), parselong);
         }
 
         // Refactor, supports %variable%, and no longer uses split, should be closer to c++ speed.
@@ -132,7 +129,7 @@ namespace SongRequestManagerV2.Bots
                             break;
                         }
                     }
-                    if (keywordlength > 0 && keywordlength != 0 && Dynamicvariables.TryGetValue(text.Substring(keywordstart, keywordlength), out var substitutetext)) {
+                    if (keywordlength > 0 && keywordlength != 0 && this.Dynamicvariables.TryGetValue(text.Substring(keywordstart, keywordlength), out var substitutetext)) {
 
                         if (keywordlength == 1 && !parselong) return output.ToString(); // Return at first sepearator on first 1 character code. 
 
@@ -150,7 +147,7 @@ namespace SongRequestManagerV2.Bots
 
         public DynamicText QueueMessage(string text, bool parselong = false)
         {
-            this._chatManager.QueueChatMessage(Parse(text, parselong));
+            this._chatManager.QueueChatMessage(this.Parse(text, parselong));
             return this;
         }
 

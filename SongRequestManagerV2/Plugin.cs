@@ -81,7 +81,7 @@ namespace SongRequestManagerV2
         public void OnExit()
         {
             BSEvents.lateMenuSceneLoadedFresh -= this.BSEvents_lateMenuSceneLoadedFresh;
-            IsApplicationExiting = true;
+            this.IsApplicationExiting = true;
             BouyomiPipeline.instance.Stop();
         }
     }

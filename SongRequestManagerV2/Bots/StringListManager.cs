@@ -1,13 +1,9 @@
 ﻿using SongRequestManagerV2.Interfaces;
-using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
-using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Zenject;
 
 namespace SongRequestManagerV2.Bots
@@ -21,11 +17,10 @@ namespace SongRequestManagerV2.Bots
         private static readonly char[] lineseparator = { '\n', '\r' };
 
         public List<string> list = new List<string>();
-        private HashSet<string> hashlist = new HashSet<string>();
+        private readonly HashSet<string> hashlist = new HashSet<string>();
         [Inject]
-        IRequestBot _bot;
-
-        ListFlags flags = 0;
+        private readonly IRequestBot _bot;
+        private readonly ListFlags flags = 0;
 
         // Callback function prototype here
 
@@ -36,17 +31,17 @@ namespace SongRequestManagerV2.Bots
 
         public bool Readfile(string filename, bool ConvertToLower = false)
         {
-            if (flags.HasFlag(ListFlags.InMemory)) return false;
+            if (this.flags.HasFlag(ListFlags.InMemory)) return false;
 
             try {
                 string listfilename = Path.Combine(Plugin.DataPath, filename);
                 string fileContent = File.ReadAllText(listfilename);
                 if (listfilename.EndsWith(".script"))
-                    list = fileContent.Split(lineseparator, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    this.list = fileContent.Split(lineseparator, StringSplitOptions.RemoveEmptyEntries).ToList();
                 else
-                    list = fileContent.Split(anyseparator, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    this.list = fileContent.Split(anyseparator, StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                if (ConvertToLower) LowercaseList();
+                if (ConvertToLower) this.LowercaseList();
                 return true;
             }
             catch {
@@ -61,7 +56,7 @@ namespace SongRequestManagerV2.Bots
             try {
                 // BUG: A DynamicText context needs to be applied to each command to allow use of dynamic variables
 
-                foreach (var line in list) _bot.Parse(null, line, CmdFlags.Local);
+                foreach (var line in this.list) this._bot.Parse(null, line, CmdFlags.Local);
             }
             catch (Exception ex) {
                 Logger.Debug(ex.ToString());
@@ -75,7 +70,7 @@ namespace SongRequestManagerV2.Bots
             try {
                 string listfilename = Path.Combine(Plugin.DataPath, filename);
 
-                var output = String.Join(separator, list.ToArray());
+                var output = String.Join(separator, this.list.ToArray());
                 File.WriteAllText(listfilename, output);
                 return true;
             }
@@ -87,60 +82,60 @@ namespace SongRequestManagerV2.Bots
 
         public bool Contains(string entry)
         {
-            if (list.Contains(entry)) return true;
+            if (this.list.Contains(entry)) return true;
             return false;
         }
 
         public bool Add(string entry)
         {
-            if (list.Contains(entry)) return false;
-            list.Add(entry);
+            if (this.list.Contains(entry)) return false;
+            this.list.Add(entry);
             return true;
         }
 
         public bool Removeentry(string entry)
         {
-            return list.Remove(entry);
+            return this.list.Remove(entry);
         }
 
         // Picks a random entry and returns it, removing it from the list
         public string Drawentry()
         {
-            if (list.Count == 0) return "";
-            int entry = RequestBot.Generator.Next(0, list.Count);
-            string result = list.ElementAt(entry);
-            list.RemoveAt(entry);
+            if (this.list.Count == 0) return "";
+            int entry = RequestBot.Generator.Next(0, this.list.Count);
+            string result = this.list.ElementAt(entry);
+            this.list.RemoveAt(entry);
             return result;
         }
 
         // Picks a random entry but does not remove it
         public string Randomentry()
         {
-            if (list.Count == 0) return "";
-            int entry = RequestBot.Generator.Next(0, list.Count);
-            string result = list.ElementAt(entry);
+            if (this.list.Count == 0) return "";
+            int entry = RequestBot.Generator.Next(0, this.list.Count);
+            string result = this.list.ElementAt(entry);
             return result;
         }
 
         public int Count()
         {
-            return list.Count;
+            return this.list.Count;
         }
 
         public void Clear()
         {
-            list.Clear();
+            this.list.Clear();
         }
 
         public void LowercaseList()
         {
-            for (int i = 0; i < list.Count; i++) {
-                list[i] = list[i].ToLower();
+            for (int i = 0; i < this.list.Count; i++) {
+                this.list[i] = this.list[i].ToLower();
             }
         }
         public void Outputlist(QueueLongMessage msg, string separator = ", ")
         {
-            foreach (string entry in list) msg.Add(entry, separator);
+            foreach (string entry in this.list) msg.Add(entry, separator);
         }
     }
 }
