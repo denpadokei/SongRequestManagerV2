@@ -1,6 +1,7 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using HMUI;
+using IPA.Utilities;
 using SongCore;
 using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Bots;
@@ -205,6 +206,10 @@ namespace SongRequestManagerV2.Views
             this._bot.SetButtonIntactivityRequest -= this.SetUIInteractivity;
             this._bot.PropertyChanged -= this.OnBotPropertyChanged;
             Loader.SongsLoadedEvent -= this.SongLoader_SongsLoadedEvent;
+            if (this.audioSource != null) {
+                Destroy(this.audioSource);
+                this.audioSource = null;
+            }
             base.OnDestroy();
         }
         #endregion
@@ -478,6 +483,11 @@ namespace SongRequestManagerV2.Views
         [UIAction("selected-cell")]
         private void SelectedCell(TableView tableView, object row)
         {
+            var clip = this.randomSoundPicker?.PickRandomObject();
+            Logger.Debug($"{clip}");
+            if (clip) {
+                this.audioSource?.PlayOneShot(clip, 1f);
+            }
             this._bot.CurrentSong = row as SongRequest;
             this._playButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = this.SelectedRow >= 0 ? Color.green : Color.red;
 
@@ -530,6 +540,8 @@ namespace SongRequestManagerV2.Views
         private readonly IRequestBot _bot;
         [Inject]
         private readonly IChatManager _chatManager;
+        private AudioSource audioSource;
+        private RandomObjectPicker<AudioClip> randomSoundPicker;
 #if UNRELEASED
         private TextMeshProUGUI _CurrentSongName;
         private TextMeshProUGUI _CurrentSongName2;
@@ -563,6 +575,10 @@ namespace SongRequestManagerV2.Views
 
         public void Initialize()
         {
+            this.audioSource = Instantiate(Resources.FindObjectsOfTypeAll<BasicUIAudioManager>().FirstOrDefault().GetField<AudioSource, BasicUIAudioManager>("_audioSource"));
+            this.audioSource.pitch = 1;
+            var clips = Resources.FindObjectsOfTypeAll<BasicUIAudioManager>().FirstOrDefault().GetField<AudioClip[], BasicUIAudioManager>("_clickSounds");
+            this.randomSoundPicker = new RandomObjectPicker<AudioClip>(clips, 0.07f);
             try {
                 Loader.SongsLoadedEvent += this.SongLoader_SongsLoadedEvent;
 #if UNRELEASED
