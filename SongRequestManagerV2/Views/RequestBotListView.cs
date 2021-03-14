@@ -564,7 +564,6 @@ namespace SongRequestManagerV2.Views
         [Inject]
         private void Constractor()
         {
-
             this._bot.UpdateUIRequest -= this.UpdateRequestUI;
             this._bot.UpdateUIRequest += this.UpdateRequestUI;
             this._bot.SetButtonIntactivityRequest -= this.SetUIInteractivity;
