@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using Zenject;
@@ -25,8 +20,8 @@ namespace SongRequestManagerV2.Models
 
         public void PlaySound()
         {
-            audioSource.volume = RequestBotConfig.Instance.SoundVolume / 100f;
-            audioSource.PlayOneShot(notifySoundClip);
+            this.audioSource.volume = RequestBotConfig.Instance.SoundVolume / 100f;
+            this.audioSource.PlayOneShot(this.notifySoundClip);
         }
 
         private IEnumerator LoadSound()

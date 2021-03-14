@@ -1,10 +1,6 @@
-﻿using BeatSaberMarkupLanguage.Notify;
-using SongRequestManagerV2.Bases;
+﻿using SongRequestManagerV2.Bases;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -123,7 +119,7 @@ namespace SongRequestManagerV2.Networks
             try {
                 await Task.Run(() =>
                 {
-                    var tc = new TcpClient(IP, Port);
+                    var tc = new TcpClient(this.IP, this.Port);
                     using (var ns = tc.GetStream()) {
                         ns.Write(bytes, 0, bytes.Length);
                     }

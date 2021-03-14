@@ -4,17 +4,15 @@ using SongRequestManagerV2.Statics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Zenject;
 
 namespace SongRequestManagerV2.Interfaces
 {
     public interface ISRMCommand
     {
-        Func<ParseState, string> Subcommand { get;  }
+        Func<ParseState, string> Subcommand { get; }
         Func<ParseState> Subcommand2 { get; }
         Func<ParseState, Task> AsyncSubCommand { get; }
 

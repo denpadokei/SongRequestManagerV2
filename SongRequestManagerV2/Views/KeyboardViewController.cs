@@ -1,5 +1,4 @@
 ﻿using BeatSaberMarkupLanguage.ViewControllers;
-using HMUI;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Interfaces;
 using UnityEngine;
@@ -10,9 +9,9 @@ namespace SongRequestManagerV2.Views
     public class KeyboardViewController : BSMLViewController
     {
         [Inject]
-        private KEYBOARD.KEYBOARDFactiry _factiry;
+        private readonly KEYBOARD.KEYBOARDFactiry _factiry;
         [Inject]
-        IRequestBot _bot;
+        private readonly IRequestBot _bot;
 
         public override string Content => @"<bg></bg>";
 
@@ -20,7 +19,7 @@ namespace SongRequestManagerV2.Views
         {
             if (firstActivation) {
                 RectTransform KeyboardContainer = new GameObject("KeyboardContainer", typeof(RectTransform)).transform as RectTransform;
-                KeyboardContainer.SetParent(rectTransform, false);
+                KeyboardContainer.SetParent(this.rectTransform, false);
                 KeyboardContainer.sizeDelta = new Vector2(60f, 40f);
 
                 var mykeyboard = this._factiry.Create().Setup(KeyboardContainer, "");
@@ -48,10 +47,10 @@ namespace SongRequestManagerV2.Views
                 mykeyboard.SetButtonType("OkButton"); // Adding this alters button positions??! Why?
                 mykeyboard.AddKeys(SEARCH, 0.75f);
 
-                mykeyboard.SetAction("CLEAR SEARCH", key => { _bot?.ClearSearch(key); });
-                mykeyboard.SetAction("UNFILTERED", _bot.UnfilteredSearch);
-                mykeyboard.SetAction("SEARCH", _bot.MSD);
-                mykeyboard.SetAction("NEWEST", _bot.Newest);
+                mykeyboard.SetAction("CLEAR SEARCH", key => { this._bot?.ClearSearch(key); });
+                mykeyboard.SetAction("UNFILTERED", this._bot.UnfilteredSearch);
+                mykeyboard.SetAction("SEARCH", this._bot.MSD);
+                mykeyboard.SetAction("NEWEST", this._bot.Newest);
 
 
 #if UNRELEASED

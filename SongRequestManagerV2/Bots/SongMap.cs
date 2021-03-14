@@ -3,9 +3,6 @@ using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Zenject;
 
 namespace SongRequestManagerV2.Bots
@@ -13,9 +10,9 @@ namespace SongRequestManagerV2.Bots
     public class SongMap
     {
         [Inject]
-        StringNormalization _normalize;
+        private readonly StringNormalization _normalize;
         [Inject]
-        IChatManager _chatManager;
+        private readonly IChatManager _chatManager;
 
         public JSONObject Song { get; set; }
         public string Path { get; set; }
@@ -24,30 +21,32 @@ namespace SongRequestManagerV2.Bots
 
         public static int HashCount { get; private set; } = 0;
 
-        void IndexFields(bool Add, int id, params string[] parameters)
+        private void IndexFields(bool Add, int id, params string[] parameters)
         {
             foreach (var field in parameters) {
-                string[] parts = _normalize.Split(field);
+                string[] parts = this._normalize.Split(field);
                 foreach (var part in parts) {
-                    if (part.Length < RequestBot.partialhash) UpdateSearchEntry(part, id, Add);
+                    if (part.Length < RequestBot.partialhash) this.UpdateSearchEntry(part, id, Add);
                     for (int i = RequestBot.partialhash; i <= part.Length; i++) {
-                        UpdateSearchEntry(part.Substring(0, i), id, Add);
+                        this.UpdateSearchEntry(part.Substring(0, i), id, Add);
                     }
                 }
             }
         }
 
-        void UpdateSearchEntry(string key, int id, bool Add = true)
+        private void UpdateSearchEntry(string key, int id, bool Add = true)
         {
 
             if (Add) HashCount++; else HashCount--;
 
             if (Add)
-                MapDatabase.SearchDictionary.AddOrUpdate(key, (k) => {
+                MapDatabase.SearchDictionary.AddOrUpdate(key, (k) =>
+                {
                     HashSet<int> va = new HashSet<int>
                     {
                         id
-                    }; return va; }, (k, va) => { va.Add(id); return va; });
+                    }; return va;
+                }, (k, va) => { va.Add(id); return va; });
             else {
                 MapDatabase.SearchDictionary[key].Remove(id); // An empty keyword is fine, and actually uncommon
             }
@@ -115,17 +114,17 @@ namespace SongRequestManagerV2.Bots
             if (MapDatabase.PPMap.TryGetValue(this.Song["id"].Value, out var songpp)) {
                 this.Song.Add("pp", songpp);
             }
-            IndexSong(this.Song);
+            this.IndexSong(this.Song);
         }
 
-        void UnIndexSong(int id)
+        private void UnIndexSong(int id)
         {
-            string indexpp = (Song["pp"].AsFloat > 0) ? "PP" : "";
+            string indexpp = (this.Song["pp"].AsFloat > 0) ? "PP" : "";
 
-            IndexFields(false, id, Song["songName"].Value, Song["songSubName"].Value, Song["authorName"].Value, Song["levelAuthor"].Value, indexpp, Song["maptype"].Value);
+            this.IndexFields(false, id, this.Song["songName"].Value, this.Song["songSubName"].Value, this.Song["authorName"].Value, this.Song["levelAuthor"].Value, indexpp, this.Song["maptype"].Value);
 
-            MapDatabase.MapLibrary.TryRemove(Song["id"].Value, out _);
-            MapDatabase.MapLibrary.TryRemove(Song["version"].Value, out _);
+            MapDatabase.MapLibrary.TryRemove(this.Song["id"].Value, out _);
+            MapDatabase.MapLibrary.TryRemove(this.Song["version"].Value, out _);
             //MapDatabase.LevelId.TryRemove(LevelId, out temp);
         }
 
@@ -138,7 +137,7 @@ namespace SongRequestManagerV2.Bots
 
                 //Instance.QueueChatMessage($"id={song["id"].Value} = {id}");
 
-                IndexFields(true, id, song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"], indexpp, song["maptype"].Value);
+                this.IndexFields(true, id, song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"], indexpp, song["maptype"].Value);
 
                 if (string.IsNullOrEmpty(song["version"].Value)) {
                     MapDatabase.MapLibrary.AddOrUpdate(song["id"].Value, this, (key, value) => this);

@@ -10,7 +10,7 @@ namespace SongRequestManagerV2
 {
     public class RequestBotConfig : INotifyPropertyChanged
     {
-        private string FilePath = Path.Combine(Plugin.DataPath, "RequestBotSettings.ini");
+        private readonly string FilePath = Path.Combine(Plugin.DataPath, "RequestBotSettings.ini");
 
         private bool _requestQueueOpen;
         public bool RequestQueueOpen
@@ -19,10 +19,10 @@ namespace SongRequestManagerV2
 
             set => this.SetProperty(ref this._requestQueueOpen, value);
         }
-        public bool PersistentRequestQueue  = true;
+        public bool PersistentRequestQueue = true;
 
-        public bool AutoplaySong  = false; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
-        public bool ClearNoFail  = true; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
+        public bool AutoplaySong = false; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
+        public bool ClearNoFail = true; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
 
         public int RequestHistoryLimit = 40;
         public int UserRequestLimit = 2;
@@ -89,26 +89,26 @@ namespace SongRequestManagerV2
         {
             //Instance = this;
 
-            _configWatcher = new FileSystemWatcher();
+            this._configWatcher = new FileSystemWatcher();
 
             Task.Run(() =>
             {
-                while (!Directory.Exists(Path.GetDirectoryName(FilePath)))
+                while (!Directory.Exists(Path.GetDirectoryName(this.FilePath)))
                     Thread.Sleep(100);
 
                 Logger.Debug("FilePath exists! Continuing initialization!");
 
-                if (File.Exists(FilePath)) {
-                    Load();
+                if (File.Exists(this.FilePath)) {
+                    this.Load();
                 }
-                Save();
+                this.Save();
 
-                _configWatcher.Path = Path.GetDirectoryName(FilePath);
-                _configWatcher.NotifyFilter = NotifyFilters.LastWrite;
-                _configWatcher.Filter = $"RequestBotSettings.ini";
-                _configWatcher.EnableRaisingEvents = true;
+                this._configWatcher.Path = Path.GetDirectoryName(this.FilePath);
+                this._configWatcher.NotifyFilter = NotifyFilters.LastWrite;
+                this._configWatcher.Filter = $"RequestBotSettings.ini";
+                this._configWatcher.EnableRaisingEvents = true;
 
-                _configWatcher.Changed += ConfigWatcherOnChanged;
+                this._configWatcher.Changed += this.ConfigWatcherOnChanged;
             });
 
             this.RequestQueueOpen = true;
@@ -116,20 +116,20 @@ namespace SongRequestManagerV2
 
         ~RequestBotConfig()
         {
-            _configWatcher.Changed -= ConfigWatcherOnChanged;
+            this._configWatcher.Changed -= this.ConfigWatcherOnChanged;
         }
 
         public void Load()
         {
-            ConfigSerializer.LoadConfig(this, FilePath);
+            ConfigSerializer.LoadConfig(this, this.FilePath);
         }
 
         public void Save(bool callback = false)
         {
             try {
                 if (!callback)
-                    _saving = true;
-                ConfigSerializer.SaveConfig(this, FilePath);
+                    this._saving = true;
+                ConfigSerializer.SaveConfig(this, this.FilePath);
             }
             catch (Exception e) {
                 Logger.Debug($"faild to save : {e}\r\n{e.Message}");
@@ -138,13 +138,12 @@ namespace SongRequestManagerV2
 
         private void ConfigWatcherOnChanged(object sender, FileSystemEventArgs fileSystemEventArgs)
         {
-            if (_saving)
-            {
-                _saving = false;
+            if (this._saving) {
+                this._saving = false;
                 return;
             }
 
-            Load();
+            this.Load();
 
             ConfigChangedEvent?.Invoke(this);
         }
@@ -168,7 +167,7 @@ namespace SongRequestManagerV2
             if (EqualityComparer<T>.Default.Equals(storage, value)) return false;
 
             storage = value;
-            RaisePropertyChanged(propertyName);
+            this.RaisePropertyChanged(propertyName);
 
             return true;
         }
@@ -179,9 +178,9 @@ namespace SongRequestManagerV2
         /// <param name="propertyName">Name of the property used to notify listeners. This
         /// value is optional and can be provided automatically when invoked from compilers
         /// that support <see cref="CallerMemberNameAttribute"/>.</param>
-        protected void RaisePropertyChanged([CallerMemberName]string propertyName = null)
+        protected void RaisePropertyChanged([CallerMemberName] string propertyName = null)
         {
-            OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+            this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
         }
 
         /// <summary>

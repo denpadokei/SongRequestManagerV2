@@ -5,11 +5,6 @@ using ChatCore.Services.Twitch;
 using SongRequestManagerV2.Interfaces;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Zenject;
 
 namespace SongRequestManagerV2.Utils
 {
@@ -52,7 +47,7 @@ namespace SongRequestManagerV2.Utils
             this.RecieveChatMessage.Enqueue(arg2);
         }
 
-        void MultiplexerInstance_OnJoinChannel(IChatService arg1, IChatChannel arg2)
+        private void MultiplexerInstance_OnJoinChannel(IChatService arg1, IChatChannel arg2)
         {
             Logger.Debug($"Joined! : [{arg1.DisplayName}][{arg2.Name}]");
             if (arg1 is TwitchService twitchService) {
@@ -60,7 +55,7 @@ namespace SongRequestManagerV2.Utils
             }
         }
 
-        void MultiplexerInstance_OnLogin(IChatService obj)
+        private void MultiplexerInstance_OnLogin(IChatService obj)
         {
             Logger.Debug($"Loged in! : [{obj.DisplayName}]");
             if (obj is TwitchService twitchService) {
@@ -70,7 +65,7 @@ namespace SongRequestManagerV2.Utils
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue) {
+            if (!this.disposedValue) {
                 if (disposing) {
                     // TODO: マネージド状態を破棄します (マネージド オブジェクト)
                     Logger.Debug("Dispose call");
@@ -81,7 +76,7 @@ namespace SongRequestManagerV2.Utils
 
                 // TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
                 // TODO: 大きなフィールドを null に設定します
-                disposedValue = true;
+                this.disposedValue = true;
             }
         }
 
@@ -95,7 +90,7 @@ namespace SongRequestManagerV2.Utils
         public void Dispose()
         {
             // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
-            Dispose(disposing: true);
+            this.Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
     }

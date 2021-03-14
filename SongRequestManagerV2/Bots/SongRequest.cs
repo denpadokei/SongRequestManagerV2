@@ -7,16 +7,12 @@ using HMUI;
 using SongCore;
 using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Bots;
-using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
 using TMPro;
 using UnityEngine;
-using VRUIControls;
 using Zenject;
 
 namespace SongRequestManagerV2
@@ -33,8 +29,8 @@ namespace SongRequestManagerV2
         public TextMeshProUGUI _authorNameText;
 
         [Inject]
-        DynamicText.DynamicTextFactory _textFactory;
-        
+        private readonly DynamicText.DynamicTextFactory _textFactory;
+
         /// <summary>説明 を取得、設定</summary>
         private string hint_;
         /// <summary>説明 を取得、設定</summary>
@@ -106,12 +102,12 @@ namespace SongRequestManagerV2
         internal void Setup()
         {
             if (RequestBotConfig.Instance.PPSearch && MapDatabase.PPMap.TryGetValue(this._song["key"].Value, out var pp) && 0 < pp) {
-                this.SongName = $"{_songName} <size=50%>{Utility.GetRating(_song)} <color=#4169e1>{pp:0.00} PP</color></size>";
+                this.SongName = $"{this._songName} <size=50%>{Utility.GetRating(this._song)} <color=#4169e1>{pp:0.00} PP</color></size>";
             }
             else {
-                this.SongName = $"{_songName} <size=50%>{Utility.GetRating(_song)}</size>";
+                this.SongName = $"{this._songName} <size=50%>{Utility.GetRating(this._song)}</size>";
             }
-            
+
             this.SetCover();
         }
 
@@ -136,7 +132,7 @@ namespace SongRequestManagerV2
         private IPreviewBeatmapLevel GetCustomLevel()
         {
             // lookup song from level id
-            return Loader.GetLevelByHash(_song["hash"]);
+            return Loader.GetLevelByHash(this._song["hash"]);
         }
 
         public void SetCover()
@@ -144,29 +140,29 @@ namespace SongRequestManagerV2
             Dispatcher.RunOnMainThread(async () =>
             {
                 try {
-                    _coverImage.enabled = false;
-                    var dt = _textFactory.Create().AddSong(_song).AddUser(_requestor); // Get basic fields
-                    dt.Add("Status", _status.ToString());
-                    dt.Add("Info", (_requestInfo != "") ? " / " + _requestInfo : "");
-                    dt.Add("RequestTime", _requestTime.ToLocalTime().ToString("hh:mm"));
+                    this._coverImage.enabled = false;
+                    var dt = this._textFactory.Create().AddSong(this._song).AddUser(this._requestor); // Get basic fields
+                    dt.Add("Status", this._status.ToString());
+                    dt.Add("Info", (this._requestInfo != "") ? " / " + this._requestInfo : "");
+                    dt.Add("RequestTime", this._requestTime.ToLocalTime().ToString("hh:mm"));
                     this.AuthorName = dt.Parse(StringFormat.QueueListRow2);
                     this.Hint = dt.Parse(StringFormat.SongHintText);
 
                     var imageSet = false;
 
                     if (SongCore.Loader.AreSongsLoaded) {
-                        var level = GetCustomLevel();
+                        var level = this.GetCustomLevel();
                         if (level != null) {
                             //Logger.Debug("custom level found");
                             // set image from song's cover image
                             var tex = await level.GetCoverImageAsync(System.Threading.CancellationToken.None);
-                            _coverImage.sprite = tex;
+                            this._coverImage.sprite = tex;
                             imageSet = true;
                         }
                     }
 
                     if (!imageSet) {
-                        string url = _song["coverURL"].Value;
+                        string url = this._song["coverURL"].Value;
 
                         if (!_cachedTextures.TryGetValue(url, out var tex)) {
                             var b = await WebClient.DownloadImage($"https://beatsaver.com{url}", System.Threading.CancellationToken.None).ConfigureAwait(true);
@@ -181,14 +177,14 @@ namespace SongRequestManagerV2
                                 Logger.Error(e);
                             }
                         }
-                        _coverImage.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                        this._coverImage.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
                     }
                 }
                 catch (Exception e) {
                     Logger.Error(e);
                 }
                 finally {
-                    _coverImage.enabled = true;
+                    this._coverImage.enabled = true;
                 }
             });
         }
@@ -197,11 +193,11 @@ namespace SongRequestManagerV2
         {
             try {
                 var obj = new JSONObject();
-                obj.Add("status", new JSONString(_status.ToString()));
-                obj.Add("requestInfo", new JSONString(_requestInfo));
-                obj.Add("time", new JSONString(_requestTime.ToFileTime().ToString()));
-                obj.Add("requestor", _requestor.ToJson());
-                obj.Add("song", _song);
+                obj.Add("status", new JSONString(this._status.ToString()));
+                obj.Add("requestInfo", new JSONString(this._requestInfo));
+                obj.Add("time", new JSONString(this._requestTime.ToFileTime().ToString()));
+                obj.Add("requestor", this._requestor.ToJson());
+                obj.Add("song", this._song);
                 return obj;
             }
             catch (Exception ex) {

@@ -1,9 +1,6 @@
-﻿using BeatSaberMarkupLanguage.Notify;
-using SongRequestManagerV2.Bases;
+﻿using SongRequestManagerV2.Bases;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -117,7 +114,8 @@ namespace SongRequestManagerV2.Networks
                             }
                             else if (encType == 1) {
                                 enc = Encoding.Unicode;
-                            }else if(encType == 2) {
+                            }
+                            else if (encType == 2) {
                                 enc = Encoding.GetEncoding("shift_jis");
                             }
                             this.Message = enc.GetString(ms.GetBuffer(), 15, (int)ms.Length).Replace("。", "").Replace("\0", "");
@@ -132,7 +130,8 @@ namespace SongRequestManagerV2.Networks
             }
         }
 
-        public void StopServer() {
+        public void StopServer()
+        {
             this.IsRunning = false;
         }
         #endregion
@@ -141,7 +140,7 @@ namespace SongRequestManagerV2.Networks
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
-        TcpListener _server;
+        private TcpListener _server;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄

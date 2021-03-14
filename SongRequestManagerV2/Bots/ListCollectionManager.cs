@@ -1,13 +1,8 @@
-﻿using SongRequestManagerV2.Interfaces;
-using SongRequestManagerV2.Statics;
+﻿using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Zenject;
 
 namespace SongRequestManagerV2.Bots
 {
@@ -26,7 +21,7 @@ namespace SongRequestManagerV2.Bots
         {
             // Add an empty list so we can set various lists to empty
             StringListManager empty = new StringListManager();
-            ListCollection.Add("empty", empty);
+            this.ListCollection.Add("empty", empty);
         }
 
         public StringListManager ClearOldList(string request, TimeSpan delta, ListFlags flags = ListFlags.Unchanged)
@@ -34,7 +29,7 @@ namespace SongRequestManagerV2.Bots
             string listfilename = Path.Combine(Plugin.DataPath, request);
             TimeSpan UpdatedAge = Utility.GetFileAgeDifference(listfilename);
 
-            StringListManager list = OpenList(request, flags);
+            StringListManager list = this.OpenList(request, flags);
 
             if (File.Exists(listfilename) && UpdatedAge > delta) // BUG: There's probably a better way to handle this
             {
@@ -50,9 +45,9 @@ namespace SongRequestManagerV2.Bots
         public StringListManager OpenList(string request, ListFlags flags = ListFlags.Unchanged) // All lists are accessed through here, flags determine mode
         {
             StringListManager list;
-            if (!ListCollection.TryGetValue(request, out list)) {
+            if (!this.ListCollection.TryGetValue(request, out list)) {
                 list = new StringListManager();
-                ListCollection.Add(request, list);
+                this.ListCollection.Add(request, list);
                 if (!flags.HasFlag(ListFlags.InMemory)) list.Readfile(request); // If in memory, we never read from disk
             }
             else {
@@ -64,7 +59,7 @@ namespace SongRequestManagerV2.Bots
         public bool Contains(string listname, string key, ListFlags flags = ListFlags.Unchanged)
         {
             try {
-                StringListManager list = OpenList(listname);
+                StringListManager list = this.OpenList(listname);
                 return list.Contains(key);
             }
             catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
@@ -74,13 +69,13 @@ namespace SongRequestManagerV2.Bots
 
         public bool Add(string listname, string key, ListFlags flags = ListFlags.Unchanged)
         {
-            return Add(ref listname, ref key, flags);
+            return this.Add(ref listname, ref key, flags);
         }
 
         public bool Add(ref string listname, ref string key, ListFlags flags = ListFlags.Unchanged)
         {
             try {
-                StringListManager list = OpenList(listname);
+                StringListManager list = this.OpenList(listname);
 
                 list.Add(key);
 
@@ -96,12 +91,12 @@ namespace SongRequestManagerV2.Bots
 
         public bool Remove(string listname, string key, ListFlags flags = ListFlags.Unchanged)
         {
-            return Remove(ref listname, ref key, flags);
+            return this.Remove(ref listname, ref key, flags);
         }
         public bool Remove(ref string listname, ref string key, ListFlags flags = ListFlags.Unchanged)
         {
             try {
-                StringListManager list = OpenList(listname);
+                StringListManager list = this.OpenList(listname);
 
                 list.Removeentry(key);
 
@@ -118,7 +113,7 @@ namespace SongRequestManagerV2.Bots
         public void Runscript(string listname, ListFlags flags = ListFlags.Unchanged)
         {
             try {
-                OpenList(listname, flags).Runscript();
+                this.OpenList(listname, flags).Runscript();
 
             }
             catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
@@ -127,7 +122,7 @@ namespace SongRequestManagerV2.Bots
         public void ClearList(string listname, ListFlags flags = ListFlags.Unchanged)
         {
             try {
-                OpenList(listname).Clear();
+                this.OpenList(listname).Clear();
             }
             catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
         }

@@ -16,7 +16,7 @@ namespace SongRequestManagerV2
         public string requestInfo; // This field contains additional information about a request. This could include the source of the request ( deck, Subscription bonus request) , comments about why a song was banned, etc.
         public ParseState state;
 
-        public RequestInfo(IChatUser requestor, string request, DateTime requestTime, bool isBeatSaverId,  ParseState state, CmdFlags flags = 0,string userstring = "")
+        public RequestInfo(IChatUser requestor, string request, DateTime requestTime, bool isBeatSaverId, ParseState state, CmdFlags flags = 0, string userstring = "")
         {
             this.requestor = requestor;
             this.request = request;

@@ -7,7 +7,7 @@
     <vertical min-width='80'>
       <page-button event-click="request-list#PageUp" direction='Up'></page-button>
       <custom-list id='request-list' data='requests' clickable-cells='true' select-cell='selected-cell' min-width='80'>
-        <background tags='selected' background='round-rect-panel'></background>
+        <background tags='selected' background='panel-fade-gradient' background-color='fuchsia'></background>
         <background tags='hovered' background='panel-top' hover-hint='~hover-hint'></background>
         <stack>
           <horizontal vertical-fit='Unconstrained' horizontal-fit='MinSize'>

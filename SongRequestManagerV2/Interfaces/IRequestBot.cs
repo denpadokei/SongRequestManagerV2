@@ -1,6 +1,4 @@
 ﻿using ChatCore.Interfaces;
-using ChatCore.Services;
-using ChatCore.Services.Twitch;
 using ChatCore.Utilities;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Models;
@@ -11,11 +9,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
-using UnityEngine;
 
 namespace SongRequestManagerV2.Interfaces
 {
