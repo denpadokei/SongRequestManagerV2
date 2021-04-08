@@ -14,8 +14,8 @@ namespace SongRequestManagerV2.Utils
         {
             if (Directory.Exists(directory)) {
                 var directoryInfo = new DirectoryInfo(directory);
-                foreach (FileInfo file in directoryInfo.GetFiles()) file.Delete();
-                foreach (DirectoryInfo subDirectory in directoryInfo.GetDirectories()) subDirectory.Delete(true);
+                foreach (var file in directoryInfo.GetFiles()) file.Delete();
+                foreach (var subDirectory in directoryInfo.GetDirectories()) subDirectory.Delete(true);
 
                 if (delete) Directory.Delete(directory);
             }
@@ -23,7 +23,7 @@ namespace SongRequestManagerV2.Utils
 
         public static TimeSpan GetFileAgeDifference(string filename)
         {
-            DateTime lastModified = File.GetLastWriteTime(filename);
+            var lastModified = File.GetLastWriteTime(filename);
             return DateTime.Now - lastModified;
         }
 
@@ -44,10 +44,10 @@ namespace SongRequestManagerV2.Utils
         {
             if (!mode) return "";
 
-            string stars = "******";
-            float rating = song["rating"].AsFloat;
+            var stars = "******";
+            var rating = song["rating"].AsFloat;
             if (rating < 0 || rating > 100) rating = 0;
-            string starrating = stars.Substring(0, (int)(rating / 17)); // 17 is used to produce a 5 star rating from 80ish to 100.
+            var starrating = stars.Substring(0, (int)(rating / 17)); // 17 is used to produce a 5 star rating from 80ish to 100.
             return starrating;
         }
 
@@ -55,7 +55,7 @@ namespace SongRequestManagerV2.Utils
         {
             if (!mode) return "";
 
-            string rating = song["rating"].AsInt.ToString();
+            var rating = song["rating"].AsInt.ToString();
             if (rating == "0") return "";
             return rating + '%';
         }

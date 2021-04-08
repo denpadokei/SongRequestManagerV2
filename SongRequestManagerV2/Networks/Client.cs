@@ -42,10 +42,7 @@ namespace SongRequestManagerV2.Networks
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // パブリックメソッド
-        public void SendBouyomi(string message)
-        {
-            this.SendBouyomi(new string[1] { message });
-        }
+        public void SendBouyomi(string message) => this.SendBouyomi(new string[1] { message });
 
         public void SendBouyomi(string[] messages)
         {
@@ -79,12 +76,12 @@ namespace SongRequestManagerV2.Networks
                     return;
             }
 
-            byte[] bMessage = Encoding.UTF8.GetBytes(sMessage);
-            Int32 iLength = bMessage.Length;
+            var bMessage = Encoding.UTF8.GetBytes(sMessage);
+            var iLength = bMessage.Length;
 
             //棒読みちゃんのTCPサーバへ接続
-            string sHost = this.IP; //棒読みちゃんが動いているホスト
-            int iPort = this.Port;       //棒読みちゃんのTCPサーバのポート番号(デフォルト値 50001)
+            var sHost = this.IP; //棒読みちゃんが動いているホスト
+            var iPort = this.Port;       //棒読みちゃんのTCPサーバのポート番号(デフォルト値 50001)
             TcpClient tc = null;
             try {
                 tc = new TcpClient(sHost, iPort);
@@ -95,8 +92,8 @@ namespace SongRequestManagerV2.Networks
 
             if (tc != null) {
                 //メッセージ送信
-                using (NetworkStream ns = tc.GetStream()) {
-                    using (BinaryWriter bw = new BinaryWriter(ns)) {
+                using (var ns = tc.GetStream()) {
+                    using (var bw = new BinaryWriter(ns)) {
                         bw.Write(iCommand); //コマンド（ 0:メッセージ読み上げ）
                         bw.Write(iSpeed);   //速度    （-1:棒読みちゃん画面上の設定）
                         bw.Write(iTone);    //音程    （-1:棒読みちゃん画面上の設定）

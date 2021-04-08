@@ -32,10 +32,7 @@ namespace SongRequestManagerV2.Networks
             _ = this._server.RunServer();
         }
 
-        public void Stop()
-        {
-            this._server.StopServer();
-        }
+        public void Stop() => this._server.StopServer();
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
@@ -57,7 +54,7 @@ namespace SongRequestManagerV2.Networks
         {
             Logger.Debug("PropertyChanged Server.");
             if (sender is Server server) {
-                if (args.PropertyName == nameof(server.resBytes)) {
+                if (args.PropertyName == nameof(server.ResBytes)) {
                     if (int.TryParse(RequestBotConfig.Instance.SendPort, out var port)) {
                         this._client.Port = port;
                     }
@@ -65,7 +62,7 @@ namespace SongRequestManagerV2.Networks
                         this._client.Port = 50005;
                     }
                     if (RequestBotConfig.Instance.IsSendBouyomi) {
-                        _ = this._client.SendBouyomi(server.resBytes);
+                        _ = this._client.SendBouyomi(server.ResBytes);
                     }
                 }
                 else if (args.PropertyName == nameof(server.Message)) {

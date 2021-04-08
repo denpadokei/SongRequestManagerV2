@@ -112,82 +112,69 @@ namespace SongRequestManagerV2
         }
 
         [UIAction("selected")]
-        private void Selected()
-        {
-            Logger.Debug($"Selected : {this._songName}");
-        }
+        private void Selected() => Logger.Debug($"Selected : {this._songName}");
 
         [UIAction("hovered")]
-        private void Hovered()
-        {
-            Logger.Debug($"Hovered : {this._songName}");
-        }
+        private void Hovered() => Logger.Debug($"Hovered : {this._songName}");
 
         [UIAction("un-selected-un-hovered")]
-        private void UnSelectedUnHovered()
-        {
-            Logger.Debug($"UnSelectedUnHovered : {this._songName}");
-        }
+        private void UnSelectedUnHovered() => Logger.Debug($"UnSelectedUnHovered : {this._songName}");
+        /// <summary>
+        /// lookup song from level id
+        /// </summary>
+        /// <returns></returns>
+        private IPreviewBeatmapLevel GetCustomLevel() => Loader.GetLevelByHash(this._song["hash"]);
 
-        private IPreviewBeatmapLevel GetCustomLevel()
-        {
-            // lookup song from level id
-            return Loader.GetLevelByHash(this._song["hash"]);
-        }
+        public void SetCover() => Dispatcher.RunOnMainThread(async () =>
+                                {
+                                    try {
+                                        this._coverImage.enabled = false;
+                                        var dt = this._textFactory.Create().AddSong(this._song).AddUser(this._requestor); // Get basic fields
+                                        dt.Add("Status", this._status.ToString());
+                                        dt.Add("Info", (this._requestInfo != "") ? " / " + this._requestInfo : "");
+                                        dt.Add("RequestTime", this._requestTime.ToLocalTime().ToString("hh:mm"));
+                                        this.AuthorName = dt.Parse(StringFormat.QueueListRow2);
+                                        this.Hint = dt.Parse(StringFormat.SongHintText);
 
-        public void SetCover()
-        {
-            Dispatcher.RunOnMainThread(async () =>
-            {
-                try {
-                    this._coverImage.enabled = false;
-                    var dt = this._textFactory.Create().AddSong(this._song).AddUser(this._requestor); // Get basic fields
-                    dt.Add("Status", this._status.ToString());
-                    dt.Add("Info", (this._requestInfo != "") ? " / " + this._requestInfo : "");
-                    dt.Add("RequestTime", this._requestTime.ToLocalTime().ToString("hh:mm"));
-                    this.AuthorName = dt.Parse(StringFormat.QueueListRow2);
-                    this.Hint = dt.Parse(StringFormat.SongHintText);
+                                        var imageSet = false;
 
-                    var imageSet = false;
+                                        if (SongCore.Loader.AreSongsLoaded) {
+                                            var level = this.GetCustomLevel();
+                                            if (level != null) {
+                                                //Logger.Debug("custom level found");
+                                                // set image from song's cover image
+                                                var tex = await level.GetCoverImageAsync(System.Threading.CancellationToken.None);
+                                                this._coverImage.sprite = tex;
+                                                imageSet = true;
+                                            }
+                                        }
 
-                    if (SongCore.Loader.AreSongsLoaded) {
-                        var level = this.GetCustomLevel();
-                        if (level != null) {
-                            //Logger.Debug("custom level found");
-                            // set image from song's cover image
-                            var tex = await level.GetCoverImageAsync(System.Threading.CancellationToken.None);
-                            this._coverImage.sprite = tex;
-                            imageSet = true;
-                        }
-                    }
+                                        if (!imageSet) {
+                                            var url = this._song["coverURL"].Value;
 
-                    if (!imageSet) {
-                        string url = this._song["coverURL"].Value;
+                                            if (!_cachedTextures.TryGetValue(url, out var tex)) {
+                                                var b = await WebClient.DownloadImage($"https://beatsaver.com{url}", System.Threading.CancellationToken.None).ConfigureAwait(true);
 
-                        if (!_cachedTextures.TryGetValue(url, out var tex)) {
-                            var b = await WebClient.DownloadImage($"https://beatsaver.com{url}", System.Threading.CancellationToken.None).ConfigureAwait(true);
+                                                tex = new Texture2D(2, 2);
+                                                tex.LoadImage(b);
 
-                            tex = new Texture2D(2, 2);
-                            tex.LoadImage(b);
-
-                            try {
-                                _cachedTextures.AddOrUpdate(url, tex, (s, v) => tex);
-                            }
-                            catch (Exception e) {
-                                Logger.Error(e);
-                            }
-                        }
-                        this._coverImage.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
-                    }
-                }
-                catch (Exception e) {
-                    Logger.Error(e);
-                }
-                finally {
-                    this._coverImage.enabled = true;
-                }
-            });
-        }
+                                                try {
+                                                    _cachedTextures.AddOrUpdate(url, tex, (s, v) => tex);
+                                                }
+                                                catch (Exception e) {
+                                                    Logger.Error(e);
+                                                }
+                                            }
+                                            this._coverImage.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                                        }
+                                    }
+                                    catch (Exception e) {
+                                        Logger.Error(e);
+                                    }
+                                    finally {
+                                        this._coverImage.enabled = true;
+                                    }
+                                });
 
         public JSONObject ToJson()
         {

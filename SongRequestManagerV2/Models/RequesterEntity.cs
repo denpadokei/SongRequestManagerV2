@@ -19,10 +19,7 @@ namespace SongRequestManagerV2.Models
 
         public IChatBadge[] Badges { get; set; }
 
-        public JSONObject ToJson()
-        {
-            return null;
-        }
+        public JSONObject ToJson() => null;
 
         public RequesterEntity()
         {

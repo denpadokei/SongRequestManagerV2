@@ -248,13 +248,10 @@ namespace SongRequestManagerV2.Views
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // パブリックメソッド
-        public void ChangeProgressText(double progress)
-        {
-            HMMainThreadDispatcher.instance?.Enqueue(() =>
-            {
-                this.ProgressText = $"Download Progress - {progress * 100:0.00} %";
-            });
-        }
+        public void ChangeProgressText(double progress) => HMMainThreadDispatcher.instance?.Enqueue(() =>
+                                                         {
+                                                             this.ProgressText = $"Download Progress - {progress * 100:0.00} %";
+                                                         });
         public void UpdateRequestUI(bool selectRowCallback = false)
         {
             if (SceneManager.GetActiveScene().name == "GameCore") {
@@ -404,11 +401,9 @@ namespace SongRequestManagerV2.Views
             }
         }
         [UIAction("#post-parse")]
-        private void PostParse()
-        {
+        private void PostParse() =>
             // Set default RequestFlowCoordinator title
             ChangeTitle?.Invoke(this.IsShowHistory ? "Song Request History" : "Song Request Queue");
-        }
         [UIAction("history-click")]
         private void HistoryButtonClick()
         {
@@ -498,10 +493,7 @@ namespace SongRequestManagerV2.Views
             //UpdateSelectSongInfo();
             this.SetUIInteractivity();
         }
-        private void SongLoader_SongsLoadedEvent(Loader arg1, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> arg2)
-        {
-            this._requestTable?.tableView?.ReloadData();
-        }
+        private void SongLoader_SongsLoadedEvent(Loader arg1, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> arg2) => this._requestTable?.tableView?.ReloadData();
 
 #if UNRELEASED
         private IPreviewBeatmapLevel CustomLevelForRow(int row)

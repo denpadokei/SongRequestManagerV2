@@ -55,7 +55,7 @@ namespace SongRequestManagerV2.Networks
         /// <summary>説明 を取得、設定</summary>
         private byte[] resBytes_;
         /// <summary>説明 を取得、設定</summary>
-        public byte[] resBytes
+        public byte[] ResBytes
         {
             get => this.resBytes_;
 
@@ -107,8 +107,8 @@ namespace SongRequestManagerV2.Networks
                                 }
                                 ms.Write(bytes, 0, size);
                             } while (ns.DataAvailable);
-                            this.resBytes = ms.GetBuffer();
-                            var encType = this.resBytes[10];
+                            this.ResBytes = ms.GetBuffer();
+                            var encType = this.ResBytes[10];
                             if (encType == 0) {
                                 enc = Encoding.UTF8;
                             }
@@ -130,10 +130,7 @@ namespace SongRequestManagerV2.Networks
             }
         }
 
-        public void StopServer()
-        {
-            this.IsRunning = false;
-        }
+        public void StopServer() => this.IsRunning = false;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド

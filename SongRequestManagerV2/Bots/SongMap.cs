@@ -24,10 +24,10 @@ namespace SongRequestManagerV2.Bots
         private void IndexFields(bool Add, int id, params string[] parameters)
         {
             foreach (var field in parameters) {
-                string[] parts = this._normalize.Split(field);
+                var parts = this._normalize.Split(field);
                 foreach (var part in parts) {
                     if (part.Length < RequestBot.partialhash) this.UpdateSearchEntry(part, id, Add);
-                    for (int i = RequestBot.partialhash; i <= part.Length; i++) {
+                    for (var i = RequestBot.partialhash; i <= part.Length; i++) {
                         this.UpdateSearchEntry(part.Substring(0, i), id, Add);
                     }
                 }
@@ -42,7 +42,7 @@ namespace SongRequestManagerV2.Bots
             if (Add)
                 MapDatabase.SearchDictionary.AddOrUpdate(key, (k) =>
                 {
-                    HashSet<int> va = new HashSet<int>
+                    var va = new HashSet<int>
                     {
                         id
                     }; return va;
@@ -74,8 +74,8 @@ namespace SongRequestManagerV2.Bots
                 this.Song.Add("levelAuthor", metadata["levelAuthorName"].Value);
                 this.Song.Add("rating", this.Song["stats"]["rating"].AsFloat * 100);
 
-                bool degrees90 = false;
-                bool degrees360 = false;
+                var degrees90 = false;
+                var degrees360 = false;
 
                 try {
 
@@ -85,7 +85,7 @@ namespace SongRequestManagerV2.Bots
                         if (entry.Value["name"] == "90Degree") degrees90 = true;
                     }
 
-                    int maxnjs = 0;
+                    var maxnjs = 0;
                     foreach (var entry in characteristics) {
                         if (entry.Value.IsNull) continue;
                         var diff = entry.Value["length"].AsInt;
@@ -119,7 +119,7 @@ namespace SongRequestManagerV2.Bots
 
         private void UnIndexSong(int id)
         {
-            string indexpp = (this.Song["pp"].AsFloat > 0) ? "PP" : "";
+            var indexpp = (this.Song["pp"].AsFloat > 0) ? "PP" : "";
 
             this.IndexFields(false, id, this.Song["songName"].Value, this.Song["songSubName"].Value, this.Song["authorName"].Value, this.Song["levelAuthor"].Value, indexpp, this.Song["maptype"].Value);
 
@@ -131,9 +131,9 @@ namespace SongRequestManagerV2.Bots
         public void IndexSong(JSONObject song)
         {
             try {
-                string indexpp = (song["pp"].AsFloat > 0) ? "PP" : "";
+                var indexpp = (song["pp"].AsFloat > 0) ? "PP" : "";
 
-                int id = int.Parse(song["id"].Value.ToUpper(), System.Globalization.NumberStyles.HexNumber);
+                var id = int.Parse(song["id"].Value.ToUpper(), System.Globalization.NumberStyles.HexNumber);
 
                 //Instance.QueueChatMessage($"id={song["id"].Value} = {id}");
 
@@ -161,10 +161,7 @@ namespace SongRequestManagerV2.Bots
             /// <param name="param2">Level ID</param>
             /// <param name="param3">Path</param>
             /// <returns></returns>
-            public override SongMap Create(JSONObject param1, string param2 = "", string param3 = "")
-            {
-                return base.Create(param1, param2, param3);
-            }
+            public override SongMap Create(JSONObject param1, string param2 = "", string param3 = "") => base.Create(param1, param2, param3);
         }
     }
 }

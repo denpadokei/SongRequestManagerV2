@@ -1,6 +1,5 @@
 ﻿using BeatSaberMarkupLanguage;
 //using StreamCore.Twitch;
-using HMUI;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
@@ -78,7 +77,7 @@ namespace SongRequestManagerV2.Bots
         {
             get
             {
-                foreach (KEY key in this.keys) if (key.name == index) return key;
+                foreach (var key in this.keys) if (key.name == index) return key;
                 Logger.Debug($"Keyboard: Unable to set property of Key  [{index}]");
 
                 return this.dummy;
@@ -94,8 +93,8 @@ namespace SongRequestManagerV2.Bots
 
         public void SetValue(string keylabel, string value)
         {
-            bool found = false;
-            foreach (KEY key in this.keys) if (key.name == keylabel) {
+            var found = false;
+            foreach (var key in this.keys) if (key.name == keylabel) {
                     found = true;
                     key.value = value;
                     //key.shifted = value;
@@ -106,8 +105,8 @@ namespace SongRequestManagerV2.Bots
 
         public void SetAction(string keyname, Action<KEY> action)
         {
-            bool found = false;
-            foreach (KEY key in this.keys) if (key.name == keyname) {
+            var found = false;
+            foreach (var key in this.keys) if (key.name == keyname) {
                     found = true;
                     key.keyaction = action;
                 }
@@ -121,12 +120,12 @@ namespace SongRequestManagerV2.Bots
             var position = this.currentposition;
             //position.x += width / 4;
 
-            Color co = Color.white;
+            var co = Color.white;
 
             co.r = (float)(color & 0xff) / 255;
             co.g = (float)((color >> 8) & 0xff) / 255;
             co.b = (float)((color >> 16) & 0xff) / 255;
-            KEY key = new KEY(this, position, keylabel, width, height, co);
+            var key = new KEY(this, position, keylabel, width, height, co);
             this.keys.Add(key);
             //currentposition.x += width / 2 + padding;
             return key;
@@ -134,7 +133,7 @@ namespace SongRequestManagerV2.Bots
 
         private KEY AddKey(string keylabel, string Shifted, float width = 12, float height = 10)
         {
-            KEY key = this.AddKey(keylabel, width, height);
+            var key = this.AddKey(keylabel, width, height);
             key.shifted = Shifted;
             return key;
         }
@@ -160,9 +159,9 @@ namespace SongRequestManagerV2.Bots
         private bool ReadFloat(ref String data, ref int Position, ref float result)
         {
             if (Position >= data.Length) return false;
-            int start = Position;
+            var start = Position;
             while (Position < data.Length) {
-                char c = data[Position];
+                var c = data[Position];
                 if (!((c >= '0' && c <= '9') || c == '+' || c == '-' || c == '.')) break;
                 Position++;
             }
@@ -178,15 +177,15 @@ namespace SongRequestManagerV2.Bots
         public KEYBOARD AddKeys(string Keyboard, float scale = 0.5f)
         {
             this.scale = scale;
-            bool space = true;
-            float spacing = this.padding;
-            float width = this.buttonwidth;
-            float height = 10f;
-            string Label = "";
-            string Key = "";
-            string newvalue = "";
-            int color = 0xffffff;
-            int p = 0; // P is for parser
+            var space = true;
+            var spacing = this.padding;
+            var width = this.buttonwidth;
+            var height = 10f;
+            var Label = "";
+            var Key = "";
+            var newvalue = "";
+            var color = 0xffffff;
+            var p = 0; // P is for parser
 
             try {
 
@@ -234,7 +233,7 @@ namespace SongRequestManagerV2.Bots
 
                             space = false;
                             p++;
-                            int label = p;
+                            var label = p;
                             while (p < Keyboard.Length && Keyboard[p] != ']') p++;
                             Label = Keyboard.Substring(label, p - label);
                             break;
@@ -277,7 +276,7 @@ namespace SongRequestManagerV2.Bots
 
                         case '\'':
                             p++;
-                            int newvaluep = p;
+                            var newvaluep = p;
                             while (p < Keyboard.Length && Keyboard[p] != '\'') p++;
                             newvalue = Keyboard.Substring(newvaluep, p - newvaluep);
                             break;
@@ -305,7 +304,7 @@ namespace SongRequestManagerV2.Bots
         public void AddKeyboard(string keyboardname, float scale = 0.5f)
         {
             try {
-                string fileContent = File.ReadAllText(Path.Combine(Plugin.DataPath, keyboardname));
+                var fileContent = File.ReadAllText(Path.Combine(Plugin.DataPath, keyboardname));
                 if (fileContent.Length > 0) this.AddKeys(fileContent, scale);
             }
             catch {
@@ -424,10 +423,7 @@ namespace SongRequestManagerV2.Bots
         }
 
 
-        public void Clear(KEY key)
-        {
-            key.kb.KeyboardText.text = "";
-        }
+        public void Clear(KEY key) => key.kb.KeyboardText.text = "";
 
         public void Enter(KEY key)
         {
@@ -455,8 +451,8 @@ namespace SongRequestManagerV2.Bots
         {
             key.kb.Shift = !key.kb.Shift;
 
-            foreach (KEY k in key.kb.keys) {
-                string x = key.kb.Shift ? k.shifted : k.value;
+            foreach (var k in key.kb.keys) {
+                var x = key.kb.Shift ? k.shifted : k.value;
                 //if (key.kb.Caps) x = k.value.ToUpper();
                 if (k.shifted != "") k.mybutton.SetButtonText(x);
 
@@ -474,7 +470,7 @@ namespace SongRequestManagerV2.Bots
         {
             this.SabotageState = !this.SabotageState;
             key.mybutton.GetComponentInChildren<Image>().color = this.SabotageState ? Color.green : Color.red;
-            string text = "!sabotage " + (this.SabotageState ? "on" : "off");
+            var text = "!sabotage " + (this.SabotageState ? "on" : "off");
             this._bot.Parse(this._bot.GetLoginUser(), text, CmdFlags.Local);
         }
 
@@ -482,7 +478,7 @@ namespace SongRequestManagerV2.Bots
         {
             if (!this.EnableInputField) return;
 
-            Vector2 v = this.KeyboardText.GetPreferredValues(this.KeyboardText.text + "|");
+            var v = this.KeyboardText.GetPreferredValues(this.KeyboardText.text + "|");
 
             v.y = 30f; // BUG: This needs to be derived from the text position
             // BUG: I do not know why that 30f is here, It makes things work, but I can't understand WHY! Me stupid.
@@ -524,7 +520,7 @@ namespace SongRequestManagerV2.Bots
                 (this.mybutton.transform as RectTransform).anchorMin = new Vector2(0.5f, 0.5f);
                 (this.mybutton.transform as RectTransform).anchorMax = new Vector2(0.5f, 0.5f);
 
-                TMP_Text txt = this.mybutton.GetComponentInChildren<TMP_Text>();
+                var txt = this.mybutton.GetComponentInChildren<TMP_Text>();
                 this.mybutton.ToggleWordWrapping(false);
 
                 this.mybutton.transform.localScale = new Vector3(kb.scale, kb.scale, 1.0f);
@@ -533,7 +529,7 @@ namespace SongRequestManagerV2.Bots
                 this.mybutton.GetComponentInChildren<Image>().color = color;
 
                 if (width == 0) {
-                    Vector2 v = txt.GetPreferredValues(text);
+                    var v = txt.GetPreferredValues(text);
                     v.x += 10f;
                     v.y += 2f;
                     width = v.x;
@@ -569,7 +565,7 @@ namespace SongRequestManagerV2.Bots
                     }
 
                     {
-                        string x = kb.Shift ? this.shifted : this.value;
+                        var x = kb.Shift ? this.shifted : this.value;
                         if (x == "") x = this.value;
                         if (kb.Caps) x = this.value.ToUpper();
                         kb.KeyboardText.text += x;
@@ -577,7 +573,7 @@ namespace SongRequestManagerV2.Bots
 
                     }
                 });
-                HoverHint _MyHintText = UIHelper.AddHintText(this.mybutton.transform as RectTransform, this.value);
+                var _MyHintText = UIHelper.AddHintText(this.mybutton.transform as RectTransform, this.value);
             }
         }
 

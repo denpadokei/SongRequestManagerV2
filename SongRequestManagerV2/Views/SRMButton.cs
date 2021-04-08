@@ -193,10 +193,7 @@ namespace SongRequestManagerV2.Views
             }
         }
 
-        private void Progress_ProgressChanged(object sender, double e)
-        {
-            this._requestFlow.ChangeProgressText(e);
-        }
+        private void Progress_ProgressChanged(object sender, double e) => this._requestFlow.ChangeProgressText(e);
 
         private void RefreshListRequest(bool obj)
         {
@@ -221,12 +218,12 @@ namespace SongRequestManagerV2.Views
                 }
                 else
                     Logger.Debug($"Processing song request {request._song["songName"].Value}");
-                string songName = request._song["songName"].Value;
-                string songIndex = Regex.Replace($"{request._song["id"].Value} ({request._song["songName"].Value} - {request._song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
+                var songName = request._song["songName"].Value;
+                var songIndex = Regex.Replace($"{request._song["id"].Value} ({request._song["songName"].Value} - {request._song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
                 songIndex = this.Normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
 
-                string currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
-                string songHash = request._song["hash"].Value.ToUpper();
+                var currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
+                var songHash = request._song["hash"].Value.ToUpper();
 
                 if (Loader.GetLevelByHash(songHash) == null) {
                     Utility.EmptyDirectory(".requestcache", false);
@@ -235,7 +232,7 @@ namespace SongRequestManagerV2.Views
                         Utility.EmptyDirectory(currentSongDirectory, true);
                         Logger.Debug($"Deleting {currentSongDirectory}");
                     }
-                    string localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request._song["id"].Value}.zip");
+                    var localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request._song["id"].Value}.zip");
 #if UNRELEASED
                     // Direct download hack
                     var ext = Path.GetExtension(request.song["coverURL"].Value);
@@ -248,7 +245,7 @@ namespace SongRequestManagerV2.Views
                         this.ChatManager.QueueChatMessage("BeatSaver is down now.");
                     }
                     using (var zipStream = new MemoryStream(result))
-                    using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
+                    using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
                         try {
                             // open zip archive from memory stream
                             archive.ExtractToDirectory(currentSongDirectory);
@@ -271,7 +268,7 @@ namespace SongRequestManagerV2.Views
                 else {
                     Logger.Debug($"Song {songName} already exists!");
                     this.BackButtonPressed();
-                    bool success = false;
+                    var success = false;
                     Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
                     Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(songHash, (s) =>
                     {
@@ -293,7 +290,7 @@ namespace SongRequestManagerV2.Views
             Loader.Instance.RefreshSongs(false);
             yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
             Utility.EmptyDirectory(".requestcache", true);
-            bool success = false;
+            var success = false;
             Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
             Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), (s) =>
             {

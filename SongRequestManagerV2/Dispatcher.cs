@@ -9,17 +9,14 @@ namespace SongRequestManagerV2
 
         public static void RunOnMainThread(Action action) => HMMainThreadDispatcher.instance.Enqueue(action);
 
-        public static void RunOnMainThread<T>(Action<T> action, T value)
-        {
-            HMMainThreadDispatcher.instance.Enqueue(() =>
-            {
-                try {
-                    action?.Invoke(value);
-                }
-                catch (Exception e) {
-                    Logger.Error(e);
-                }
-            });
-        }
+        public static void RunOnMainThread<T>(Action<T> action, T value) => HMMainThreadDispatcher.instance.Enqueue(() =>
+                                                                          {
+                                                                              try {
+                                                                                  action?.Invoke(value);
+                                                                              }
+                                                                              catch (Exception e) {
+                                                                                  Logger.Error(e);
+                                                                              }
+                                                                          });
     }
 }

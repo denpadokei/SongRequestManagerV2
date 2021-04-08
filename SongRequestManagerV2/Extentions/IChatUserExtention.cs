@@ -8,7 +8,7 @@ namespace SongRequestManagerV2.Extentions
     {
         public static JSONObject CustomToJson(this IChatUser chatUser)
         {
-            JSONObject obj = new JSONObject();
+            var obj = new JSONObject();
             obj.Add(nameof(chatUser.Id), new JSONString(chatUser.Id ?? ""));
             obj.Add(nameof(chatUser.UserName), new JSONString(chatUser.UserName ?? ""));
             obj.Add(nameof(chatUser.DisplayName), new JSONString(chatUser.DisplayName ?? ""));

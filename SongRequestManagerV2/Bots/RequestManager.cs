@@ -85,10 +85,7 @@ namespace SongRequestManagerV2
 
         }
 
-        public void WriteRequest()
-        {
-            this.Write(requestsPath, RequestSongs);
-        }
+        public void WriteRequest() => this.Write(requestsPath, RequestSongs);
 
         public void ReadHistory()
         {
@@ -106,9 +103,6 @@ namespace SongRequestManagerV2
 
         }
 
-        public void WriteHistory()
-        {
-            this.Write(historyPath, HistorySongs);
-        }
+        public void WriteHistory() => this.Write(historyPath, HistorySongs);
     }
 }

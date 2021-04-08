@@ -136,7 +136,7 @@ namespace SongRequestManagerV2.Models
 
 
             #region Gamechanger Specific           
-            bool GameChangerInstalled = IPA.Loader.PluginManager.GetPlugin("Beat Bits") != null;
+            var GameChangerInstalled = IPA.Loader.PluginManager.GetPlugin("Beat Bits") != null;
             //_WobbleInstalled = IPA.Loader.PluginManager.GetPlugin("WobbleSaber") != null;
 
             if (GameChangerInstalled) {
@@ -388,9 +388,9 @@ namespace SongRequestManagerV2.Models
                         }
                     }
 
-                    using (StreamReader sr = new StreamReader(filename)) {
+                    using (var sr = new StreamReader(filename)) {
                         while (sr.Peek() >= 0) {
-                            string line = sr.ReadLine();
+                            var line = sr.ReadLine();
                             line.Trim(' ');
                             if (line.Length < 2 || line.StartsWith("//")) continue;
 
@@ -601,9 +601,9 @@ namespace SongRequestManagerV2.Models
         {
             try {
 
-                string[] flags = state._subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                var flags = state._subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                CmdFlags flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state._subparameter);
+                var flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state._subparameter);
                 state._botcmd.Flags |= flag;
                 state._botcmd.UpdateCommand(ChangedFlags.Flags);
 
@@ -621,7 +621,7 @@ namespace SongRequestManagerV2.Models
         {
             //var flags = state._subparameter.Split(new char[] { ' ', ',' });
 
-            CmdFlags flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state._subparameter);
+            var flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state._subparameter);
 
             state._botcmd.Flags &= ~flag;
 
@@ -635,7 +635,7 @@ namespace SongRequestManagerV2.Models
         public string SubcmdAllow(ParseState state)
         {
             // BUG: No parameter checking
-            string key = state._subparameter.ToLower();
+            var key = state._subparameter.ToLower();
             state._botcmd.Permittedusers = key;
             if (!state._flags.HasFlag(CmdFlags.SilentResult)) this._chatManager.QueueChatMessage($"Permit custom userlist set to  {key}.");
             return endcommand;
@@ -731,7 +731,7 @@ namespace SongRequestManagerV2.Models
 
         internal string Accesslist(string request)
         {
-            string[] listname = request.Split('.');
+            var listname = request.Split('.');
 
             var req = listname[0];
 
@@ -781,7 +781,7 @@ namespace SongRequestManagerV2.Models
             JSONNode result = null;
 
             if (!RequestBotConfig.Instance.OfflineMode) {
-                string requestUrl = (id != "") ? $"https://beatsaver.com/api/maps/detail/{id}" : $"https://beatsaver.com/api/search/text/0?q={this.normalize.NormalizeBeatSaverString(state._parameter)}";
+                var requestUrl = (id != "") ? $"https://beatsaver.com/api/maps/detail/{id}" : $"https://beatsaver.com/api/search/text/0?q={this.normalize.NormalizeBeatSaverString(state._parameter)}";
                 var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
                 if (resp.IsSuccessStatusCode) {
@@ -792,16 +792,16 @@ namespace SongRequestManagerV2.Models
                 }
             }
 
-            string errorMessage = "";
-            SongFilter filter = SongFilter.none;
+            var errorMessage = "";
+            var filter = SongFilter.none;
             if (state._flags.HasFlag(CmdFlags.NoFilter)) filter = SongFilter.Queue;
-            List<JSONObject> songs = this.Bot.GetSongListFromResults(result, state._parameter, ref errorMessage, filter, state._sort != "" ? state._sort : StringFormat.LookupSortOrder.ToString());
+            var songs = this.Bot.GetSongListFromResults(result, state._parameter, ref errorMessage, filter, state._sort != "" ? state._sort : StringFormat.LookupSortOrder.ToString());
 
             JSONObject song;
 
             var msg = this._queueFactory.Create().SetUp(1, 5); // One message maximum, 5 bytes reserved for the ...
             msg.Header($"{songs.Count} found: ");
-            foreach (JSONObject entry in songs) {
+            foreach (var entry in songs) {
                 //entry.Add("pp", 100);
                 //SongBrowserPlugin.DataAccess.ScoreSaberDataFile
 
@@ -847,7 +847,7 @@ namespace SongRequestManagerV2.Models
 
             msg.Header($"{RequestBot.Played.Count} songs played tonight: ");
 
-            foreach (JSONObject song in RequestBot.Played) {
+            foreach (var song in RequestBot.Played) {
                 if (msg.Add(song["songName"].Value + " (" + song["version"] + ")", ", ")) break;
             }
             msg.End($" ... and {RequestBot.Played.Count - msg.Count} other songs.", "No songs have been played.");
@@ -862,7 +862,7 @@ namespace SongRequestManagerV2.Models
 
             msg.Header("Banlist ");
 
-            foreach (string songId in this.Bot.ListCollectionManager.OpenList("banlist.unique").list) {
+            foreach (var songId in this.Bot.ListCollectionManager.OpenList("banlist.unique").list) {
                 if (msg.Add(songId, ", ")) break;
             }
             msg.End($" ... and {this.Bot.ListCollectionManager.OpenList("banlist.unique").list.Count - msg.Count} more entries.", "is empty.");

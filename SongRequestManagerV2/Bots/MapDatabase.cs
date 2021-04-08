@@ -44,7 +44,7 @@ namespace SongRequestManagerV2.Bots
                 this.LoadCustomSongs().Await(null, null, null);
             }
 
-            List<SongMap> result = new List<SongMap>();
+            var result = new List<SongMap>();
 
             if (this.Bot.GetBeatSaverId(SearchKey) != "") {
                 if (MapDatabase.MapLibrary.TryGetValue(this.normalize.RemoveSymbols(ref SearchKey, this.normalize._SymbolsNoDash), out var song)) {
@@ -53,9 +53,9 @@ namespace SongRequestManagerV2.Bots
                 }
             }
 
-            List<HashSet<int>> resultlist = new List<HashSet<int>>();
+            var resultlist = new List<HashSet<int>>();
 
-            string[] SearchParts = this.normalize.Split(SearchKey);
+            var SearchParts = this.normalize.Split(SearchKey);
 
             foreach (var part in SearchParts) {
                 if (!SearchDictionary.TryGetValue(part, out var idset)) return result; // Keyword must be found
@@ -70,7 +70,7 @@ namespace SongRequestManagerV2.Bots
 
             // Compute all matches
             foreach (var map in resultlist[0]) {
-                for (int i = 1; i < resultlist.Count; i++) {
+                for (var i = 1; i < resultlist.Count; i++) {
                     if (!resultlist[i].Contains(map)) goto next; // We can't continue from here :(    
                 }
 
@@ -107,9 +107,9 @@ namespace SongRequestManagerV2.Bots
         public void SaveDatabase()
         {
             try {
-                DateTime start = DateTime.Now;
+                var start = DateTime.Now;
                 //JSONArray arr = new JSONArray();
-                JSONObject arr = new JSONObject();
+                var arr = new JSONObject();
                 foreach (var entry in MapLibrary)
                     arr.Add(entry.Value.Song["id"], entry.Value.Song);
                 File.WriteAllText(Path.Combine(Plugin.DataPath, "SongDatabase.dat"), arr.ToString());
@@ -124,13 +124,13 @@ namespace SongRequestManagerV2.Bots
         public void LoadDatabase()
         {
             try {
-                DateTime start = DateTime.Now;
-                string path = Path.Combine(Plugin.DataPath, "SongDatabase.dat");
+                var start = DateTime.Now;
+                var path = Path.Combine(Plugin.DataPath, "SongDatabase.dat");
 
                 if (File.Exists(path)) {
-                    JSONNode json = JSON.Parse(File.ReadAllText(path));
+                    var json = JSON.Parse(File.ReadAllText(path));
                     if (!json.IsNull) {
-                        int Count = json.Count;
+                        var Count = json.Count;
 
                         //foreach (JSONObject j in json.AsArray)
                         //{                                    
@@ -138,7 +138,7 @@ namespace SongRequestManagerV2.Bots
                         //}
 
 
-                        foreach (KeyValuePair<string, JSONNode> kvp in json) {
+                        foreach (var kvp in json) {
                             this._songMapFactory.Create((JSONObject)kvp.Value);
                         }
 
@@ -169,8 +169,8 @@ namespace SongRequestManagerV2.Bots
             var info = archive.Entries.First<ZipArchiveEntry>(e => (e.Name.EndsWith(filename)));
             if (info == null) return "";
 
-            StreamReader reader = new StreamReader(info.Open());
-            string result = reader.ReadToEnd();
+            var reader = new StreamReader(info.Open());
+            var result = reader.ReadToEnd();
             reader.Close();
             return result;
         }
@@ -191,19 +191,19 @@ namespace SongRequestManagerV2.Bots
                 var startingmem = GC.GetTotalMemory(true);
 
                 this._chatManager.QueueChatMessage($"Starting to read archive.");
-                int addcount = 0;
+                var addcount = 0;
                 var StarTime = DateTime.Now;
 
                 var di = new DirectoryInfo(folder);
 
-                foreach (FileInfo f in di.GetFiles("*.zip")) {
+                foreach (var f in di.GetFiles("*.zip")) {
 
                     try {
                         var x = ZipFile.OpenRead(f.FullName);
                         var info = x.Entries.First<ZipArchiveEntry>(e => (e.Name.EndsWith("info.json")));
 
-                        string id = "";
-                        string version = "";
+                        var id = "";
+                        var version = "";
                         this.GetIdFromPath(f.Name, ref id, ref version);
 
                         if (MapDatabase.MapLibrary.ContainsKey(id)) {
@@ -211,7 +211,7 @@ namespace SongRequestManagerV2.Bots
                             continue;
                         }
 
-                        JSONObject song = JSONObject.Parse(this.Readzipjson(x)).AsObject;
+                        var song = JSONObject.Parse(this.Readzipjson(x)).AsObject;
 
                         string hash;
 
@@ -229,7 +229,7 @@ namespace SongRequestManagerV2.Bots
 
                         hash = this.Bot.CreateMD5FromString(FileAccumulator.ToString());
 
-                        string levelId = string.Join("∎", hash, song["songName"].Value, song["songSubName"].Value, song["authorName"], song["beatsPerMinute"].AsFloat.ToString()) + "∎";
+                        var levelId = string.Join("∎", hash, song["songName"].Value, song["songSubName"].Value, song["authorName"], song["beatsPerMinute"].AsFloat.ToString()) + "∎";
 
                         if (LevelId.ContainsKey(levelId)) {
 
@@ -284,10 +284,10 @@ namespace SongRequestManagerV2.Bots
 
                 if (folder == "") folder = Path.Combine(Environment.CurrentDirectory, "customsongs");
 
-                List<FileInfo> files = new List<FileInfo>();  // List that will hold the files and subfiles in path
-                List<DirectoryInfo> folders = new List<DirectoryInfo>(); // List that hold direcotries that cannot be accessed
+                var files = new List<FileInfo>();  // List that will hold the files and subfiles in path
+                var folders = new List<DirectoryInfo>(); // List that hold direcotries that cannot be accessed
 
-                DirectoryInfo di = new DirectoryInfo(folder);
+                var di = new DirectoryInfo(folder);
                 FullDirList(di, "*");
 
                 if (RequestBotConfig.Instance.additionalsongpath != "") {
@@ -298,7 +298,7 @@ namespace SongRequestManagerV2.Bots
                 void FullDirList(DirectoryInfo dir, string searchPattern)
                 {
                     try {
-                        foreach (FileInfo f in dir.GetFiles(searchPattern)) {
+                        foreach (var f in dir.GetFiles(searchPattern)) {
                             if (f.FullName.EndsWith("info.json"))
                                 files.Add(f);
                         }
@@ -308,7 +308,7 @@ namespace SongRequestManagerV2.Bots
                         return;
                     }
 
-                    foreach (DirectoryInfo d in dir.GetDirectories()) {
+                    foreach (var d in dir.GetDirectories()) {
                         folders.Add(d);
                         FullDirList(d, searchPattern);
                     }
@@ -329,7 +329,7 @@ namespace SongRequestManagerV2.Bots
                     try {
                         if (MapDatabase.MapLibrary.ContainsKey(id)) continue;
 
-                        JSONObject song = JSONObject.Parse(File.ReadAllText(item.FullName)).AsObject;
+                        var song = JSONObject.Parse(File.ReadAllText(item.FullName)).AsObject;
 
                         string hash;
 
@@ -348,7 +348,7 @@ namespace SongRequestManagerV2.Bots
 
                         hash = this.Bot.CreateMD5FromString(FileAccumulator.ToString());
 
-                        string levelId = string.Join("∎", hash, song["songName"].Value, song["songSubName"].Value, song["authorName"], song["beatsPerMinute"].AsFloat.ToString()) + "∎";
+                        var levelId = string.Join("∎", hash, song["songName"].Value, song["songSubName"].Value, song["authorName"], song["beatsPerMinute"].AsFloat.ToString()) + "∎";
 
                         if (LevelId.ContainsKey(levelId)) {
                             LevelId[levelId].Path = item.DirectoryName;
@@ -376,7 +376,7 @@ namespace SongRequestManagerV2.Bots
 
         private bool GetIdFromPath(string path, ref string id, ref string version)
         {
-            string[] parts = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
 
             id = "";
             version = "0";
