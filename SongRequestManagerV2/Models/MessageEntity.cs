@@ -33,9 +33,7 @@ namespace SongRequestManagerV2.Models
         {
             this.Id = "";
             this.Message = "";
-            this.Sender = new RequesterEntity();
             this.Channel = new UnknownChatChannel();
-            this.Emotes = new IChatEmote[0];
             this.Metadata = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
         }
 
