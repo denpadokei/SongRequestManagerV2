@@ -13,7 +13,6 @@ using SongRequestManagerV2.WebSockets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -476,7 +475,7 @@ namespace SongRequestManagerV2.Bots
             var message = new MessageEntity()
             {
                 Message = messages[4],
-                Sender = new RequesterEntity() { DisplayName = messages[5], UserName = messages[5]}
+                Sender = new RequesterEntity() { DisplayName = messages[5], UserName = messages[5] }
             };
             this.RecievedMessages(message);
         }

@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine.Events;
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
@@ -12,14 +7,11 @@ namespace SongRequestManagerV2.WebSockets
     public class MSJPServer : IDisposable
     {
         private const int port = 50005;
-        private WebSocketServer server;
+        private readonly WebSocketServer server;
         private bool disposedValue;
 
         public event Action<string> RecivedMessage;
-        private void ReciveMessageHandler(MessageEventArgs e)
-        {
-            this.RecivedMessage?.Invoke(e.Data);
-        }
+        private void ReciveMessageHandler(MessageEventArgs e) => this.RecivedMessage?.Invoke(e.Data);
 
         public MSJPServer()
         {
@@ -27,40 +19,17 @@ namespace SongRequestManagerV2.WebSockets
             this.server.AddWebSocketService<MSJPBehaviour>("/", i => i.Init(this.ReciveMessageHandler));
             this.server.Start();
         }
-        public class MSJPBehaviour : WebSocketBehavior
-        {
-            public Action<MessageEventArgs> OnReceived;
-            public void Init(Action<MessageEventArgs> action)
-            {
-                Logger.Debug("Init call");
-                this.OnReceived = action;
-            }
-            protected override void OnMessage(MessageEventArgs e)
-            {
-                if (OnReceived != null) {
-                    Logger.Debug($"{e.Data}");
-                    OnReceived.Invoke(e);
-                }
-            }
-
-            protected override void OnClose(CloseEventArgs e)
-            {
-                this.OnReceived = null;
-                base.OnClose(e);
-                Logger.Debug($"Closed.");
-            }
-        }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue) {
+            if (!this.disposedValue) {
                 if (disposing) {
                     // TODO: マネージド状態を破棄します (マネージド オブジェクト)
                 }
                 this.server.Stop();
                 // TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
                 // TODO: 大きなフィールドを null に設定します
-                disposedValue = true;
+                this.disposedValue = true;
             }
         }
 
@@ -74,8 +43,26 @@ namespace SongRequestManagerV2.WebSockets
         public void Dispose()
         {
             // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
-            Dispose(disposing: true);
+            this.Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        public class MSJPBehaviour : WebSocketBehavior
+        {
+            public Action<MessageEventArgs> OnReceived;
+            public void Init(Action<MessageEventArgs> action) => this.OnReceived = action;
+            protected override void OnMessage(MessageEventArgs e)
+            {
+                if (this.OnReceived != null) {
+                    this.OnReceived.Invoke(e);
+                }
+            }
+
+            protected override void OnClose(CloseEventArgs e)
+            {
+                this.OnReceived = null;
+                base.OnClose(e);
+            }
         }
     }
 }
