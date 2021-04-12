@@ -472,6 +472,9 @@ namespace SongRequestManagerV2.Bots
         private void OnRecivedMessage(string obj)
         {
             var messages = obj.Split(new string[] { "<bouyomi>" }, StringSplitOptions.None);
+            if (string.Equals(messages[7], "Twitch", StringComparison.CurrentCultureIgnoreCase)) {
+                return;
+            }
             var message = new MessageEntity()
             {
                 Message = messages[4],
