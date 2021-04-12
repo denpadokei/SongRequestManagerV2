@@ -95,18 +95,18 @@ namespace SongRequestManagerV2.Networks
 
                         using (var ns = client.GetStream())
                         using (var ms = new MemoryStream()) {
-                            ns.ReadTimeout = 5000;
-                            ns.WriteTimeout = 5000;
+                            ns.ReadTimeout = 10000;
+                            ns.WriteTimeout = 10000;
 
                             var bytes = new byte[256];
 
-                            do {
+                            while (true) {
                                 var size = ns.Read(bytes, 0, bytes.Length);
                                 if (size == 0) {
                                     break;
                                 }
                                 ms.Write(bytes, 0, size);
-                            } while (ns.DataAvailable);
+                            }
                             this.ResBytes = ms.GetBuffer();
                             var encType = this.ResBytes[10];
                             if (encType == 0) {
@@ -126,7 +126,7 @@ namespace SongRequestManagerV2.Networks
                 this.IsRunning = false;
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error($"{e}");
             }
         }
 

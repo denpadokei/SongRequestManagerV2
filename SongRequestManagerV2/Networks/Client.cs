@@ -42,9 +42,9 @@ namespace SongRequestManagerV2.Networks
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // パブリックメソッド
-        public void SendBouyomi(string message) => this.SendBouyomi(new string[1] { message });
+        public void SendBouyomi(string message) => this.SendBouyomi(message);
 
-        public void SendBouyomi(string[] messages)
+        public void SendBouyomi(params string[] messages)
         {
             string sMessage = null;
             byte bCode = 0;

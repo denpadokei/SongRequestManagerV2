@@ -9,6 +9,7 @@ using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Networks;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
+using SongRequestManagerV2.WebSockets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -92,7 +93,7 @@ namespace SongRequestManagerV2.Bots
         private readonly ParseState.ParseStateFactory _stateFactory;
         [Inject]
         private readonly SongMap.SongMapFactory _songMapFactory;
-
+        private MSJPServer server;
         public static string playedfilename = "";
         public event Action ReceviedRequest;
         public event Action<bool> RefreshListRequest;
@@ -161,6 +162,7 @@ namespace SongRequestManagerV2.Bots
                     this.timer.Elapsed -= this.Timer_Elapsed;
                     this.timer.Dispose();
                     SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
+                    this.server.RecivedMessage -= this.OnRecivedMessage;
                     try {
                         if (BouyomiPipeline.instance != null) {
                             BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
@@ -458,9 +460,25 @@ namespace SongRequestManagerV2.Bots
                 BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
                 BouyomiPipeline.instance.Stop();
             }
+            try {
+                this.server = new MSJPServer();
+                this.server.RecivedMessage += this.OnRecivedMessage;
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
         }
 
-
+        private void OnRecivedMessage(string obj)
+        {
+            var messages = obj.Split(new string[] { "<bouyomi>" }, StringSplitOptions.None);
+            var message = new MessageEntity()
+            {
+                Message = messages[4],
+                Sender = new RequesterEntity() { DisplayName = messages[5], UserName = messages[5]}
+            };
+            this.RecievedMessages(message);
+        }
         // if (!silence) this.ChatManager.QueueChatMessage($"{request.Key.song["songName"].Value}/{request.Key.song["authorName"].Value} ({songId}) added to the blacklist.");
         private void SendChatMessage(string message)
         {
