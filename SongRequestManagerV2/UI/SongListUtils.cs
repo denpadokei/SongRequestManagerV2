@@ -148,15 +148,10 @@ namespace SongRequestManagerV2
         //    return true;
         //}
 
-        public IEnumerator ScrollToLevel(string levelID, Action<bool> callback, bool animated, bool isRetry = false)
+        public IEnumerator ScrollToLevel(string levelID, Action callback)
         {
-            if (this._resultsViewController.isActivated) {
-                var button = this._resultsViewController.GetComponentsInChildren<Button>().FirstOrDefault(x => x.name.Contains("Continue"));
-                button.onClick?.Invoke();
-            }
-
             if (this._levelCollectionViewController) {
-                Logger.Debug($"Scrolling to {levelID}! Retry={isRetry}");
+                Logger.Debug($"Scrolling to {levelID}!");
 
                 // handle if song browser is present
                 if (Plugin.SongBrowserPluginPresent) {
@@ -183,7 +178,7 @@ namespace SongRequestManagerV2
                 var levelsTableView = this._levelCollectionViewController.GetField<LevelCollectionTableView, LevelCollectionViewController>("_levelCollectionTableView");
                 levelsTableView.SelectLevel(song);
             }
-            callback?.Invoke(false);
+            callback?.Invoke();
             if (RequestBotConfig.Instance?.ClearNoFail == true) {
                 var gameplayModifiersPanelController = this._gameplaySetupViewController.GetField<GameplayModifiersPanelController, GameplaySetupViewController>("_gameplayModifiersPanelController");
                 gameplayModifiersPanelController.gameplayModifiers.SetField("_noFailOn0Energy", false);

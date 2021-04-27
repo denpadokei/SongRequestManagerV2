@@ -14,6 +14,12 @@ namespace SongRequestManagerV2.Views
             get => RequestBotConfig.Instance.AutopickFirstSong;
             set => RequestBotConfig.Instance.AutopickFirstSong = value;
         }
+        [UIValue("clear-nofail")]
+        public bool ClearNofail
+        {
+            get => RequestBotConfig.Instance.ClearNoFail;
+            set => RequestBotConfig.Instance.ClearNoFail = value;
+        }
 
         [UIValue("lowest-allowed-rating")]
         public float LowestAllowedRating
