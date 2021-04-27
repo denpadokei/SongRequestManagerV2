@@ -80,7 +80,7 @@ namespace SongRequestManagerV2.Bases
         {
             // BUG: Needs additional checking
 
-            string fixedname = listname.ToLower();
+            var fixedname = listname.ToLower();
             if (!fixedname.EndsWith(".users")) fixedname += ".users";
             this.Permittedusers = fixedname;
         }
@@ -179,20 +179,11 @@ namespace SongRequestManagerV2.Bases
 
 
         #region Command List Save / Load functionality
-        public string GetHelpText()
-        {
-            return this.ShortHelp;
-        }
+        public string GetHelpText() => this.ShortHelp;
 
-        public string GetFlags()
-        {
-            return this.Flags.ToString();
-        }
+        public string GetFlags() => this.Flags.ToString();
 
-        public string GetAliases()
-        {
-            return String.Join(",", this.Aliases.ToArray());
-        }
+        public string GetAliases() => String.Join(",", this.Aliases.ToArray());
         #endregion
 
         private string Variable(ParseState state) // Basically show the value of a variable without parsing

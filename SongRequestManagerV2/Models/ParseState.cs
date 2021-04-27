@@ -64,23 +64,23 @@ namespace SongRequestManagerV2.Models
         public string ExecuteSubcommand() // BUG: Only one supported for now (till I finalize the parse logic) ,we'll make it all work eventually
         {
             Logger.Debug("Execute SubCommand");
-            int commandstart = 0;
+            var commandstart = 0;
 
             if (this._parameter.Length < 2) return notsubcommand;
 
-            int subcommandend = this._parameter.IndexOfAny(new[] { ' ', '/' }, 1);
+            var subcommandend = this._parameter.IndexOfAny(new[] { ' ', '/' }, 1);
             if (subcommandend == -1) subcommandend = this._parameter.Length;
 
-            int subcommandsectionend = this._parameter.IndexOf('/', 1);
+            var subcommandsectionend = this._parameter.IndexOf('/', 1);
             if (subcommandsectionend == -1) subcommandsectionend = this._parameter.Length;
 
             //RequestBot.Instance.QueueChatMessage($"parameter [{parameter}] ({subcommandend},{subcommandsectionend})");
 
-            int commandlength = subcommandend - commandstart;
+            var commandlength = subcommandend - commandstart;
 
             if (commandlength == 0) return notsubcommand;
 
-            string subcommand = this._parameter.Substring(commandstart, commandlength).ToLower();
+            var subcommand = this._parameter.Substring(commandstart, commandlength).ToLower();
 
             this._subparameter = (subcommandsectionend - subcommandend > 0) ? this._parameter.Substring(subcommandend, subcommandsectionend - subcommandend).Trim(' ') : "";
 
@@ -115,20 +115,12 @@ namespace SongRequestManagerV2.Models
             return result;
         }
 
-        public string Error(string Error)
-        {
-            return this.Text(Error);
-        }
+        public string Error(string Error) => this.Text(Error);
 
-        public string Helptext(bool showlong = false)
-        {
-            return this._textFactory.Create().AddUser(this._user).AddBotCmd(this._botcmd).Parse(this._botcmd.ShortHelp, showlong);
-        }
+        public string Helptext(bool showlong = false) => this._textFactory.Create().AddUser(this._user).AddBotCmd(this._botcmd).Parse(this._botcmd.ShortHelp, showlong);
 
         public string Text(string text) // Return a formatted text message
-        {
-            return this._textFactory.Create().AddUser(this._user).AddBotCmd(this._botcmd).Parse(text);
-        }
+=> this._textFactory.Create().AddUser(this._user).AddBotCmd(this._botcmd).Parse(text);
 
         private static readonly string _done = "X";
         public void ExecuteCommand()
@@ -146,7 +138,7 @@ namespace SongRequestManagerV2.Models
             //          !lookup/sethelp usage: %alias%<song name or id>
             //
             while (true) {
-                string errormsg = this.ExecuteSubcommand();
+                var errormsg = this.ExecuteSubcommand();
                 Logger.Debug($"errormsg : {errormsg}");
                 if (errormsg == notsubcommand) break;
                 if (errormsg != "") {
@@ -171,12 +163,12 @@ namespace SongRequestManagerV2.Models
 
             // Check permissions first
 
-            bool allow = Utility.HasRights(this._botcmd, this._user, this._flags);
+            var allow = Utility.HasRights(this._botcmd, this._user, this._flags);
 
 
             // Num is Nani?
             if (!allow && !this._botcmd.Flags.HasFlag(CmdFlags.BypassRights) && !this._listCollectionManager.Contains(this._botcmd.Permittedusers, this._user.UserName.ToLower())) {
-                CmdFlags twitchpermission = this._botcmd.Flags & CmdFlags.TwitchLevel;
+                var twitchpermission = this._botcmd.Flags & CmdFlags.TwitchLevel;
                 if (!this._botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) this._chatManager.QueueChatMessage($"{this._command} is restricted to {twitchpermission.ToString()}");
                 return;
             }
@@ -195,7 +187,7 @@ namespace SongRequestManagerV2.Models
             }
 
             try {
-                string errormsg = this._botcmd.Execute(this); // Call the command
+                var errormsg = this._botcmd.Execute(this); // Call the command
                 if (errormsg != "" && !this._flags.HasFlag(CmdFlags.SilentError)) {
                     this._chatManager.QueueChatMessage(errormsg);
                 }
@@ -209,7 +201,7 @@ namespace SongRequestManagerV2.Models
 
         public static string GetCommand(ref string request)
         {
-            int commandlength = 0;
+            var commandlength = 0;
             // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
             while (commandlength < request.Length && (request[commandlength] != '=' && request[commandlength] != '/' && request[commandlength] != ' ')) commandlength++;  // Command name ends with #... for now, I'll clean up some more later    
             if (commandlength == 0) return "";
@@ -225,12 +217,12 @@ namespace SongRequestManagerV2.Models
             //var match = Regex.Match(request, "^!(?<command>[^ ^/]*?<parameter>.*)");
             //string username = match.Success ? match.Groups["command"].Value : null;
 
-            int commandstart = 0;
-            int parameterstart = 0;
+            var commandstart = 0;
+            var parameterstart = 0;
 
             // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
             while (parameterstart < this._request.Length && (this._request[parameterstart] != '=' && this._request[parameterstart] != '/' && this._request[parameterstart] != ' ')) parameterstart++;  // Command name ends with #... for now, I'll clean up some more later           
-            int commandlength = parameterstart - commandstart;
+            var commandlength = parameterstart - commandstart;
             while (parameterstart < this._request.Length && this._request[parameterstart] == ' ') parameterstart++; // Eat the space(s) if that's the separator after the command
             if (commandlength == 0) return this;
 

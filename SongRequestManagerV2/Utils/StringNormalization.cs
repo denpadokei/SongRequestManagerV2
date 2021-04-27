@@ -11,8 +11,8 @@ namespace SongRequestManagerV2.Utils
 
         public void ReplaceSymbols(StringBuilder text, char[] mask)
         {
-            for (int i = 0; i < text.Length; i++) {
-                char c = text[i];
+            for (var i = 0; i < text.Length; i++) {
+                var c = text[i];
                 if (c < 128) text[i] = mask[c];
             }
         }
@@ -42,7 +42,7 @@ namespace SongRequestManagerV2.Utils
         public string NormalizeBeatSaverString(string text)
         {
             var words = this.Split(text);
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
             foreach (var word in words) {
                 if (word.Length < 3) continue;
                 if (BeatsaverBadWords.Contains(word.ToLower())) continue;
@@ -61,7 +61,7 @@ namespace SongRequestManagerV2.Utils
         {
             var sb = new StringBuilder(text);
             this.ReplaceSymbols(sb, this._SymbolsMap);
-            string[] result = sb.ToString().ToLower().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var result = sb.ToString().ToLower().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             return result;
         }
@@ -72,7 +72,7 @@ namespace SongRequestManagerV2.Utils
 
         public StringNormalization()
         {
-            for (char i = (char)0; i < 128; i++) {
+            for (var i = (char)0; i < 128; i++) {
                 this._SymbolsMap[i] = i;
                 this._SymbolsNoDash[i] = i;
                 this._SymbolsValidDirectory[i] = i;

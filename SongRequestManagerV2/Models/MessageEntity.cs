@@ -39,9 +39,6 @@ namespace SongRequestManagerV2.Models
             this.Metadata = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
         }
 
-        public JSONObject ToJson()
-        {
-            throw new NotImplementedException();
-        }
+        public JSONObject ToJson() => throw new NotImplementedException();
     }
 }

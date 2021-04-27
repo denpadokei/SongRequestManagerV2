@@ -10,15 +10,9 @@ namespace SongRequestManagerV2.Bots
         public bool repeat;
         private readonly Timer timeq;
 
-        public void Dispose()
-        {
-            ((IDisposable)this.timeq).Dispose();
-        }
+        public void Dispose() => ((IDisposable)this.timeq).Dispose();
 
-        public void StopTimer()
-        {
-            this.timeq.Stop();
-        }
+        public void StopTimer() => this.timeq.Stop();
 
         public BotEvent(DateTime time, string command, bool repeat, Action<string, ElapsedEventArgs> timerAction = null)
         {

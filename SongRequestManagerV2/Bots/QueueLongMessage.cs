@@ -32,10 +32,7 @@ namespace SongRequestManagerV2.Bots
             return this;
         }
 
-        public void Header(string text)
-        {
-            this.msgBuilder.Append(text);
-        }
+        public void Header(string text) => this.msgBuilder.Append(text);
 
         // BUG: Only works form string < MaximumTwitchMessageLength
         public bool Add(string text, string separator = "") // Make sure you use Header(text) for your initial nonlist message, or your displayed message count will be wrong.
@@ -86,10 +83,7 @@ namespace SongRequestManagerV2.Bots
 
         public class QueueLongMessageFactroy : PlaceholderFactory<QueueLongMessage>
         {
-            public override QueueLongMessage Create()
-            {
-                return base.Create().SetUp();
-            }
+            public override QueueLongMessage Create() => base.Create().SetUp();
         }
     }
 }

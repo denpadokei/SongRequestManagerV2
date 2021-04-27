@@ -23,16 +23,16 @@ namespace SongRequestManagerV2.UI
         public static Button CreateUIButton(Transform parent, string buttonTemplate, Vector2 anchoredPosition, Vector2 sizeDelta, UnityAction onClick, string buttonText = "BUTTON", Sprite icon = null, Button origin = null)
         {
 
-            Button button = MonoBehaviour.Instantiate(Resources.FindObjectsOfTypeAll<Button>().Last(x => (x.name == buttonTemplate)), parent, false);
+            var button = MonoBehaviour.Instantiate(Resources.FindObjectsOfTypeAll<Button>().Last(x => (x.name == buttonTemplate)), parent, false);
             button.name = "BSMLButton";
             button.interactable = true;
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(onClick);
-            Polyglot.LocalizedTextMeshProUGUI localizer = button.GetComponentInChildren<Polyglot.LocalizedTextMeshProUGUI>();
+            var localizer = button.GetComponentInChildren<Polyglot.LocalizedTextMeshProUGUI>();
             if (localizer != null)
                 GameObject.Destroy(localizer);
-            ExternalComponents externalComponents = button.gameObject.AddComponent<ExternalComponents>();
-            TextMeshProUGUI textMesh = button.GetComponentInChildren<TextMeshProUGUI>();
+            var externalComponents = button.gameObject.AddComponent<ExternalComponents>();
+            var textMesh = button.GetComponentInChildren<TextMeshProUGUI>();
             textMesh.richText = true;
             textMesh.text = buttonText;
             //textMesh.fontSize = 0.1f;
@@ -40,11 +40,11 @@ namespace SongRequestManagerV2.UI
 
             GameObject.Destroy(button.transform.Find("Content").GetComponent<LayoutElement>());
 
-            ContentSizeFitter buttonSizeFitter = button.gameObject.AddComponent<ContentSizeFitter>();
+            var buttonSizeFitter = button.gameObject.AddComponent<ContentSizeFitter>();
             buttonSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             buttonSizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            LayoutGroup stackLayoutGroup = button.GetComponentInChildren<LayoutGroup>();
+            var stackLayoutGroup = button.GetComponentInChildren<LayoutGroup>();
             if (stackLayoutGroup != null)
                 externalComponents.components.Add(stackLayoutGroup);
 
@@ -58,21 +58,21 @@ namespace SongRequestManagerV2.UI
         /// <param name="buttonTemplate"></param>
         /// <param name="buttonInstance"></param>
         /// <returns></returns>
-        static public Button CreateUIButton(Transform parent, Button buttonTemplate, string name = "")
+        public static Button CreateUIButton(Transform parent, Button buttonTemplate, string name = "")
         {
-            Button btn = UnityEngine.Object.Instantiate(buttonTemplate, parent);
+            var btn = UnityEngine.Object.Instantiate(buttonTemplate, parent);
             //UnityEngine.Object.DestroyImmediate(btn.GetComponent<SignalOnUIButtonClick>());
             btn.onClick = new Button.ButtonClickedEvent();
             btn.name = string.IsNullOrEmpty(name) ? "CustomUIButton" : name;
             btn.interactable = true;
-            Polyglot.LocalizedTextMeshProUGUI localizer = btn.GetComponentInChildren<Polyglot.LocalizedTextMeshProUGUI>();
+            var localizer = btn.GetComponentInChildren<Polyglot.LocalizedTextMeshProUGUI>();
             if (localizer != null)
                 GameObject.Destroy(localizer);
             //CurvedTextMeshPro textMeshPro = btn.GetComponentInChildren<CurvedTextMeshPro>();
             //if (textMeshPro != null)
             //    GameObject.Destroy(textMeshPro);
             //ExternalComponents externalComponents = btn.gameObject.GetComponent<ExternalComponents>();
-            TextMeshProUGUI textMesh = btn.GetComponentInChildren<TextMeshProUGUI>();
+            var textMesh = btn.GetComponentInChildren<TextMeshProUGUI>();
             textMesh.richText = true;
             if (!string.IsNullOrEmpty(name)) {
                 textMesh.text = name;

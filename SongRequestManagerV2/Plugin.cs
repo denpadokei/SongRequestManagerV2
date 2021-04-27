@@ -55,12 +55,11 @@ namespace SongRequestManagerV2
             // init sprites
             Base64Sprites.Init();
         }
-
-        private void BSEvents_lateMenuSceneLoadedFresh(ScenesTransitionSetupDataSO obj)
-        {
-            // setup settings ui
-            BSMLSettings.instance.AddSettingsMenu("SRM V2", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", BeatSaberUI.CreateViewController<SongRequestManagerSettings>());
-        }
+        /// <summary>
+        /// setup settings ui
+        /// </summary>
+        /// <param name="obj"></param>
+        private void BSEvents_lateMenuSceneLoadedFresh(ScenesTransitionSetupDataSO obj) => BSMLSettings.instance.AddSettingsMenu("SRM V2", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", BeatSaberUI.CreateViewController<SongRequestManagerSettings>());
 
         public static void SongBrowserCancelFilter()
         {

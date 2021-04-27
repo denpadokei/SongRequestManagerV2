@@ -32,11 +32,10 @@ namespace SongRequestManagerV2
         }
 
         public byte[] ContentToBytes() => this._content;
+
         public string ContentToString() => Encoding.UTF8.GetString(this._content);
-        public JSONNode ConvertToJsonNode()
-        {
-            return JSONNode.Parse(this.ContentToString());
-        }
+
+        public JSONNode ConvertToJsonNode() => JSONNode.Parse(this.ContentToString());
     }
 
     internal static class WebClient
@@ -152,7 +151,7 @@ namespace SongRequestManagerV2
                     var buffer = new byte[8192];
                     var bytesRead = 0; ;
 
-                    long? contentLength = resp?.Content.Headers.ContentLength;
+                    var contentLength = resp?.Content.Headers.ContentLength;
                     var totalRead = 0;
 
                     // send report
@@ -170,7 +169,7 @@ namespace SongRequestManagerV2
                     }
 
                     progress?.Report(1);
-                    byte[] bytes = memoryStream.ToArray();
+                    var bytes = memoryStream.ToArray();
 
                     return new WebResponse(resp, bytes);
                 }

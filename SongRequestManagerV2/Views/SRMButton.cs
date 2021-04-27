@@ -17,6 +17,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -54,7 +55,7 @@ namespace SongRequestManagerV2.Views
         private readonly WaitForSeconds waitForSeconds = new WaitForSeconds(0.07f);
 
         private volatile bool isChangeing = false;
-
+        private bool isInGame = false;
         public Progress<double> DownloadProgress { get; } = new Progress<double>();
 
         public HMUI.Screen Screen { get; set; }
@@ -62,6 +63,8 @@ namespace SongRequestManagerV2.Views
         public Canvas ButtonCanvas { get; set; }
 
         public FlowCoordinator Current => this._mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
+
+        private static readonly SemaphoreSlim _downloadSemaphore = new SemaphoreSlim(1, 1);
 
         [UIAction("action")]
         public void Action()
@@ -132,6 +135,7 @@ namespace SongRequestManagerV2.Views
 
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
             this.DownloadProgress.ProgressChanged += this.Progress_ProgressChanged;
+            SceneManager.activeSceneChanged += this.SceneManager_activeSceneChanged;
             try {
                 var screen = new GameObject("SRMButton", typeof(CanvasScaler), typeof(RectMask2D), typeof(VRGraphicRaycaster), typeof(CurvedCanvasSettings));
                 screen.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", BeatSaberUI.PhysicsRaycasterWithCache);
@@ -162,6 +166,11 @@ namespace SongRequestManagerV2.Views
             Logger.Debug("Start() end");
         }
 
+        private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1)
+        {
+            this.isInGame = string.Equals(arg1.name, "GameCore", StringComparison.CurrentCultureIgnoreCase);
+        }
+
         #region Unity message
         protected override void OnDestroy()
         {
@@ -170,7 +179,8 @@ namespace SongRequestManagerV2.Views
             this._bot.RefreshListRequest -= this.RefreshListRequest;
             this._requestFlow.QueueStatusChanged -= this.OnQueueStatusChanged;
             this._requestFlow.PlayProcessEvent -= this.ProcessSongRequest;
-            this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged; ;
+            this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
+            SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
             base.OnDestroy();
         }
         #endregion
@@ -193,14 +203,11 @@ namespace SongRequestManagerV2.Views
             }
         }
 
-        private void Progress_ProgressChanged(object sender, double e)
-        {
-            this._requestFlow.ChangeProgressText(e);
-        }
+        private void Progress_ProgressChanged(object sender, double e) => this._requestFlow.ChangeProgressText(e);
 
         private void RefreshListRequest(bool obj)
         {
-            if (SceneManager.GetActiveScene().name == "GameCore") {
+            if (this.isInGame) {
                 return;
             }
             this._requestFlow.RefreshSongList(obj);
@@ -208,103 +215,122 @@ namespace SongRequestManagerV2.Views
 
         private async void ProcessSongRequest(SongRequest request, bool fromHistory = false)
         {
-            if ((RequestManager.RequestSongs.Any() && !fromHistory) || (RequestManager.HistorySongs.Any() && fromHistory)) {
-                if (!fromHistory) {
-                    Logger.Debug("Set status to request");
-                    this._bot.SetRequestStatus(request, RequestStatus.Played);
-                    this._bot.DequeueRequest(request);
-                }
-
-                if (request == null) {
-                    Logger.Debug("Can't process a null request! Aborting!");
-                    return;
-                }
-                else
-                    Logger.Debug($"Processing song request {request._song["songName"].Value}");
-                string songName = request._song["songName"].Value;
-                string songIndex = Regex.Replace($"{request._song["id"].Value} ({request._song["songName"].Value} - {request._song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
-                songIndex = this.Normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
-
-                string currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
-                string songHash = request._song["hash"].Value.ToUpper();
-
-                if (Loader.GetLevelByHash(songHash) == null) {
-                    Utility.EmptyDirectory(".requestcache", false);
-
-                    if (Directory.Exists(currentSongDirectory)) {
-                        Utility.EmptyDirectory(currentSongDirectory, true);
-                        Logger.Debug($"Deleting {currentSongDirectory}");
+            await _downloadSemaphore.WaitAsync();
+            try {
+                if ((RequestManager.RequestSongs.Any() && !fromHistory) || (RequestManager.HistorySongs.Any() && fromHistory)) {
+                    if (!fromHistory) {
+                        Logger.Debug("Set status to request");
+                        this._bot.SetRequestStatus(request, RequestStatus.Played);
+                        this._bot.DequeueRequest(request);
                     }
-                    string localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request._song["id"].Value}.zip");
+
+                    if (request == null) {
+                        Logger.Debug("Can't process a null request! Aborting!");
+                        return;
+                    }
+                    else
+                        Logger.Debug($"Processing song request {request._song["songName"].Value}");
+                    var songName = request._song["songName"].Value;
+                    var songIndex = Regex.Replace($"{request._song["id"].Value} ({request._song["songName"].Value} - {request._song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
+                    songIndex = this.Normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
+
+                    var currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
+                    var songHash = request._song["hash"].Value.ToUpper();
+
+                    if (Loader.GetLevelByHash(songHash) == null) {
+                        Utility.EmptyDirectory(".requestcache", false);
+
+                        if (Directory.Exists(currentSongDirectory)) {
+                            Utility.EmptyDirectory(currentSongDirectory, true);
+                            Logger.Debug($"Deleting {currentSongDirectory}");
+                        }
+                        var localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request._song["id"].Value}.zip");
 #if UNRELEASED
                     // Direct download hack
                     var ext = Path.GetExtension(request.song["coverURL"].Value);
                     var k = request.song["coverURL"].Value.Replace(ext, ".zip");
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
-#else
-                    var result = await WebClient.DownloadSong($"https://beatsaver.com{request._song["downloadURL"].Value}", System.Threading.CancellationToken.None, this.DownloadProgress);
-                    if (result == null) {
-                        this.ChatManager.QueueChatMessage("BeatSaver is down now.");
-                    }
-                    using (var zipStream = new MemoryStream(result))
-                    using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
-                        try {
-                            // open zip archive from memory stream
-                            archive.ExtractToDirectory(currentSongDirectory);
+#endif
+                        var result = await WebClient.DownloadSong($"https://beatsaver.com{request._song["downloadURL"].Value}", System.Threading.CancellationToken.None, this.DownloadProgress);
+                        if (result == null) {
+                            this.ChatManager.QueueChatMessage("BeatSaver is down now.");
                         }
-                        catch (Exception e) {
-                            Logger.Debug($"Unable to extract ZIP! Exception: {e}");
-                            return;
+                        using (var zipStream = new MemoryStream(result))
+                        using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
+                            try {
+                                // open zip archive from memory stream
+                                archive.ExtractToDirectory(currentSongDirectory);
+                            }
+                            catch (Exception e) {
+                                Logger.Debug($"Unable to extract ZIP! Exception: {e}");
+                                return;
+                            }
+                            zipStream.Close();
                         }
-                        zipStream.Close();
-                    }
-                    Dispatcher.RunCoroutine(this.WaitForRefreshAndSchroll(request));
+                        Dispatcher.RunCoroutine(this.WaitForRefreshAndSchroll(request));
 #if UNRELEASED
                         //if (!request.song.IsNull) // Experimental!
                         //{
                         //TwitchWebSocketClient.SendCommand("/marker "+ _textFactory.Create().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
                         //}
 #endif
-#endif
-                }
-                else {
-                    Logger.Debug($"Song {songName} already exists!");
-                    this.BackButtonPressed();
-                    bool success = false;
-                    Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
-                    Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(songHash, (s) =>
-                    {
-                        success = s;
-                        this._bot.UpdateRequestUI();
-                    }, false));
-                    if (!request._song.IsNull) {
-                        // Display next song message
-                        this._textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
+                    }
+                    else {
+                        Logger.Debug($"Song {songName} already exists!");
+                        Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
+                        Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(songHash, () =>
+                        {
+                            this._bot.UpdateRequestUI();
+                        }));
+                        if (!request._song.IsNull) {
+                            // Display next song message
+                            this._textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
+                        }
                     }
                 }
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
+            finally {
+                _downloadSemaphore.Release();
             }
         }
 
         private IEnumerator WaitForRefreshAndSchroll(SongRequest request)
         {
             yield return null;
-            yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
-            Loader.Instance.RefreshSongs(false);
-            yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
-            Utility.EmptyDirectory(".requestcache", true);
-            bool success = false;
-            Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
-            Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), (s) =>
-            {
-                success = s;
-                this._bot.UpdateRequestUI();
-            }, false));
+            if (this.isInGame) {
+                // ダウンロード中に1曲やるかーって人向けの処理
+                while (true) {
+                    yield return new WaitWhile(() => this.isInGame);
+                    yield return new WaitForSeconds(4.0f);
+                    if (!this.isInGame) {
+                        break;
+                    }
+                    yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
+                    Loader.Instance.RefreshSongs(false);
+                }
+                ((IProgress<double>)this.DownloadProgress).Report(0d);
+            }
+            else {
+                yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
+                Loader.Instance.RefreshSongs(false);
+                yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
+                Utility.EmptyDirectory(".requestcache", true);
+                
+                Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
+                Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), () =>
+                {
+                    this._bot.UpdateRequestUI();
+                }));
 
-            ((IProgress<double>)this.DownloadProgress).Report(0d);
-            if (!request._song.IsNull) {
-                // Display next song message
-                this._textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
+                ((IProgress<double>)this.DownloadProgress).Report(0d);
+                if (!request._song.IsNull) {
+                    // Display next song message
+                    this._textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
+                }
             }
         }
 

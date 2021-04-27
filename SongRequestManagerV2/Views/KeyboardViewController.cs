@@ -18,7 +18,7 @@ namespace SongRequestManagerV2.Views
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             if (firstActivation) {
-                RectTransform KeyboardContainer = new GameObject("KeyboardContainer", typeof(RectTransform)).transform as RectTransform;
+                var KeyboardContainer = new GameObject("KeyboardContainer", typeof(RectTransform)).transform as RectTransform;
                 KeyboardContainer.SetParent(this.rectTransform, false);
                 KeyboardContainer.sizeDelta = new Vector2(60f, 40f);
 

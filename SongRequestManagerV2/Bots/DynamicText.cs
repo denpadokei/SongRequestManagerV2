@@ -56,7 +56,7 @@ namespace SongRequestManagerV2.Bots
         public DynamicText AddBotCmd(ISRMCommand botcmd)
         {
 
-            StringBuilder aliastext = new StringBuilder();
+            var aliastext = new StringBuilder();
             foreach (var alias in botcmd.Aliases) aliastext.Append($"{alias} ");
             this.Add("alias", aliastext.ToString());
 
@@ -76,9 +76,7 @@ namespace SongRequestManagerV2.Bots
         }
 
         public DynamicText AddSong(JSONObject json, string prefix = "") // Alternate call for direct object
-        {
-            return this.AddSong(ref json, prefix);
-        }
+=> this.AddSong(ref json, prefix);
 
         public DynamicText AddSong(ref JSONObject song, string prefix = "")
         {
@@ -105,24 +103,22 @@ namespace SongRequestManagerV2.Bots
         }
 
         public string Parse(StringBuilder text, bool parselong = false) // We implement a path for ref or nonref
-        {
-            return this.Parse(text.ToString(), parselong);
-        }
+=> this.Parse(text.ToString(), parselong);
 
         // Refactor, supports %variable%, and no longer uses split, should be closer to c++ speed.
         public string Parse(string text, bool parselong = false)
         {
-            StringBuilder output = new StringBuilder(text.Length); // We assume a starting capacity at LEAST = to length of original string;
+            var output = new StringBuilder(text.Length); // We assume a starting capacity at LEAST = to length of original string;
 
-            for (int p = 0; p < text.Length; p++) // P is pointer, that's good enough for me
+            for (var p = 0; p < text.Length; p++) // P is pointer, that's good enough for me
             {
-                char c = text[p];
+                var c = text[p];
                 if (c == '%') {
-                    int keywordstart = p + 1;
-                    int keywordlength = 0;
+                    var keywordstart = p + 1;
+                    var keywordlength = 0;
 
-                    int end = Math.Min(p + 32, text.Length); // Limit the scan for the 2nd % to 32 characters, or the end of the string
-                    for (int k = keywordstart; k < end; k++) // Pretty sure there's a function for this, I'll look it up later
+                    var end = Math.Min(p + 32, text.Length); // Limit the scan for the 2nd % to 32 characters, or the end of the string
+                    for (var k = keywordstart; k < end; k++) // Pretty sure there's a function for this, I'll look it up later
                     {
                         if (text[k] == '%') {
                             keywordlength = k - keywordstart;

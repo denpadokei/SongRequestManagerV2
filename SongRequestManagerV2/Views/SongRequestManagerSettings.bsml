@@ -1,23 +1,22 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-  <vertical vertical-fit='MinSize'>
-    <scrollable-settings-container min-height='50' min-width='100'>
-      <bool-setting text='Autopick First Song' value='autopick-first-song' bind-value='true' hover-hint='Automatically pick the first song with sr!' preferred-width='80'></bool-setting>
-      <slider-setting text='Minimum rating' min='0' max='100' increment='.5' value='lowest-allowed-rating' integer-only='false' hover-hint='Minimum allowed song rating' preferred-width='80'></slider-setting>
-      <slider-setting text='Maximum Song Length' min='0' max='999' increment='1' value='maximum-song-length' integer-only='true' hover-hint='Longest allowed song length in minutes' preferred-width='80'></slider-setting>
-      <slider-setting text='Minimum NJS allowed' min='0' max='50' increment='1' value='minimum-njs' integer-only='true' hover-hint='Disallow songs below a certain NJS' preferred-width='80'></slider-setting>
-      <bool-setting text='TTS Support' value='tts-support' bind-value='true' hover-hint='Add ! to all command outputs for TTS Filtering' preferred-width='80'></bool-setting>
-      <slider-setting text='User Request limit' min='0' max='10' increment='1' value='user-request-limit' integer-only='true' hover-hint='Maximum requests in queue at one time' preferred-width='80'></slider-setting>
-      <slider-setting text='Sub Request limit' min='0' max='10' increment='1' value='sub-request-limit' integer-only='true' hover-hint='Maximum requests in queue at one time' preferred-width='80'></slider-setting>
-      <slider-setting text='Moderator Request limit' min='0' max='100' increment='1' value='mod-request-limit' integer-only='true' hover-hint='Maximum requests in queue at one time' preferred-width='80'></slider-setting>
-      <slider-setting text='VIP Request bonus' min='0' max='10' increment='1' value='vip-bonus-requests' integer-only='true' hover-hint='Additional requests allowed in queue' preferred-width='80'></slider-setting>
-      <bool-setting text='Full moderator rights' value='mod-full-rights' bind-value='true' hover-hint='Allow moderators access to ALL bot commands. Do you trust your mods?' preferred-width='80'></bool-setting>
-      <bool-setting text='LimitUserRequestsToSession' value='limit-user-requests-to-session' bind-value='true' hover-hint='Request limits do not reset after a song is played.' preferred-width='80'></bool-setting>
-      <slider-setting text='SessionResetAfterXHours' min='1' max='12' increment='1' integer-only='true' value='session-reset-after-xhours' hover-hint='Number of hours before persistent session properties are reset (ie: Queue, Played , Duplicate List)' preferred-width='80'></slider-setting>
-      <checkbox text='Notify Sound' value='is-sound-enable' preferred-width='80'></checkbox>
-      <slider-setting text='Volume' increment='10' integer-only='true' min='0' max='100' value='volume' preferred-width='80'></slider-setting>
-      <bool-setting text='PP Serch' value='pp-sarch' bind-value='true' preferred-width='80'></bool-setting>
-    </scrollable-settings-container>
-  </vertical>
+  <settings-container>
+    <bool-setting text='Autopick First Song' value='autopick-first-song' bind-value='true' hover-hint='Automatically pick the first song with sr!'></bool-setting>
+    <bool-setting text='Clear Nofail' value='clear-nofail' bind-value='true' hover-hint='Endable clear nofail on select request song.'></bool-setting>
+    <slider-setting text='Minimum rating' min='0' max='100' increment='.5' value='lowest-allowed-rating' integer-only='false' hover-hint='Minimum allowed song rating' ></slider-setting>
+    <slider-setting text='Maximum Song Length' min='0' max='999' increment='1' value='maximum-song-length' integer-only='true' hover-hint='Longest allowed song length in minutes' ></slider-setting>
+    <slider-setting text='Minimum NJS allowed' min='0' max='50' increment='1' value='minimum-njs' integer-only='true' hover-hint='Disallow songs below a certain NJS' ></slider-setting>
+    <bool-setting text='TTS Support' value='tts-support' bind-value='true' hover-hint='Add ! to all command outputs for TTS Filtering' ></bool-setting>
+    <slider-setting text='User Request limit' min='0' max='10' increment='1' value='user-request-limit' integer-only='true' hover-hint='Maximum requests in queue at one time' ></slider-setting>
+    <slider-setting text='Sub Request limit' min='0' max='10' increment='1' value='sub-request-limit' integer-only='true' hover-hint='Maximum requests in queue at one time' ></slider-setting>
+    <slider-setting text='Moderator Request limit' min='0' max='100' increment='1' value='mod-request-limit' integer-only='true' hover-hint='Maximum requests in queue at one time' ></slider-setting>
+    <slider-setting text='VIP Request bonus' min='0' max='10' increment='1' value='vip-bonus-requests' integer-only='true' hover-hint='Additional requests allowed in queue' ></slider-setting>
+    <bool-setting text='Full moderator rights' value='mod-full-rights' bind-value='true' hover-hint='Allow moderators access to ALL bot commands. Do you trust your mods?' ></bool-setting>
+    <bool-setting text='LimitUserRequestsToSession' value='limit-user-requests-to-session' bind-value='true' hover-hint='Request limits do not reset after a song is played.' ></bool-setting>
+    <slider-setting text='SessionResetAfterXHours' min='1' max='12' increment='1' integer-only='true' value='session-reset-after-xhours' hover-hint='Number of hours before persistent session properties are reset (ie: Queue, Played , Duplicate List)' ></slider-setting>
+    <checkbox text='Notify Sound' value='is-sound-enable' ></checkbox>
+    <slider-setting text='Volume' increment='10' integer-only='true' min='0' max='100' value='volume' ></slider-setting>
+    <bool-setting text='PP Serch' value='pp-sarch' bind-value='true' ></bool-setting>
+  </settings-container>
 </bg>
 
   

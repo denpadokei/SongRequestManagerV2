@@ -34,8 +34,8 @@ namespace SongRequestManagerV2.Bots
             if (this.flags.HasFlag(ListFlags.InMemory)) return false;
 
             try {
-                string listfilename = Path.Combine(Plugin.DataPath, filename);
-                string fileContent = File.ReadAllText(listfilename);
+                var listfilename = Path.Combine(Plugin.DataPath, filename);
+                var fileContent = File.ReadAllText(listfilename);
                 if (listfilename.EndsWith(".script"))
                     this.list = fileContent.Split(lineseparator, StringSplitOptions.RemoveEmptyEntries).ToList();
                 else
@@ -65,10 +65,10 @@ namespace SongRequestManagerV2.Bots
 
         public bool Writefile(string filename)
         {
-            string separator = filename.EndsWith(".script") ? "\r\n" : ",";
+            var separator = filename.EndsWith(".script") ? "\r\n" : ",";
 
             try {
-                string listfilename = Path.Combine(Plugin.DataPath, filename);
+                var listfilename = Path.Combine(Plugin.DataPath, filename);
 
                 var output = String.Join(separator, this.list.ToArray());
                 File.WriteAllText(listfilename, output);
@@ -93,17 +93,14 @@ namespace SongRequestManagerV2.Bots
             return true;
         }
 
-        public bool Removeentry(string entry)
-        {
-            return this.list.Remove(entry);
-        }
+        public bool Removeentry(string entry) => this.list.Remove(entry);
 
         // Picks a random entry and returns it, removing it from the list
         public string Drawentry()
         {
             if (this.list.Count == 0) return "";
-            int entry = RequestBot.Generator.Next(0, this.list.Count);
-            string result = this.list.ElementAt(entry);
+            var entry = RequestBot.Generator.Next(0, this.list.Count);
+            var result = this.list.ElementAt(entry);
             this.list.RemoveAt(entry);
             return result;
         }
@@ -112,30 +109,24 @@ namespace SongRequestManagerV2.Bots
         public string Randomentry()
         {
             if (this.list.Count == 0) return "";
-            int entry = RequestBot.Generator.Next(0, this.list.Count);
-            string result = this.list.ElementAt(entry);
+            var entry = RequestBot.Generator.Next(0, this.list.Count);
+            var result = this.list.ElementAt(entry);
             return result;
         }
 
-        public int Count()
-        {
-            return this.list.Count;
-        }
+        public int Count() => this.list.Count;
 
-        public void Clear()
-        {
-            this.list.Clear();
-        }
+        public void Clear() => this.list.Clear();
 
         public void LowercaseList()
         {
-            for (int i = 0; i < this.list.Count; i++) {
+            for (var i = 0; i < this.list.Count; i++) {
                 this.list[i] = this.list[i].ToLower();
             }
         }
         public void Outputlist(QueueLongMessage msg, string separator = ", ")
         {
-            foreach (string entry in this.list) msg.Add(entry, separator);
+            foreach (var entry in this.list) msg.Add(entry, separator);
         }
     }
 }
