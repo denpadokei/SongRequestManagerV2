@@ -21,8 +21,18 @@ namespace SongRequestManagerV2
 
         protected override void BackButtonWasPressed(ViewController topViewController)
         {
+            try {
+                var parent = this.GetField<FlowCoordinator, FlowCoordinator>("_parentFlowCoordinator");
+                if (parent != null) {
+                    this._keyboardViewController.DeactivateGameObject();
+                    parent.DismissFlowCoordinator(this);
+                }
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
+            
             base.BackButtonWasPressed(topViewController);
-            this.GetField<FlowCoordinator, FlowCoordinator>("_parentFlowCoordinator").DismissFlowCoordinator(this);
         }
 
         [Inject]
