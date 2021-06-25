@@ -58,7 +58,8 @@ namespace SongRequestManagerV2.Bots
             var SearchParts = this.normalize.Split(SearchKey);
 
             foreach (var part in SearchParts) {
-                if (!SearchDictionary.TryGetValue(part, out var idset)) return result; // Keyword must be found
+                if (!SearchDictionary.TryGetValue(part, out var idset))
+                    return result; // Keyword must be found
                 resultlist.Add(idset);
             }
 
@@ -71,7 +72,8 @@ namespace SongRequestManagerV2.Bots
             // Compute all matches
             foreach (var map in resultlist[0]) {
                 for (var i = 1; i < resultlist.Count; i++) {
-                    if (!resultlist[i].Contains(map)) goto next; // We can't continue from here :(    
+                    if (!resultlist[i].Contains(map))
+                        goto next; // We can't continue from here :(    
                 }
 
 
@@ -116,7 +118,7 @@ namespace SongRequestManagerV2.Bots
                 this._chatManager.QueueChatMessage($"Saved Song Databse in  {(DateTime.Now - start).Seconds} secs.");
             }
             catch (Exception ex) {
-                Logger.Debug(ex.ToString());
+                Logger.Error(ex);
             }
 
         }
@@ -151,7 +153,7 @@ namespace SongRequestManagerV2.Bots
             }
             catch (Exception ex) {
 
-                Logger.Debug(ex.ToString());
+                Logger.Error(ex);
                 this._chatManager.QueueChatMessage($"{ex}");
             }
         }
@@ -167,7 +169,8 @@ namespace SongRequestManagerV2.Bots
         public string Readzipjson(ZipArchive archive, string filename = "info.json")
         {
             var info = archive.Entries.First<ZipArchiveEntry>(e => (e.Name.EndsWith(filename)));
-            if (info == null) return "";
+            if (info == null)
+                return "";
 
             var reader = new StreamReader(info.Open());
             var result = reader.ReadToEnd();
@@ -179,7 +182,8 @@ namespace SongRequestManagerV2.Bots
         // Early code... index a full zip archive.
         public async Task LoadZIPDirectory(string folder = "")
         {
-            if (MapDatabase.DatabaseLoading) return;
+            if (MapDatabase.DatabaseLoading)
+                return;
 
             if (string.IsNullOrEmpty(folder)) {
                 folder = Environment.CurrentDirectory;
@@ -207,7 +211,8 @@ namespace SongRequestManagerV2.Bots
                         this.GetIdFromPath(f.Name, ref id, ref version);
 
                         if (MapDatabase.MapLibrary.ContainsKey(id)) {
-                            if (MapLibrary[id].Path != "") MapLibrary[id].Path = f.FullName;
+                            if (MapLibrary[id].Path != "")
+                                MapLibrary[id].Path = f.FullName;
                             continue;
                         }
 
@@ -278,11 +283,13 @@ namespace SongRequestManagerV2.Bots
             DatabaseLoading = true;
             return Task.Run(() =>
             {
-                if (songid == "") this._chatManager.QueueChatMessage($"Starting song indexing {folder}");
+                if (songid == "")
+                    this._chatManager.QueueChatMessage($"Starting song indexing {folder}");
 
                 var StarTime = DateTime.UtcNow;
 
-                if (folder == "") folder = Path.Combine(Environment.CurrentDirectory, "customsongs");
+                if (folder == "")
+                    folder = Path.Combine(Environment.CurrentDirectory, "customsongs");
 
                 var files = new List<FileInfo>();  // List that will hold the files and subfiles in path
                 var folders = new List<DirectoryInfo>(); // List that hold direcotries that cannot be accessed
@@ -327,7 +334,8 @@ namespace SongRequestManagerV2.Bots
                     this.GetIdFromPath(item.DirectoryName, ref id, ref version);
 
                     try {
-                        if (MapDatabase.MapLibrary.ContainsKey(id)) continue;
+                        if (MapDatabase.MapLibrary.ContainsKey(id))
+                            continue;
 
                         var song = JSONObject.Parse(File.ReadAllText(item.FullName)).AsObject;
 
@@ -367,7 +375,8 @@ namespace SongRequestManagerV2.Bots
 
                 }
                 var duration = DateTime.UtcNow - StarTime;
-                if (songid == "") this._chatManager.QueueChatMessage($"Song indexing done. ({duration.TotalSeconds} secs.");
+                if (songid == "")
+                    this._chatManager.QueueChatMessage($"Song indexing done. ({duration.TotalSeconds} secs.");
 
                 DatabaseImported = true;
                 DatabaseLoading = false;

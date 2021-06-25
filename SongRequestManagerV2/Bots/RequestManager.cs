@@ -27,20 +27,20 @@ namespace SongRequestManagerV2
         public List<object> Read(string path)
         {
             var songs = new List<object>();
-            if (File.Exists(path)) {
-                var json = JSON.Parse(File.ReadAllText(path));
-                if (!json.IsNull) {
-                    foreach (var j in json.AsArray) {
-                        try {
-                            if (!j.Value.IsNull && j.Value is JSONObject obj) {
-                                var req = this.factory.Create().Init(obj);
-                                songs.Add(req);
-                            }
-                        }
-                        catch (Exception e) {
-                            Logger.Debug($"{e}");
-                        }
-                    }
+            if (!File.Exists(path)) {
+                return songs;
+            }
+            var json = JSON.Parse(File.ReadAllText(path));
+            if (json.IsNull) {
+                return songs;
+            }
+            foreach (var j in json.AsArray) {
+                if (j.Value.IsNull) {
+                    continue;
+                }
+                if (j.Value is JSONObject obj) {
+                    var req = this.factory.Create().Init(obj);
+                    songs.Add(req);
                 }
             }
             return songs;
@@ -48,7 +48,6 @@ namespace SongRequestManagerV2
 
         public void Write(string path, IEnumerable<object> songs)
         {
-            Logger.Debug($"Start write");
             try {
                 if (!Directory.Exists(Path.GetDirectoryName(path)))
                     Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -59,16 +58,13 @@ namespace SongRequestManagerV2
                         arr.Add(song.ToJson());
                     }
                     catch (Exception ex) {
-                        Logger.Debug($"{ex}\r\n{song}");
+                        Logger.Error($"{song}\r\n{ex}");
                     }
                 }
                 File.WriteAllText(path, arr.ToString());
             }
             catch (Exception ex) {
-                Logger.Debug($"{ex}");
-            }
-            finally {
-                Logger.Debug($"End write");
+                Logger.Error(ex);
             }
         }
 
@@ -79,7 +75,7 @@ namespace SongRequestManagerV2
                 RequestSongs.AddRange(this.Read(requestsPath));
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
                 this._chatManager.QueueChatMessage("There was an error reading the request queue.");
             }
 

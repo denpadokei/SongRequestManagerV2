@@ -40,7 +40,8 @@ namespace SongRequestManagerV2.Models
 
             this._flags = state._flags;
             this._parameter = state._parameter;
-            if (parameter != null) this._parameter = parameter;
+            if (parameter != null)
+                this._parameter = parameter;
             this._subparameter = state._subparameter;
             this._command = state._command;
             this._info = state._info;
@@ -63,34 +64,40 @@ namespace SongRequestManagerV2.Models
 
         public string ExecuteSubcommand() // BUG: Only one supported for now (till I finalize the parse logic) ,we'll make it all work eventually
         {
-            Logger.Debug("Execute SubCommand");
             var commandstart = 0;
 
-            if (this._parameter.Length < 2) return notsubcommand;
+            if (this._parameter.Length < 2)
+                return notsubcommand;
 
             var subcommandend = this._parameter.IndexOfAny(new[] { ' ', '/' }, 1);
-            if (subcommandend == -1) subcommandend = this._parameter.Length;
+            if (subcommandend == -1)
+                subcommandend = this._parameter.Length;
 
             var subcommandsectionend = this._parameter.IndexOf('/', 1);
-            if (subcommandsectionend == -1) subcommandsectionend = this._parameter.Length;
+            if (subcommandsectionend == -1)
+                subcommandsectionend = this._parameter.Length;
 
             //RequestBot.Instance.QueueChatMessage($"parameter [{parameter}] ({subcommandend},{subcommandsectionend})");
 
             var commandlength = subcommandend - commandstart;
 
-            if (commandlength == 0) return notsubcommand;
+            if (commandlength == 0)
+                return notsubcommand;
 
             var subcommand = this._parameter.Substring(commandstart, commandlength).ToLower();
 
             this._subparameter = (subcommandsectionend - subcommandend > 0) ? this._parameter.Substring(subcommandend, subcommandsectionend - subcommandend).Trim(' ') : "";
 
 
-            if (!this._commandManager.Aliases.TryGetValue(subcommand, out var subcmd)) return notsubcommand;
+            if (!this._commandManager.Aliases.TryGetValue(subcommand, out var subcmd))
+                return notsubcommand;
 
-            if (!subcmd.Flags.HasFlag(CmdFlags.Subcommand)) return notsubcommand;
+            if (!subcmd.Flags.HasFlag(CmdFlags.Subcommand))
+                return notsubcommand;
             // BUG: Need to check subcmd permissions here.     
 
-            if (!Utility.HasRights(subcmd, this._user, this._flags)) return this.Error($"No permission to use {subcommand}");
+            if (!Utility.HasRights(subcmd, this._user, this._flags))
+                return this.Error($"No permission to use {subcommand}");
 
             if (subcmd.Flags.HasFlag(CmdFlags.NoParameter)) {
                 this._parameter = this._parameter.Substring(subcommandend).Trim(' ');
@@ -100,10 +107,11 @@ namespace SongRequestManagerV2.Models
             }
 
             try {
-                return subcmd.Subcommand(this);
+                subcmd.Subcommand?.Invoke(this);
             }
             catch (Exception ex) {
-                Logger.Debug(ex.ToString());
+                Logger.Error(ex);
+                return ex.Message;
             }
 
             return "";
@@ -111,7 +119,8 @@ namespace SongRequestManagerV2.Models
 
         public string Msg(string text, string result = "")
         {
-            if (!this._flags.HasFlag(CmdFlags.SilentResult)) this._textFactory.Create().AddUser(this._user).AddBotCmd(this._botcmd).QueueMessage(text);
+            if (!this._flags.HasFlag(CmdFlags.SilentResult))
+                this._textFactory.Create().AddUser(this._user).AddBotCmd(this._botcmd).QueueMessage(text);
             return result;
         }
 
@@ -126,7 +135,6 @@ namespace SongRequestManagerV2.Models
         public void ExecuteCommand()
         {
             if (!this._commandManager.Aliases.TryGetValue(this._command, out this._botcmd)) {
-                Logger.Debug("Unknown command");
                 return; // Unknown command
             }
 
@@ -140,7 +148,8 @@ namespace SongRequestManagerV2.Models
             while (true) {
                 var errormsg = this.ExecuteSubcommand();
                 Logger.Debug($"errormsg : {errormsg}");
-                if (errormsg == notsubcommand) break;
+                if (errormsg == notsubcommand)
+                    break;
                 if (errormsg != "") {
                     if (errormsg == _done) {
                         this._flags |= CmdFlags.Disabled; // Temporarily disable the rest of the command - flags is local parse state flag.
@@ -159,7 +168,8 @@ namespace SongRequestManagerV2.Models
                 this._botcmd.ChangedParameters |= ChangedFlags.Saved;
             }
 
-            if (this._botcmd.Flags.HasFlag(CmdFlags.Disabled) || this._flags.HasFlag(CmdFlags.Disabled)) return; // Disabled commands fail silently
+            if (this._botcmd.Flags.HasFlag(CmdFlags.Disabled) || this._flags.HasFlag(CmdFlags.Disabled))
+                return; // Disabled commands fail silently
 
             // Check permissions first
 
@@ -169,7 +179,8 @@ namespace SongRequestManagerV2.Models
             // Num is Nani?
             if (!allow && !this._botcmd.Flags.HasFlag(CmdFlags.BypassRights) && !this._listCollectionManager.Contains(this._botcmd.Permittedusers, this._user.UserName.ToLower())) {
                 var twitchpermission = this._botcmd.Flags & CmdFlags.TwitchLevel;
-                if (!this._botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) this._chatManager.QueueChatMessage($"{this._command} is restricted to {twitchpermission.ToString()}");
+                if (!this._botcmd.Flags.HasFlag(CmdFlags.SilentCheck))
+                    this._chatManager.QueueChatMessage($"{this._command} is restricted to {twitchpermission.ToString()}");
                 return;
             }
 
@@ -182,7 +193,8 @@ namespace SongRequestManagerV2.Models
             // Check regex
 
             if (!this._botcmd.Regexfilter.IsMatch(this._parameter)) {
-                if (!this._botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) this._commandManager.ShowHelpMessage(this._botcmd, this._user, this._parameter, false);
+                if (!this._botcmd.Flags.HasFlag(CmdFlags.SilentCheck))
+                    this._commandManager.ShowHelpMessage(this._botcmd, this._user, this._parameter, false);
                 return;
             }
 
@@ -194,7 +206,7 @@ namespace SongRequestManagerV2.Models
             }
             catch (Exception ex) {
                 // Display failure message, and lock out command for a time period. Not yet.
-                Logger.Debug(ex.ToString());
+                Logger.Error(ex);
             }
         }
 
@@ -203,16 +215,15 @@ namespace SongRequestManagerV2.Models
         {
             var commandlength = 0;
             // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
-            while (commandlength < request.Length && (request[commandlength] != '=' && request[commandlength] != '/' && request[commandlength] != ' ')) commandlength++;  // Command name ends with #... for now, I'll clean up some more later    
-            if (commandlength == 0) return "";
+            while (commandlength < request.Length && (request[commandlength] != '=' && request[commandlength] != '/' && request[commandlength] != ' '))
+                commandlength++;  // Command name ends with #... for now, I'll clean up some more later    
+            if (commandlength == 0)
+                return "";
             return request.Substring(0, commandlength).ToLower();
         }
 
         public ParseState ParseCommand()
         {
-            Logger.Debug("Start ParceCommand in ParseCommand()");
-            Logger.Debug($"request : {this._request}");
-
             // Notes for later.
             //var match = Regex.Match(request, "^!(?<command>[^ ^/]*?<parameter>.*)");
             //string username = match.Success ? match.Groups["command"].Value : null;
@@ -221,27 +232,24 @@ namespace SongRequestManagerV2.Models
             var parameterstart = 0;
 
             // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
-            while (parameterstart < this._request.Length && (this._request[parameterstart] != '=' && this._request[parameterstart] != '/' && this._request[parameterstart] != ' ')) parameterstart++;  // Command name ends with #... for now, I'll clean up some more later           
+            while (parameterstart < this._request.Length && (this._request[parameterstart] != '=' && this._request[parameterstart] != '/' && this._request[parameterstart] != ' '))
+                parameterstart++;  // Command name ends with #... for now, I'll clean up some more later           
             var commandlength = parameterstart - commandstart;
-            while (parameterstart < this._request.Length && this._request[parameterstart] == ' ') parameterstart++; // Eat the space(s) if that's the separator after the command
-            if (commandlength == 0) return this;
+            while (parameterstart < this._request.Length && this._request[parameterstart] == ' ')
+                parameterstart++; // Eat the space(s) if that's the separator after the command
+            if (commandlength == 0)
+                return this;
 
             this._command = this._request.Substring(commandstart, commandlength).ToLower();
-            Logger.Debug($"command : {this._command}");
-            if (this._commandManager.Aliases.ContainsKey(this._command)) {
-                Logger.Debug("Contain ailias commad");
-                this._parameter = this._request.Substring(parameterstart);
 
+            if (this._commandManager.Aliases.ContainsKey(this._command)) {
+                this._parameter = this._request.Substring(parameterstart);
                 try {
-                    Logger.Debug("Start command");
                     this.ExecuteCommand();
                 }
                 catch (Exception ex) {
-                    Logger.Debug(ex.ToString());
+                    Logger.Error(ex);
                 }
-            }
-            else {
-                Logger.Debug("Not Contain ailias commad");
             }
 
             return this;

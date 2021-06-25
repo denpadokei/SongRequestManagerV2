@@ -70,7 +70,6 @@ namespace SongRequestManagerV2.Views
         public void Action()
         {
             try {
-                Logger.Debug("action");
                 this._button.interactable = false;
                 this.SRMButtonPressed();
             }
@@ -80,7 +79,6 @@ namespace SongRequestManagerV2.Views
             finally {
                 this._button.interactable = true;
             }
-
         }
 
         internal void SRMButtonPressed()
@@ -88,7 +86,6 @@ namespace SongRequestManagerV2.Views
             if (this.Current is LevelSelectionFlowCoordinator) {
                 this.Current.PresentFlowCoordinator(this._requestFlow, null, AnimationDirection.Horizontal, false, false);
             }
-            Logger.Debug($"{this.Current.name}");
             return;
         }
 
@@ -113,7 +110,6 @@ namespace SongRequestManagerV2.Views
 
         internal void BackButtonPressed()
         {
-            Logger.Debug($"{this.Current.name} : {this._requestFlow.name}");
             if (this.Current.name != this._requestFlow.name) {
                 return;
             }
@@ -126,8 +122,6 @@ namespace SongRequestManagerV2.Views
         }
         public void Initialize()
         {
-            Logger.Debug("Start()");
-
             this._bot.ChangeButtonColor += this.SetButtonColor;
             this._bot.RefreshListRequest += this.RefreshListRequest;
             this._requestFlow.QueueStatusChanged += this.OnQueueStatusChanged;
@@ -151,9 +145,6 @@ namespace SongRequestManagerV2.Views
                 if (this._button == null) {
                     this._button = UIHelper.CreateUIButton((screen.transform as RectTransform), "CancelButton", Vector2.zero, Vector2.zero, this.Action, "OPEN", null) as NoTransitionsButton;
                 }
-                Logger.Debug($"screem size : {(screen.transform as RectTransform).sizeDelta}");
-                Logger.Debug($"button size : {(this._button.transform as RectTransform).sizeDelta}");
-                Logger.Debug($"button position : {this._button.transform.position}");
             }
             catch (Exception e) {
                 Logger.Error(e);
@@ -161,15 +152,9 @@ namespace SongRequestManagerV2.Views
 
             this._bot.UpdateRequestUI();
             this.SetButtonColor();
-
-            Logger.Debug("Created request button!");
-            Logger.Debug("Start() end");
         }
 
-        private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1)
-        {
-            this.isInGame = string.Equals(arg1.name, "GameCore", StringComparison.CurrentCultureIgnoreCase);
-        }
+        private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1) => this.isInGame = string.Equals(arg1.name, "GameCore", StringComparison.CurrentCultureIgnoreCase);
 
         #region Unity message
         protected override void OnDestroy()
@@ -219,17 +204,13 @@ namespace SongRequestManagerV2.Views
             try {
                 if ((RequestManager.RequestSongs.Any() && !fromHistory) || (RequestManager.HistorySongs.Any() && fromHistory)) {
                     if (!fromHistory) {
-                        Logger.Debug("Set status to request");
                         this._bot.SetRequestStatus(request, RequestStatus.Played);
                         this._bot.DequeueRequest(request);
                     }
 
                     if (request == null) {
-                        Logger.Debug("Can't process a null request! Aborting!");
                         return;
                     }
-                    else
-                        Logger.Debug($"Processing song request {request._song["songName"].Value}");
                     var songName = request._song["songName"].Value;
                     var songIndex = Regex.Replace($"{request._song["id"].Value} ({request._song["songName"].Value} - {request._song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
                     songIndex = this.Normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
@@ -242,7 +223,6 @@ namespace SongRequestManagerV2.Views
 
                         if (Directory.Exists(currentSongDirectory)) {
                             Utility.EmptyDirectory(currentSongDirectory, true);
-                            Logger.Debug($"Deleting {currentSongDirectory}");
                         }
                         var localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request._song["id"].Value}.zip");
 #if UNRELEASED
@@ -263,7 +243,8 @@ namespace SongRequestManagerV2.Views
                                 archive.ExtractToDirectory(currentSongDirectory);
                             }
                             catch (Exception e) {
-                                Logger.Debug($"Unable to extract ZIP! Exception: {e}");
+                                Logger.Error($"Unable to extract ZIP! Exception");
+                                Logger.Error(e);
                                 return;
                             }
                             zipStream.Close();
@@ -277,7 +258,6 @@ namespace SongRequestManagerV2.Views
 #endif
                     }
                     else {
-                        Logger.Debug($"Song {songName} already exists!");
                         Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
                         Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(songHash, () =>
                         {
@@ -319,7 +299,7 @@ namespace SongRequestManagerV2.Views
                 Loader.Instance.RefreshSongs(false);
                 yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
                 Utility.EmptyDirectory(".requestcache", true);
-                
+
                 Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
                 Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), () =>
                 {

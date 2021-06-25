@@ -28,7 +28,6 @@ namespace SongRequestManagerV2.Models
                 Directory.CreateDirectory(SOUNDFOLDER);
             }
             var soundPath = Directory.EnumerateFiles(SOUNDFOLDER, "*.wav", SearchOption.TopDirectoryOnly).FirstOrDefault();
-            Logger.Debug(soundPath);
             if (string.IsNullOrEmpty(soundPath)) {
                 yield break;
             }

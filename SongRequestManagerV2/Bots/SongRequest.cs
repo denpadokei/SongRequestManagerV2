@@ -112,13 +112,13 @@ namespace SongRequestManagerV2
         }
 
         [UIAction("selected")]
-        private void Selected() => Logger.Debug($"Selected : {this._songName}");
+        private void Selected() { }
 
         [UIAction("hovered")]
-        private void Hovered() => Logger.Debug($"Hovered : {this._songName}");
+        private void Hovered() { }
 
         [UIAction("un-selected-un-hovered")]
-        private void UnSelectedUnHovered() => Logger.Debug($"UnSelectedUnHovered : {this._songName}");
+        private void UnSelectedUnHovered() { }
         /// <summary>
         /// lookup song from level id
         /// </summary>
@@ -188,7 +188,7 @@ namespace SongRequestManagerV2
                 return obj;
             }
             catch (Exception ex) {
-                Logger.Debug($"{ex}\r\n{ex.Message}");
+                Logger.Error(ex);
                 return null;
             }
         }
@@ -200,7 +200,7 @@ namespace SongRequestManagerV2
                 return temp;
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
                 return new UnknownChatUser(obj["requestor"].AsObject.ToString());
             }
         }

@@ -35,7 +35,8 @@ namespace SongRequestManagerV2.Bots
             {
                 //RequestBot.Instance.QueueChatMessage($"Clearing old session {request}");
                 list.Clear();
-                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly))) list.Writefile(request);
+                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly)))
+                    list.Writefile(request);
 
             }
 
@@ -47,10 +48,12 @@ namespace SongRequestManagerV2.Bots
             if (!this.ListCollection.TryGetValue(request, out var list)) {
                 list = new StringListManager();
                 this.ListCollection.Add(request, list);
-                if (!flags.HasFlag(ListFlags.InMemory)) list.Readfile(request); // If in memory, we never read from disk
+                if (!flags.HasFlag(ListFlags.InMemory))
+                    list.Readfile(request); // If in memory, we never read from disk
             }
             else {
-                if (flags.HasFlag(ListFlags.Uncached)) list.Readfile(request); // If Cache is off, ALWAYS re-read file.
+                if (flags.HasFlag(ListFlags.Uncached))
+                    list.Readfile(request); // If Cache is off, ALWAYS re-read file.
             }
             return list;
         }
@@ -61,7 +64,7 @@ namespace SongRequestManagerV2.Bots
                 var list = this.OpenList(listname);
                 return list.Contains(key);
             }
-            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Error(ex); } // Going to try this form, to reduce code verbosity.              
 
             return false;
         }
@@ -76,11 +79,12 @@ namespace SongRequestManagerV2.Bots
                 list.Add(key);
 
 
-                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly))) list.Writefile(listname);
+                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly)))
+                    list.Writefile(listname);
                 return true;
 
             }
-            catch (Exception ex) { Logger.Debug(ex.ToString()); }
+            catch (Exception ex) { Logger.Error(ex); }
 
             return false;
         }
@@ -93,12 +97,13 @@ namespace SongRequestManagerV2.Bots
 
                 list.Removeentry(key);
 
-                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly))) list.Writefile(listname);
+                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly)))
+                    list.Writefile(listname);
 
                 return false;
 
             }
-            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Error(ex); } // Going to try this form, to reduce code verbosity.              
 
             return false;
         }
@@ -109,7 +114,7 @@ namespace SongRequestManagerV2.Bots
                 this.OpenList(listname, flags).Runscript();
 
             }
-            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Error(ex); } // Going to try this form, to reduce code verbosity.              
         }
 
         public void ClearList(string listname, ListFlags flags = ListFlags.Unchanged)
@@ -117,7 +122,7 @@ namespace SongRequestManagerV2.Bots
             try {
                 this.OpenList(listname).Clear();
             }
-            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Error(ex); } // Going to try this form, to reduce code verbosity.              
         }
 
     }

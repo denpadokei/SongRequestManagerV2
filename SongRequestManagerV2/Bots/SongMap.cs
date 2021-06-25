@@ -26,7 +26,8 @@ namespace SongRequestManagerV2.Bots
             foreach (var field in parameters) {
                 var parts = this._normalize.Split(field);
                 foreach (var part in parts) {
-                    if (part.Length < RequestBot.partialhash) this.UpdateSearchEntry(part, id, Add);
+                    if (part.Length < RequestBot.partialhash)
+                        this.UpdateSearchEntry(part, id, Add);
                     for (var i = RequestBot.partialhash; i <= part.Length; i++) {
                         this.UpdateSearchEntry(part.Substring(0, i), id, Add);
                     }
@@ -37,7 +38,10 @@ namespace SongRequestManagerV2.Bots
         private void UpdateSearchEntry(string key, int id, bool Add = true)
         {
 
-            if (Add) HashCount++; else HashCount--;
+            if (Add)
+                HashCount++;
+            else
+                HashCount--;
 
             if (Add)
                 MapDatabase.SearchDictionary.AddOrUpdate(key, (k) =>
@@ -45,7 +49,8 @@ namespace SongRequestManagerV2.Bots
                     var va = new HashSet<int>
                     {
                         id
-                    }; return va;
+                    };
+                    return va;
                 }, (k, va) => { va.Add(id); return va; });
             else {
                 MapDatabase.SearchDictionary[key].Remove(id); // An empty keyword is fine, and actually uncommon
@@ -81,16 +86,20 @@ namespace SongRequestManagerV2.Bots
 
                     var characteristics = metadata["characteristics"][0]["difficulties"];
                     foreach (var entry in metadata["characteristics"]) {
-                        if (entry.Value["name"] == "360Degree") degrees360 = true;
-                        if (entry.Value["name"] == "90Degree") degrees90 = true;
+                        if (entry.Value["name"] == "360Degree")
+                            degrees360 = true;
+                        if (entry.Value["name"] == "90Degree")
+                            degrees90 = true;
                     }
 
                     var maxnjs = 0;
                     foreach (var entry in characteristics) {
-                        if (entry.Value.IsNull) continue;
+                        if (entry.Value.IsNull)
+                            continue;
                         var diff = entry.Value["length"].AsInt;
                         var njs = entry.Value["njs"].AsInt;
-                        if (njs > maxnjs) maxnjs = njs;
+                        if (njs > maxnjs)
+                            maxnjs = njs;
 
 
 
@@ -104,7 +113,8 @@ namespace SongRequestManagerV2.Bots
                     if (maxnjs > 0) {
                         this.Song.Add("njs", maxnjs);
                     }
-                    if (degrees360 || degrees90) this.Song.Add("maptype", "360");
+                    if (degrees360 || degrees90)
+                        this.Song.Add("maptype", "360");
                 }
                 catch (Exception e) {
                     Logger.Error(e);

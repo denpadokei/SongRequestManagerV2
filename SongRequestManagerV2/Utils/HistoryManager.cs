@@ -45,7 +45,7 @@ namespace SongRequestManagerV2.Utils
                 }
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
             }
         }
 
@@ -63,7 +63,7 @@ namespace SongRequestManagerV2.Utils
                     return playlist;
                 }
                 catch (Exception e) {
-                    Logger.Debug($"{e}");
+                    Logger.Error(e);
                     return null;
                 }
             }

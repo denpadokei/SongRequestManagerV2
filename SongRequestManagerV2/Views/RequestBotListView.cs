@@ -261,7 +261,7 @@ namespace SongRequestManagerV2.Views
             {
                 try {
                     this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed";
-                    this._queueButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red; ;
+                    this._queueButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red;
                     this.HistoryHoverHint = this.IsShowHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
                     this.HistoryButtonText = this.IsShowHistory ? "Requests" : "History";
                     this.PlayButtonText = this.IsShowHistory ? "Replay" : "Play";
@@ -287,7 +287,6 @@ namespace SongRequestManagerV2.Views
                 var toggled = interactive;
 
                 if (this._requestTable.NumberOfCells() == 0 || this.SelectedRow == -1 || this.SelectedRow >= this.Songs.Count()) {
-                    Logger.Debug("Nothing selected, or empty list, buttons should be off");
                     toggled = false;
                 }
 
@@ -479,7 +478,6 @@ namespace SongRequestManagerV2.Views
         private void SelectedCell(TableView tableView, object row)
         {
             var clip = this.randomSoundPicker?.PickRandomObject();
-            Logger.Debug($"{clip}");
             if (clip) {
                 this.audioSource?.PlayOneShot(clip, 1f);
             }
@@ -490,7 +488,6 @@ namespace SongRequestManagerV2.Views
                 var isChallenge = this._bot.CurrentSong._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
                 this.IsPlayButtonEnable = !isChallenge;
             }
-            //UpdateSelectSongInfo();
             this.SetUIInteractivity();
         }
         private void SongLoader_SongsLoadedEvent(Loader arg1, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> arg2) => this._requestTable?.tableView?.ReloadData();
@@ -577,7 +574,7 @@ namespace SongRequestManagerV2.Views
 #endif
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
             }
             try {
                 try {
@@ -617,7 +614,7 @@ namespace SongRequestManagerV2.Views
                     #endregion
                 }
                 catch (Exception e) {
-                    Logger.Debug($"{e}");
+                    Logger.Error(e);
                 }
                 try {
                     #region Blacklist button
@@ -626,7 +623,7 @@ namespace SongRequestManagerV2.Views
                     #endregion
                 }
                 catch (Exception e) {
-                    Logger.Debug($"{e}");
+                    Logger.Error(e);
                 }
                 try {
                     #region Skip button
@@ -634,7 +631,7 @@ namespace SongRequestManagerV2.Views
                     #endregion
                 }
                 catch (Exception e) {
-                    Logger.Debug($"{e}");
+                    Logger.Error(e);
                 }
                 try {
                     #region Play button
@@ -643,7 +640,7 @@ namespace SongRequestManagerV2.Views
                     #endregion
                 }
                 catch (Exception e) {
-                    Logger.Debug($"{e}");
+                    Logger.Error(e);
                 }
                 try {
                     #region Queue button
@@ -652,7 +649,7 @@ namespace SongRequestManagerV2.Views
                     #endregion
                 }
                 catch (Exception e) {
-                    Logger.Debug($"{e}");
+                    Logger.Error(e);
                 }
                 try {
                     #region Progress
@@ -660,13 +657,13 @@ namespace SongRequestManagerV2.Views
                     #endregion
                 }
                 catch (Exception e) {
-                    Logger.Debug($"{e}");
+                    Logger.Error(e);
                 }
                 //this._requestTable.tableView.selectionType = TableViewSelectionType.Single;
 
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
             }
         }
 
