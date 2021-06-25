@@ -29,26 +29,14 @@ namespace SongRequestManagerV2
         [Inject]
         private readonly ResultsViewController _resultsViewController;
 
-        private static bool _initialized = false;
+        private bool _initialized = false;
         //private static bool _songBrowserInstalled = false;
         //private static bool _songDownloaderInstalled = false;
         [Inject]
-        public void Initialize()
+        public void Constractor()
         {
-
-
-            if (!_initialized) {
-                try {
-                    //_songBrowserInstalled = Utilities.IsModInstalled("Song Browser");
-                    //_songDownloaderInstalled = IPA.Loader.PluginManager.GetPlugin("BeatSaver Downloader") != null;
-
-                    //Logger.Debug($"Song Browser installed: {_songBrowserInstalled}");
-                    //Logger.Debug($"Downloader installed: {_songDownloaderInstalled}");
-                    _initialized = true;
-                }
-                catch (Exception e) {
-                    Logger.Debug($"Exception {e}");
-                }
+            if (!this._initialized) {
+                this._initialized = true;
             }
         }
 
@@ -117,7 +105,7 @@ namespace SongRequestManagerV2
             //SongLoaderPlugin.SongLoader.Instance.RefreshSongs(fullRefresh);
             //while (SongLoaderPlugin.SongLoader.AreSongsLoading) yield return null;
 
-            yield return null;
+            yield break;
 
             // Set the row index to the previously selected song
             //if (selectOldLevel)
@@ -151,8 +139,6 @@ namespace SongRequestManagerV2
         public IEnumerator ScrollToLevel(string levelID, Action callback)
         {
             if (this._levelCollectionViewController) {
-                Logger.Debug($"Scrolling to {levelID}!");
-
                 // handle if song browser is present
                 if (Plugin.SongBrowserPluginPresent) {
                     Plugin.SongBrowserCancelFilter();
@@ -171,7 +157,6 @@ namespace SongRequestManagerV2
                 this._levelFilteringNavigationController.HandleAnnotatedBeatmapLevelCollectionsViewControllerDidSelectAnnotatedBeatmapLevelCollection(customSong);
                 var song = Loader.GetLevelByHash(levelID.Split('_').Last());
                 if (song == null) {
-                    Logger.Debug("Song not find.");
                     yield break;
                 }
                 // get the table view

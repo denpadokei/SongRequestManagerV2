@@ -126,7 +126,7 @@ namespace SongRequestManagerV2.Networks
                 this.IsRunning = false;
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
             }
         }
 

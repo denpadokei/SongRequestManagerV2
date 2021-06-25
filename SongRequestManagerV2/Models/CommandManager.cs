@@ -278,7 +278,6 @@ namespace SongRequestManagerV2.Models
             catch (Exception e) {
                 Logger.Error(e);
             }
-            Logger.Debug("End InitializeCommands()");
         }
 
         public string SaveCommands(ParseState state)

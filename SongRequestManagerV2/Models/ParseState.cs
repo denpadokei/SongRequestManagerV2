@@ -63,7 +63,6 @@ namespace SongRequestManagerV2.Models
 
         public string ExecuteSubcommand() // BUG: Only one supported for now (till I finalize the parse logic) ,we'll make it all work eventually
         {
-            Logger.Debug("Execute SubCommand");
             var commandstart = 0;
 
             if (this._parameter.Length < 2) return notsubcommand;
@@ -100,10 +99,11 @@ namespace SongRequestManagerV2.Models
             }
 
             try {
-                return subcmd.Subcommand(this);
+                subcmd.Subcommand?.Invoke(this);
             }
             catch (Exception ex) {
-                Logger.Debug(ex.ToString());
+                Logger.Error(ex);
+                return ex.Message;
             }
 
             return "";
@@ -126,7 +126,6 @@ namespace SongRequestManagerV2.Models
         public void ExecuteCommand()
         {
             if (!this._commandManager.Aliases.TryGetValue(this._command, out this._botcmd)) {
-                Logger.Debug("Unknown command");
                 return; // Unknown command
             }
 
@@ -194,7 +193,7 @@ namespace SongRequestManagerV2.Models
             }
             catch (Exception ex) {
                 // Display failure message, and lock out command for a time period. Not yet.
-                Logger.Debug(ex.ToString());
+                Logger.Error(ex);
             }
         }
 
@@ -210,9 +209,6 @@ namespace SongRequestManagerV2.Models
 
         public ParseState ParseCommand()
         {
-            Logger.Debug("Start ParceCommand in ParseCommand()");
-            Logger.Debug($"request : {this._request}");
-
             // Notes for later.
             //var match = Regex.Match(request, "^!(?<command>[^ ^/]*?<parameter>.*)");
             //string username = match.Success ? match.Groups["command"].Value : null;
@@ -227,21 +223,15 @@ namespace SongRequestManagerV2.Models
             if (commandlength == 0) return this;
 
             this._command = this._request.Substring(commandstart, commandlength).ToLower();
-            Logger.Debug($"command : {this._command}");
+            
             if (this._commandManager.Aliases.ContainsKey(this._command)) {
-                Logger.Debug("Contain ailias commad");
                 this._parameter = this._request.Substring(parameterstart);
-
                 try {
-                    Logger.Debug("Start command");
                     this.ExecuteCommand();
                 }
                 catch (Exception ex) {
-                    Logger.Debug(ex.ToString());
+                    Logger.Error(ex);
                 }
-            }
-            else {
-                Logger.Debug("Not Contain ailias commad");
             }
 
             return this;

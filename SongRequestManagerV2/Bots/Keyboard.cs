@@ -294,8 +294,8 @@ namespace SongRequestManagerV2.Bots
 
             }
             catch (Exception ex) {
-                Logger.Debug($"Unable to parse keyboard at position {p} : [{Keyboard}]");
-                Logger.Debug(ex.ToString());
+                Logger.Error($"Unable to parse keyboard at position {p} : [{Keyboard}]");
+                Logger.Error(ex);
             }
 
             return this;

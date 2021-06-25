@@ -124,7 +124,7 @@ namespace SongRequestManagerV2.Networks
                 }).ConfigureAwait(false);
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
             }
         }
         #endregion

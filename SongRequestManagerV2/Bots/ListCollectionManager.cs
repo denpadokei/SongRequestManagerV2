@@ -61,7 +61,7 @@ namespace SongRequestManagerV2.Bots
                 var list = this.OpenList(listname);
                 return list.Contains(key);
             }
-            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Error(ex); } // Going to try this form, to reduce code verbosity.              
 
             return false;
         }
@@ -80,7 +80,7 @@ namespace SongRequestManagerV2.Bots
                 return true;
 
             }
-            catch (Exception ex) { Logger.Debug(ex.ToString()); }
+            catch (Exception ex) { Logger.Error(ex); }
 
             return false;
         }
@@ -98,7 +98,7 @@ namespace SongRequestManagerV2.Bots
                 return false;
 
             }
-            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Error(ex); } // Going to try this form, to reduce code verbosity.              
 
             return false;
         }
@@ -109,7 +109,7 @@ namespace SongRequestManagerV2.Bots
                 this.OpenList(listname, flags).Runscript();
 
             }
-            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Error(ex); } // Going to try this form, to reduce code verbosity.              
         }
 
         public void ClearList(string listname, ListFlags flags = ListFlags.Unchanged)
@@ -117,7 +117,7 @@ namespace SongRequestManagerV2.Bots
             try {
                 this.OpenList(listname).Clear();
             }
-            catch (Exception ex) { Logger.Debug(ex.ToString()); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) { Logger.Error(ex); } // Going to try this form, to reduce code verbosity.              
         }
 
     }

@@ -61,7 +61,7 @@ namespace SongRequestManagerV2
                 _client?.Dispose();
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
             }
 
 
@@ -78,7 +78,7 @@ namespace SongRequestManagerV2
                 return await SendAsync(HttpMethod.Get, url, token);
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
                 return null;
             }
         }
@@ -93,7 +93,7 @@ namespace SongRequestManagerV2
                 return null;
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
                 return null;
             }
         }
@@ -113,15 +113,13 @@ namespace SongRequestManagerV2
                 return null;
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
                 return null;
             }
         }
 
         internal static async Task<WebResponse> SendAsync(HttpMethod methodType, string url, CancellationToken token, IProgress<double> progress = null)
         {
-            Logger.Debug($"{methodType.ToString()}: {url}");
-
             // send request
             try {
                 HttpResponseMessage resp = null;
@@ -138,8 +136,8 @@ namespace SongRequestManagerV2
                         Logger.Debug($"resp code : {resp.StatusCode}");
                     }
                     catch (Exception e) {
-                        Logger.Debug($"Error : {e}");
-                        Logger.Debug($"{resp?.StatusCode}");
+                        Logger.Error($"resp code : {resp?.StatusCode}");
+                        Logger.Error(e);
                     }
                 } while (resp?.StatusCode != HttpStatusCode.NotFound && resp?.IsSuccessStatusCode != true && retryCount <= RETRY_COUNT);
 
@@ -175,7 +173,7 @@ namespace SongRequestManagerV2
                 }
             }
             catch (Exception e) {
-                Logger.Debug($"{e}");
+                Logger.Error(e);
                 throw;
             }
         }
