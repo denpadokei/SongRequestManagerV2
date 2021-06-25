@@ -13,7 +13,8 @@ namespace SongRequestManagerV2.Utils
         {
             for (var i = 0; i < text.Length; i++) {
                 var c = text[i];
-                if (c < 128) text[i] = mask[c];
+                if (c < 128)
+                    text[i] = mask[c];
             }
         }
 
@@ -22,7 +23,8 @@ namespace SongRequestManagerV2.Utils
             var o = new StringBuilder(text.Length);
 
             foreach (var c in text) {
-                if (c > 127 || mask[c] != ' ') o.Append(c);
+                if (c > 127 || mask[c] != ' ')
+                    o.Append(c);
             }
             return o.ToString();
         }
@@ -33,7 +35,8 @@ namespace SongRequestManagerV2.Utils
             var o = new StringBuilder(text.Length);
 
             foreach (var c in text) {
-                if (c > 127 || mask[c] != '\0') o.Append(c);
+                if (c > 127 || mask[c] != '\0')
+                    o.Append(c);
             }
             return o.ToString();
         }
@@ -44,8 +47,10 @@ namespace SongRequestManagerV2.Utils
             var words = this.Split(text);
             var result = new StringBuilder();
             foreach (var word in words) {
-                if (word.Length < 3) continue;
-                if (BeatsaverBadWords.Contains(word.ToLower())) continue;
+                if (word.Length < 3)
+                    continue;
+                if (BeatsaverBadWords.Contains(word.ToLower()))
+                    continue;
                 result.Append(word);
                 result.Append(' ');
             }
@@ -53,7 +58,8 @@ namespace SongRequestManagerV2.Utils
             //RequestBot.Instance.QueueChatMessage($"Search string: {result.ToString()}");
 
 
-            if (result.Length == 0) return "qwesartysasasdsdaa";
+            if (result.Length == 0)
+                return "qwesartysasasdsdaa";
             return result.ToString().Trim();
         }
 
@@ -78,9 +84,15 @@ namespace SongRequestManagerV2.Utils
                 this._SymbolsValidDirectory[i] = i;
             }
 
-            foreach (var c in new char[] { '@', '*', '+', ':', '-', '<', '~', '>', '(', ')', '[', ']', '/', '\\', '.', ',' }) if (c < 128) this._SymbolsMap[c] = ' ';
-            foreach (var c in new char[] { '@', '*', '+', ':', '<', '~', '>', '(', ')', '[', ']', '/', '\\', '.', ',' }) if (c < 128) this._SymbolsNoDash[c] = ' ';
-            foreach (var c in Path.GetInvalidPathChars()) if (c < 128) this._SymbolsValidDirectory[c] = '\0';
+            foreach (var c in new char[] { '@', '*', '+', ':', '-', '<', '~', '>', '(', ')', '[', ']', '/', '\\', '.', ',' })
+                if (c < 128)
+                    this._SymbolsMap[c] = ' ';
+            foreach (var c in new char[] { '@', '*', '+', ':', '<', '~', '>', '(', ')', '[', ']', '/', '\\', '.', ',' })
+                if (c < 128)
+                    this._SymbolsNoDash[c] = ' ';
+            foreach (var c in Path.GetInvalidPathChars())
+                if (c < 128)
+                    this._SymbolsValidDirectory[c] = '\0';
             this._SymbolsValidDirectory[':'] = '\0';
             this._SymbolsValidDirectory['\\'] = '\0';
             this._SymbolsValidDirectory['/'] = '\0';

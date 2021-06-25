@@ -35,7 +35,8 @@ namespace SongRequestManagerV2.Bots
             {
                 //RequestBot.Instance.QueueChatMessage($"Clearing old session {request}");
                 list.Clear();
-                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly))) list.Writefile(request);
+                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly)))
+                    list.Writefile(request);
 
             }
 
@@ -47,10 +48,12 @@ namespace SongRequestManagerV2.Bots
             if (!this.ListCollection.TryGetValue(request, out var list)) {
                 list = new StringListManager();
                 this.ListCollection.Add(request, list);
-                if (!flags.HasFlag(ListFlags.InMemory)) list.Readfile(request); // If in memory, we never read from disk
+                if (!flags.HasFlag(ListFlags.InMemory))
+                    list.Readfile(request); // If in memory, we never read from disk
             }
             else {
-                if (flags.HasFlag(ListFlags.Uncached)) list.Readfile(request); // If Cache is off, ALWAYS re-read file.
+                if (flags.HasFlag(ListFlags.Uncached))
+                    list.Readfile(request); // If Cache is off, ALWAYS re-read file.
             }
             return list;
         }
@@ -76,7 +79,8 @@ namespace SongRequestManagerV2.Bots
                 list.Add(key);
 
 
-                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly))) list.Writefile(listname);
+                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly)))
+                    list.Writefile(listname);
                 return true;
 
             }
@@ -93,7 +97,8 @@ namespace SongRequestManagerV2.Bots
 
                 list.Removeentry(key);
 
-                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly))) list.Writefile(listname);
+                if (!(flags.HasFlag(ListFlags.InMemory) | flags.HasFlag(ListFlags.ReadOnly)))
+                    list.Writefile(listname);
 
                 return false;
 

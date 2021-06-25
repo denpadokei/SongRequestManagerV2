@@ -77,7 +77,9 @@ namespace SongRequestManagerV2.Bots
         {
             get
             {
-                foreach (var key in this.keys) if (key.name == index) return key;
+                foreach (var key in this.keys)
+                    if (key.name == index)
+                        return key;
                 Logger.Debug($"Keyboard: Unable to set property of Key  [{index}]");
 
                 return this.dummy;
@@ -88,31 +90,36 @@ namespace SongRequestManagerV2.Bots
         public void SetButtonType(string ButtonName = "A")
         {
             this.BaseButton = Resources.FindObjectsOfTypeAll<Button>().FirstOrDefault(x => (x.name == ButtonName));
-            if (this.BaseButton == null) this.BaseButton = Resources.FindObjectsOfTypeAll<Button>().FirstOrDefault(x => (x.name == "KeyboardButton"));
+            if (this.BaseButton == null)
+                this.BaseButton = Resources.FindObjectsOfTypeAll<Button>().FirstOrDefault(x => (x.name == "KeyboardButton"));
         }
 
         public void SetValue(string keylabel, string value)
         {
             var found = false;
-            foreach (var key in this.keys) if (key.name == keylabel) {
+            foreach (var key in this.keys)
+                if (key.name == keylabel) {
                     found = true;
                     key.value = value;
                     //key.shifted = value;
                 }
 
-            if (!found) Logger.Debug($"Keyboard: Unable to set property of Key  [{keylabel}]");
+            if (!found)
+                Logger.Debug($"Keyboard: Unable to set property of Key  [{keylabel}]");
         }
 
         public void SetAction(string keyname, Action<KEY> action)
         {
             var found = false;
-            foreach (var key in this.keys) if (key.name == keyname) {
+            foreach (var key in this.keys)
+                if (key.name == keyname) {
                     found = true;
                     key.keyaction = action;
                 }
 
             // BUG: This message was annoying if the keyboard didn't include those keys.
-            if (!found) Logger.Debug($"Keyboard: Unable to set action of Key  [{keyname}]");
+            if (!found)
+                Logger.Debug($"Keyboard: Unable to set action of Key  [{keyname}]");
         }
 
         private KEY AddKey(string keylabel, float width = 12, float height = 10, int color = 0xffffff)
@@ -143,8 +150,10 @@ namespace SongRequestManagerV2.Bots
         {
             this.currentposition.x += spacing;
 
-            if (Label != "") this.AddKey(Label, Width, height, color).Set(newvalue);
-            else if (Key != "") this.AddKey(Key[0].ToString(), Key[1].ToString()).Set(newvalue);
+            if (Label != "")
+                this.AddKey(Label, Width, height, color).Set(newvalue);
+            else if (Key != "")
+                this.AddKey(Key[0].ToString(), Key[1].ToString()).Set(newvalue);
             spacing = 0;
             Width = this.buttonwidth;
             height = 10f;
@@ -158,15 +167,18 @@ namespace SongRequestManagerV2.Bots
 
         private bool ReadFloat(ref String data, ref int Position, ref float result)
         {
-            if (Position >= data.Length) return false;
+            if (Position >= data.Length)
+                return false;
             var start = Position;
             while (Position < data.Length) {
                 var c = data[Position];
-                if (!((c >= '0' && c <= '9') || c == '+' || c == '-' || c == '.')) break;
+                if (!((c >= '0' && c <= '9') || c == '+' || c == '-' || c == '.'))
+                    break;
                 Position++;
             }
 
-            if (float.TryParse(data.Substring(start, Position - start), out result)) return true;
+            if (float.TryParse(data.Substring(start, Position - start), out result))
+                return true;
 
             Position = start;
             return false;
@@ -234,7 +246,8 @@ namespace SongRequestManagerV2.Bots
                             space = false;
                             p++;
                             var label = p;
-                            while (p < Keyboard.Length && Keyboard[p] != ']') p++;
+                            while (p < Keyboard.Length && Keyboard[p] != ']')
+                                p++;
                             Label = Keyboard.Substring(label, p - label);
                             break;
 
@@ -265,10 +278,12 @@ namespace SongRequestManagerV2.Bots
                                 }
 
                                 if (space) {
-                                    if (Label != "" || Key != "") this.EmitKey(ref spacing, ref width, ref Label, ref Key, ref space, ref newvalue, ref height, ref color);
+                                    if (Label != "" || Key != "")
+                                        this.EmitKey(ref spacing, ref width, ref Label, ref Key, ref space, ref newvalue, ref height, ref color);
                                     spacing = number;
                                 }
-                                else width = number;
+                                else
+                                    width = number;
                                 continue;
                             }
 
@@ -277,7 +292,8 @@ namespace SongRequestManagerV2.Bots
                         case '\'':
                             p++;
                             var newvaluep = p;
-                            while (p < Keyboard.Length && Keyboard[p] != '\'') p++;
+                            while (p < Keyboard.Length && Keyboard[p] != '\'')
+                                p++;
                             newvalue = Keyboard.Substring(newvaluep, p - newvaluep);
                             break;
 
@@ -305,7 +321,8 @@ namespace SongRequestManagerV2.Bots
         {
             try {
                 var fileContent = File.ReadAllText(Path.Combine(Plugin.DataPath, keyboardname));
-                if (fileContent.Length > 0) this.AddKeys(fileContent, scale);
+                if (fileContent.Length > 0)
+                    this.AddKeys(fileContent, scale);
             }
             catch {
                 // This is a silent fail since custom keyboards are optional
@@ -444,7 +461,8 @@ namespace SongRequestManagerV2.Bots
         private void Backspace(KEY key)
         {
             // BUG: This is terribly long winded... 
-            if (key.kb.KeyboardText.text.Length > 0) key.kb.KeyboardText.text = key.kb.KeyboardText.text.Substring(0, key.kb.KeyboardText.text.Length - 1); // Is there a cleaner way to say this?
+            if (key.kb.KeyboardText.text.Length > 0)
+                key.kb.KeyboardText.text = key.kb.KeyboardText.text.Substring(0, key.kb.KeyboardText.text.Length - 1); // Is there a cleaner way to say this?
         }
 
         private void SHIFT(KEY key)
@@ -454,9 +472,11 @@ namespace SongRequestManagerV2.Bots
             foreach (var k in key.kb.keys) {
                 var x = key.kb.Shift ? k.shifted : k.value;
                 //if (key.kb.Caps) x = k.value.ToUpper();
-                if (k.shifted != "") k.mybutton.SetButtonText(x);
+                if (k.shifted != "")
+                    k.mybutton.SetButtonText(x);
 
-                if (k.name == "SHIFT") k.mybutton.GetComponentInChildren<Image>().color = key.kb.Shift ? Color.green : Color.white;
+                if (k.name == "SHIFT")
+                    k.mybutton.GetComponentInChildren<Image>().color = key.kb.Shift ? Color.green : Color.white;
             }
         }
 
@@ -476,7 +496,8 @@ namespace SongRequestManagerV2.Bots
 
         private void DrawCursor()
         {
-            if (!this.EnableInputField) return;
+            if (!this.EnableInputField)
+                return;
 
             var v = this.KeyboardText.GetPreferredValues(this.KeyboardText.text + "|");
 
@@ -566,8 +587,10 @@ namespace SongRequestManagerV2.Bots
 
                     {
                         var x = kb.Shift ? this.shifted : this.value;
-                        if (x == "") x = this.value;
-                        if (kb.Caps) x = this.value.ToUpper();
+                        if (x == "")
+                            x = this.value;
+                        if (kb.Caps)
+                            x = this.value.ToUpper();
                         kb.KeyboardText.text += x;
                         kb.DrawCursor();
 

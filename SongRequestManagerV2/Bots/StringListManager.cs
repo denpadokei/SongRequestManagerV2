@@ -31,7 +31,8 @@ namespace SongRequestManagerV2.Bots
 
         public bool Readfile(string filename, bool ConvertToLower = false)
         {
-            if (this.flags.HasFlag(ListFlags.InMemory)) return false;
+            if (this.flags.HasFlag(ListFlags.InMemory))
+                return false;
 
             try {
                 var listfilename = Path.Combine(Plugin.DataPath, filename);
@@ -41,7 +42,8 @@ namespace SongRequestManagerV2.Bots
                 else
                     this.list = fileContent.Split(anyseparator, StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                if (ConvertToLower) this.LowercaseList();
+                if (ConvertToLower)
+                    this.LowercaseList();
                 return true;
             }
             catch {
@@ -56,7 +58,8 @@ namespace SongRequestManagerV2.Bots
             try {
                 // BUG: A DynamicText context needs to be applied to each command to allow use of dynamic variables
 
-                foreach (var line in this.list) this._bot.Parse(null, line, CmdFlags.Local);
+                foreach (var line in this.list)
+                    this._bot.Parse(null, line, CmdFlags.Local);
             }
             catch (Exception ex) {
                 Logger.Error(ex);
@@ -82,13 +85,15 @@ namespace SongRequestManagerV2.Bots
 
         public bool Contains(string entry)
         {
-            if (this.list.Contains(entry)) return true;
+            if (this.list.Contains(entry))
+                return true;
             return false;
         }
 
         public bool Add(string entry)
         {
-            if (this.list.Contains(entry)) return false;
+            if (this.list.Contains(entry))
+                return false;
             this.list.Add(entry);
             return true;
         }
@@ -98,7 +103,8 @@ namespace SongRequestManagerV2.Bots
         // Picks a random entry and returns it, removing it from the list
         public string Drawentry()
         {
-            if (this.list.Count == 0) return "";
+            if (this.list.Count == 0)
+                return "";
             var entry = RequestBot.Generator.Next(0, this.list.Count);
             var result = this.list.ElementAt(entry);
             this.list.RemoveAt(entry);
@@ -108,7 +114,8 @@ namespace SongRequestManagerV2.Bots
         // Picks a random entry but does not remove it
         public string Randomentry()
         {
-            if (this.list.Count == 0) return "";
+            if (this.list.Count == 0)
+                return "";
             var entry = RequestBot.Generator.Next(0, this.list.Count);
             var result = this.list.ElementAt(entry);
             return result;
@@ -126,7 +133,8 @@ namespace SongRequestManagerV2.Bots
         }
         public void Outputlist(QueueLongMessage msg, string separator = ", ")
         {
-            foreach (var entry in this.list) msg.Add(entry, separator);
+            foreach (var entry in this.list)
+                msg.Add(entry, separator);
         }
     }
 }

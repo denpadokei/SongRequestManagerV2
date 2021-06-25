@@ -142,12 +142,13 @@ namespace SongRequestManagerV2
                 } while (resp?.StatusCode != HttpStatusCode.NotFound && resp?.IsSuccessStatusCode != true && retryCount <= RETRY_COUNT);
 
 
-                if (token.IsCancellationRequested) throw new TaskCanceledException();
+                if (token.IsCancellationRequested)
+                    throw new TaskCanceledException();
 
                 using (var memoryStream = new MemoryStream())
                 using (var stream = await resp.Content.ReadAsStreamAsync().ConfigureAwait(false)) {
                     var buffer = new byte[8192];
-                    var bytesRead = 0; ;
+                    var bytesRead = 0;
 
                     var contentLength = resp?.Content.Headers.ContentLength;
                     var totalRead = 0;
@@ -156,7 +157,8 @@ namespace SongRequestManagerV2
                     progress?.Report(0);
 
                     while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0) {
-                        if (token.IsCancellationRequested) throw new TaskCanceledException();
+                        if (token.IsCancellationRequested)
+                            throw new TaskCanceledException();
 
                         if (contentLength != null) {
                             progress?.Report((double)totalRead / (double)contentLength);

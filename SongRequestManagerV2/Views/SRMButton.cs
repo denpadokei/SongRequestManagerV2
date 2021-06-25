@@ -154,10 +154,7 @@ namespace SongRequestManagerV2.Views
             this.SetButtonColor();
         }
 
-        private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1)
-        {
-            this.isInGame = string.Equals(arg1.name, "GameCore", StringComparison.CurrentCultureIgnoreCase);
-        }
+        private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1) => this.isInGame = string.Equals(arg1.name, "GameCore", StringComparison.CurrentCultureIgnoreCase);
 
         #region Unity message
         protected override void OnDestroy()
@@ -302,7 +299,7 @@ namespace SongRequestManagerV2.Views
                 Loader.Instance.RefreshSongs(false);
                 yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
                 Utility.EmptyDirectory(".requestcache", true);
-                
+
                 Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
                 Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), () =>
                 {

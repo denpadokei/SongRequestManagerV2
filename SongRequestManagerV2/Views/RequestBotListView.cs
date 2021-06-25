@@ -261,7 +261,7 @@ namespace SongRequestManagerV2.Views
             {
                 try {
                     this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed";
-                    this._queueButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red; ;
+                    this._queueButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red;
                     this.HistoryHoverHint = this.IsShowHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
                     this.HistoryButtonText = this.IsShowHistory ? "Requests" : "History";
                     this.PlayButtonText = this.IsShowHistory ? "Replay" : "Play";

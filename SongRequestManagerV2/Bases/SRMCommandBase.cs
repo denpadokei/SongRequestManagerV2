@@ -81,7 +81,8 @@ namespace SongRequestManagerV2.Bases
             // BUG: Needs additional checking
 
             var fixedname = listname.ToLower();
-            if (!fixedname.EndsWith(".users")) fixedname += ".users";
+            if (!fixedname.EndsWith(".users"))
+                fixedname += ".users";
             this.Permittedusers = fixedname;
         }
 
@@ -89,13 +90,19 @@ namespace SongRequestManagerV2.Bases
         {
             // BUG: Most of these will be replaced.  
 
-            if (this.Method2 != null) this.Method2(state._user, state._parameter, state._flags, state._info);
-            else if (this.Method != null) this.Method(state._user, state._parameter);
+            if (this.Method2 != null)
+                this.Method2(state._user, state._parameter, state._flags, state._info);
+            else if (this.Method != null)
+                this.Method(state._user, state._parameter);
             //else if (Method3 != null) return Method3(this, state.user, state.parameter, state.flags, state.info);
-            else if (this.func1 != null) Dispatcher.RunCoroutine(this.func1(state));
-            else if (this.Subcommand != null) return this.Subcommand(state); // Recommended.
-            else if (this.Subcommand2 != null) this.Subcommand(state);
-            else if (this.AsyncSubCommand != null) this.AsyncSubCommand(state).Await(null, null, null);
+            else if (this.func1 != null)
+                Dispatcher.RunCoroutine(this.func1(state));
+            else if (this.Subcommand != null)
+                return this.Subcommand(state); // Recommended.
+            else if (this.Subcommand2 != null)
+                this.Subcommand(state);
+            else if (this.AsyncSubCommand != null)
+                this.AsyncSubCommand(state).Await(null, null, null);
             return success;
         }
 
