@@ -247,6 +247,7 @@
     <Compile Include="Models\SRMCommand.cs" />
     <Compile Include="Models\CommandManager.cs" />
     <Compile Include="Models\ParseState.cs" />
+    <Compile Include="SimpleJsons\SimpleJson.cs" />
     <Compile Include="Statics\Enums.cs" />
     <Compile Include="Statics\StringFormat.cs" />
     <Compile Include="Utils\ChatManager.cs" />

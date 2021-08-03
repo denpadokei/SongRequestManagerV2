@@ -1,6 +1,6 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Models.Twitch;
-using ChatCore.Utilities;
+using SongRequestManagerV2.SimpleJSON;
 
 namespace SongRequestManagerV2.Extentions
 {
@@ -18,7 +18,7 @@ namespace SongRequestManagerV2.Extentions
             var badges = new JSONArray();
             if (chatUser.Badges != null) {
                 foreach (var badge in chatUser.Badges) {
-                    badges.Add(badge.ToJson());
+                    badges.Add(JSON.Parse(badge.ToJson().ToString()));
                 }
                 obj.Add(nameof(chatUser.Badges), badges);
             }

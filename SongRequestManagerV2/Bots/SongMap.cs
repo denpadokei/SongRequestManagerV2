@@ -1,4 +1,4 @@
-﻿using ChatCore.Utilities;
+﻿using SongRequestManagerV2.SimpleJSON;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Utils;
 using System;
@@ -68,53 +68,49 @@ namespace SongRequestManagerV2.Bots
         [Inject]
         private void Constractor()
         {
-            if (!this.Song["version"].IsString) {
-                this.Song.Add("id", this.Song["key"]);
-                this.Song.Add("version", this.Song["key"]);
+            if (!this.Song["versions"].IsArray) {
+                this.Song.Add("id", this.Song["id"]);
+                this.Song.Add("version", this.Song["id"]);
 
                 var metadata = this.Song["metadata"];
                 this.Song.Add("songName", metadata["songName"].Value);
                 this.Song.Add("songSubName", metadata["songSubName"].Value);
                 this.Song.Add("authorName", metadata["songAuthorName"].Value);
                 this.Song.Add("levelAuthor", metadata["levelAuthorName"].Value);
-                this.Song.Add("rating", this.Song["stats"]["rating"].AsFloat * 100);
+                this.Song.Add("rating", this.Song["stats"]["score"].AsFloat * 100);
 
                 var degrees90 = false;
                 var degrees360 = false;
 
                 try {
+                    if (this.Song["versions"].AsArray[0].AsObject["diffs"].IsArray) {
+                        var diffs = this.Song["versions"].AsArray[0].AsObject["diffs"].AsArray;
+                        var maxnjs = 0d;
+                        foreach (var diff in diffs) {
+                            var chara = diff.Value["characteristic"].Value;
+                            if (chara.Equals("_360Degree", StringComparison.InvariantCultureIgnoreCase)) {
+                                degrees360 = true;
+                            }   
+                            if (chara.Equals("_90Degree", StringComparison.InvariantCultureIgnoreCase)) {
+                                degrees90 = true;
+                            }
+                            var seconds = diff.Value["seconds"].AsDouble;
+                            var njs = diff.Value["njs"].AsFloat;
+                            if (njs > maxnjs) {
+                                maxnjs = njs;
+                            }
+                            if (seconds > 0) {
+                                this.Song.Add("songlength", $"{(int)(seconds / 60)}:{seconds % 60:00}");
+                                this.Song.Add("songduration", seconds);                                
+                            }
 
-                    var characteristics = metadata["characteristics"][0]["difficulties"];
-                    foreach (var entry in metadata["characteristics"]) {
-                        if (entry.Value["name"] == "360Degree")
-                            degrees360 = true;
-                        if (entry.Value["name"] == "90Degree")
-                            degrees90 = true;
-                    }
-
-                    var maxnjs = 0;
-                    foreach (var entry in characteristics) {
-                        if (entry.Value.IsNull)
-                            continue;
-                        var diff = entry.Value["length"].AsInt;
-                        var njs = entry.Value["njs"].AsInt;
-                        if (njs > maxnjs)
-                            maxnjs = njs;
-
-
-
-                        if (diff > 0) {
-                            this.Song.Add("songlength", $"{diff / 60}:{diff % 60:00}");
-                            this.Song.Add("songduration", diff);
-                            //Instance.QueueChatMessage($"{diff / 60}:{diff % 60}");
                         }
+                        if (maxnjs > 0) {
+                            this.Song.Add("njs", maxnjs);
+                        }
+                        if (degrees360 || degrees90)
+                            this.Song.Add("maptype", "360");
                     }
-
-                    if (maxnjs > 0) {
-                        this.Song.Add("njs", maxnjs);
-                    }
-                    if (degrees360 || degrees90)
-                        this.Song.Add("maptype", "360");
                 }
                 catch (Exception e) {
                     Logger.Error(e);

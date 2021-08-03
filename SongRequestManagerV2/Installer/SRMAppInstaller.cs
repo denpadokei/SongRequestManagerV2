@@ -1,4 +1,4 @@
-﻿using ChatCore.Utilities;
+﻿using SongRequestManagerV2.SimpleJSON;
 using SiraUtil;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Models;

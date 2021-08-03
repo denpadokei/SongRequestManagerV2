@@ -1,6 +1,6 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Models.Twitch;
-using ChatCore.Utilities;
+using SongRequestManagerV2.SimpleJSON;
 using IPA.Loader;
 using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Extentions;
@@ -23,6 +23,7 @@ using System.Timers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
+using System.Diagnostics;
 #if OLDVERSION
 using TMPro;
 #endif
@@ -66,6 +67,7 @@ namespace SongRequestManagerV2.Bots
         private static readonly Regex _drawcard = new Regex("($^)|(^[0-9a-zA-Z]+$)", RegexOptions.Compiled);
 
         public const string SCRAPED_SCORE_SABER_ALL_JSON_URL = "https://cdn.wes.cloud/beatstar/bssb/v2-ranked.json";
+        public const string BEATSAVER_ROOT_URL = "https://beatmaps.io/api";
 
         private readonly System.Timers.Timer timer = new System.Timers.Timer(500);
 
@@ -1058,7 +1060,7 @@ namespace SongRequestManagerV2.Bots
                 JSONNode result = null;
 
                 if (!RequestBotConfig.Instance.OfflineMode) {
-                    var requestUrl = $"https://beatsaver.com/api/maps/detail/{id}";
+                    var requestUrl = $"{BEATSAVER_ROOT_URL}/maps/id/{id}";
                     var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
                     if (resp.IsSuccessStatusCode) {

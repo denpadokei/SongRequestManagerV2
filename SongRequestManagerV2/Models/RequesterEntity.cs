@@ -1,5 +1,4 @@
 ﻿using ChatCore.Interfaces;
-using ChatCore.Utilities;
 
 namespace SongRequestManagerV2.Models
 {
@@ -18,8 +17,7 @@ namespace SongRequestManagerV2.Models
         public bool IsModerator { get; set; }
 
         public IChatBadge[] Badges { get; set; }
-
-        public JSONObject ToJson() => null;
+        ChatCore.Utilities.JSONObject IChatUser.ToJson() => null;
 
         public RequesterEntity()
         {

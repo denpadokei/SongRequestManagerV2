@@ -2,7 +2,7 @@
 using ChatCore.Interfaces;
 using ChatCore.Models;
 using ChatCore.Models.Twitch;
-using ChatCore.Utilities;
+using SongRequestManagerV2.SimpleJSON;
 using HMUI;
 using SongCore;
 using SongRequestManagerV2.Bases;
@@ -183,7 +183,7 @@ namespace SongRequestManagerV2
                 obj.Add("status", new JSONString(this._status.ToString()));
                 obj.Add("requestInfo", new JSONString(this._requestInfo));
                 obj.Add("time", new JSONString(this._requestTime.ToFileTime().ToString()));
-                obj.Add("requestor", this._requestor.ToJson());
+                obj.Add("requestor", JSON.Parse(this._requestor.ToJson().ToString()));
                 obj.Add("song", this._song);
                 return obj;
             }

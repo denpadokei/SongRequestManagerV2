@@ -1,5 +1,5 @@
 ﻿using ChatCore.Interfaces;
-using ChatCore.Utilities;
+using SongRequestManagerV2.SimpleJSON;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;

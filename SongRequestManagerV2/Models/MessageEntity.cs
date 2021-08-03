@@ -1,6 +1,5 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Models;
-using ChatCore.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -39,6 +38,6 @@ namespace SongRequestManagerV2.Models
             this.Metadata = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
         }
 
-        public JSONObject ToJson() => throw new NotImplementedException();
+        public ChatCore.Utilities.JSONObject ToJson() => throw new NotImplementedException();
     }
 }
