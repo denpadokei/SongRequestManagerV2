@@ -216,7 +216,7 @@ namespace SongRequestManagerV2.Views
                     songIndex = this.Normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
 
                     var currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
-                    var songHash = request.SongNode["hash"].Value.ToUpper();
+                    var songHash = request.SongNode["versions"].AsArray[0].AsObject["hash"].Value.ToUpper();
 
                     if (Loader.GetLevelByHash(songHash) == null) {
                         Utility.EmptyDirectory(".requestcache", false);
@@ -235,7 +235,7 @@ namespace SongRequestManagerV2.Views
                         //  WebClient.DownloadSong($"https://beatsaver.com{request.SongNode["downloadURL"].Value}", System.Threading.CancellationToken.None, this.DownloadProgress);
                         var result = await request.DownloadZip(CancellationToken.None, DownloadProgress);
                         if (result == null) {
-                            this.ChatManager.QueueChatMessage("BeatSaver is down now.");
+                            this.ChatManager.QueueChatMessage("beatmaps.io is down now.");
                         }
                         using (var zipStream = new MemoryStream(result))
                         using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
@@ -302,7 +302,7 @@ namespace SongRequestManagerV2.Views
                 Utility.EmptyDirectory(".requestcache", true);
 
                 Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
-                Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(request.SongNode["hash"].Value.ToUpper(), () =>
+                Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(request.SongNode["versions"].AsArray[0].AsObject["hash"].Value.ToUpper(), () =>
                 {
                     this._bot.UpdateRequestUI();
                 }));

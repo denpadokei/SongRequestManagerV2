@@ -74,6 +74,7 @@ namespace SongRequestManagerV2
         public string _requestInfo; // Contains extra song info, Like : Sub/Donation request, Deck pick, Empty Queue pick,Mapper request, etc.
         public string _songName;
         public string _authorName;
+        private string _hash;
 
         private static readonly ConcurrentDictionary<string, Texture2D> _cachedTextures = new ConcurrentDictionary<string, Texture2D>();
 
@@ -98,13 +99,14 @@ namespace SongRequestManagerV2
             this._status = status;
             this._requestTime = requestTime;
             this._requestInfo = requestInfo;
+            this._hash = song["versions"].AsArray[0].AsObject["hash"].Value;
             return this;
         }
 
         [UIAction("#post-parse")]
         internal void Setup()
         {
-            if (RequestBotConfig.Instance.PPSearch && MapDatabase.PPMap.TryGetValue(this.SongNode["key"].Value, out var pp) && 0 < pp) {
+            if (RequestBotConfig.Instance.PPSearch && MapDatabase.PPMap.TryGetValue(this.SongNode["id"].Value, out var pp) && 0 < pp) {
                 this.SongName = $"{this._songName} <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>";
             }
             else {
@@ -156,7 +158,7 @@ namespace SongRequestManagerV2
                                             var url = this.SongNode["coverURL"].Value;
 
                                             if (!_cachedTextures.TryGetValue(url, out var tex)) {
-                                                var b = await WebClient.DownloadImage($"https://beatsaver.com{url}", System.Threading.CancellationToken.None).ConfigureAwait(true);
+                                                var b = await WebClient.DownloadImage($"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{this._hash}.jpg", System.Threading.CancellationToken.None).ConfigureAwait(true);
 
                                                 tex = new Texture2D(2, 2);
                                                 tex.LoadImage(b);
@@ -211,7 +213,7 @@ namespace SongRequestManagerV2
         public async Task<byte[]> DownloadZip(CancellationToken token = default(CancellationToken), IProgress<double> progress = null)
         {
             try {
-                var response = await WebClient.SendAsync(HttpMethod.Get, $"https://cdn.beatmaps.io/{SongNode["versions"].AsArray[0]["hash"].Value.ToLower()}.zip", token, progress);
+                var response = await WebClient.SendAsync(HttpMethod.Get, $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{SongNode["versions"].AsArray[0]["hash"].Value.ToLower()}.zip", token, progress);
 
                 if (response?.IsSuccessStatusCode == true) {
                     return response.ContentToBytes();

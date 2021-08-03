@@ -67,7 +67,8 @@ namespace SongRequestManagerV2.Bots
         private static readonly Regex _drawcard = new Regex("($^)|(^[0-9a-zA-Z]+$)", RegexOptions.Compiled);
 
         public const string SCRAPED_SCORE_SABER_ALL_JSON_URL = "https://cdn.wes.cloud/beatstar/bssb/v2-ranked.json";
-        public const string BEATMAPS_ROOT_URL = "https://beatmaps.io/api";
+        public const string BEATMAPS_API_ROOT_URL = "https://beatmaps.io/api";
+        public const string BEATMAPS_CDN_ROOT_URL = "https://cdn.beatmaps.io";
 
         private readonly System.Timers.Timer timer = new System.Timers.Timer(500);
 
@@ -507,7 +508,7 @@ namespace SongRequestManagerV2.Bots
             return result;
         }
 
-        internal void UpdateSongMap(JSONObject song) => WebClient.GetAsync($"{BEATMAPS_ROOT_URL}/maps/id/{song["id"].Value}", System.Threading.CancellationToken.None).Await(resp =>
+        internal void UpdateSongMap(JSONObject song) => WebClient.GetAsync($"{BEATMAPS_API_ROOT_URL}/maps/id/{song["id"].Value}", System.Threading.CancellationToken.None).Await(resp =>
                                                       {
                                                           if (resp.IsSuccessStatusCode) {
                                                               var result = resp.ConvertToJsonNode();
@@ -535,7 +536,7 @@ namespace SongRequestManagerV2.Bots
 
             var id = this.GetBeatSaverId(this.Normalize.RemoveSymbols(ref request, this.Normalize._SymbolsNoDash));
             try {
-                if (id != "") {
+                if (!string.IsNullOrEmpty(id)) {
                     // Remap song id if entry present. This is one time, and not correct as a result. No recursion right now, could be confusing to the end user.
                     if (songremap.ContainsKey(id) && !requestInfo.flags.HasFlag(CmdFlags.NoFilter)) {
                         request = songremap[id];
@@ -559,7 +560,7 @@ namespace SongRequestManagerV2.Bots
 
                 // Get song query results from beatsaver.com
                 if (!RequestBotConfig.Instance.OfflineMode) {
-                    var requestUrl = !string.IsNullOrEmpty(id) ? $"{BEATMAPS_ROOT_URL}/maps/id/{this.Normalize.RemoveSymbols(ref request, this.Normalize._SymbolsNoDash)}" : $"{BEATMAPS_ROOT_URL}/search/text/0?q={normalrequest}";
+                    var requestUrl = !string.IsNullOrEmpty(id) ? $"{BEATMAPS_API_ROOT_URL}/maps/id/{this.Normalize.RemoveSymbols(ref request, this.Normalize._SymbolsNoDash)}" : $"{BEATMAPS_API_ROOT_URL}/search/text/0?q={normalrequest}";
 #if DEBUG
                     Logger.Debug($"Start get map detial : {stopwatch.ElapsedMilliseconds} ms");
 #endif
@@ -1060,7 +1061,7 @@ namespace SongRequestManagerV2.Bots
                 JSONNode result = null;
 
                 if (!RequestBotConfig.Instance.OfflineMode) {
-                    var requestUrl = $"{BEATMAPS_ROOT_URL}/maps/id/{id}";
+                    var requestUrl = $"{BEATMAPS_API_ROOT_URL}/maps/id/{id}";
                     var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
                     if (resp.IsSuccessStatusCode) {
@@ -1402,7 +1403,7 @@ namespace SongRequestManagerV2.Bots
         {
             var totalSongs = 0;
 
-            var requestUrl = $"{BEATMAPS_ROOT_URL}/maps/latest";
+            var requestUrl = $"{BEATMAPS_API_ROOT_URL}/maps/latest";
 
             //if (RequestBotConfig.Instance.OfflineMode) return;
 
@@ -1468,7 +1469,7 @@ namespace SongRequestManagerV2.Bots
 
             var id = this.GetBeatSaverId(state._parameter);
 
-            var requestUrl = (id != "") ? $"{BEATMAPS_ROOT_URL}/maps/detail/{this.Normalize.RemoveSymbols(ref state._parameter, this.Normalize._SymbolsNoDash)}" : $"{BEATMAPS_ROOT_URL}/search/text";
+            var requestUrl = (id != "") ? $"{BEATMAPS_API_ROOT_URL}/maps/detail/{this.Normalize.RemoveSymbols(ref state._parameter, this.Normalize._SymbolsNoDash)}" : $"{BEATMAPS_API_ROOT_URL}/search/text";
 
             if (RequestBotConfig.Instance.OfflineMode)
                 return;
@@ -1533,7 +1534,7 @@ namespace SongRequestManagerV2.Bots
         {
 
             var id = this.GetBeatSaverId(state._parameter);
-            var requestUrl = (id != "") ? $"{BEATMAPS_ROOT_URL}/maps/detail/{this.Normalize.RemoveSymbols(ref state._parameter, this.Normalize._SymbolsNoDash)}" : $"{BEATMAPS_ROOT_URL}/search/text/0?q={state._request}";
+            var requestUrl = (id != "") ? $"{BEATMAPS_API_ROOT_URL}/maps/detail/{this.Normalize.RemoveSymbols(ref state._parameter, this.Normalize._SymbolsNoDash)}" : $"{BEATMAPS_API_ROOT_URL}/search/text/0?q={state._request}";
 
             var errorMessage = "";
 

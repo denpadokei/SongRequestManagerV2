@@ -98,6 +98,13 @@ namespace SongRequestManagerV2
             }
         }
 
+        /// <summary>
+        /// たぶんもう使わない。
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <param name="token"></param>
+        /// <param name="progress"></param>
+        /// <returns></returns>
         internal static async Task<byte[]> DownloadSong(string hash, CancellationToken token, IProgress<double> progress = null)
         {
             // check if beatsaver url needs to be pre-pended

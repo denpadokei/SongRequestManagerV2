@@ -804,7 +804,7 @@ namespace SongRequestManagerV2.Models
             JSONNode result = null;
 
             if (!RequestBotConfig.Instance.OfflineMode) {
-                var requestUrl = (id != "") ? $"{RequestBot.BEATMAPS_ROOT_URL}/maps/detail/{id}" : $"{RequestBot.BEATMAPS_ROOT_URL}/search/text/0?q={this.normalize.NormalizeBeatSaverString(state._parameter)}";
+                var requestUrl = (id != "") ? $"{RequestBot.BEATMAPS_API_ROOT_URL}/maps/detail/{id}" : $"{RequestBot.BEATMAPS_API_ROOT_URL}/search/text/0?q={this.normalize.NormalizeBeatSaverString(state._parameter)}";
                 var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
                 if (resp.IsSuccessStatusCode) {
