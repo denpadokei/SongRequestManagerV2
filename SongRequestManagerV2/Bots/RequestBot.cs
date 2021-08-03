@@ -524,6 +524,9 @@ namespace SongRequestManagerV2.Bots
         // BUG: Testing major changes. This will get seriously refactored soon.
         internal async Task CheckRequest(RequestInfo requestInfo)
         {
+            if (requestInfo == null) {
+                return;
+            }
 #if DEBUG
             Logger.Debug("Start CheckRequest");
             var stopwatch = new Stopwatch();
@@ -560,11 +563,26 @@ namespace SongRequestManagerV2.Bots
 
                 // Get song query results from beatsaver.com
                 if (!RequestBotConfig.Instance.OfflineMode) {
-                    var requestUrl = !string.IsNullOrEmpty(id) ? $"{BEATMAPS_API_ROOT_URL}/maps/id/{this.Normalize.RemoveSymbols(ref request, this.Normalize._SymbolsNoDash)}" : $"{BEATMAPS_API_ROOT_URL}/search/text/0?q={normalrequest}";
+                    var requestUrl = "";
+                    WebResponse resp = null;
+                    if (!string.IsNullOrEmpty(id)) {
+                        var idWithoutSymbols = this.Normalize.RemoveSymbols(ref request, this.Normalize._SymbolsNoDash);
+                        if (!requestInfo.IsPryorityKey && long.TryParse(idWithoutSymbols, out var beatmapId)) {
+                            requestUrl = $"{BEATMAPS_API_ROOT_URL}/maps/id/{beatmapId}";
+                            resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
+                        }
+                        if (resp == null) {
+                            requestUrl = $"{BEATMAPS_API_ROOT_URL}/maps/beatsaver/{idWithoutSymbols}";
+                            resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
+                        }
+                    }
+                    else {
+                        requestUrl = $"{BEATMAPS_API_ROOT_URL}/search/text/0?q={normalrequest}";
+                        resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
+                    }
 #if DEBUG
                     Logger.Debug($"Start get map detial : {stopwatch.ElapsedMilliseconds} ms");
 #endif
-                    var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
                     if (resp == null) {
                         errorMessage = $"beatmaps.io is down now.";
                     }
@@ -769,7 +787,7 @@ namespace SongRequestManagerV2.Bots
         public string GetBeatSaverId(string request)
         {
             request = this.Normalize.RemoveSymbols(ref request, this.Normalize._SymbolsNoDash);
-            if (request != "360" && _digitRegex.IsMatch(request))
+            if (_digitRegex.IsMatch(request))
                 return request;
             if (_beatSaverRegex.IsMatch(request)) {
                 var requestparts = request.Split(new char[] { '-' }, 2);
@@ -802,7 +820,7 @@ namespace SongRequestManagerV2.Bots
         }
 
 
-        public string ProcessSongRequest(ParseState state)
+        public string ProcessSongRequest(ParseState state, bool pryorityKey = false)
         {
             try {
                 if (RequestBotConfig.Instance.RequestQueueOpen == false && !state._flags.HasFlag(CmdFlags.NoFilter) && !state._flags.HasFlag(CmdFlags.Local)) // BUG: Complex permission, Queue state message needs to be handled higher up
@@ -843,7 +861,7 @@ namespace SongRequestManagerV2.Bots
                 // BUG: Need to clean up the new request pipeline
                 var testrequest = this.Normalize.RemoveSymbols(ref state._parameter, this.Normalize._SymbolsNoDash);
 
-                var newRequest = new RequestInfo(state._user, state._parameter, DateTime.UtcNow, _digitRegex.IsMatch(testrequest) || _beatSaverRegex.IsMatch(testrequest), state, state._flags, state._info);
+                var newRequest = new RequestInfo(state._user, state._parameter, DateTime.UtcNow, _digitRegex.IsMatch(testrequest) || _beatSaverRegex.IsMatch(testrequest), state, state._flags, state._info, pryorityKey);
 
                 if (!newRequest.isBeatSaverId && state._parameter.Length < 2) {
                     this.ChatManager.QueueChatMessage($"Request \"{state._parameter}\" is too short- Beat Saver searches must be at least 3 characters!");

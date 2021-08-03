@@ -69,8 +69,8 @@ namespace SongRequestManagerV2.Bots
         private void Constractor()
         {
             if (!this.Song["version"].IsString) {
-                this.Song.Add("id", this.Song["id"]);
-                this.Song.Add("version", this.Song["id"]);
+                //this.Song.Add("id", this.Song["id"]);
+                this.Song.Add("version", this.Song["versions"].AsArray[0].AsObject["key"]);
 
                 var metadata = this.Song["metadata"];
                 this.Song.Add("songName", metadata["songName"].Value);
