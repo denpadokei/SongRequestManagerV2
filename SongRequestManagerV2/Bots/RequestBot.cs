@@ -67,8 +67,13 @@ namespace SongRequestManagerV2.Bots
         private static readonly Regex _drawcard = new Regex("($^)|(^[0-9a-zA-Z]+$)", RegexOptions.Compiled);
 
         public const string SCRAPED_SCORE_SABER_ALL_JSON_URL = "https://cdn.wes.cloud/beatstar/bssb/v2-ranked.json";
+#if DEBUG
         public const string BEATMAPS_API_ROOT_URL = "https://beatmaps.io/api";
         public const string BEATMAPS_CDN_ROOT_URL = "https://cdn.beatmaps.io";
+#else
+        public const string BEATMAPS_API_ROOT_URL = "https://beatsaver/api";
+        public const string BEATMAPS_CDN_ROOT_URL = "https://cdn.beatmaps.io";
+#endif
 
         private readonly System.Timers.Timer timer = new System.Timers.Timer(500);
 
