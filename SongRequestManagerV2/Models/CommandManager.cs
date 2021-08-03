@@ -525,7 +525,7 @@ namespace SongRequestManagerV2.Models
             try {
                 if (state._parameter != "")
                     state._parameter += " ";
-                state._parameter += (RequestManager.HistorySongs.FirstOrDefault() as SongRequest)._song["version"];
+                state._parameter += (RequestManager.HistorySongs.FirstOrDefault() as SongRequest).SongNode["version"];
                 return "";
             }
             catch {
@@ -540,7 +540,7 @@ namespace SongRequestManagerV2.Models
             try {
                 if (state._parameter != "")
                     state._parameter += " ";
-                state._parameter += this.Bot.CurrentSong._song["version"];
+                state._parameter += this.Bot.CurrentSong.SongNode["version"];
                 return "";
             }
             catch {
@@ -573,7 +573,7 @@ namespace SongRequestManagerV2.Models
             try {
                 if (state._parameter != "")
                     state._parameter += " ";
-                state._parameter += (RequestManager.HistorySongs.GetConsumingEnumerable().ElementAt(1) as SongRequest)._song["version"];
+                state._parameter += (RequestManager.HistorySongs.GetConsumingEnumerable().ElementAt(1) as SongRequest).SongNode["version"];
                 return "";
             }
             catch {
@@ -588,7 +588,7 @@ namespace SongRequestManagerV2.Models
             try {
                 if (state._parameter != "")
                     state._parameter += " ";
-                state._parameter += (RequestManager.RequestSongs.FirstOrDefault() as SongRequest)._song["version"];
+                state._parameter += (RequestManager.RequestSongs.FirstOrDefault() as SongRequest).SongNode["version"];
                 return "";
             }
             catch {
@@ -804,7 +804,7 @@ namespace SongRequestManagerV2.Models
             JSONNode result = null;
 
             if (!RequestBotConfig.Instance.OfflineMode) {
-                var requestUrl = (id != "") ? $"https://beatsaver.com/api/maps/detail/{id}" : $"https://beatsaver.com/api/search/text/0?q={this.normalize.NormalizeBeatSaverString(state._parameter)}";
+                var requestUrl = (id != "") ? $"{RequestBot.BEATMAPS_ROOT_URL}/maps/detail/{id}" : $"{RequestBot.BEATMAPS_ROOT_URL}/search/text/0?q={this.normalize.NormalizeBeatSaverString(state._parameter)}";
                 var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
                 if (resp.IsSuccessStatusCode) {
@@ -843,7 +843,7 @@ namespace SongRequestManagerV2.Models
             var msg = this._queueFactory.Create().SetUp(RequestBotConfig.Instance.maximumqueuemessages);
 
             foreach (SongRequest req in RequestManager.RequestSongs.ToArray()) {
-                var song = req._song;
+                var song = req.SongNode;
                 if (msg.Add(this._textFactory.Create().AddSong(ref song).Parse(StringFormat.QueueListFormat), ", "))
                     break;
             }
@@ -858,7 +858,7 @@ namespace SongRequestManagerV2.Models
             var msg = this._queueFactory.Create().SetUp(1);
 
             foreach (var entry in RequestManager.HistorySongs.OfType<SongRequest>()) {
-                var song = entry._song;
+                var song = entry.SongNode;
                 if (msg.Add(this._textFactory.Create().AddSong(ref song).Parse(StringFormat.HistoryListFormat), ", "))
                     break;
             }

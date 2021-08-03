@@ -14,6 +14,9 @@ using System.Collections.Concurrent;
 using TMPro;
 using UnityEngine;
 using Zenject;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Threading;
 
 namespace SongRequestManagerV2
 {
@@ -64,7 +67,7 @@ namespace SongRequestManagerV2
             set => this.SetProperty(ref this.authorName_, value);
         }
 
-        public JSONObject _song;
+        public JSONObject SongNode { get; set; }
         public IChatUser _requestor;
         public DateTime _requestTime;
         public RequestStatus _status;
@@ -88,7 +91,7 @@ namespace SongRequestManagerV2
 
         public SongRequest Init(JSONObject song, IChatUser requestor, DateTime requestTime, RequestStatus status = RequestStatus.Invalid, string requestInfo = "")
         {
-            this._song = song;
+            this.SongNode = song;
             this._songName = song["songName"].Value;
             this._authorName = song["levelAuthor"].Value;
             this._requestor = requestor;
@@ -101,11 +104,11 @@ namespace SongRequestManagerV2
         [UIAction("#post-parse")]
         internal void Setup()
         {
-            if (RequestBotConfig.Instance.PPSearch && MapDatabase.PPMap.TryGetValue(this._song["key"].Value, out var pp) && 0 < pp) {
-                this.SongName = $"{this._songName} <size=50%>{Utility.GetRating(this._song)} <color=#4169e1>{pp:0.00} PP</color></size>";
+            if (RequestBotConfig.Instance.PPSearch && MapDatabase.PPMap.TryGetValue(this.SongNode["key"].Value, out var pp) && 0 < pp) {
+                this.SongName = $"{this._songName} <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>";
             }
             else {
-                this.SongName = $"{this._songName} <size=50%>{Utility.GetRating(this._song)}</size>";
+                this.SongName = $"{this._songName} <size=50%>{Utility.GetRating(this.SongNode)}</size>";
             }
 
             this.SetCover();
@@ -123,13 +126,13 @@ namespace SongRequestManagerV2
         /// lookup song from level id
         /// </summary>
         /// <returns></returns>
-        private IPreviewBeatmapLevel GetCustomLevel() => Loader.GetLevelByHash(this._song["hash"]);
+        private IPreviewBeatmapLevel GetCustomLevel() => Loader.GetLevelByHash(this.SongNode["hash"]);
 
         public void SetCover() => Dispatcher.RunOnMainThread(async () =>
                                 {
                                     try {
                                         this._coverImage.enabled = false;
-                                        var dt = this._textFactory.Create().AddSong(this._song).AddUser(this._requestor); // Get basic fields
+                                        var dt = this._textFactory.Create().AddSong(this.SongNode).AddUser(this._requestor); // Get basic fields
                                         dt.Add("Status", this._status.ToString());
                                         dt.Add("Info", (this._requestInfo != "") ? " / " + this._requestInfo : "");
                                         dt.Add("RequestTime", this._requestTime.ToLocalTime().ToString("hh:mm"));
@@ -150,7 +153,7 @@ namespace SongRequestManagerV2
                                         }
 
                                         if (!imageSet) {
-                                            var url = this._song["coverURL"].Value;
+                                            var url = this.SongNode["coverURL"].Value;
 
                                             if (!_cachedTextures.TryGetValue(url, out var tex)) {
                                                 var b = await WebClient.DownloadImage($"https://beatsaver.com{url}", System.Threading.CancellationToken.None).ConfigureAwait(true);
@@ -184,7 +187,7 @@ namespace SongRequestManagerV2
                 obj.Add("requestInfo", new JSONString(this._requestInfo));
                 obj.Add("time", new JSONString(this._requestTime.ToFileTime().ToString()));
                 obj.Add("requestor", JSON.Parse(this._requestor.ToJson().ToString()));
-                obj.Add("song", this._song);
+                obj.Add("song", this.SongNode);
                 return obj;
             }
             catch (Exception ex) {
@@ -202,6 +205,22 @@ namespace SongRequestManagerV2
             catch (Exception e) {
                 Logger.Error(e);
                 return new UnknownChatUser(obj["requestor"].AsObject.ToString());
+            }
+        }
+
+        public async Task<byte[]> DownloadZip(CancellationToken token = default(CancellationToken), IProgress<double> progress = null)
+        {
+            try {
+                var response = await WebClient.SendAsync(HttpMethod.Get, $"https://cdn.beatmaps.io/{SongNode["versions"].AsArray[0]["hash"].Value.ToLower()}.zip", token, progress);
+
+                if (response?.IsSuccessStatusCode == true) {
+                    return response.ContentToBytes();
+                }
+                return null;
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+                return null;
             }
         }
 

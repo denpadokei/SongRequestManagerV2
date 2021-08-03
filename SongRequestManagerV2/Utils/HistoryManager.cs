@@ -19,7 +19,7 @@ namespace SongRequestManagerV2.Utils
             if (!Directory.Exists(fileInfo.Directory.FullName)) {
                 Directory.CreateDirectory(fileInfo.Directory.FullName);
             }
-            var songObject = song._song.AsObject;
+            var songObject = song.SongNode.AsObject;
 
             var playlistsong = new PlaylistSongEntity()
             {

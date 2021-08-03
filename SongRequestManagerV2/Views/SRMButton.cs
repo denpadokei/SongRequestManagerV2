@@ -211,12 +211,12 @@ namespace SongRequestManagerV2.Views
                     if (request == null) {
                         return;
                     }
-                    var songName = request._song["songName"].Value;
-                    var songIndex = Regex.Replace($"{request._song["id"].Value} ({request._song["songName"].Value} - {request._song["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
+                    var songName = request.SongNode["songName"].Value;
+                    var songIndex = Regex.Replace($"{request.SongNode["id"].Value} ({request.SongNode["songName"].Value} - {request.SongNode["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
                     songIndex = this.Normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
 
                     var currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
-                    var songHash = request._song["hash"].Value.ToUpper();
+                    var songHash = request.SongNode["hash"].Value.ToUpper();
 
                     if (Loader.GetLevelByHash(songHash) == null) {
                         Utility.EmptyDirectory(".requestcache", false);
@@ -224,7 +224,7 @@ namespace SongRequestManagerV2.Views
                         if (Directory.Exists(currentSongDirectory)) {
                             Utility.EmptyDirectory(currentSongDirectory, true);
                         }
-                        var localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request._song["id"].Value}.zip");
+                        var localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request.SongNode["id"].Value}.zip");
 #if UNRELEASED
                     // Direct download hack
                     var ext = Path.GetExtension(request.song["coverURL"].Value);
@@ -232,7 +232,8 @@ namespace SongRequestManagerV2.Views
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #endif
-                        var result = await WebClient.DownloadSong($"https://beatsaver.com{request._song["downloadURL"].Value}", System.Threading.CancellationToken.None, this.DownloadProgress);
+                        //  WebClient.DownloadSong($"https://beatsaver.com{request.SongNode["downloadURL"].Value}", System.Threading.CancellationToken.None, this.DownloadProgress);
+                        var result = await request.DownloadZip(CancellationToken.None, DownloadProgress);
                         if (result == null) {
                             this.ChatManager.QueueChatMessage("BeatSaver is down now.");
                         }
@@ -263,9 +264,9 @@ namespace SongRequestManagerV2.Views
                         {
                             this._bot.UpdateRequestUI();
                         }));
-                        if (!request._song.IsNull) {
+                        if (!request.SongNode.IsNull) {
                             // Display next song message
-                            this._textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
+                            this._textFactory.Create().AddUser(request._requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
                         }
                     }
                 }
@@ -301,15 +302,15 @@ namespace SongRequestManagerV2.Views
                 Utility.EmptyDirectory(".requestcache", true);
 
                 Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
-                Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(request._song["hash"].Value.ToUpper(), () =>
+                Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(request.SongNode["hash"].Value.ToUpper(), () =>
                 {
                     this._bot.UpdateRequestUI();
                 }));
 
                 ((IProgress<double>)this.DownloadProgress).Report(0d);
-                if (!request._song.IsNull) {
+                if (!request.SongNode.IsNull) {
                     // Display next song message
-                    this._textFactory.Create().AddUser(request._requestor).AddSong(request._song).QueueMessage(StringFormat.NextSonglink.ToString());
+                    this._textFactory.Create().AddUser(request._requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
                 }
             }
         }

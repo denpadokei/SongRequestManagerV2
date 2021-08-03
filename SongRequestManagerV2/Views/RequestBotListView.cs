@@ -423,7 +423,7 @@ namespace SongRequestManagerV2.Views
                 }
 
                 // get song
-                var song = this._bot.CurrentSong._song;
+                var song = this._bot.CurrentSong.SongNode;
 
                 // indicate dialog is active
                 this.confirmDialogActive = true;
@@ -443,7 +443,7 @@ namespace SongRequestManagerV2.Views
                 }
 
                 // get song
-                var song = this._bot.CurrentSong._song;
+                var song = this._bot.CurrentSong.SongNode;
 
                 // indicate dialog is active
                 this.confirmDialogActive = true;
@@ -456,7 +456,7 @@ namespace SongRequestManagerV2.Views
         private void PlayButtonClick()
         {
             if (this._requestTable.NumberOfCells() > 0) {
-                RequestBot.Played.Add(this._bot.CurrentSong._song);
+                RequestBot.Played.Add(this._bot.CurrentSong.SongNode);
                 this._bot.WriteJSON(RequestBot.playedfilename, RequestBot.Played);
 
                 this.SetUIInteractivity(false);

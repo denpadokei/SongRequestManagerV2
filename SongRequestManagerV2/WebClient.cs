@@ -98,14 +98,14 @@ namespace SongRequestManagerV2
             }
         }
 
-        internal static async Task<byte[]> DownloadSong(string url, CancellationToken token, IProgress<double> progress = null)
+        internal static async Task<byte[]> DownloadSong(string hash, CancellationToken token, IProgress<double> progress = null)
         {
             // check if beatsaver url needs to be pre-pended
-            if (!url.StartsWith(@"https://beatsaver.com/")) {
-                url = $"https://beatsaver.com/{url}";
+            if (!hash.StartsWith(@"https://cdn.beatmaps.io/")) {
+                hash = $"https://cdn.beatmaps.io/{hash}.zip";
             }
             try {
-                var response = await SendAsync(HttpMethod.Get, url, token, progress: progress);
+                var response = await SendAsync(HttpMethod.Get, hash, token, progress: progress);
 
                 if (response?.IsSuccessStatusCode == true) {
                     return response.ContentToBytes();
