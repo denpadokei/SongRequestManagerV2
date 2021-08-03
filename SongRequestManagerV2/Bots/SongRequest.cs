@@ -155,10 +155,15 @@ namespace SongRequestManagerV2
                                         }
 
                                         if (!imageSet) {
-                                            var url = this.SongNode["coverURL"].Value;
-
+                                            var url = "";
+                                            if (this.SongNode["versions"].AsArray[0].AsObject["coverURL"].IsString) {
+                                                url = this.SongNode["versions"].AsArray[0].AsObject["coverURL"].Value;
+                                                }
+                                            else {
+                                                url = $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{this._hash}.jpg";
+                                            }
                                             if (!_cachedTextures.TryGetValue(url, out var tex)) {
-                                                var b = await WebClient.DownloadImage($"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{this._hash}.jpg", System.Threading.CancellationToken.None).ConfigureAwait(true);
+                                                var b = await WebClient.DownloadImage(url, System.Threading.CancellationToken.None).ConfigureAwait(true);
 
                                                 tex = new Texture2D(2, 2);
                                                 tex.LoadImage(b);
@@ -213,7 +218,14 @@ namespace SongRequestManagerV2
         public async Task<byte[]> DownloadZip(CancellationToken token = default(CancellationToken), IProgress<double> progress = null)
         {
             try {
-                var response = await WebClient.SendAsync(HttpMethod.Get, $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{SongNode["versions"].AsArray[0]["hash"].Value.ToLower()}.zip", token, progress);
+                var url = "";
+                if (this.SongNode["versions"].AsArray[0].AsObject["downloadURL"].IsString) {
+                    url = this.SongNode["versions"].AsArray[0].AsObject["downloadURL"].Value;
+                }
+                else {
+                    url = $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{SongNode["versions"].AsArray[0]["hash"].Value.ToLower()}.zip";
+                }
+                var response = await WebClient.SendAsync(HttpMethod.Get, url, token, progress);
 
                 if (response?.IsSuccessStatusCode == true) {
                     return response.ContentToBytes();
