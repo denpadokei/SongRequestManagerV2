@@ -526,7 +526,7 @@ namespace SongRequestManagerV2.Models
             try {
                 if (state._parameter != "")
                     state._parameter += " ";
-                state._parameter += (RequestManager.HistorySongs.FirstOrDefault() as SongRequest).SongNode["version"];
+                state._parameter += (RequestManager.HistorySongs.FirstOrDefault() as SongRequest).SongNode["id"];
                 return "";
             }
             catch {
@@ -541,7 +541,7 @@ namespace SongRequestManagerV2.Models
             try {
                 if (state._parameter != "")
                     state._parameter += " ";
-                state._parameter += this.Bot.CurrentSong.SongNode["version"];
+                state._parameter += this.Bot.CurrentSong.SongNode["id"];
                 return "";
             }
             catch {
@@ -574,7 +574,7 @@ namespace SongRequestManagerV2.Models
             try {
                 if (state._parameter != "")
                     state._parameter += " ";
-                state._parameter += (RequestManager.HistorySongs.GetConsumingEnumerable().ElementAt(1) as SongRequest).SongNode["version"];
+                state._parameter += (RequestManager.HistorySongs.GetConsumingEnumerable().ElementAt(1) as SongRequest).SongNode["id"];
                 return "";
             }
             catch {
@@ -589,7 +589,7 @@ namespace SongRequestManagerV2.Models
             try {
                 if (state._parameter != "")
                     state._parameter += " ";
-                state._parameter += (RequestManager.RequestSongs.FirstOrDefault() as SongRequest).SongNode["version"];
+                state._parameter += (RequestManager.RequestSongs.FirstOrDefault() as SongRequest).SongNode["id"];
                 return "";
             }
             catch {
@@ -875,7 +875,7 @@ namespace SongRequestManagerV2.Models
             msg.Header($"{RequestBot.Played.Count} songs played tonight: ");
 
             foreach (var song in RequestBot.Played) {
-                if (msg.Add(song["songName"].Value + " (" + song["version"] + ")", ", "))
+                if (msg.Add(song["songName"].Value + " (" + song["id"] + ")", ", "))
                     break;
             }
             msg.End($" ... and {RequestBot.Played.Count - msg.Count} other songs.", "No songs have been played.");

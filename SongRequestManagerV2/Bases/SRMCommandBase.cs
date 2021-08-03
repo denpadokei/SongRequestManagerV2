@@ -29,7 +29,7 @@ namespace SongRequestManagerV2.Bases
 
         protected static readonly string _blockeduser = "blockeduser.unique";
 
-        public Func<ParseState, bool, string> Subcommand { get; protected set; } = null; // Prefered calling convention. It does expose calling command base properties, so be careful.
+        public Func<ParseState, string> Subcommand { get; protected set; } = null; // Prefered calling convention. It does expose calling command base properties, so be careful.
         public Func<ParseState> Subcommand2 { get; protected set; } = null;
         public Func<ParseState, Task> AsyncSubCommand { get; protected set; } = null;
 
@@ -106,26 +106,6 @@ namespace SongRequestManagerV2.Bases
             return success;
         }
 
-        public string Execute(ParseState state, bool priorytyKey = false)
-        {
-            if (this.Method2 != null)
-                this.Method2(state._user, state._parameter, state._flags, state._info);
-            else if (this.Method != null)
-                this.Method(state._user, state._parameter);
-            //else if (Method3 != null) return Method3(this, state.user, state.parameter, state.flags, state.info);
-            else if (this.func1 != null)
-                Dispatcher.RunCoroutine(this.func1(state));
-            else if (this.Subcommand3 != null)
-                return this.Subcommand3(state, priorytyKey);
-            else if (this.Subcommand != null)
-                return this.Subcommand(state); // Recommended.
-            else if (this.Subcommand2 != null)
-                this.Subcommand(state);
-            else if (this.AsyncSubCommand != null)
-                this.AsyncSubCommand(state).Await(null, null, null);
-            return success;
-        }
-
         public ISRMCommand Setup(string alias)
         {
             this.Aliases.Clear();
@@ -154,11 +134,7 @@ namespace SongRequestManagerV2.Bases
             this.UserString = reference.ToString(); // Save a backup
             return this;
         }
-        public ISRMCommand Action(Func<ParseState, bool, string> action)
-        {
-            this.Subcommand3 = action;
-            return this;
-        }
+
         public ISRMCommand Action(Func<ParseState, string> action)
         {
             this.Subcommand = action;

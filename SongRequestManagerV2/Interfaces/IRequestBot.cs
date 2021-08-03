@@ -64,7 +64,7 @@ namespace SongRequestManagerV2.Interfaces
         string GetGCCount(ParseState state);
         Task GetPPData();
         List<JSONObject> GetSongListFromResults(JSONNode result, string SearchString, ref string errorMessage, SongFilter filter = (SongFilter)(-1), string sortby = "-rating", int reverse = 1);
-        string IsRequestInQueue(string request, bool fast = false);
+        string IsRequestInQueue(string request, bool isKey = false, bool fast = false);
         string Listaccess(ParseState state);
         void ListList(IChatUser requestor, string request);
         Task Makelistfromsearch(ParseState state);

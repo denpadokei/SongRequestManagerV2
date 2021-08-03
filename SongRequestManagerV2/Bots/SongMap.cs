@@ -69,7 +69,7 @@ namespace SongRequestManagerV2.Bots
         private void Constractor()
         {
             if (!this.Song["version"].IsString) {
-                //this.Song.Add("id", this.Song["id"]);
+                this.Song.Add("id", this.Song["id"]);
                 this.Song.Add("version", this.Song["versions"].AsArray[0].AsObject["key"]);
 
                 var metadata = this.Song["metadata"];
@@ -83,41 +83,39 @@ namespace SongRequestManagerV2.Bots
                 var degrees360 = false;
 
                 try {
-                    if (this.Song["versions"].AsArray[0].AsObject["diffs"].IsArray) {
-                        var diffs = this.Song["versions"].AsArray[0].AsObject["diffs"].AsArray;
-                        var maxnjs = 0d;
-                        foreach (var diff in diffs) {
-                            var chara = diff.Value["characteristic"].Value;
-                            if (chara.Equals("_360Degree", StringComparison.InvariantCultureIgnoreCase)) {
-                                degrees360 = true;
-                            }   
-                            if (chara.Equals("_90Degree", StringComparison.InvariantCultureIgnoreCase)) {
-                                degrees90 = true;
-                            }
-                            var seconds = diff.Value["seconds"].AsDouble;
-                            var njs = diff.Value["njs"].AsFloat;
-                            if (njs > maxnjs) {
-                                maxnjs = njs;
-                            }
-                            if (seconds > 0) {
-                                this.Song.Add("songlength", $"{(int)(seconds / 60)}:{seconds % 60:00}");
-                                this.Song.Add("songduration", seconds);                                
-                            }
+                    var diffs = this.Song["versions"].AsArray[0].AsObject["diffs"].AsArray;
+                    var maxnjs = 0d;
+                    foreach (var diff in diffs) {
+                        var chara = diff.Value["characteristic"].Value;
+                        if (chara.Equals("_360Degree", StringComparison.InvariantCultureIgnoreCase)) {
+                            degrees360 = true;
+                        }
+                        if (chara.Equals("_90Degree", StringComparison.InvariantCultureIgnoreCase)) {
+                            degrees90 = true;
+                        }
+                        var seconds = diff.Value["seconds"].AsDouble;
+                        var njs = diff.Value["njs"].AsFloat;
+                        if (njs > maxnjs) {
+                            maxnjs = njs;
+                        }
+                        if (seconds > 0) {
+                            this.Song.Add("songlength", $"{(int)(seconds / 60)}:{seconds % 60:00}");
+                            this.Song.Add("songduration", seconds);
+                        }
 
-                        }
-                        if (maxnjs > 0) {
-                            this.Song.Add("njs", maxnjs);
-                        }
-                        if (degrees360 || degrees90)
-                            this.Song.Add("maptype", "360");
                     }
+                    if (maxnjs > 0) {
+                        this.Song.Add("njs", maxnjs);
+                    }
+                    if (degrees360 || degrees90)
+                        this.Song.Add("maptype", "360");
                 }
                 catch (Exception e) {
                     Logger.Error(e);
                 }
             }
 
-            if (MapDatabase.PPMap.TryGetValue(this.Song["id"].Value, out var songpp)) {
+            if (MapDatabase.PPMap.TryGetValue(this.Song["version"].Value, out var songpp)) {
                 this.Song.Add("pp", songpp);
             }
             this.IndexSong(this.Song);
@@ -145,12 +143,12 @@ namespace SongRequestManagerV2.Bots
 
                 this.IndexFields(true, id, song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"], indexpp, song["maptype"].Value);
 
-                if (string.IsNullOrEmpty(song["version"].Value)) {
+                if (!string.IsNullOrEmpty(song["id"].Value)) {
                     MapDatabase.MapLibrary.AddOrUpdate(song["id"].Value, this, (key, value) => this);
                 }
-                else {
-                    MapDatabase.MapLibrary.AddOrUpdate(song["version"].Value, this, (key, value) => this);
-                }
+                //else if(!string.IsNullOrEmpty(song["version"].Value)) {
+                //    MapDatabase.MapLibrary.AddOrUpdate(song["version"].Value, this, (key, value) => this);
+                //}
                 //MapDatabase.LevelId.TryAdd(LevelId, this);
             }
             catch (Exception ex) {
