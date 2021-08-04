@@ -71,8 +71,8 @@ namespace SongRequestManagerV2.Bots
         public const string BEATMAPS_API_ROOT_URL = "https://beatmaps.io/api";
         public const string BEATMAPS_CDN_ROOT_URL = "https://cdn.beatmaps.io";
 #else
-        public const string BEATMAPS_API_ROOT_URL = "https://beatsaver/api";
-        public const string BEATMAPS_CDN_ROOT_URL = "https://cdn.beatmaps.io";
+        public const string BEATMAPS_API_ROOT_URL = "https://beatsaver.com/api";
+        public const string BEATMAPS_CDN_ROOT_URL = "https://cdn.beatsaver.com";
 #endif
 
         private readonly System.Timers.Timer timer = new System.Timers.Timer(500);
@@ -537,18 +537,18 @@ namespace SongRequestManagerV2.Bots
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 #endif
-            var requestor = requestInfo.requestor;
-            var request = requestInfo.request;
+            var requestor = requestInfo.Requestor;
+            var request = requestInfo.Request;
 
-            var normalrequest = this.Normalize.NormalizeBeatSaverString(requestInfo.request);
+            var normalrequest = this.Normalize.NormalizeBeatSaverString(requestInfo.Request);
 
             var id = this.GetBeatSaverId(this.Normalize.RemoveSymbols(ref request, this.Normalize._SymbolsNoDash));
             try {
                 if (!string.IsNullOrEmpty(id)) {
                     // Remap song id if entry present. This is one time, and not correct as a result. No recursion right now, could be confusing to the end user.
-                    if (songremap.ContainsKey(id) && !requestInfo.flags.HasFlag(CmdFlags.NoFilter)) {
+                    if (songremap.ContainsKey(id) && !requestInfo.Flags.HasFlag(CmdFlags.NoFilter)) {
                         request = songremap[id];
-                        this.ChatManager.QueueChatMessage($"Remapping request {requestInfo.request} to {request}");
+                        this.ChatManager.QueueChatMessage($"Remapping request {requestInfo.Request} to {request}");
                     }
 
                     var requestcheckmessage = this.IsRequestInQueue(this.Normalize.RemoveSymbols(ref request, this.Normalize._SymbolsNoDash), requestInfo.IsPryorityKey);               // Check if requested ID is in Queue  
@@ -600,13 +600,13 @@ namespace SongRequestManagerV2.Bots
                 }
 
                 var filter = SongFilter.All;
-                if (requestInfo.flags.HasFlag(CmdFlags.NoFilter)) {
+                if (requestInfo.Flags.HasFlag(CmdFlags.NoFilter)) {
                     filter = SongFilter.Queue;
                 }
                 Logger.Debug($"{result}");
-                var songs = this.GetSongListFromResults(result, result["id"], ref errorMessage, filter, requestInfo.state._sort != "" ? requestInfo.state._sort : StringFormat.AddSortOrder.ToString());
+                var songs = this.GetSongListFromResults(result, result["id"], ref errorMessage, filter, requestInfo.State._sort != "" ? requestInfo.State._sort : StringFormat.AddSortOrder.ToString());
 
-                var autopick = RequestBotConfig.Instance.AutopickFirstSong || requestInfo.flags.HasFlag(CmdFlags.Autopick);
+                var autopick = RequestBotConfig.Instance.AutopickFirstSong || requestInfo.Flags.HasFlag(CmdFlags.Autopick);
 
                 // Filter out too many or too few results
                 if (songs.Count == 0) {
@@ -633,7 +633,7 @@ namespace SongRequestManagerV2.Bots
                     return;
                 }
                 else {
-                    if (!requestInfo.flags.HasFlag(CmdFlags.NoFilter))
+                    if (!requestInfo.Flags.HasFlag(CmdFlags.NoFilter))
                         errorMessage = this.SongSearchFilter(songs[0], false);
                 }
 
@@ -646,11 +646,11 @@ namespace SongRequestManagerV2.Bots
                 RequestTracker[requestor.Id].numRequests++;
                 this.ListCollectionManager.Add(duplicatelist, song["id"].Value);
                 var req = this._songRequestFactory.Create();
-                req.Init(song, requestor, requestInfo.requestTime, RequestStatus.Queued, requestInfo.requestInfo);
+                req.Init(song, requestor, requestInfo.RequestTime, RequestStatus.Queued, requestInfo.RequestInfoText);
                 if (RequestBotConfig.Instance.NotifySound) {
                     this.notifySound.PlaySound();
                 }
-                if ((requestInfo.flags.HasFlag(CmdFlags.MoveToTop))) {
+                if ((requestInfo.Flags.HasFlag(CmdFlags.MoveToTop))) {
                     var reqs = new List<object>() { req };
                     var newList = reqs.Union(RequestManager.RequestSongs.ToArray());
                     RequestManager.RequestSongs.Clear();
@@ -663,7 +663,7 @@ namespace SongRequestManagerV2.Bots
 
                 this.Writedeck(requestor, "savedqueue"); // This can be used as a backup if persistent Queue is turned off.
 
-                if (!requestInfo.flags.HasFlag(CmdFlags.SilentResult)) {
+                if (!requestInfo.Flags.HasFlag(CmdFlags.SilentResult)) {
                     this._textFactory.Create().AddSong(ref song).QueueMessage(StringFormat.AddSongToQueueText.ToString());
                 }
             }
@@ -868,7 +868,7 @@ namespace SongRequestManagerV2.Bots
 
                 var newRequest = new RequestInfo(state._user, state._parameter, DateTime.UtcNow, _digitRegex.IsMatch(testrequest) || _beatSaverRegex.IsMatch(testrequest), state, state._flags, state._info, pryorityKey);
 
-                if (!newRequest.isBeatSaverId && state._parameter.Length < 2) {
+                if (!newRequest.IsBeatSaverId && state._parameter.Length < 2) {
                     this.ChatManager.QueueChatMessage($"Request \"{state._parameter}\" is too short- Beat Saver searches must be at least 3 characters!");
                 }
 
@@ -2187,7 +2187,7 @@ namespace SongRequestManagerV2.Bots
                 }
             }
         }
-        public List<JSONObject> GetSongListFromResults(JSONNode result, string SearchString, ref string errorMessage, SongFilter filter = SongFilter.All, string sortby = "-rating", int reverse = 1)
+        public List<JSONObject> GetSongListFromResults(JSONNode result, string searchString, ref string errorMessage, SongFilter filter = SongFilter.All, string sortby = "-rating", int reverse = 1)
         {
             var songs = new List<JSONObject>();
 
@@ -2207,7 +2207,7 @@ namespace SongRequestManagerV2.Bots
                 }
             }
 
-            var list = this.MapDatabase.Search(SearchString);
+            var list = this.MapDatabase.Search(searchString);
 
             try {
                 var sortorder = sortby.Split(' ');
