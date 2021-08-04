@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace SongRequestManagerV2.Utils
@@ -18,18 +19,21 @@ namespace SongRequestManagerV2.Utils
             }
         }
 
-        public string RemoveSymbols(ref string text, char[] mask)
+        public string RemoveSymbols(string text, char[] mask)
         {
-            var o = new StringBuilder(text.Length);
+            var commands = text.Split(' ');
+            var sb = new StringBuilder();
 
-            foreach (var c in text) {
-                if (c > 127 || mask[c] != ' ')
-                    o.Append(c);
+            foreach (var command in commands) {
+                if (string.IsNullOrEmpty(command) || command.First() == '!') {
+                    continue;
+                }
+                sb.Append(command);
             }
-            return o.ToString();
+            return sb.ToString();
         }
 
-        public string RemoveDirectorySymbols(ref string text)
+        public string RemoveDirectorySymbols(string text)
         {
             var mask = this._SymbolsValidDirectory;
             var o = new StringBuilder(text.Length);

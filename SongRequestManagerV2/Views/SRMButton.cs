@@ -213,7 +213,7 @@ namespace SongRequestManagerV2.Views
                     }
                     var songName = request.SongNode["songName"].Value;
                     var songIndex = Regex.Replace($"{request.SongNode["id"].Value} ({request.SongNode["songName"].Value} - {request.SongNode["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
-                    songIndex = this.Normalize.RemoveDirectorySymbols(ref songIndex); // Remove invalid characters.
+                    songIndex = this.Normalize.RemoveDirectorySymbols(songIndex); // Remove invalid characters.
 
                     var currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
                     var songHash = request.SongNode["versions"].AsArray[0].AsObject["hash"].Value.ToUpper();

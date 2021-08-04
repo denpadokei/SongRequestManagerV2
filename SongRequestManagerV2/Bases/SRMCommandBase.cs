@@ -91,9 +91,9 @@ namespace SongRequestManagerV2.Bases
             // BUG: Most of these will be replaced.  
 
             if (this.Method2 != null)
-                this.Method2(state._user, state._parameter, state._flags, state._info);
+                this.Method2(state.User, state.Parameter, state.Flags, state.Info);
             else if (this.Method != null)
-                this.Method(state._user, state._parameter);
+                this.Method(state.User, state.Parameter);
             //else if (Method3 != null) return Method3(this, state.user, state.parameter, state.flags, state.info);
             else if (this.func1 != null)
                 Dispatcher.RunCoroutine(this.func1(state));

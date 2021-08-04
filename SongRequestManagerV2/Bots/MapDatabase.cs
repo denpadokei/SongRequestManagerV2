@@ -38,7 +38,7 @@ namespace SongRequestManagerV2.Bots
         private readonly SongMap.SongMapFactory _songMapFactory;
 
         // Fast? Full Text Search
-        public List<SongMap> Search(string SearchKey)
+        public List<SongMap> Search(string searchKey)
         {
             if (!DatabaseImported && RequestBotConfig.Instance.LocalSearch) {
                 this.LoadCustomSongs().Await(null, null, null);
@@ -46,8 +46,8 @@ namespace SongRequestManagerV2.Bots
 
             var result = new List<SongMap>();
 
-            if (this.Bot.GetBeatSaverId(SearchKey) != "") {
-                if (MapDatabase.MapLibrary.TryGetValue(this.normalize.RemoveSymbols(ref SearchKey, this.normalize._SymbolsNoDash), out var song)) {
+            if (this.Bot.GetBeatSaverId(searchKey) != "") {
+                if (MapDatabase.MapLibrary.TryGetValue(this.normalize.RemoveSymbols(searchKey, this.normalize._SymbolsNoDash), out var song)) {
                     result.Add(song);
                     return result;
                 }
@@ -55,7 +55,7 @@ namespace SongRequestManagerV2.Bots
 
             var resultlist = new List<HashSet<int>>();
 
-            var SearchParts = this.normalize.Split(SearchKey);
+            var SearchParts = this.normalize.Split(searchKey);
 
             foreach (var part in SearchParts) {
                 if (!SearchDictionary.TryGetValue(part, out var idset))
