@@ -71,6 +71,7 @@ namespace SongRequestManagerV2
         public JSONObject SongNode { get; private set; }
         public JSONObject SongMetaData => this.SongNode["metadata"].AsObject;
         public JSONObject SongVersion { get; private set; }
+        public bool IsWIP { get; private set; }
         public IChatUser _requestor;
         public DateTime _requestTime;
         public RequestStatus _status;
@@ -106,10 +107,12 @@ namespace SongRequestManagerV2
             this._requestInfo = requestInfo;
             var version = this.SongNode["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString());
             if (version == null) {
-                this.SongVersion = new JSONObject();
+                this.SongVersion = this.SongNode["versions"].AsArray.Children.OrderBy(x => DateTime.Parse(x["createdAt"].Value)).LastOrDefault().AsObject;
+                this.IsWIP = true;
             }
             else {
                 this.SongVersion = this.SongNode["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString()).AsObject;
+                this.IsWIP = false;
             }
             this._hash = this.SongVersion["hash"].Value;
             this._coverURL = this.SongVersion["coverURL"].Value;
@@ -123,11 +126,12 @@ namespace SongRequestManagerV2
         [UIAction("#post-parse")]
         internal void Setup()
         {
+            var name = this.IsWIP ? $"<color=\"yellow\">[WIP]</color> {this._songName}" : this._songName;
             if (RequestBotConfig.Instance.PPSearch && MapDatabase.PPMap.TryGetValue(this.SongNode["id"].Value, out var pp) && 0 < pp) {
-                this.SongName = $"{this._songName} <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>";
+                this.SongName = $"{name} <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>";
             }
             else {
-                this.SongName = $"{this._songName} <size=50%>{Utility.GetRating(this.SongNode)}</size>";
+                this.SongName = $"{name} <size=50%>{Utility.GetRating(this.SongNode)}</size>";
             }
 
             this.SetCover();

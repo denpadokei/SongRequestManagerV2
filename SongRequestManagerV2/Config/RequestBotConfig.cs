@@ -22,7 +22,7 @@ namespace SongRequestManagerV2
         public bool PersistentRequestQueue = true;
 
         public bool AutoplaySong = false; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
-        public bool ClearNoFail = true; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
+        public bool ClearNoFail = false; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
 
         public int RequestHistoryLimit = 40;
         public int UserRequestLimit = 2;
