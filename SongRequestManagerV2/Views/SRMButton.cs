@@ -211,12 +211,12 @@ namespace SongRequestManagerV2.Views
                     if (request == null) {
                         return;
                     }
-                    var songName = request.SongNode["songName"].Value;
-                    var songIndex = Regex.Replace($"{request.SongNode["id"].Value} ({request.SongNode["songName"].Value} - {request.SongNode["levelAuthor"].Value})", "[\\\\:*/?\"<>|]", "_");
+                    var songName = request.SongMetaData["songName"].Value;
+                    var songIndex = Regex.Replace($"{request.SongNode["id"].Value} ({request.SongMetaData["songName"].Value} - {request.SongMetaData["levelAuthorName"].Value})", "[\\\\:*/?\"<>|]", "_");
                     songIndex = this.Normalize.RemoveDirectorySymbols(songIndex); // Remove invalid characters.
 
-                    var currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data\\CustomLevels", songIndex);
-                    var songHash = request.SongNode["versions"].AsArray[0].AsObject["hash"].Value.ToUpper();
+                    var currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels", songIndex);
+                    var songHash = request.SongVersion["hash"].Value.ToUpper();
 
                     if (Loader.GetLevelByHash(songHash) == null) {
                         Utility.EmptyDirectory(".requestcache", false);
@@ -224,7 +224,6 @@ namespace SongRequestManagerV2.Views
                         if (Directory.Exists(currentSongDirectory)) {
                             Utility.EmptyDirectory(currentSongDirectory, true);
                         }
-                        var localPath = Path.Combine(Environment.CurrentDirectory, ".requestcache", $"{request.SongNode["id"].Value}.zip");
 #if UNRELEASED
                     // Direct download hack
                     var ext = Path.GetExtension(request.song["coverURL"].Value);
@@ -302,7 +301,7 @@ namespace SongRequestManagerV2.Views
                 Utility.EmptyDirectory(".requestcache", true);
 
                 Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
-                Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(request.SongNode["versions"].AsArray[0].AsObject["hash"].Value.ToUpper(), () =>
+                Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel($"custom_level_{request.SongVersion["hash"].Value.ToLower()}", () =>
                 {
                     this._bot.UpdateRequestUI();
                 }));

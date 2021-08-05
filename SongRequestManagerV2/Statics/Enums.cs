@@ -19,13 +19,13 @@ namespace SongRequestManagerV2.Statics
     [Flags]
     public enum RequestStatus
     {
-        Invalid,
-        Queued,
-        Blacklisted,
-        Skipped,
-        Played,
-        Wrongsong,
-        SongSearch,
+        Invalid = 1,
+        Queued = 1 << 2,
+        Blacklisted = 1 << 3,
+        Skipped = 1 << 4,
+        Played = 1 << 5,
+        Wrongsong = 1 << 6,
+        SongSearch = 1 << 7
     }
 
     [Flags]
@@ -49,6 +49,14 @@ namespace SongRequestManagerV2.Statics
         rating,
         hashMd5,
         hashSha1
+    }
+
+    internal enum MapStatus
+    {
+        Uploaded,
+        Testplay,
+        Published,
+        Feedback
     }
 
     #region COMMANDFLAGS

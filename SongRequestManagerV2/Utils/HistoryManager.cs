@@ -19,15 +19,16 @@ namespace SongRequestManagerV2.Utils
             if (!Directory.Exists(fileInfo.Directory.FullName)) {
                 Directory.CreateDirectory(fileInfo.Directory.FullName);
             }
-            var songObject = song.SongNode.AsObject;
+            var songObject = song.SongMetaData;
+            var version = song.SongVersion;
 
             var playlistsong = new PlaylistSongEntity()
             {
                 songName = songObject["songName"].Value,
-                levelAuthorName = songObject["levelAuthor"].Value,
+                levelAuthorName = songObject["levelAuthorName"].Value,
                 key = songObject["id"].Value,
-                hash = songObject["hash"].Value.ToUpper(),
-                levelid = $"custom_level_{songObject["hash"].Value.ToUpper()}",
+                hash = version["hash"].Value.ToUpper(),
+                levelid = $"custom_level_{version["hash"].Value.ToUpper()}",
                 dateAdded = song._requestTime
             };
 

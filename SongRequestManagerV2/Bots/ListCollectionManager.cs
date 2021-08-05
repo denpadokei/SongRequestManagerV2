@@ -68,10 +68,7 @@ namespace SongRequestManagerV2.Bots
 
             return false;
         }
-
-        public bool Add(string listname, string key, ListFlags flags = ListFlags.Unchanged) => this.Add(ref listname, ref key, flags);
-
-        public bool Add(ref string listname, ref string key, ListFlags flags = ListFlags.Unchanged)
+        public bool Add(string listname, string key, ListFlags flags = ListFlags.Unchanged)
         {
             try {
                 var list = this.OpenList(listname);

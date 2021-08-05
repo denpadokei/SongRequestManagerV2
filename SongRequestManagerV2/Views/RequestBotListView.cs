@@ -381,7 +381,7 @@ namespace SongRequestManagerV2.Views
                 var currentsong = CurrentlySelectedSong();
 
                 _CurrentSongName.text = currentsong.song["songName"].Value;
-                _CurrentSongName2.text = $"{currentsong.song["authorName"].Value} ({currentsong.song["version"].Value})";
+                _CurrentSongName2.text = $"{currentsong.song["songAuthorName"].Value} ({currentsong.song["version"].Value})";
 
                 ColorDeckButtons(CenterKeys, Color.white, Color.magenta);
             }
@@ -423,13 +423,13 @@ namespace SongRequestManagerV2.Views
                 }
 
                 // get song
-                var song = this._bot.CurrentSong.SongNode;
+                var song = this._bot.CurrentSong.SongMetaData;
 
                 // indicate dialog is active
                 this.confirmDialogActive = true;
 
                 // show dialog
-                this.ShowDialog("Skip Song Warning", $"Skipping {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { this.confirmDialogActive = false; });
+                this.ShowDialog("Skip Song Warning", $"Skipping {song["songName"].Value} by {song["songAuthorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { this.confirmDialogActive = false; });
             }
         }
         [UIAction("blacklist-click")]
@@ -443,13 +443,13 @@ namespace SongRequestManagerV2.Views
                 }
 
                 // get song
-                var song = this._bot.CurrentSong.SongNode;
+                var song = this._bot.CurrentSong.SongMetaData;
 
                 // indicate dialog is active
                 this.confirmDialogActive = true;
 
                 // show dialog
-                this.ShowDialog("Blacklist Song Warning", $"Blacklisting {song["songName"].Value} by {song["authorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { this.confirmDialogActive = false; });
+                this.ShowDialog("Blacklist Song Warning", $"Blacklisting {song["songName"].Value} by {song["songAuthorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { this.confirmDialogActive = false; });
             }
         }
         [UIAction("play-click")]

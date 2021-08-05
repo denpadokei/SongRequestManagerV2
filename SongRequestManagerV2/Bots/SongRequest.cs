@@ -17,6 +17,7 @@ using Zenject;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Threading;
+using System.Linq;
 
 namespace SongRequestManagerV2
 {
@@ -67,7 +68,9 @@ namespace SongRequestManagerV2
             set => this.SetProperty(ref this.authorName_, value);
         }
 
-        public JSONObject SongNode { get; set; }
+        public JSONObject SongNode { get; private set; }
+        public JSONObject SongMetaData => this.SongNode["metadata"].AsObject;
+        public JSONObject SongVersion { get; private set; }
         public IChatUser _requestor;
         public DateTime _requestTime;
         public RequestStatus _status;
@@ -75,6 +78,8 @@ namespace SongRequestManagerV2
         public string _songName;
         public string _authorName;
         private string _hash;
+        private string _coverURL;
+        private string _downloadURL;
 
         private static readonly ConcurrentDictionary<string, Texture2D> _cachedTextures = new ConcurrentDictionary<string, Texture2D>();
 
@@ -93,20 +98,32 @@ namespace SongRequestManagerV2
         public SongRequest Init(JSONObject song, IChatUser requestor, DateTime requestTime, RequestStatus status = RequestStatus.Invalid, string requestInfo = "")
         {
             this.SongNode = song;
-            this._songName = song["songName"].Value;
-            this._authorName = song["levelAuthor"].Value;
+            this._songName = this.SongMetaData["songName"].Value;
+            this._authorName = this.SongMetaData["levelAuthorName"].Value;
             this._requestor = requestor;
             this._status = status;
             this._requestTime = requestTime;
             this._requestInfo = requestInfo;
-            this._hash = song["versions"].AsArray[0].AsObject["hash"].Value;
+            var version = this.SongNode["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString());
+            if (version == null) {
+                this.SongVersion = new JSONObject();
+            }
+            else {
+                this.SongVersion = this.SongNode["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString()).AsObject;
+            }
+            this._hash = this.SongVersion["hash"].Value;
+            this._coverURL = this.SongVersion["coverURL"].Value;
+            this._downloadURL = this.SongVersion["downloadURL"].Value;
+            if (MapDatabase.PPMap.TryGetValue(this.SongNode["id"].Value, out var pp)) {
+                this.SongNode.Add("pp", new JSONNumber(pp));
+            }
             return this;
         }
 
         [UIAction("#post-parse")]
         internal void Setup()
         {
-            if (RequestBotConfig.Instance.PPSearch && MapDatabase.PPMap.TryGetValue(this.SongNode["version"].Value, out var pp) && 0 < pp) {
+            if (RequestBotConfig.Instance.PPSearch && MapDatabase.PPMap.TryGetValue(this.SongNode["id"].Value, out var pp) && 0 < pp) {
                 this.SongName = $"{this._songName} <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>";
             }
             else {
@@ -128,7 +145,7 @@ namespace SongRequestManagerV2
         /// lookup song from level id
         /// </summary>
         /// <returns></returns>
-        private IPreviewBeatmapLevel GetCustomLevel() => Loader.GetLevelByHash(this.SongNode["hash"]);
+        private IPreviewBeatmapLevel GetCustomLevel() => Loader.GetLevelByHash(this._hash.ToUpper());
 
         public void SetCover() => Dispatcher.RunOnMainThread(async () =>
                                 {
@@ -156,11 +173,11 @@ namespace SongRequestManagerV2
 
                                         if (!imageSet) {
                                             var url = "";
-                                            if (this.SongNode["versions"].AsArray[0].AsObject["coverURL"].IsString) {
-                                                url = this.SongNode["versions"].AsArray[0].AsObject["coverURL"].Value;
-                                                }
+                                            if (!string.IsNullOrEmpty(this._coverURL)) {
+                                                url = this._coverURL;
+                                            }
                                             else {
-                                                url = $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{this._hash}.jpg";
+                                                url = $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{this._hash.ToLower()}.jpg";
                                             }
                                             if (!_cachedTextures.TryGetValue(url, out var tex)) {
                                                 var b = await WebClient.DownloadImage(url, System.Threading.CancellationToken.None).ConfigureAwait(true);
@@ -219,11 +236,11 @@ namespace SongRequestManagerV2
         {
             try {
                 var url = "";
-                if (this.SongNode["versions"].AsArray[0].AsObject["downloadURL"].IsString) {
-                    url = this.SongNode["versions"].AsArray[0].AsObject["downloadURL"].Value;
+                if (!string.IsNullOrEmpty(this._downloadURL)) {
+                    url = this._downloadURL;
                 }
                 else {
-                    url = $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{SongNode["versions"].AsArray[0]["hash"].Value.ToLower()}.zip";
+                    url = $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{this._hash.ToLower()}.zip";
                 }
                 var response = await WebClient.SendAsync(HttpMethod.Get, url, token, progress);
 
