@@ -22,6 +22,9 @@ namespace SongRequestManagerV2.Bots
 
         public DynamicText Add(string key, string value)
         {
+            if (this.Dynamicvariables.ContainsKey(key)) {
+                return this;
+            }
             this.Dynamicvariables.Add(key, value); // Make the code slower but more readable :(
             return this;
         }
@@ -70,22 +73,36 @@ namespace SongRequestManagerV2.Bots
         }
 
         // Adds a JSON object to the dictionary. You can define a prefix to make the object identifiers unique if needed.
-        public DynamicText AddJSON(ref JSONObject json, string prefix = "")
+        public DynamicText AddJSON(JSONObject json, string prefix = "")
         {
-            foreach (var element in json)
-                this.Add(prefix + element.Key, element.Value);
+            foreach (var element in json.DeepChildren) {
+                foreach (var item in element.Children) {
+                    foreach (var ditem in item) {
+                        this.Add(prefix + ditem.Key, ditem.Value);
+                    }
+                }
+                foreach (var item in element) {
+                    this.Add(prefix + item.Key, item.Value);
+                }
+            }
+            foreach (var item in json.Children) {
+                foreach (var element in item) {
+                    this.Add(prefix + element.Key, element.Value);
+                }
+            }
+            foreach (var item in json) {
+                this.Add(prefix + item.Key, item.Value);
+            }
             return this;
         }
 
-        public DynamicText AddSong(JSONObject json, string prefix = "") // Alternate call for direct object
-=> this.AddSong(ref json, prefix);
-
-        public DynamicText AddSong(ref JSONObject song, string prefix = "")
+        // Alternate call for direct object
+        public DynamicText AddSong(JSONObject song, string prefix = "")
         {
-            this.AddJSON(ref song, prefix); // Add the song JSON
+            this.AddJSON(song, prefix); // Add the song JSON
 
             //SongMap map;
-            //if (MapDatabase.MapLibrary.TryGetValue(song["version"].Value, out map) && map.pp>0)
+            //if (MapDatabase.MapLibrary.TryGetValue(song["id"].Value, out map) && map.pp>0)
             //{
             //    Add("pp", map.pp.ToString());
             //}
@@ -103,7 +120,7 @@ namespace SongRequestManagerV2.Bots
             this.Add("StarRating", Utility.GetStarRating(song)); // Add additional dynamic properties
             this.Add("Rating", Utility.GetRating(song));
             this.Add("BeatsaverLink", $"https://beatsaver.com/beatmap/{song["id"].Value}");
-            this.Add("BeatsaberLink", $"https://bsaber.com/songs/{song["id"].Value}");
+            this.Add("BeatsaberLink", $"https://beatsaver.com/maps/{song["id"].Value}");
             return this;
         }
 

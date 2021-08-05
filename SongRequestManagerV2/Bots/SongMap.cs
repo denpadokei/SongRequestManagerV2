@@ -4,6 +4,8 @@ using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
 using Zenject;
+using System.Linq;
+using SongRequestManagerV2.Statics;
 
 namespace SongRequestManagerV2.Bots
 {
@@ -14,7 +16,9 @@ namespace SongRequestManagerV2.Bots
         [Inject]
         private readonly IChatManager _chatManager;
 
-        public JSONObject Song { get; set; }
+        public JSONObject SongObject { get; set; }
+        public JSONObject SongVersion { get; private set; }
+        public JSONObject SRMInfo => SongObject["srm_info"].AsObject;
         public string Path { get; set; }
         public string LevelId { get; set; }
         public float PP { get; set; } = 0;
@@ -60,7 +64,14 @@ namespace SongRequestManagerV2.Bots
 
         public SongMap(JSONObject song, string levelId = "", string path = "")
         {
-            this.Song = song;
+            this.SongObject = song;
+            var versions = this.SongObject["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString());
+            if (versions == null) {
+                this.SongVersion = new JSONObject();
+            }
+            else {
+                this.SongVersion = this.SongObject["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString()).AsObject;
+            }
             this.LevelId = levelId;
             this.Path = path;
         }
@@ -68,22 +79,22 @@ namespace SongRequestManagerV2.Bots
         [Inject]
         private void Constractor()
         {
-            if (!this.Song["version"].IsString) {
-                this.Song.Add("id", this.Song["id"]);
-                this.Song.Add("version", this.Song["versions"].AsArray[0].AsObject["key"]);
-
-                var metadata = this.Song["metadata"];
-                this.Song.Add("songName", metadata["songName"].Value);
-                this.Song.Add("songSubName", metadata["songSubName"].Value);
-                this.Song.Add("authorName", metadata["songAuthorName"].Value);
-                this.Song.Add("levelAuthor", metadata["levelAuthorName"].Value);
-                this.Song.Add("rating", this.Song["stats"]["score"].AsFloat * 100);
+            if (!this.SongObject["srm_info"].IsObject) {
+                var srmJson = new JSONObject();
+                srmJson.Add("id", this.SongObject["id"].Value);
+                srmJson.Add("key", this.SongObject["id"].Value);
+                var metadata = this.SongObject["metadata"];
+                srmJson.Add("songName", metadata["songName"].Value);
+                srmJson.Add("songSubName", metadata["songSubName"].Value);
+                srmJson.Add("songAuthorName", metadata["songAuthorName"].Value);
+                srmJson.Add("levelAuthorName", metadata["levelAuthorName"].Value);
+                srmJson.Add("rating", new JSONNumber(this.SongObject["stats"]["score"].AsFloat * 100));
 
                 var degrees90 = false;
                 var degrees360 = false;
 
                 try {
-                    var diffs = this.Song["versions"].AsArray[0].AsObject["diffs"].AsArray;
+                    var diffs = this.SongVersion["diffs"].AsArray;
                     var maxnjs = 0d;
                     foreach (var diff in diffs) {
                         var chara = diff.Value["characteristic"].Value;
@@ -99,57 +110,56 @@ namespace SongRequestManagerV2.Bots
                             maxnjs = njs;
                         }
                         if (seconds > 0) {
-                            this.Song.Add("songlength", $"{(int)(seconds / 60)}:{seconds % 60:00}");
-                            this.Song.Add("songduration", seconds);
+                            srmJson.Add("songlength", $"{(int)(seconds / 60)}:{seconds % 60:00}");
+                            srmJson.Add("songduration", seconds);
                         }
-
                     }
                     if (maxnjs > 0) {
-                        this.Song.Add("njs", maxnjs);
+                        srmJson.Add("njs", maxnjs);
                     }
-                    if (degrees360 || degrees90)
-                        this.Song.Add("maptype", "360");
+                    if (degrees360 || degrees90) {
+                        srmJson.Add("maptype", "360");
+                    }
+                    if (MapDatabase.PPMap.TryGetValue(this.SongObject["id"].Value, out var songpp)) {
+                        srmJson.Add("pp", songpp);
+                    }
+
+                    this.SongObject.Add("srm_info", srmJson);
                 }
                 catch (Exception e) {
                     Logger.Error(e);
                 }
             }
-
-            if (MapDatabase.PPMap.TryGetValue(this.Song["version"].Value, out var songpp)) {
-                this.Song.Add("pp", songpp);
-            }
-            this.IndexSong(this.Song);
+            this.IndexSong(this.SongObject);
         }
 
         private void UnIndexSong(int id)
         {
-            var indexpp = (this.Song["pp"].AsFloat > 0) ? "PP" : "";
+            var indexpp = (this.SongObject["pp"].AsFloat > 0) ? "PP" : "";
 
-            this.IndexFields(false, id, this.Song["songName"].Value, this.Song["songSubName"].Value, this.Song["authorName"].Value, this.Song["levelAuthor"].Value, indexpp, this.Song["maptype"].Value);
+            this.IndexFields(false, id, this.SRMInfo["songName"].Value, this.SRMInfo["songSubName"].Value, this.SRMInfo["songAuthorName"].Value, this.SRMInfo["levelAuthorName"].Value, indexpp, this.SRMInfo["maptype"].Value);
 
-            MapDatabase.MapLibrary.TryRemove(this.Song["id"].Value, out _);
-            MapDatabase.MapLibrary.TryRemove(this.Song["version"].Value, out _);
-            //MapDatabase.LevelId.TryRemove(LevelId, out temp);
+            MapDatabase.MapLibrary.TryRemove(this.SongObject["id"].Value, out _);
         }
 
         public void IndexSong(JSONObject song)
         {
             try {
-                var indexpp = (song["pp"].AsFloat > 0) ? "PP" : "";
+                if (!song["srm_info"].IsObject) {
+                    return;
+                }
+                var info = song["srm_info"].AsObject;
+                var indexpp = (info["pp"].AsFloat > 0) ? "PP" : "";
 
-                var id = int.Parse(song["id"].Value.ToUpper(), System.Globalization.NumberStyles.HexNumber);
+                var id = info["id"];
 
                 //Instance.QueueChatMessage($"id={song["id"].Value} = {id}");
 
-                this.IndexFields(true, id, song["songName"].Value, song["songSubName"].Value, song["authorName"].Value, song["levelAuthor"], indexpp, song["maptype"].Value);
+                this.IndexFields(true, id, info["songName"].Value, info["songSubName"].Value, info["songAuthorName"].Value, info["levelAuthorName"], indexpp, info["maptype"].Value);
 
-                if (!string.IsNullOrEmpty(song["id"].Value)) {
-                    MapDatabase.MapLibrary.AddOrUpdate(song["id"].Value, this, (key, value) => this);
+                if (!string.IsNullOrEmpty(info["id"].Value)) {
+                    MapDatabase.MapLibrary.AddOrUpdate(info["id"].Value, this, (key, value) => this);
                 }
-                //else if(!string.IsNullOrEmpty(song["version"].Value)) {
-                //    MapDatabase.MapLibrary.AddOrUpdate(song["version"].Value, this, (key, value) => this);
-                //}
-                //MapDatabase.LevelId.TryAdd(LevelId, this);
             }
             catch (Exception ex) {
                 this._chatManager.QueueChatMessage(ex.ToString());

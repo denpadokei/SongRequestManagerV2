@@ -113,7 +113,7 @@ namespace SongRequestManagerV2.Bots
                 //JSONArray arr = new JSONArray();
                 var arr = new JSONObject();
                 foreach (var entry in MapLibrary)
-                    arr.Add(entry.Value.Song["id"], entry.Value.Song);
+                    arr.Add(entry.Value.SongObject["id"], entry.Value.SongObject);
                 File.WriteAllText(Path.Combine(Plugin.DataPath, "SongDatabase.dat"), arr.ToString());
                 this._chatManager.QueueChatMessage($"Saved Song Databse in  {(DateTime.Now - start).Seconds} secs.");
             }
@@ -234,7 +234,7 @@ namespace SongRequestManagerV2.Bots
 
                         hash = this.Bot.CreateMD5FromString(FileAccumulator.ToString());
 
-                        var levelId = string.Join("∎", hash, song["songName"].Value, song["songSubName"].Value, song["authorName"], song["beatsPerMinute"].AsFloat.ToString()) + "∎";
+                        var levelId = string.Join("∎", hash, song["songName"].Value, song["songSubName"].Value, song["songAuthorName"], song["beatsPerMinute"].AsFloat.ToString()) + "∎";
 
                         if (LevelId.ContainsKey(levelId)) {
 
@@ -245,7 +245,6 @@ namespace SongRequestManagerV2.Bots
                         addcount++;
 
                         song.Add("id", id);
-                        song.Add("version", version);
                         song.Add("hashMd5", hash);
 
                         this._songMapFactory.Create(song, levelId, f.FullName);
@@ -356,7 +355,7 @@ namespace SongRequestManagerV2.Bots
 
                         hash = this.Bot.CreateMD5FromString(FileAccumulator.ToString());
 
-                        var levelId = string.Join("∎", hash, song["songName"].Value, song["songSubName"].Value, song["authorName"], song["beatsPerMinute"].AsFloat.ToString()) + "∎";
+                        var levelId = string.Join("∎", hash, song["songName"].Value, song["songSubName"].Value, song["songAuthorName"], song["beatsPerMinute"].AsFloat.ToString()) + "∎";
 
                         if (LevelId.ContainsKey(levelId)) {
                             LevelId[levelId].Path = item.DirectoryName;
@@ -364,7 +363,6 @@ namespace SongRequestManagerV2.Bots
                         }
 
                         song.Add("id", id);
-                        song.Add("version", version);
                         song.Add("hashMd5", hash);
 
                         this._songMapFactory.Create(song, levelId, item.DirectoryName);
