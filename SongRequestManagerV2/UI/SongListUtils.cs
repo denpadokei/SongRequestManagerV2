@@ -134,7 +134,7 @@ namespace SongRequestManagerV2
         //    return true;
         //}
 
-        public IEnumerator ScrollToLevel(string levelID, Action callback)
+        public IEnumerator ScrollToLevel(string levelID, Action callback, bool isWip = false)
         {
             if (this._levelCollectionViewController) {
                 // handle if song browser is present
@@ -149,11 +149,12 @@ namespace SongRequestManagerV2
 
                 yield return new WaitWhile(() => this._levelFilteringNavigationController.GetField<CancellationTokenSource>("_cancellationTokenSource") != null);
                 var tableView = this._annotatedBeatmapLevelCollectionsViewController.GetField<AnnotatedBeatmapLevelCollectionsTableView, AnnotatedBeatmapLevelCollectionsViewController>("_annotatedBeatmapLevelCollectionsTableView");
-                tableView.SelectAndScrollToCellWithIdx(0);
-
-                var customSong = tableView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsTableView>("_annotatedBeatmapLevelCollections").FirstOrDefault();
+                tableView.SelectAndScrollToCellWithIdx(isWip ? 1 : 0);
+                var customSong = isWip
+                    ? tableView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsTableView>("_annotatedBeatmapLevelCollections").ElementAt(1)
+                    : tableView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsTableView>("_annotatedBeatmapLevelCollections").FirstOrDefault();
                 this._levelFilteringNavigationController.HandleAnnotatedBeatmapLevelCollectionsViewControllerDidSelectAnnotatedBeatmapLevelCollection(customSong);
-                var song = Loader.GetLevelByHash(levelID.Split('_').Last());
+                var song = isWip ? Loader.GetLevelByHash(levelID.Split('_').Last()) : Loader.GetLevelById($"custom_level_{levelID.Split('_').Last().ToUpper()} WIP");
                 if (song == null) {
                     yield break;
                 }

@@ -15,7 +15,8 @@ namespace SongRequestManagerV2
         public CmdFlags Flags { get; set; } // Flags for the song request, include things like silence, bypass checks, etc.
         public string RequestInfoText { get; set; } // This field contains additional information about a request. This could include the source of the request ( deck, Subscription bonus request) , comments about why a song was banned, etc.
         public ParseState State { get; set; }
-        public RequestInfo(IChatUser requestor, string request, DateTime requestTime, bool isBeatSaverId, ParseState state, CmdFlags flags = 0, string userstring = "")
+        public bool IsWIP { get; set; }
+        public RequestInfo(IChatUser requestor, string request, DateTime requestTime, bool isBeatSaverId, ParseState state, CmdFlags flags = 0, string userstring = "", bool isWip = false)
         {
             this.Requestor = requestor;
             this.Request = request;
@@ -24,6 +25,7 @@ namespace SongRequestManagerV2
             this.State = state;
             this.Flags = flags;
             this.RequestInfoText = userstring;
+            this.IsWIP = isWip;
         }
     }
 }

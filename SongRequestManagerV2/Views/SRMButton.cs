@@ -215,7 +215,7 @@ namespace SongRequestManagerV2.Views
                     var songIndex = Regex.Replace($"{request.SongNode["id"].Value} ({request.SongMetaData["songName"].Value} - {request.SongMetaData["levelAuthorName"].Value})", "[\\\\:*/?\"<>|]", "_");
                     songIndex = this.Normalize.RemoveDirectorySymbols(songIndex); // Remove invalid characters.
 
-                    var currentSongDirectory = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels", songIndex);
+                    var currentSongDirectory = request.IsWIP ? Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomWIPLevels", songIndex) : Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels", songIndex);
                     var songHash = request.SongVersion["hash"].Value.ToUpper();
 
                     if (Loader.GetLevelByHash(songHash) == null) {
@@ -234,7 +234,7 @@ namespace SongRequestManagerV2.Views
                         //  WebClient.DownloadSong($"https://beatsaver.com{request.SongNode["downloadURL"].Value}", System.Threading.CancellationToken.None, this.DownloadProgress);
                         var result = await request.DownloadZip(CancellationToken.None, DownloadProgress);
                         if (result == null) {
-                            this.ChatManager.QueueChatMessage("beatmaps.io is down now.");
+                            this.ChatManager.QueueChatMessage("beatsaver is down now.");
                         }
                         using (var zipStream = new MemoryStream(result))
                         using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
@@ -254,7 +254,7 @@ namespace SongRequestManagerV2.Views
                         //if (!request.song.IsNull) // Experimental!
                         //{
                         //TwitchWebSocketClient.SendCommand("/marker "+ _textFactory.Create().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
-                        //}
+                        //}B
 #endif
                     }
                     else {
@@ -262,7 +262,8 @@ namespace SongRequestManagerV2.Views
                         Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(songHash, () =>
                         {
                             this._bot.UpdateRequestUI();
-                        }));
+                        },
+                        request.IsWIP));
                         if (!request.SongNode.IsNull) {
                             // Display next song message
                             this._textFactory.Create().AddUser(request._requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
@@ -304,7 +305,8 @@ namespace SongRequestManagerV2.Views
                 Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel($"custom_level_{request.SongVersion["hash"].Value.ToLower()}", () =>
                 {
                     this._bot.UpdateRequestUI();
-                }));
+                },
+                request.IsWIP));
 
                 ((IProgress<double>)this.DownloadProgress).Report(0d);
                 if (!request.SongNode.IsNull) {

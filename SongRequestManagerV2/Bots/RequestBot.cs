@@ -637,10 +637,6 @@ namespace SongRequestManagerV2.Bots
                 var song = songs[0];
                 var req = this._songRequestFactory.Create();
                 req.Init(song, requestor, requestInfo.RequestTime, RequestStatus.Queued, requestInfo.RequestInfoText);
-                if (req.SongVersion.Count == 0) {
-                    this.ChatManager.QueueChatMessage($"This map is not published. ({song["id"].Value})");
-                    return;
-                }
                 RequestTracker[requestor.Id].numRequests++;
                 this.ListCollectionManager.Add(duplicatelist, song["id"].Value);
                 if (RequestBotConfig.Instance.NotifySound) {
@@ -1017,7 +1013,7 @@ namespace SongRequestManagerV2.Bots
             var version = song["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString());
             var stats = song["stats"].AsObject;
             if (version == null) {
-                return fast ? "X" : $"This map is not published.({songid})";
+                version = song["versions"].AsArray.Children.OrderBy(x => DateTime.Parse(x["createdAt"].Value)).LastOrDefault();
             }
             if (metadata.IsNull || stats.IsNull) {
                 return fast ? "X" : "Ivalided json type.";

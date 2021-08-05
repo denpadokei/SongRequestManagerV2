@@ -67,7 +67,7 @@ namespace SongRequestManagerV2.Bots
             this.SongObject = song;
             var versions = this.SongObject["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString());
             if (versions == null) {
-                this.SongVersion = new JSONObject();
+                this.SongVersion = this.SongObject["versions"].AsArray.Children.OrderBy(x => DateTime.Parse(x["createdAt"])).LastOrDefault().AsObject;
             }
             else {
                 this.SongVersion = this.SongObject["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString()).AsObject;
