@@ -154,7 +154,7 @@ namespace SongRequestManagerV2
                     ? tableView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsTableView>("_annotatedBeatmapLevelCollections").ElementAt(1)
                     : tableView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsTableView>("_annotatedBeatmapLevelCollections").FirstOrDefault();
                 this._levelFilteringNavigationController.HandleAnnotatedBeatmapLevelCollectionsViewControllerDidSelectAnnotatedBeatmapLevelCollection(customSong);
-                var song = isWip ? Loader.GetLevelByHash(levelID.Split('_').Last()) : Loader.GetLevelById($"custom_level_{levelID.Split('_').Last().ToUpper()} WIP");
+                var song = !isWip ?  Loader.GetLevelById($"custom_level_{levelID.Split('_').Last().ToUpper()} WIP") : Loader.GetLevelByHash(levelID.Split('_').Last());
                 if (song == null) {
                     yield break;
                 }
