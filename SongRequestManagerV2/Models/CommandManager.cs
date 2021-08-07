@@ -843,7 +843,7 @@ namespace SongRequestManagerV2.Models
             var msg = this._queueFactory.Create().SetUp(RequestBotConfig.Instance.maximumqueuemessages);
 
             foreach (SongRequest req in RequestManager.RequestSongs.ToArray()) {
-                var song = req.SongMetaData;
+                var song = req.SongNode;
                 if (msg.Add(this._textFactory.Create().AddSong(song).Parse(StringFormat.QueueListFormat), ", "))
                     break;
             }
