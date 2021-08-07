@@ -15,11 +15,7 @@ namespace SongRequestManagerV2.Configuration
         public static RequestBotConfig Instance { get; internal set; }
         public virtual bool AutoOpenRequestQueue { get; set; } = true;
         public virtual bool RequestQueueOpen { get; set; } = true;
-        public virtual bool PersistentRequestQueue { get; set; } = true;
-
-        public virtual bool AutoplaySong { get; set; } = false; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
         public virtual bool ClearNoFail { get; set; } = false; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
-
         public virtual int RequestHistoryLimit { get; set; } = 40;
         public virtual int UserRequestLimit { get; set; } = 2;
         public virtual int SubRequestLimit { get; set; } = 5;
@@ -27,52 +23,43 @@ namespace SongRequestManagerV2.Configuration
         public virtual int VipBonusRequests { get; set; } = 1; // VIP's get bonus requests in addition to their base limit *IMPLEMENTED*
         public virtual int SessionResetAfterXHours { get; set; } = 6; // Number of hours before persistent session properties are reset (ie: Queue, Played , Duplicate List)
         public virtual bool LimitUserRequestsToSession { get; set; } = false; // Request limits do not reset after a song is played.  
-
         public virtual float LowestAllowedRating { get; set; } = 0; // Lowest allowed song rating to be played 0-100 *IMPLEMENTED*, needs UI
         public virtual float MaximumSongLength { get; set; } = 180; // Maximum song length in minutes
         public virtual float MinimumNJS { get; set; } = 0;
-
         public virtual int MaxiumScanRange { get; set; } = 5; // How far down the list to scan for new songs
-
-        public virtual int PPDeckMiniumumPP { get; set; } = 150; // Minimum PP to add to pp deck
-
-        public virtual string DeckList { get; set; } = "fun hard brutal dance chill";
-
         public virtual bool AutopickFirstSong { get; set; } = false; // Pick the first song that !bsr finds instead of showing a short list. *IMPLEMENTED*, needs UI
-        public virtual bool AllowModAddClosedQueue { get; set; } = true; // Allow moderator to add songs while queue is closed 
-        public virtual bool SendNextSongBeingPlayedtoChat { get; set; } = true; // Enable chat message when you hit play
         public virtual bool UpdateQueueStatusFiles { get; set; } = true; // Create and update queue list and open/close status files for OBS *IMPLEMENTED*, needs UI
         public virtual int MaximumQueueTextEntries { get; set; } = 8;
         public virtual string BotPrefix { get; set; } = "";
-
         public virtual bool ModFullRights { get; set; } = false; // Allow moderator full broadcaster rights. Use at own risk!
-
         public virtual int MaximumQueueMessages { get; set; } = 1;
-        public virtual int MaximumLookupMessages { get; set; } = 1;
-
         public virtual DateTime LastBackup { get; set; } = DateTime.MinValue;
         public virtual string BackupPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "userdata", "backup");
-
         public virtual bool OfflineMode { get; set; } = false;
-        public virtual bool SavedatabaseOnNewest { get; set; } = false;
         public virtual string OfflinePath { get; set; } = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels");
-
         public virtual bool LocalSearch { get; set; } = false;
         public virtual bool PPSearch { get; set; } = true;
         public virtual string AdditionalSongPath { get; set; } = "";
-        public virtual string SongdownloadPath { get; set; } = "";
         public virtual string LocalUserName { get; set; } = "";
-
         public virtual bool IsStartServer { get; set; } = false;
-        public virtual string ReceivePort { get; set; } = "50001";
+        public virtual int ReceivePort { get; set; } = 50001;
         public virtual bool IsSendBouyomi { get; set; } = false;
-        public virtual string SendPort { get; set; } = "50005";
-
+        public virtual int SendPort { get; set; } = 50005;
         public virtual bool PerformanceMode { get; set; } = false;
-
         public virtual bool NotifySound { get; set; } = false;
         public virtual int SoundVolume { get; set; } = 50;
-
+        // 使ってない設定達 R.I.P
+#if false
+        public virtual bool PersistentRequestQueue { get; set; } = true;
+        public virtual bool AutoplaySong { get; set; } = false; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
+        public virtual int MaximumLookupMessages { get; set; } = 1;
+        public virtual int PPDeckMiniumumPP { get; set; } = 150; // Minimum PP to add to pp deck
+        public virtual string DeckList { get; set; } = "fun hard brutal dance chill";
+        public virtual bool AllowModAddClosedQueue { get; set; } = true; // Allow moderator to add songs while queue is closed 
+        public virtual bool SendNextSongBeingPlayedtoChat { get; set; } = true; // Enable chat message when you hit play
+        public virtual bool SavedatabaseOnNewest { get; set; } = false;
+        public virtual string SongdownloadPath { get; set; } = "";
+#endif
         public event Action<RequestBotConfig> ConfigChangedEvent;
         /// <summary>
         /// This is called whenever BSIPA reads the config from disk (including when file changes are detected).
