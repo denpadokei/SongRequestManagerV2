@@ -2,9 +2,11 @@
 using BeatSaberMarkupLanguage.Settings;
 using BS_Utils.Utilities;
 using IPA;
+using IPA.Config.Stores;
 using IPA.Loader;
 using IPA.Utilities;
 using SiraUtil.Zenject;
+using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Installer;
 using SongRequestManagerV2.Installers;
 using SongRequestManagerV2.Networks;
@@ -21,7 +23,7 @@ namespace SongRequestManagerV2
     public class Plugin
     {
         public string Name => "Song Request ManagerV2";
-        public static string Version => _meta.Version.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static string Version => _meta.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         private static PluginMetadata _meta;
 
@@ -33,12 +35,13 @@ namespace SongRequestManagerV2
         public static bool SongBrowserPluginPresent;
 
         [Init]
-        public void Init(IPALogger log, PluginMetadata meta, Zenjector zenjector)
+        public void Init(IPALogger log, IPA.Config.Config config, PluginMetadata meta, Zenjector zenjector)
         {
             Instance = this;
             _meta = meta;
             Logger = log;
             Logger.Debug("Logger initialized.");
+            RequestBotConfig.Instance = config.Generated<RequestBotConfig>();
             zenjector.OnApp<SRMAppInstaller>();
             zenjector.OnMenu<SRMInstaller>();
         }

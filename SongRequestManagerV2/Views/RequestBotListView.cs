@@ -5,6 +5,7 @@ using IPA.Utilities;
 using SongCore;
 using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -224,7 +225,6 @@ namespace SongRequestManagerV2.Views
             }
             else if (args.PropertyName == nameof(this.PerformanceMode)) {
                 RequestBotConfig.Instance.PerformanceMode = this.PerformanceMode;
-                RequestBotConfig.Instance.Save();
             }
         }
 
@@ -468,7 +468,6 @@ namespace SongRequestManagerV2.Views
         private void QueueButtonClick()
         {
             RequestBotConfig.Instance.RequestQueueOpen = !RequestBotConfig.Instance.RequestQueueOpen;
-            RequestBotConfig.Instance.Save();
             this._bot.WriteQueueStatusToFile(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
             this._chatManager.QueueChatMessage(RequestBotConfig.Instance.RequestQueueOpen ? "Queue is open." : "Queue is closed.");
             this.UpdateRequestUI();

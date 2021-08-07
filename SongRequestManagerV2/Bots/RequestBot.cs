@@ -24,6 +24,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 using System.Diagnostics;
+using SongRequestManagerV2.Configuration;
 #if OLDVERSION
 using TMPro;
 #endif
@@ -149,7 +150,6 @@ namespace SongRequestManagerV2.Bots
         public void Initialize()
         {
             Logger.Debug("Start Initialize");
-            RequestBotConfig.Instance.Save(true);
             SceneManager.activeSceneChanged += this.SceneManager_activeSceneChanged;
             this.timer.Elapsed += this.Timer_Elapsed;
             this.timer.Start();
@@ -404,10 +404,8 @@ namespace SongRequestManagerV2.Bots
                 }
 
                 try {
-                    if (!DateTime.TryParse(RequestBotConfig.Instance.LastBackup, out var LastBackup))
-                        LastBackup = DateTime.MinValue;
-                    var TimeSinceBackup = DateTime.Now - LastBackup;
-                    if (TimeSinceBackup > TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours)) {
+                    var timeSinceBackup = DateTime.Now - RequestBotConfig.Instance.LastBackup;
+                    if (timeSinceBackup > TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours)) {
                         this.Backup();
                     }
                 }
@@ -556,7 +554,7 @@ namespace SongRequestManagerV2.Bots
                         return;
                     }
 
-                    if (RequestBotConfig.Instance.OfflineMode && RequestBotConfig.Instance.offlinepath != "" && !MapDatabase.MapLibrary.ContainsKey(id)) {
+                    if (RequestBotConfig.Instance.OfflineMode && RequestBotConfig.Instance.OfflinePath != "" && !MapDatabase.MapLibrary.ContainsKey(id)) {
                         Dispatcher.RunCoroutine(this.LoadOfflineDataBase(id));
                     }
                 }
@@ -679,7 +677,7 @@ namespace SongRequestManagerV2.Bots
 
         internal IEnumerator LoadOfflineDataBase(string id)
         {
-            foreach (var directory in Directory.EnumerateDirectories(RequestBotConfig.Instance.offlinepath, id + "*")) {
+            foreach (var directory in Directory.EnumerateDirectories(RequestBotConfig.Instance.OfflinePath, id + "*")) {
                 this.MapDatabase.LoadCustomSongs(directory, id).Await(null, e => { Logger.Error(e); }, null);
                 yield return new WaitForSeconds(0.025f);
                 yield return new WaitWhile(() => MapDatabase.DatabaseLoading);
@@ -1702,7 +1700,6 @@ namespace SongRequestManagerV2.Bots
         public void ToggleQueue(IChatUser requestor, string request, bool state)
         {
             RequestBotConfig.Instance.RequestQueueOpen = state;
-            RequestBotConfig.Instance.Save();
 
             this.ChatManager.QueueChatMessage(state ? "Queue is now open." : "Queue is now closed.");
             this.WriteQueueStatusToFile(this.QueueMessage(state));
@@ -2161,14 +2158,13 @@ namespace SongRequestManagerV2.Bots
         public string Backup()
         {
             var Now = DateTime.Now;
-            var BackupName = Path.Combine(RequestBotConfig.Instance.backuppath, $"SRMBACKUP-{Now.ToString("yyyy-MM-dd-HHmm")}.zip");
+            var BackupName = Path.Combine(RequestBotConfig.Instance.BackupPath, $"SRMBACKUP-{Now.ToString("yyyy-MM-dd-HHmm")}.zip");
             try {
-                if (!Directory.Exists(RequestBotConfig.Instance.backuppath))
-                    Directory.CreateDirectory(RequestBotConfig.Instance.backuppath);
+                if (!Directory.Exists(RequestBotConfig.Instance.BackupPath))
+                    Directory.CreateDirectory(RequestBotConfig.Instance.BackupPath);
 
                 ZipFile.CreateFromDirectory(Plugin.DataPath, BackupName, System.IO.Compression.CompressionLevel.Fastest, true);
-                RequestBotConfig.Instance.LastBackup = DateTime.Now.ToString();
-                RequestBotConfig.Instance.Save();
+                RequestBotConfig.Instance.LastBackup = Now;
             }
             catch (Exception ex) {
                 Logger.Error(ex);

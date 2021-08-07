@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SongRequestManagerV2.Configuration;
+using System;
 using System.ComponentModel;
 using UnityEngine;
 

@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Zenject;
+using SongRequestManagerV2.Configuration;
 
 namespace SongRequestManagerV2.Models
 {
@@ -840,7 +841,7 @@ namespace SongRequestManagerV2.Models
         public void ListQueue(IChatUser requestor, string request)
         {
 
-            var msg = this._queueFactory.Create().SetUp(RequestBotConfig.Instance.maximumqueuemessages);
+            var msg = this._queueFactory.Create().SetUp(RequestBotConfig.Instance.MaximumQueueMessages);
 
             foreach (SongRequest req in RequestManager.RequestSongs.ToArray()) {
                 var song = req.SongNode;
@@ -858,13 +859,12 @@ namespace SongRequestManagerV2.Models
             var msg = this._queueFactory.Create().SetUp(1);
 
             foreach (var entry in RequestManager.HistorySongs.OfType<SongRequest>()) {
-                var song = entry.SongMetaData;
+                var song = entry.SongNode;
                 if (msg.Add(this._textFactory.Create().AddSong(song).Parse(StringFormat.HistoryListFormat), ", "))
                     break;
             }
             msg.End($" ... and {RequestManager.HistorySongs.Count - msg.Count} more songs.", "History is empty.");
             return;
-
         }
 
         public void ShowSongsplayed(IChatUser requestor, string request) // Note: This can be spammy.

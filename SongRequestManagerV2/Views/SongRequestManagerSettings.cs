@@ -1,5 +1,6 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using SongRequestManagerV2.Configuration;
 
 namespace SongRequestManagerV2.Views
 {
