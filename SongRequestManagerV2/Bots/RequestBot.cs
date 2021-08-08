@@ -23,7 +23,9 @@ using System.Timers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using SongRequestManagerV2.Configuration;
 #if OLDVERSION
 using TMPro;
@@ -411,7 +413,7 @@ namespace SongRequestManagerV2.Bots
                 }
 
                 try {
-                    var timeSinceBackup = DateTime.Now - RequestBotConfig.Instance.LastBackup;
+                    var timeSinceBackup = DateTime.Now - DateTime.Parse(RequestBotConfig.Instance.LastBackup);
                     if (timeSinceBackup > TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours)) {
                         this.Backup();
                     }
@@ -2217,14 +2219,14 @@ namespace SongRequestManagerV2.Bots
         }
         public string Backup()
         {
-            var Now = DateTime.Now;
-            var BackupName = Path.Combine(RequestBotConfig.Instance.BackupPath, $"SRMBACKUP-{Now.ToString("yyyy-MM-dd-HHmm")}.zip");
+            var now = DateTime.Now;
+            var BackupName = Path.Combine(RequestBotConfig.Instance.BackupPath, $"SRMBACKUP-{now.ToString("yyyy-MM-dd-HHmm")}.zip");
             try {
                 if (!Directory.Exists(RequestBotConfig.Instance.BackupPath))
                     Directory.CreateDirectory(RequestBotConfig.Instance.BackupPath);
 
                 ZipFile.CreateFromDirectory(Plugin.DataPath, BackupName, System.IO.Compression.CompressionLevel.Fastest, true);
-                RequestBotConfig.Instance.LastBackup = Now;
+                RequestBotConfig.Instance.LastBackup = now.ToString();
             }
             catch (Exception ex) {
                 Logger.Error(ex);

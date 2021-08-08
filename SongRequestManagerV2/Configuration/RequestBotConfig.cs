@@ -33,7 +33,7 @@ namespace SongRequestManagerV2.Configuration
         public virtual string BotPrefix { get; set; } = "";
         public virtual bool ModFullRights { get; set; } = false; // Allow moderator full broadcaster rights. Use at own risk!
         public virtual int MaximumQueueMessages { get; set; } = 1;
-        public virtual DateTime LastBackup { get; set; } = DateTime.MinValue;
+        public virtual string LastBackup { get; set; } = DateTime.MinValue.ToString();
         public virtual string BackupPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "userdata", "backup");
         public virtual bool OfflineMode { get; set; } = false;
         public virtual string OfflinePath { get; set; } = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels");
