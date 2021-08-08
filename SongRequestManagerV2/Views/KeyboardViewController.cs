@@ -30,27 +30,21 @@ namespace SongRequestManagerV2.Views
 #endif
                 mykeyboard.AddKeys(Keyboard.QWERTY); // You can replace this with DVORAK if you like
                 mykeyboard.DefaultActions();
-
-#if UNRELEASED
                 const string SEARCH = @"
 
-[CLEAR SEARCH]/0 /2 [NEWEST]/0 /2 [UNFILTERED]/30 /2 [PP]/0'!addsongs/top/pp pp%CR%' /2 [SEARCH]/0";
+[CLEAR SEARCH]/0 /2 [NEWEST]/0 /2 [RANKED]/0 /2 [UNFILTERED]/30 /2 [SEARCH]/0";
 
-#else
-                const string SEARCH = @"
-
-[CLEAR SEARCH]/0 /2 [NEWEST]/0 /2 [UNFILTERED]/30 /2 [SEARCH]/0";
-
-#endif
 
 
                 mykeyboard.SetButtonType("OkButton"); // Adding this alters button positions??! Why?
                 mykeyboard.AddKeys(SEARCH, 0.75f);
 
-                mykeyboard.SetAction("CLEAR SEARCH", key => { this._bot?.ClearSearch(key); });
+                mykeyboard.SetAction("CLEAR SEARCH", this._bot.ClearSearch);
                 mykeyboard.SetAction("UNFILTERED", this._bot.UnfilteredSearch);
-                mykeyboard.SetAction("SEARCH", this._bot.MSD);
+                mykeyboard.SetAction("SEARCH", this._bot.Search);
+                mykeyboard.SetAction("RANKED", this._bot.PP);
                 mykeyboard.SetAction("NEWEST", this._bot.Newest);
+                
 
 
 #if UNRELEASED

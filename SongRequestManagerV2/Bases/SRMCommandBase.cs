@@ -54,16 +54,11 @@ namespace SongRequestManagerV2.Bases
         [Inject]
         private readonly IChatManager _chatManager;
 
-        public ISRMCommand AddAliases(IEnumerable<string> aliases)
+        public ISRMCommand AddAliases(params string[] aliases)
         {
             foreach (var item in aliases) {
                 this.Aliases.Add(item.ToLower());
             }
-            return this;
-        }
-        public ISRMCommand AddAliases(string aliase)
-        {
-            this.Aliases.Add(aliase.ToLower());
             return this;
         }
 
@@ -105,15 +100,7 @@ namespace SongRequestManagerV2.Bases
                 this.AsyncSubCommand(state).Await(null, null, null);
             return success;
         }
-
-        public ISRMCommand Setup(string alias)
-        {
-            this.Aliases.Clear();
-            this.Aliases.Add(alias.ToLower());
-            return this;
-        }
-
-        public ISRMCommand Setup(IEnumerable<string> alias)
+        public ISRMCommand Setup(params string[] alias)
         {
             this.Aliases.Clear();
             foreach (var element in alias) {

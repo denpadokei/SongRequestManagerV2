@@ -28,15 +28,12 @@ namespace SongRequestManagerV2.Interfaces
         int UserNumber { get; set; }
         int UseCount { get; set; }
         ChangedFlags ChangedParameters { get; set; }
-
-        ISRMCommand AddAliases(IEnumerable<string> aliases);
-        ISRMCommand AddAliases(string aliases);
+        ISRMCommand AddAliases(params string[] aliases);
         void Constractor();
         void UpdateCommand(ChangedFlags changed);
         void SetPermittedUsers(string listname);
         string Execute(ParseState state);
-        ISRMCommand Setup(string alias);
-        ISRMCommand Setup(IEnumerable<string> alias);
+        ISRMCommand Setup(params string[] alias);
         ISRMCommand Setup(string variablename, StringBuilder reference);
         ISRMCommand Action(Func<ParseState, string> action);
         ISRMCommand Action(Func<ParseState> action);

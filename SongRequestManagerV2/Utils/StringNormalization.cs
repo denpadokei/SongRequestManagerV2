@@ -27,21 +27,11 @@ namespace SongRequestManagerV2.Utils
                     o.Append(c);
             }
             return o.ToString();
-            //var commands = text.Split(' ');
-            //var sb = new StringBuilder();
-
-            //foreach (var command in commands) {
-            //    if (string.IsNullOrEmpty(command) || command.First() == '!') {
-            //        continue;
-            //    }
-            //    sb.Append(command);
-            //}
-            //return sb.ToString();
         }
 
         public string RemoveDirectorySymbols(string text)
         {
-            var mask = this._SymbolsValidDirectory;
+            var mask = this.SymbolsValidDirectory;
             var o = new StringBuilder(text.Length);
 
             foreach (var c in text) {
@@ -76,50 +66,49 @@ namespace SongRequestManagerV2.Utils
         public string[] Split(string text)
         {
             var sb = new StringBuilder(text);
-            this.ReplaceSymbols(sb, this._SymbolsMap);
+            this.ReplaceSymbols(sb, this.SymbolsMap);
             var result = sb.ToString().ToLower().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             return result;
         }
 
-        public char[] _SymbolsMap = new char[128];
-        public char[] _SymbolsNoDash = new char[128];
-        public char[] _SymbolsValidDirectory = new char[128];
+        public char[] SymbolsMap { get; } = new char[128];
+        public char[] SymbolsNoDash { get; } = new char[128];
+        public char[] SymbolsValidDirectory { get; } = new char[128];
 
         public StringNormalization()
         {
             for (var i = (char)0; i < 128; i++) {
-                this._SymbolsMap[i] = i;
-                this._SymbolsNoDash[i] = i;
-                this._SymbolsValidDirectory[i] = i;
+                this.SymbolsMap[i] = i;
+                this.SymbolsNoDash[i] = i;
+                this.SymbolsValidDirectory[i] = i;
             }
 
             foreach (var c in new char[] { '@', '*', '+', ':', '-', '<', '~', '>', '(', ')', '[', ']', '/', '\\', '.', ',' })
                 if (c < 128)
-                    this._SymbolsMap[c] = ' ';
+                    this.SymbolsMap[c] = ' ';
             foreach (var c in new char[] { '@', '*', '+', ':', '<', '~', '>', '(', ')', '[', ']', '/', '\\', '.', ',' })
                 if (c < 128)
-                    this._SymbolsNoDash[c] = ' ';
+                    this.SymbolsNoDash[c] = ' ';
             foreach (var c in Path.GetInvalidPathChars())
                 if (c < 128)
-                    this._SymbolsValidDirectory[c] = '\0';
-            this._SymbolsValidDirectory[':'] = '\0';
-            this._SymbolsValidDirectory['\\'] = '\0';
-            this._SymbolsValidDirectory['/'] = '\0';
-            this._SymbolsValidDirectory['+'] = '\0';
-            this._SymbolsValidDirectory['*'] = '\0';
-            this._SymbolsValidDirectory['?'] = '\0';
-            this._SymbolsValidDirectory[';'] = '\0';
-            this._SymbolsValidDirectory['$'] = '\0';
-            this._SymbolsValidDirectory['.'] = '\0';
-            this._SymbolsValidDirectory['('] = '\0';
-            this._SymbolsValidDirectory[')'] = '\0';
+                    this.SymbolsValidDirectory[c] = '\0';
+            this.SymbolsValidDirectory[':'] = '\0';
+            this.SymbolsValidDirectory['\\'] = '\0';
+            this.SymbolsValidDirectory['/'] = '\0';
+            this.SymbolsValidDirectory['+'] = '\0';
+            this.SymbolsValidDirectory['*'] = '\0';
+            this.SymbolsValidDirectory['?'] = '\0';
+            this.SymbolsValidDirectory[';'] = '\0';
+            this.SymbolsValidDirectory['$'] = '\0';
+            this.SymbolsValidDirectory['.'] = '\0';
+            this.SymbolsValidDirectory['('] = '\0';
+            this.SymbolsValidDirectory[')'] = '\0';
 
             // Incomplete list of words that BeatSaver.com filters out for no good reason. No longer applies!
             foreach (var word in new string[] { "pp" }) {
                 BeatsaverBadWords.Add(word.ToLower());
             }
-
         }
     }
 }

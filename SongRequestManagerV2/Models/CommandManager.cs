@@ -72,8 +72,8 @@ namespace SongRequestManagerV2.Models
             this.Aliases.Clear();
 
             #region 初期化ごにょごにょ
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "!bsr", "!request", "!add", "!sr", "!srm" }).Action(this.Bot.ProcessSongRequest).Help(FlagParameter.Everyone, "usage: %alias%<songname> or <song id>, omit <,>'s. %|%This adds a song to the request queue. Try and be a little specific. You can look up songs on %beatsaver%", _atleast1));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "!lookup", "!find" }).AsyncAction(this.LookupSongs).Help(FlagParameter.Mod | FlagParameter.Sub | FlagParameter.VIP, "usage: %alias%<song name> or <song id>, omit <>'s.%|%Get a list of songs from %beatsaver% matching your search criteria.", _atleast1));
+            commands.Add(this._commandFactory.Create().Setup("!bsr", "!request", "!add", "!sr", "!srm").Action(this.Bot.ProcessSongRequest).Help(FlagParameter.Everyone, "usage: %alias%<songname> or <song id>, omit <,>'s. %|%This adds a song to the request queue. Try and be a little specific. You can look up songs on %beatsaver%", _atleast1));
+            commands.Add(this._commandFactory.Create().Setup("!lookup", "!find").AsyncAction(this.LookupSongs).Help(FlagParameter.Mod | FlagParameter.Sub | FlagParameter.VIP, "usage: %alias%<song name> or <song id>, omit <>'s.%|%Get a list of songs from %beatsaver% matching your search criteria.", _atleast1));
 
             commands.Add(this._commandFactory.Create().Setup("!link").Action(this.Bot.ShowSongLink).Help(FlagParameter.Everyone, "usage: %alias% %|%... Shows song details, and an %beatsaver% link to the current song", _nothing));
 
@@ -88,9 +88,9 @@ namespace SongRequestManagerV2.Models
             commands.Add(this._commandFactory.Create().Setup("!modadd").Action(this.Bot.ModAdd).Help(FlagParameter.Mod, "usage: %alias%<songname> or <song id>, omit <,>'s. %|%This adds a song to the request queue. This ignores ALL filters including bans.", _atleast1));
             commands.Add(this._commandFactory.Create().Setup("!mtt").Action(this.Bot.MoveRequestToTop).Help(FlagParameter.Mod, "usage: %alias%<songname>,<username>,<song id> %|%... Moves a song to the top of the request queue.", _atleast1));
             commands.Add(this._commandFactory.Create().Setup("!att").Action(this.Bot.AddToTop).Help(FlagParameter.Mod, "usage: %alias%<songname> or <song id>, omit <,>'s. %|%This adds a song to the top of the request queue. Try and be a little specific. You can look up songs on %beatsaver%", _atleast1));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "!last", "!demote", "!later" }).Action(this.Bot.MoveRequestToBottom).Help(FlagParameter.Mod, "usage: %alias%<songname>,<username>,<song id> %|%... Moves a song to the bottom of the request queue.", _atleast1));
+            commands.Add(this._commandFactory.Create().Setup("!last", "!demote", "!later").Action(this.Bot.MoveRequestToBottom).Help(FlagParameter.Mod, "usage: %alias%<songname>,<username>,<song id> %|%... Moves a song to the bottom of the request queue.", _atleast1));
             commands.Add(this._commandFactory.Create().Setup("!remove").Action(this.Bot.DequeueSong).Help(FlagParameter.Mod, "usage: %alias%<songname>,<username>,<song id> %|%... Removes a song from the queue.", _atleast1));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "!wrongsong", "!wrong", "!oops" }).Action(this.Bot.WrongSong).Help(FlagParameter.Everyone, "usage: %alias%%|%... Removes your last requested song form the queue. It can be requested again later.", _nothing));
+            commands.Add(this._commandFactory.Create().Setup("!wrongsong", "!wrong", "!oops").Action(this.Bot.WrongSong).Help(FlagParameter.Everyone, "usage: %alias%%|%... Removes your last requested song form the queue. It can be requested again later.", _nothing));
 
             commands.Add(this._commandFactory.Create().Setup("!unblock").Action(this.Bot.Unban).Help(FlagParameter.Mod, "usage: %alias%<song id>, do not include <,>'s.", _beatsaversongversion));
             commands.Add(this._commandFactory.Create().Setup("!block").AsyncAction(this.Bot.Ban).Help(FlagParameter.Mod, "usage: %alias%<song id>, do not include <,>'s.", _beatsaversongversion));
@@ -104,7 +104,7 @@ namespace SongRequestManagerV2.Models
             commands.Add(this._commandFactory.Create().Setup("!restore").Action(this.Bot.Restoredeck).Help(FlagParameter.Mod, "usage: %alias%%|%... Restores the request queue from the previous session. Only useful if you have persistent Queue turned off.", _nothing));
 
             commands.Add(this._commandFactory.Create().Setup("!about").Help(CmdFlags.Broadcaster | CmdFlags.SilentCheck, $"Song Request Manager version {Plugin.Version}. Github angturil/SongRequestManager", _fail)); // Help commands have no code
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "!help" }).Action(this.Help).Help(FlagParameter.Everyone, "usage: %alias%<command name>, or just %alias%to show a list of all commands available to you.", _anything));
+            commands.Add(this._commandFactory.Create().Setup("!help").Action(this.Help).Help(FlagParameter.Everyone, "usage: %alias%<command name>, or just %alias%to show a list of all commands available to you.", _anything));
             commands.Add(this._commandFactory.Create().Setup("!commandlist").Action(this.ShowCommandlist).Help(FlagParameter.Everyone, "usage: %alias%%|%... Displays all the bot commands available to you.", _nothing));
 
             commands.Add(this._commandFactory.Create().Setup("!readdeck").Action(this.Bot.Readdeck).Help(FlagParameter.Mod, "usage: %alias", _alphaNumericRegex));
@@ -123,7 +123,8 @@ namespace SongRequestManagerV2.Models
             commands.Add(this._commandFactory.Create().Setup("!every").Action(this.Bot.Every).Help(FlagParameter.Broadcaster, "usage: every <minutes> %|% Run a command every <minutes>.", _atleast1));
             commands.Add(this._commandFactory.Create().Setup("!in").Action(this.Bot.EventIn).Help(FlagParameter.Broadcaster, "usage: in <minutes> <bot command>.", _atleast1));
             commands.Add(this._commandFactory.Create().Setup("!clearevents").Action(this.Bot.ClearEvents).Help(FlagParameter.Broadcaster, "usage: %alias% %|% Clear all timer events."));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "!addnew", "!addlatest" }).AsyncAction(this.Bot.AddsongsFromnewest).Help(FlagParameter.Mod, "usage: %alias% <listname>%|%... Adds the latest maps from %beatsaver%, filtered by the previous selected allowmappers command", _nothing));
+            commands.Add(this._commandFactory.Create().Setup("!addnew", "!addlatest").AsyncAction(this.Bot.AddsongsFromnewest).Help(FlagParameter.Mod, "usage: %alias% <listname>%|%... Adds the latest maps from %beatsaver%, filtered by the previous selected allowmappers command", _nothing));
+            commands.Add(this._commandFactory.Create().Setup("!addpp").AsyncAction(this.Bot.AddsongsFromRank).Help(FlagParameter.Mod, "usage: %alias% <listname>%|%... Adds the rank maps from %beatsaver%, filtered by the previous selected allowmappers command", _nothing));
             commands.Add(this._commandFactory.Create().Setup("!backup").Action(this.Bot.BackupStreamcore).Help(CmdFlags.Broadcaster, "Backup %SRM% directory.", _anything));
 
             //new COMMAND("!refreshsongs").Coroutine(RefreshSongs).Help(Broadcaster, "Adds custom songs to bot list. This is a pre-release feature."); // BUG: Broken in 1.10
@@ -134,7 +135,7 @@ namespace SongRequestManagerV2.Models
             commands.Add(this._commandFactory.Create().Setup("!QueueLottery").Action(this.Bot.QueueLottery).Help(FlagParameter.Broadcaster, "usage: %alias% <entry count> %|% Shuffle the queue and reduce to <entry count> entries. Close the queue.", _anything));
 
             commands.Add(this._commandFactory.Create().Setup("!addtoqueue").Action(this.Bot.Queuelist).Help(FlagParameter.Broadcaster, "usage: %alias% <list>", _atleast1));
-
+            commands.Add(this._commandFactory.Create().Setup("!makesearchdeck").AsyncAction(this.Bot.Makelistfromsearch).Help(FlagParameter.Broadcaster, "usage: %alias%%|% Add all songs matching a criteria to search.deck", _atleast1));
 
             #region Gamechanger Specific           
             var GameChangerInstalled = IPA.Loader.PluginManager.GetPlugin("Beat Bits") != null;
@@ -146,8 +147,6 @@ namespace SongRequestManagerV2.Models
             #endregion
 
 #if UNRELEASED
-            new COMMAND("!makesearchdeck").AsyncAction(makelistfromsearch).Help(Broadcaster, "usage: %alias%%|% Add all songs matching a criteria to search.deck", _atleast1);
-
             //new COMMAND("!sdk2test").Action(livsdktest).Help(Broadcaster,"usage: don't",_anything);
 
             //new COMMAND("!getpp").Coroutine(GetPPData).Help(Broadcaster, "Get PP Data");
@@ -227,40 +226,40 @@ namespace SongRequestManagerV2.Models
             // BEGIN SUBCOMMANDS - these modify the Properties of a command, or the current parse state. 
             // sub commands need to have at least one alias that does not begin with an illegal character, or you will not be able to alter them in twitch chat
 
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/enable", "subcmdenable" }).Action(this.SubcmdEnable).Help(FlagParameter.Subcmd, "usage: <command>/enable"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/disable", "subcmddisable" }).Action(this.SubcmdDisable).Help(FlagParameter.Subcmd, "usage: <command>/disable"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/current", "subcmdcurrent" }).Action(this.SubcmdCurrentSong).Help(FlagParameter.Subcmd | FlagParameter.Everyone, "usage: <command>/current"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/selected", "subcmdselected" }).Action(this.SubcmdSelected).Help(FlagParameter.Subcmd | FlagParameter.Mod, "usage: <command>/selected"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/last", "/previous", "subcmdlast" }).Action(this.SubcmdPreviousSong).Help(FlagParameter.Subcmd | FlagParameter.Everyone, "usage: <command>/last"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/next", "subcmdnext" }).Action(this.SubcmdNextSong).Help(FlagParameter.Subcmd | FlagParameter.Everyone, "usage: <command>/next"));
+            commands.Add(this._commandFactory.Create().Setup("/enable", "subcmdenable").Action(this.SubcmdEnable).Help(FlagParameter.Subcmd, "usage: <command>/enable"));
+            commands.Add(this._commandFactory.Create().Setup("/disable", "subcmddisable").Action(this.SubcmdDisable).Help(FlagParameter.Subcmd, "usage: <command>/disable"));
+            commands.Add(this._commandFactory.Create().Setup("/current", "subcmdcurrent").Action(this.SubcmdCurrentSong).Help(FlagParameter.Subcmd | FlagParameter.Everyone, "usage: <command>/current"));
+            commands.Add(this._commandFactory.Create().Setup("/selected", "subcmdselected").Action(this.SubcmdSelected).Help(FlagParameter.Subcmd | FlagParameter.Mod, "usage: <command>/selected"));
+            commands.Add(this._commandFactory.Create().Setup("/last", "/previous", "subcmdlast").Action(this.SubcmdPreviousSong).Help(FlagParameter.Subcmd | FlagParameter.Everyone, "usage: <command>/last"));
+            commands.Add(this._commandFactory.Create().Setup("/next", "subcmdnext").Action(this.SubcmdNextSong).Help(FlagParameter.Subcmd | FlagParameter.Everyone, "usage: <command>/next"));
 
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/requestor", "subcmduser" }).Action(this.SubcmdCurrentUser).Help(FlagParameter.Subcmd | FlagParameter.Everyone, "usage: <command>/requestor"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/list", "subcmdlist" }).Action(this.SubcmdList).Help(FlagParameter.Subcmd | FlagParameter.Mod, "usage: <command>/list"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/add", "subcmdadd" }).Action(this.SubcmdAdd).Help(FlagParameter.Subcmd | FlagParameter.Mod, "usage: <command>/add"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/remove", "subcmdremove" }).Action(this.SubcmdRemove).Help(FlagParameter.Subcmd | FlagParameter.Mod, "usage: <command>/remove"));
-
-
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/flags", "subcmdflags" }).Action(this.SubcmdShowflags).Help(FlagParameter.Subcmd, "usage: <command>/next"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/set", "subcmdset" }).Action(this.SubcmdSetflags).Help(FlagParameter.Subcmd, "usage: <command>/set <flags>"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/clear", "subcmdclear" }).Action(this.SubcmdClearflags).Help(FlagParameter.Subcmd, "usage: <command>/clear <flags>"));
-
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/allow", "subcmdallow" }).Action(this.SubcmdAllow).Help(FlagParameter.Subcmd, "usage: <command>/allow"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/sethelp", "/helpmsg", "subcmdsethelp" }).Action(this.SubcmdSethelp).Help(FlagParameter.Subcmd, "usage: <command>/sethelp"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/silent", "subcmdsilent" }).Action(this.SubcmdSilent).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Everyone, "usage: <command>/silent"));
-
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "=", "subcmdequal" }).Action(this.SubcmdEqual).Help(FlagParameter.Subcmd | FlagParameter.Broadcaster, "usage: ="));
-
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/alias", "subcmdalias" }).Action(this.SubcmdAlias).Help(FlagParameter.Subcmd | FlagParameter.Broadcaster, "usage: %alias% %|% Defines all the aliases a command can use"));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/default", "subcmddefault" }).Action(this.SubcmdDefault).Help(FlagParameter.Subcmd | FlagParameter.Broadcaster, "usage: <formattext> %alias%"));
-
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/newest", "subcmdnewest" }).Action(this.SubcmdNewest).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Everyone));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/best", "subcmdbest" }).Action(this.SubcmdBest).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Everyone));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/oldest", "subcmdoldest" }).Action(this.SubcmdOldest).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Everyone));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/pp", "subcmdpp" }).Action(this.SubcmdPP).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Everyone));
+            commands.Add(this._commandFactory.Create().Setup("/requestor", "subcmduser").Action(this.SubcmdCurrentUser).Help(FlagParameter.Subcmd | FlagParameter.Everyone, "usage: <command>/requestor"));
+            commands.Add(this._commandFactory.Create().Setup("/list", "subcmdlist").Action(this.SubcmdList).Help(FlagParameter.Subcmd | FlagParameter.Mod, "usage: <command>/list"));
+            commands.Add(this._commandFactory.Create().Setup("/add", "subcmdadd").Action(this.SubcmdAdd).Help(FlagParameter.Subcmd | FlagParameter.Mod, "usage: <command>/add"));
+            commands.Add(this._commandFactory.Create().Setup("/remove", "subcmdremove").Action(this.SubcmdRemove).Help(FlagParameter.Subcmd | FlagParameter.Mod, "usage: <command>/remove"));
 
 
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/top", "subcmdtop" }).Action(this.SubcmdTop).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Mod | FlagParameter.Broadcaster, "%alias% sets a flag to move the request(s) to the top of the queue."));
-            commands.Add(this._commandFactory.Create().Setup(new string[] { "/mod", "subcmdmod" }).Action(this.SubcmdMod).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Mod | FlagParameter.Broadcaster, "%alias% sets a flag to ignore all filtering"));
+            commands.Add(this._commandFactory.Create().Setup("/flags", "subcmdflags").Action(this.SubcmdShowflags).Help(FlagParameter.Subcmd, "usage: <command>/next"));
+            commands.Add(this._commandFactory.Create().Setup("/set", "subcmdset").Action(this.SubcmdSetflags).Help(FlagParameter.Subcmd, "usage: <command>/set <flags>"));
+            commands.Add(this._commandFactory.Create().Setup("/clear", "subcmdclear").Action(this.SubcmdClearflags).Help(FlagParameter.Subcmd, "usage: <command>/clear <flags>"));
+
+            commands.Add(this._commandFactory.Create().Setup("/allow", "subcmdallow").Action(this.SubcmdAllow).Help(FlagParameter.Subcmd, "usage: <command>/allow"));
+            commands.Add(this._commandFactory.Create().Setup("/sethelp", "/helpmsg", "subcmdsethelp").Action(this.SubcmdSethelp).Help(FlagParameter.Subcmd, "usage: <command>/sethelp"));
+            commands.Add(this._commandFactory.Create().Setup("/silent", "subcmdsilent").Action(this.SubcmdSilent).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Everyone, "usage: <command>/silent"));
+
+            commands.Add(this._commandFactory.Create().Setup("=", "subcmdequal").Action(this.SubcmdEqual).Help(FlagParameter.Subcmd | FlagParameter.Broadcaster, "usage: ="));
+
+            commands.Add(this._commandFactory.Create().Setup("/alias", "subcmdalias").Action(this.SubcmdAlias).Help(FlagParameter.Subcmd | FlagParameter.Broadcaster, "usage: %alias% %|% Defines all the aliases a command can use"));
+            commands.Add(this._commandFactory.Create().Setup("/default", "subcmddefault").Action(this.SubcmdDefault).Help(FlagParameter.Subcmd | FlagParameter.Broadcaster, "usage: <formattext> %alias%"));
+
+            commands.Add(this._commandFactory.Create().Setup("/newest", "subcmdnewest").Action(this.SubcmdNewest).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Everyone));
+            commands.Add(this._commandFactory.Create().Setup("/best", "subcmdbest").Action(this.SubcmdBest).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Everyone));
+            commands.Add(this._commandFactory.Create().Setup("/oldest", "subcmdoldest").Action(this.SubcmdOldest).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Everyone));
+            commands.Add(this._commandFactory.Create().Setup("/pp", "subcmdpp").Action(this.SubcmdPP).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Everyone));
+
+
+            commands.Add(this._commandFactory.Create().Setup("/top", "subcmdtop").Action(this.SubcmdTop).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Mod | FlagParameter.Broadcaster, "%alias% sets a flag to move the request(s) to the top of the queue."));
+            commands.Add(this._commandFactory.Create().Setup("/mod", "subcmdmod").Action(this.SubcmdMod).Help(FlagParameter.Subcmd | CmdFlags.NoParameter | FlagParameter.Mod | FlagParameter.Broadcaster, "%alias% sets a flag to ignore all filtering"));
             #endregion
             commands.AddRange(this._diContainer.ResolveAll<ISRMCommand>());
 
@@ -510,13 +509,13 @@ namespace SongRequestManagerV2.Models
 
         public string SubcmdAdd(ParseState state)
         {
-            this.Bot.Addtolist(state.User, state._botcmd.UserParameter.ToString() + " " + state._subparameter);
+            this.Bot.Addtolist(state.User, state._botcmd.UserParameter.ToString() + " " + state.Subparameter);
             return endcommand;
         }
 
         public string SubcmdRemove(ParseState state)
         {
-            this.Bot.RemoveFromlist(state.User, state._botcmd.UserParameter.ToString() + " " + state._subparameter);
+            this.Bot.RemoveFromlist(state.User, state._botcmd.UserParameter.ToString() + " " + state.Subparameter);
             return endcommand;
         }
 
@@ -602,7 +601,7 @@ namespace SongRequestManagerV2.Models
 
         public string SubcmdShowflags(ParseState state)
         {
-            if (state._subparameter == "") {
+            if (state.Subparameter == "") {
                 this._chatManager.QueueChatMessage($"{state.Command} flags: {state._botcmd.Flags.ToString()}");
             }
             else {
@@ -617,9 +616,9 @@ namespace SongRequestManagerV2.Models
         {
             try {
 
-                var flags = state._subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                var flags = state.Subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                var flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state._subparameter);
+                var flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state.Subparameter);
                 state._botcmd.Flags |= flag;
                 state._botcmd.UpdateCommand(ChangedFlags.Flags);
 
@@ -628,7 +627,7 @@ namespace SongRequestManagerV2.Models
 
             }
             catch {
-                return $"Unable to set  {state.Command} flags to {state._subparameter}";
+                return $"Unable to set  {state.Command} flags to {state.Subparameter}";
             }
 
             return endcommand;
@@ -638,7 +637,7 @@ namespace SongRequestManagerV2.Models
         {
             //var flags = state._subparameter.Split(new char[] { ' ', ',' });
 
-            var flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state._subparameter);
+            var flag = (CmdFlags)Enum.Parse(typeof(CmdFlags), state.Subparameter);
 
             state._botcmd.Flags &= ~flag;
 
@@ -653,7 +652,7 @@ namespace SongRequestManagerV2.Models
         public string SubcmdAllow(ParseState state)
         {
             // BUG: No parameter checking
-            var key = state._subparameter.ToLower();
+            var key = state.Subparameter.ToLower();
             state._botcmd.Permittedusers = key;
             if (!state.Flags.HasFlag(CmdFlags.SilentResult))
                 this._chatManager.QueueChatMessage($"Permit custom userlist set to  {key}.");
@@ -663,18 +662,18 @@ namespace SongRequestManagerV2.Models
         public string SubcmdAlias(ParseState state)
         {
 
-            state._subparameter.ToLower();
+            state.Subparameter.ToLower();
 
             if (state._botcmd.Aliases.Contains(state._botcmd.Aliases.FirstOrDefault() ?? "") || this.Aliases.ContainsKey(state._botcmd.Aliases.FirstOrDefault() ?? "")) {
                 foreach (var alias in state._botcmd.Aliases)
                     this.Aliases.TryRemove(alias, out _);
                 state._botcmd.Aliases.Clear();
-                state._botcmd.AddAliases(state._subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
+                state._botcmd.AddAliases(state.Subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
                 state._botcmd.UpdateCommand(ChangedFlags.Aliases);
                 this.AddAliases(state._botcmd);
             }
             else {
-                return $"Unable to set {state.Command} aliases to {state._subparameter}";
+                return $"Unable to set {state.Command} aliases to {state.Subparameter}";
             }
 
             return endcommand;
@@ -683,7 +682,7 @@ namespace SongRequestManagerV2.Models
 
         public string SubcmdSethelp(ParseState state)
         {
-            state._botcmd.ShortHelp = state._subparameter + state.Parameter; // This one's different
+            state._botcmd.ShortHelp = state.Subparameter + state.Parameter; // This one's different
             state._botcmd.UpdateCommand(ChangedFlags.Help);
 
             if (!state.Flags.HasFlag(CmdFlags.SilentResult))
@@ -716,7 +715,7 @@ namespace SongRequestManagerV2.Models
             state.Flags |= CmdFlags.SilentResult; // Turn off success messages, but still allow errors.
 
             if (state._botcmd.Flags.HasFlag(CmdFlags.Variable)) {
-                state._botcmd.UserParameter.Clear().Append(state._subparameter + state.Parameter);
+                state._botcmd.UserParameter.Clear().Append(state.Subparameter + state.Parameter);
                 state._botcmd.UpdateCommand(ChangedFlags.Variable);
 
             }

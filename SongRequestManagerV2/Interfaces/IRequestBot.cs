@@ -36,6 +36,7 @@ namespace SongRequestManagerV2.Interfaces
         void WriteQueueStatusToFile(string status);
         Task Addsongs(ParseState state);
         Task AddsongsFromnewest(ParseState state);
+        Task AddsongsFromRank(ParseState state);
         void Addtolist(IChatUser requestor, string request);
         string AddToTop(ParseState state);
         string Backup();
@@ -46,6 +47,7 @@ namespace SongRequestManagerV2.Interfaces
         string ChatMessage(ParseState state);
         string ClearDuplicateList(ParseState state);
         string ClearEvents(ParseState state);
+        void PP(Keyboard.KEY obj);
         void ClearList(IChatUser requestor, string request);
         void Clearqueue(IChatUser requestor, string request);
         void ClearSearch(Keyboard.KEY key);

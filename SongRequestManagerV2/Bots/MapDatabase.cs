@@ -48,7 +48,7 @@ namespace SongRequestManagerV2.Bots
             var result = new List<SongMap>();
 
             if (this.Bot.GetBeatSaverId(searchKey) != "") {
-                if (MapDatabase.MapLibrary.TryGetValue(this.normalize.RemoveSymbols(searchKey, this.normalize._SymbolsNoDash), out var song)) {
+                if (MapDatabase.MapLibrary.TryGetValue(this.normalize.RemoveSymbols(searchKey, this.normalize.SymbolsNoDash), out var song)) {
                     result.Add(song);
                     return result;
                 }

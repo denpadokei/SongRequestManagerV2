@@ -596,7 +596,7 @@ namespace SongRequestManagerV2.Bots
 
                     }
                 });
-                var _MyHintText = UIHelper.AddHintText(this.mybutton.transform as RectTransform, this.value);
+                var myHintText = UIHelper.AddHintText(this.mybutton.transform as RectTransform, this.value);
             }
         }
 

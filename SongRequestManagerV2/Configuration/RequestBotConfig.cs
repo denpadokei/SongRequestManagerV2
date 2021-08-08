@@ -40,7 +40,6 @@ namespace SongRequestManagerV2.Configuration
         public virtual bool LocalSearch { get; set; } = false;
         public virtual bool PPSearch { get; set; } = true;
         public virtual string AdditionalSongPath { get; set; } = "";
-        public virtual string LocalUserName { get; set; } = "";
         public virtual bool IsStartServer { get; set; } = false;
         public virtual int ReceivePort { get; set; } = 50001;
         public virtual bool IsSendBouyomi { get; set; } = false;
