@@ -2,6 +2,7 @@
 using HMUI;
 using IPA.Utilities;
 using SongCore;
+using SongRequestManagerV2.Configuration;
 using System;
 using System.Collections;
 using System.Collections.Generic;

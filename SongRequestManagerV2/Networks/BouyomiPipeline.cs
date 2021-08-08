@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SongRequestManagerV2.Configuration;
+using System;
 using System.ComponentModel;
 using UnityEngine;
 
@@ -23,12 +24,7 @@ namespace SongRequestManagerV2.Networks
         #region // パブリックメソッド
         public void Start()
         {
-            if (int.TryParse(RequestBotConfig.Instance.ReceivePort, out var port)) {
-                this._server.Port = port;
-            }
-            else {
-                this._server.Port = 50001;
-            }
+            this._server.Port = RequestBotConfig.Instance.ReceivePort;
             _ = this._server.RunServer();
         }
 
@@ -54,12 +50,7 @@ namespace SongRequestManagerV2.Networks
         {
             if (sender is Server server) {
                 if (args.PropertyName == nameof(server.ResBytes)) {
-                    if (int.TryParse(RequestBotConfig.Instance.SendPort, out var port)) {
-                        this._client.Port = port;
-                    }
-                    else {
-                        this._client.Port = 50005;
-                    }
+                    this._client.Port = RequestBotConfig.Instance.SendPort;
                     if (RequestBotConfig.Instance.IsSendBouyomi) {
                         _ = this._client.SendBouyomi(server.ResBytes);
                     }

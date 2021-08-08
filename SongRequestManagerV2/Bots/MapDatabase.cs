@@ -12,6 +12,7 @@ using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 using Zenject;
+using SongRequestManagerV2.Configuration;
 
 namespace SongRequestManagerV2.Bots
 {
@@ -47,7 +48,7 @@ namespace SongRequestManagerV2.Bots
             var result = new List<SongMap>();
 
             if (this.Bot.GetBeatSaverId(searchKey) != "") {
-                if (MapDatabase.MapLibrary.TryGetValue(this.normalize.RemoveSymbols(searchKey, this.normalize._SymbolsNoDash), out var song)) {
+                if (MapDatabase.MapLibrary.TryGetValue(this.normalize.RemoveSymbols(searchKey, this.normalize.SymbolsNoDash), out var song)) {
                     result.Add(song);
                     return result;
                 }
@@ -296,8 +297,8 @@ namespace SongRequestManagerV2.Bots
                 var di = new DirectoryInfo(folder);
                 FullDirList(di, "*");
 
-                if (RequestBotConfig.Instance.additionalsongpath != "") {
-                    di = new DirectoryInfo(RequestBotConfig.Instance.additionalsongpath);
+                if (RequestBotConfig.Instance.AdditionalSongPath != "") {
+                    di = new DirectoryInfo(RequestBotConfig.Instance.AdditionalSongPath);
                     FullDirList(di, "*");
                 }
 

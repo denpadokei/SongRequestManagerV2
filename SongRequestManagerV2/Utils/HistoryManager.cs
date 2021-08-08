@@ -15,6 +15,10 @@ namespace SongRequestManagerV2.Utils
 
         internal static void AddSong(SongRequest song)
         {
+            // WIPはプレイリストにいれなくていいと思いました。
+            if (song.IsWIP) {
+                return;
+            }
             var fileInfo = new FileInfo(PlaylistPath);
             if (!Directory.Exists(fileInfo.Directory.FullName)) {
                 Directory.CreateDirectory(fileInfo.Directory.FullName);
@@ -26,10 +30,10 @@ namespace SongRequestManagerV2.Utils
             {
                 songName = songObject["songName"].Value,
                 levelAuthorName = songObject["levelAuthorName"].Value,
-                key = songObject["id"].Value,
+                key = song.SongNode["id"].Value,
                 hash = version["hash"].Value.ToUpper(),
                 levelid = $"custom_level_{version["hash"].Value.ToUpper()}",
-                dateAdded = song._requestTime
+                dateAdded = song.RequestTime
             };
 
             var playlist = LoadPlaylist();

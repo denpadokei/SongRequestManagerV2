@@ -20,7 +20,7 @@ namespace SongRequestManagerV2.Models
 
         public ISRMCommand _botcmd = null;
 
-        public string _subparameter = "";
+        public string Subparameter { get; set; } = "";
         private const string notsubcommand = "NotSubcmd";
         [Inject]
         private readonly IChatManager _chatManager;
@@ -41,7 +41,7 @@ namespace SongRequestManagerV2.Models
             this.Parameter = state.Parameter;
             if (parameter != null)
                 this.Parameter = parameter;
-            this._subparameter = state._subparameter;
+            this.Subparameter = state.Subparameter;
             this.Command = state.Command;
             this.Info = state.Info;
             this.Sort = state.Sort;
@@ -67,7 +67,6 @@ namespace SongRequestManagerV2.Models
 
             if (this.Parameter.Length < 2)
                 return notsubcommand;
-
             var subcommandend = this.Parameter.IndexOfAny(new[] { ' ', '/' }, 1);
             if (subcommandend == -1)
                 subcommandend = this.Parameter.Length;
@@ -85,7 +84,7 @@ namespace SongRequestManagerV2.Models
 
             var subcommand = this.Parameter.Substring(commandstart, commandlength).ToLower();
 
-            this._subparameter = (subcommandsectionend - subcommandend > 0) ? this.Parameter.Substring(subcommandend, subcommandsectionend - subcommandend).Trim(' ') : "";
+            this.Subparameter = (subcommandsectionend - subcommandend > 0) ? this.Parameter.Substring(subcommandend, subcommandsectionend - subcommandend).Trim(' ') : "";
 
 
             if (!this._commandManager.Aliases.TryGetValue(subcommand, out var subcmd))

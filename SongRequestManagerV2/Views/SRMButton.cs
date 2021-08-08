@@ -7,6 +7,7 @@ using HMUI;
 using IPA.Utilities;
 using SongCore;
 using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.UI;
@@ -148,6 +149,10 @@ namespace SongRequestManagerV2.Views
             }
             catch (Exception e) {
                 Logger.Error(e);
+            }
+
+            if (RequestBotConfig.Instance.AutoOpenRequestQueue && !RequestBotConfig.Instance.RequestQueueOpen) {
+                RequestBotConfig.Instance.RequestQueueOpen = true;
             }
 
             this._bot.UpdateRequestUI();

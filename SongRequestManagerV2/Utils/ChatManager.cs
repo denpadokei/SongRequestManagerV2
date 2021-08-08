@@ -2,6 +2,7 @@
 using ChatCore.Interfaces;
 using ChatCore.Services;
 using ChatCore.Services.Twitch;
+using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Interfaces;
 using System;
 using System.Collections.Concurrent;

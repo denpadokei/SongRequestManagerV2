@@ -1,10 +1,14 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
+using SongBrowser.Internals;
+using SongRequestManagerV2.Configuration;
+using Zenject;
 
 namespace SongRequestManagerV2.Views
 {
     [HotReload]
-    public class SongRequestManagerSettings : BSMLAutomaticViewController
+    public class SongRequestManagerSettings : BSMLAutomaticViewController, IInitializable
     {
         public string ResourceName => "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml";
 
@@ -45,7 +49,7 @@ namespace SongRequestManagerV2.Views
         [UIValue("tts-support")]
         public bool TtsSupport
         {
-            get => RequestBotConfig.Instance.BotPrefix != "";
+            get => !string.IsNullOrEmpty(RequestBotConfig.Instance.BotPrefix);
             set => RequestBotConfig.Instance.BotPrefix = value ? "! " : "";
         }
 
@@ -124,5 +128,7 @@ namespace SongRequestManagerV2.Views
             get => RequestBotConfig.Instance.PPSearch;
             set => RequestBotConfig.Instance.PPSearch = value;
         }
+
+        public void Initialize() => BSMLSettings.instance.AddSettingsMenu("SRM V2", ResourceName, this);
     }
 }
