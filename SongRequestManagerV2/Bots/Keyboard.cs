@@ -17,7 +17,7 @@ using Image = UnityEngine.UI.Image;
 namespace SongRequestManagerV2.Bots
 {
     // Experimental chat console
-    public class KEYBOARD
+    public class Keyboard
     {
         public List<KEY> keys = new List<KEY>();
         private bool SabotageState = false;
@@ -186,7 +186,7 @@ namespace SongRequestManagerV2.Bots
 
         // Very basic parser for the keyboard grammar - no doubt can be improved. Tricky to implement because of special characters.
         // It might possible to make grep do this, but it would be even harder to read than this!
-        public KEYBOARD AddKeys(string Keyboard, float scale = 0.5f)
+        public Keyboard AddKeys(string Keyboard, float scale = 0.5f)
         {
             this.scale = scale;
             var space = true;
@@ -330,7 +330,7 @@ namespace SongRequestManagerV2.Bots
         }
 
         // Default actions may be called more than once. Make sure to only set any overrides that replace these AFTER all keys have been added
-        public KEYBOARD DefaultActions()
+        public Keyboard DefaultActions()
         {
             this.SetAction("SABOTAGE", this.SABOTAGE);
             this.SetAction("CLEAR", this.Clear);
@@ -341,12 +341,12 @@ namespace SongRequestManagerV2.Bots
             return this;
         }
 
-        public KEYBOARD()
+        public Keyboard()
         {
 
         }
 
-        public KEYBOARD Setup(RectTransform container, string DefaultKeyboard = QWERTY, bool EnableInputField = true, float x = 0, float y = 0)
+        public Keyboard Setup(RectTransform container, string DefaultKeyboard = QWERTY, bool EnableInputField = true, float x = 0, float y = 0)
         {
             this.EnableInputField = EnableInputField;
             this.container = container;
@@ -388,14 +388,14 @@ namespace SongRequestManagerV2.Bots
             return this;
         }
 
-        public KEYBOARD NextRow(float adjustx = 0)
+        public Keyboard NextRow(float adjustx = 0)
         {
             this.currentposition.y -= this.currentposition.x == this.baseposition.x ? 3 : 6; // Next row on an empty row only results in a half row advance
             this.currentposition.x = this.baseposition.x;
             return this;
         }
 
-        public KEYBOARD SetScale(float scale)
+        public Keyboard SetScale(float scale)
         {
             this.scale = scale;
             return this;
@@ -513,7 +513,7 @@ namespace SongRequestManagerV2.Bots
             public string value = "";
             public string shifted = "";
             public Button mybutton;
-            public KEYBOARD kb;
+            public Keyboard kb;
             public Action<KEY> keyaction = null;
 
             public KEY Set(string Value)
@@ -530,7 +530,7 @@ namespace SongRequestManagerV2.Bots
                 // This key is not intialized at all
             }
 
-            public KEY(KEYBOARD kb, Vector2 position, string text, float width, float height, Color color)
+            public KEY(Keyboard kb, Vector2 position, string text, float width, float height, Color color)
             {
                 this.value = text;
                 this.kb = kb;
@@ -600,7 +600,7 @@ namespace SongRequestManagerV2.Bots
             }
         }
 
-        public class KEYBOARDFactiry : PlaceholderFactory<KEYBOARD>
+        public class KEYBOARDFactiry : PlaceholderFactory<Keyboard>
         {
 
         }

@@ -9,7 +9,7 @@ namespace SongRequestManagerV2.Views
     public class KeyboardViewController : BSMLViewController
     {
         [Inject]
-        private readonly KEYBOARD.KEYBOARDFactiry _factiry;
+        private readonly Keyboard.KEYBOARDFactiry _factiry;
         [Inject]
         private readonly IRequestBot _bot;
 
@@ -28,7 +28,7 @@ namespace SongRequestManagerV2.Views
                 //mykeyboard.AddKeys(BOTKEYS, 0.4f);
                 RequestBot.AddKeyboard(mykeyboard, "emotes.kbd", 0.4f);
 #endif
-                mykeyboard.AddKeys(KEYBOARD.QWERTY); // You can replace this with DVORAK if you like
+                mykeyboard.AddKeys(Keyboard.QWERTY); // You can replace this with DVORAK if you like
                 mykeyboard.DefaultActions();
 
 #if UNRELEASED

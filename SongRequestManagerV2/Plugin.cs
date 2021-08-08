@@ -54,16 +54,9 @@ namespace SongRequestManagerV2
             }
 
             SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
-            BSEvents.lateMenuSceneLoadedFresh += this.BSEvents_lateMenuSceneLoadedFresh;
             // init sprites
             Base64Sprites.Init();
         }
-        /// <summary>
-        /// setup settings ui
-        /// </summary>
-        /// <param name="obj"></param>
-        private void BSEvents_lateMenuSceneLoadedFresh(ScenesTransitionSetupDataSO obj) => BSMLSettings.instance.AddSettingsMenu("SRM V2", "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml", BeatSaberUI.CreateViewController<SongRequestManagerSettings>());
-
         public static void SongBrowserCancelFilter()
         {
             if (SongBrowserPluginPresent) {
@@ -78,12 +71,20 @@ namespace SongRequestManagerV2
                 }
             }
         }
-
         [OnExit]
         public void OnExit()
         {
-            BSEvents.lateMenuSceneLoadedFresh -= this.BSEvents_lateMenuSceneLoadedFresh;
             this.IsApplicationExiting = true;
+            
+        }
+        [OnEnable]
+        public void OnEnabled()
+        {
+
+        }
+        [OnDisable]
+        public void OnDisabled()
+        {
             BouyomiPipeline.instance.Stop();
         }
     }

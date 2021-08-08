@@ -15,7 +15,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using VRUIControls;
 using Zenject;
-using KEYBOARD = SongRequestManagerV2.Bots.KEYBOARD;
+using Keyboard = SongRequestManagerV2.Bots.Keyboard;
 
 namespace SongRequestManagerV2.Views
 {
@@ -511,7 +511,7 @@ namespace SongRequestManagerV2.Views
         #region // メンバ変数
         private static readonly object _lockObject = new object();
         private bool confirmDialogActive = false;
-        private KEYBOARD CenterKeys;
+        private Keyboard CenterKeys;
 
         [UIComponent("request-list")]
         private readonly CustomCellListTableData _requestTable;
@@ -523,7 +523,7 @@ namespace SongRequestManagerV2.Views
         [Inject]
         protected PhysicsRaycasterWithCache _physicsRaycaster;
         [Inject]
-        private readonly KEYBOARD.KEYBOARDFactiry _factiry;
+        private readonly Keyboard.KEYBOARDFactiry _factiry;
         [Inject]
         private readonly IRequestBot _bot;
         [Inject]

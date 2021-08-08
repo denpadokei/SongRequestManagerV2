@@ -21,16 +21,22 @@ namespace SongRequestManagerV2.Utils
 
         public string RemoveSymbols(string text, char[] mask)
         {
-            var commands = text.Split(' ');
-            var sb = new StringBuilder();
-
-            foreach (var command in commands) {
-                if (string.IsNullOrEmpty(command) || command.First() == '!') {
-                    continue;
-                }
-                sb.Append(command);
+            var o = new StringBuilder(text.Length);
+            foreach (var c in text) {
+                if (c > 127 || mask[c] != ' ')
+                    o.Append(c);
             }
-            return sb.ToString();
+            return o.ToString();
+            //var commands = text.Split(' ');
+            //var sb = new StringBuilder();
+
+            //foreach (var command in commands) {
+            //    if (string.IsNullOrEmpty(command) || command.First() == '!') {
+            //        continue;
+            //    }
+            //    sb.Append(command);
+            //}
+            //return sb.ToString();
         }
 
         public string RemoveDirectorySymbols(string text)
