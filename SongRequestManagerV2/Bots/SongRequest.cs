@@ -75,7 +75,7 @@ namespace SongRequestManagerV2
         public bool IsWIP { get; private set; }
         public IChatUser _requestor;
         public DateTime RequestTime { get; private set; }
-        public RequestStatus _status;
+        public RequestStatus Status { get; set; }
         public string _requestInfo; // Contains extra song info, Like : Sub/Donation request, Deck pick, Empty Queue pick,Mapper request, etc.
         public string _songName;
         public string _authorName;
@@ -103,7 +103,7 @@ namespace SongRequestManagerV2
             this._songName = this.SongMetaData["songName"].Value;
             this._authorName = this.SongMetaData["levelAuthorName"].Value;
             this._requestor = requestor;
-            this._status = status;
+            this.Status = status;
             this.RequestTime = requestTime;
             this._requestInfo = requestInfo;
             var version = this.SongNode["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString());
@@ -157,7 +157,7 @@ namespace SongRequestManagerV2
                                     try {
                                         this._coverImage.enabled = false;
                                         var dt = this._textFactory.Create().AddSong(this.SongNode).AddUser(this._requestor); // Get basic fields
-                                        dt.Add("Status", this._status.ToString());
+                                        dt.Add("Status", this.Status.ToString());
                                         dt.Add("Info", (this._requestInfo != "") ? " / " + this._requestInfo : "");
                                         dt.Add("RequestTime", this.RequestTime.ToLocalTime().ToString("hh:mm"));
                                         this.AuthorName = dt.Parse(StringFormat.QueueListRow2);
@@ -212,7 +212,7 @@ namespace SongRequestManagerV2
         {
             try {
                 var obj = new JSONObject();
-                obj.Add("status", new JSONString(this._status.ToString()));
+                obj.Add("status", new JSONString(this.Status.ToString()));
                 obj.Add("requestInfo", new JSONString(this._requestInfo));
                 obj.Add("time", new JSONString(this.RequestTime.ToFileTime().ToString()));
                 obj.Add("requestor", JSON.Parse(this._requestor.ToJson().ToString()));

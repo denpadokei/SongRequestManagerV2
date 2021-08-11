@@ -243,7 +243,7 @@ namespace SongRequestManagerV2.Bots
         public void ClearSearches()
         {
             foreach (var item in RequestManager.RequestSongs) {
-                if (item is SongRequest request && request._status == RequestStatus.SongSearch) {
+                if (item is SongRequest request && request.Status == RequestStatus.SongSearch) {
                     this.DequeueRequest(request, false);
                 }
             }
@@ -727,7 +727,7 @@ namespace SongRequestManagerV2.Bots
         public void DequeueRequest(SongRequest request, bool updateUI = true)
         {
             try {
-                if (request._status != RequestStatus.Wrongsong && request._status != RequestStatus.SongSearch) {
+                if (request.Status != RequestStatus.Wrongsong && request.Status != RequestStatus.SongSearch) {
                     var reqs = new List<object>() { request };
                     var newList = reqs.Union(RequestManager.HistorySongs.ToArray());
                     RequestManager.HistorySongs.Clear();
@@ -773,7 +773,7 @@ namespace SongRequestManagerV2.Bots
             }
         }
 
-        public void SetRequestStatus(SongRequest request, RequestStatus status, bool fromHistory = false) => request._status = status;
+        public void SetRequestStatus(SongRequest request, RequestStatus status, bool fromHistory = false) => request.Status = status;
 
         public void Blacklist(SongRequest request, bool fromHistory, bool skip)
         {

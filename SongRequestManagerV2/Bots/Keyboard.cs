@@ -425,7 +425,7 @@ namespace SongRequestManagerV2.Bots
         private void ClearSearches()
         {
             foreach (var item in RequestManager.RequestSongs.GetConsumingEnumerable()) {
-                if (item is SongRequest entry && entry._status == RequestStatus.SongSearch) {
+                if (item is SongRequest entry && entry.Status == RequestStatus.SongSearch) {
                     this._bot.DequeueRequest(entry, false);
                 }
             }
