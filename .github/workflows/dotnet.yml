@@ -27,4 +27,3 @@ jobs:
         path: |
           SongRequestManagerV2/bin/Release/netstandard2.0/SongRequestManagerV2.dll
           SongRequestManagerV2/bin/Release/netstandard2.0/SongRequestManagerV2.pdb
-          SongRequestManagerV2/bin/Release/netstandard2.0/Sound/NotifySound.wav
