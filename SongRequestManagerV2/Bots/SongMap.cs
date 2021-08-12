@@ -25,13 +25,15 @@ namespace SongRequestManagerV2.Bots
 
         public static int HashCount { get; private set; } = 0;
 
-        private void IndexFields(bool Add, int id, params string[] parameters)
+        private void IndexFields(bool Add, string id, params string[] parameters)
         {
             foreach (var field in parameters) {
                 var parts = this._normalize.Split(field);
                 foreach (var part in parts) {
-                    if (part.Length < RequestBot.partialhash)
+                    if (part.Length < RequestBot.partialhash) {
                         this.UpdateSearchEntry(part, id, Add);
+                    }
+                        
                     for (var i = RequestBot.partialhash; i <= part.Length; i++) {
                         this.UpdateSearchEntry(part.Substring(0, i), id, Add);
                     }
@@ -39,7 +41,7 @@ namespace SongRequestManagerV2.Bots
             }
         }
 
-        private void UpdateSearchEntry(string key, int id, bool Add = true)
+        private void UpdateSearchEntry(string key, string id, bool Add = true)
         {
 
             if (Add)
@@ -47,17 +49,25 @@ namespace SongRequestManagerV2.Bots
             else
                 HashCount--;
 
-            if (Add)
+            if (Add) {
                 MapDatabase.SearchDictionary.AddOrUpdate(key, (k) =>
                 {
-                    var va = new HashSet<int>
+                    var va = new HashSet<string>
                     {
                         id
                     };
                     return va;
-                }, (k, va) => { va.Add(id); return va; });
+                },
+                (k, va) =>
+                {
+                    va.Add(id);
+                    return va;
+                });
+            }   
             else {
-                MapDatabase.SearchDictionary[key].Remove(id); // An empty keyword is fine, and actually uncommon
+                if (MapDatabase.SearchDictionary.TryRemove(key, out var result)) {
+                    result?.Remove(id); // An empty keyword is fine, and actually uncommon
+                }
             }
 
         }
@@ -133,7 +143,7 @@ namespace SongRequestManagerV2.Bots
             this.IndexSong(this.SongObject);
         }
 
-        private void UnIndexSong(int id)
+        private void UnIndexSong(string id)
         {
             var indexpp = (this.SongObject["pp"].AsFloat > 0) ? "PP" : "";
 
@@ -151,11 +161,11 @@ namespace SongRequestManagerV2.Bots
                 var info = song["srm_info"].AsObject;
                 var indexpp = (info["pp"].AsFloat > 0) ? "PP" : "";
 
-                var id = info["id"];
+                var id = info["id"].Value;
 
                 //Instance.QueueChatMessage($"id={song["id"].Value} = {id}");
 
-                this.IndexFields(true, id, info["songName"].Value, info["songSubName"].Value, info["songAuthorName"].Value, info["levelAuthorName"], indexpp, info["maptype"].Value);
+                this.IndexFields(true, id, info["songName"].Value, info["songSubName"].Value, info["songAuthorName"].Value, info["levelAuthorName"].Value, indexpp, info["maptype"].Value);
 
                 if (!string.IsNullOrEmpty(info["id"].Value)) {
                     MapDatabase.MapLibrary.AddOrUpdate(info["id"].Value, this, (key, value) => this);

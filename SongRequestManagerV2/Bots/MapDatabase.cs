@@ -20,7 +20,7 @@ namespace SongRequestManagerV2.Bots
     {
         public static ConcurrentDictionary<string, SongMap> MapLibrary { get; } = new ConcurrentDictionary<string, SongMap>();
         public static ConcurrentDictionary<string, SongMap> LevelId { get; } = new ConcurrentDictionary<string, SongMap>();
-        public static ConcurrentDictionary<string, HashSet<int>> SearchDictionary { get; } = new ConcurrentDictionary<string, HashSet<int>>();
+        public static ConcurrentDictionary<string, HashSet<string>> SearchDictionary { get; } = new ConcurrentDictionary<string, HashSet<string>>();
         public static ConcurrentDictionary<string, float> PPMap { get; } = new ConcurrentDictionary<string, float>();
 
         private static int tempid = 100000; // For now, we use these for local ID less songs
@@ -54,7 +54,7 @@ namespace SongRequestManagerV2.Bots
                 }
             }
 
-            var resultlist = new List<HashSet<int>>();
+            var resultlist = new List<HashSet<string>>();
 
             var SearchParts = this.normalize.Split(searchKey);
 
@@ -79,7 +79,7 @@ namespace SongRequestManagerV2.Bots
 
 
                 try {
-                    result.Add(MapDatabase.MapLibrary[map.ToString("x")]);
+                    result.Add(MapDatabase.MapLibrary[map]);
                 }
                 catch {
                     this._chatManager.QueueChatMessage($"map fail = {map}");
