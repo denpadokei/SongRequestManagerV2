@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SongRequestManagerV2.Models;
+using SongRequestManagerV2.Statics;
 using System;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,10 @@ namespace SongRequestManagerV2.Utils
         {
             // WIPはプレイリストにいれなくていいと思いました。
             if (song.IsWIP) {
+                return;
+            }
+            // !oopsと検索系は除外
+            if ((song.Status & (RequestStatus.Wrongsong | RequestStatus.SongSearch)) != 0) {
                 return;
             }
             var fileInfo = new FileInfo(PlaylistPath);

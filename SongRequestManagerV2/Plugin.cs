@@ -7,7 +7,6 @@ using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Installer;
 using SongRequestManagerV2.Installers;
 using SongRequestManagerV2.Networks;
-using SongRequestManagerV2.UI;
 using System;
 using System.IO;
 using System.Reflection;
