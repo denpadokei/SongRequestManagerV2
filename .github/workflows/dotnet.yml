@@ -20,6 +20,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet build --no-restore --configuration Release --no-restore
+      uses: actions/upload-artifact@v2
+      with:
+        name: SongRequestManagerV2
+        path: |
+          SongRequestManagerV2/bin/Release/netstandard2.0/SongRequestManagerV2.dll
+          SongRequestManagerV2/bin/Release/netstandard2.0/SongRequestManagerV2.pdb
+          SongRequestManagerV2/bin/Release/netstandard2.0/Sound/NotifySound.wav
