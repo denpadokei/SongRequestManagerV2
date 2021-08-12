@@ -237,7 +237,7 @@ namespace SongRequestManagerV2.Views
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #endif
                         //  WebClient.DownloadSong($"https://beatsaver.com{request.SongNode["downloadURL"].Value}", System.Threading.CancellationToken.None, this.DownloadProgress);
-                        var result = await request.DownloadZip(CancellationToken.None, DownloadProgress);
+                        var result = await request.DownloadZip(CancellationToken.None, this.DownloadProgress);
                         if (result == null) {
                             this.ChatManager.QueueChatMessage("beatsaver is down now.");
                         }

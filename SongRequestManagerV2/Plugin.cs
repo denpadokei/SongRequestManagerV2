@@ -1,7 +1,4 @@
-﻿using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.Settings;
-using BS_Utils.Utilities;
-using IPA;
+﻿using IPA;
 using IPA.Config.Stores;
 using IPA.Loader;
 using IPA.Utilities;
@@ -11,7 +8,6 @@ using SongRequestManagerV2.Installer;
 using SongRequestManagerV2.Installers;
 using SongRequestManagerV2.Networks;
 using SongRequestManagerV2.UI;
-using SongRequestManagerV2.Views;
 using System;
 using System.IO;
 using System.Reflection;
@@ -72,20 +68,13 @@ namespace SongRequestManagerV2
             }
         }
         [OnExit]
-        public void OnExit()
-        {
-            this.IsApplicationExiting = true;
-            
-        }
+        public void OnExit() => this.IsApplicationExiting = true;
         [OnEnable]
         public void OnEnabled()
         {
 
         }
         [OnDisable]
-        public void OnDisabled()
-        {
-            BouyomiPipeline.instance.Stop();
-        }
+        public void OnDisabled() => BouyomiPipeline.instance.Stop();
     }
 }

@@ -1,7 +1,8 @@
 ﻿using ChatCore.Interfaces;
-using SongRequestManagerV2.SimpleJSON;
 using SongRequestManagerV2.Bots;
+using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Interfaces;
+using SongRequestManagerV2.SimpleJSON;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;
@@ -13,7 +14,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Zenject;
-using SongRequestManagerV2.Configuration;
 
 namespace SongRequestManagerV2.Models
 {

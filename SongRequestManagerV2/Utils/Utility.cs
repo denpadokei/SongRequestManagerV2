@@ -1,12 +1,12 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Models.Twitch;
-using SongRequestManagerV2.SimpleJSON;
+using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Interfaces;
+using SongRequestManagerV2.SimpleJSON;
 using SongRequestManagerV2.Statics;
 using System;
 using System.IO;
 using System.Linq;
-using SongRequestManagerV2.Configuration;
 
 namespace SongRequestManagerV2.Utils
 {

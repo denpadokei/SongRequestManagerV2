@@ -670,7 +670,7 @@ namespace SongRequestManagerV2.Bots
                     this._textFactory.Create().AddSong(song).QueueMessage(StringFormat.AddSongToQueueText.ToString());
                 }
             }
-            catch(NullReferenceException nullex) {
+            catch (NullReferenceException nullex) {
                 Logger.Error(nullex);
                 Logger.Error(nullex.Message);
                 Logger.Error(nullex.StackTrace);
@@ -903,7 +903,7 @@ namespace SongRequestManagerV2.Bots
                 return this.ChatManager.TwitchService?.LoggedInUser;
             }
             else {
-                
+
                 var obj = new
                 {
                     Id = CurrentUser.platformUserId,
@@ -1558,7 +1558,7 @@ namespace SongRequestManagerV2.Bots
                 this.UpdateRequestUI();
                 this.RefreshSongQuere();
                 this.RefreshQueue = true;
-                
+
             }
             Logger.Debug($"Total songs : {totalSongs}");
         }
@@ -1983,7 +1983,7 @@ namespace SongRequestManagerV2.Bots
                 if (song != null) {
                     var json = song.SongMetaData;
                     this._textFactory.Create().AddSong(json).QueueMessage(StringFormat.LinkSonglink.ToString());
-                }   
+                }
             }
             catch (Exception ex) {
                 Logger.Error(ex);

@@ -1,11 +1,11 @@
-﻿using SongRequestManagerV2.SimpleJSON;
-using SongRequestManagerV2.Interfaces;
+﻿using SongRequestManagerV2.Interfaces;
+using SongRequestManagerV2.SimpleJSON;
+using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
-using Zenject;
 using System.Linq;
-using SongRequestManagerV2.Statics;
+using Zenject;
 
 namespace SongRequestManagerV2.Bots
 {
@@ -18,7 +18,7 @@ namespace SongRequestManagerV2.Bots
 
         public JSONObject SongObject { get; set; }
         public JSONObject SongVersion { get; private set; }
-        public JSONObject SRMInfo => SongObject["srm_info"].AsObject;
+        public JSONObject SRMInfo => this.SongObject["srm_info"].AsObject;
         public string Path { get; set; }
         public string LevelId { get; set; }
         public float PP { get; set; } = 0;

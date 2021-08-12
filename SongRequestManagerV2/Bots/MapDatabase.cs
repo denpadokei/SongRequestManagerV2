@@ -1,6 +1,7 @@
-﻿using SongRequestManagerV2.SimpleJSON;
+﻿using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
+using SongRequestManagerV2.SimpleJSON;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Concurrent;
@@ -12,7 +13,6 @@ using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 using Zenject;
-using SongRequestManagerV2.Configuration;
 
 namespace SongRequestManagerV2.Bots
 {
