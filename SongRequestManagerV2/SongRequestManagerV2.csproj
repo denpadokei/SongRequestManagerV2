@@ -8,6 +8,8 @@
     <AssemblyName>SongRequestManagerV2</AssemblyName>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Version>6.0.1</Version>
+    <AssemblyVersion>6.0.1</AssemblyVersion>
+    <FileVersion>6.0.1</FileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$(DefineConstants.Contains('CIBuild')) OR '$(NCrunch)' == '1'">
     <DisableCopyToPlugins>True</DisableCopyToPlugins>
@@ -195,8 +197,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
-    <None Include="packages.config" />
-    <None Include="SongRequestManagerV2.csproj.user"/>
+    <None Include="SongRequestManagerV2.csproj.user" />
     <EmbeddedResource Include="Views\SongRequestManagerSettings.bsml" />
     <EmbeddedResource Include="Views\SRMButton.bsml" />
     <EmbeddedResource Include="Views\RequestBotListView.bsml" />
@@ -212,8 +213,5 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-  <PropertyGroup>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-  </PropertyGroup>
   <ProjectExtensions />
 </Project>
