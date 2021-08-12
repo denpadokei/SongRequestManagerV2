@@ -160,11 +160,7 @@ namespace SongRequestManagerV2.Bots
                 }
                 var info = song["srm_info"].AsObject;
                 var indexpp = (info["pp"].AsFloat > 0) ? "PP" : "";
-
                 var id = info["id"].Value;
-
-                //Instance.QueueChatMessage($"id={song["id"].Value} = {id}");
-
                 this.IndexFields(true, id, info["songName"].Value, info["songSubName"].Value, info["songAuthorName"].Value, info["levelAuthorName"].Value, indexpp, info["maptype"].Value);
 
                 if (!string.IsNullOrEmpty(info["id"].Value)) {
