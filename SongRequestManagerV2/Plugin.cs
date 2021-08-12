@@ -24,11 +24,11 @@ namespace SongRequestManagerV2
         private static PluginMetadata _meta;
 
         public static IPALogger Logger { get; private set; }
-        public bool IsApplicationExiting = false;
+        public bool IsApplicationExiting { get; set; } = false;
         public static Plugin Instance { get; private set; }
 
         public static string DataPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "UserData", "Song Request ManagerV2");
-        public static bool SongBrowserPluginPresent;
+        public static bool SongBrowserPluginPresent { get; set; }
 
         [Init]
         public void Init(IPALogger log, IPA.Config.Config config, PluginMetadata meta, Zenjector zenjector)
@@ -39,7 +39,7 @@ namespace SongRequestManagerV2
             Logger.Debug("Logger initialized.");
             RequestBotConfig.Instance = config.Generated<RequestBotConfig>();
             zenjector.OnApp<SRMAppInstaller>();
-            zenjector.OnMenu<SRMInstaller>();
+            zenjector.OnMenu<SRMMenuInstaller>();
         }
 
         [OnStart]
@@ -48,10 +48,7 @@ namespace SongRequestManagerV2
             if (!Directory.Exists(DataPath)) {
                 Directory.CreateDirectory(DataPath);
             }
-
             SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
-            // init sprites
-            Base64Sprites.Init();
         }
         public static void SongBrowserCancelFilter()
         {
