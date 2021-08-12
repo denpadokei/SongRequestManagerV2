@@ -21,8 +21,3 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore --configuration Release --no-restore
-      with:
-        name: SongRequestManagerV2
-        path: |
-          SongRequestManagerV2/bin/Release/netstandard2.0/SongRequestManagerV2.dll
-          SongRequestManagerV2/bin/Release/netstandard2.0/SongRequestManagerV2.pdb
