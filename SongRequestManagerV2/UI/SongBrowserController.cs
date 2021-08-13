@@ -4,15 +4,13 @@ using SongBrowser;
 using SongBrowser.DataAccess;
 using SongBrowser.UI;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SongRequestManagerV2.UI
 {
     public class SongBrowserController
     {
         public static bool SongBrowserPluginPresent { get; private set; }
-        private static PluginMetadata _songBrowserMetaData;
+        private static readonly PluginMetadata _songBrowserMetaData;
 
         static SongBrowserController()
         {

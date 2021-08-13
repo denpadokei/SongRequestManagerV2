@@ -746,7 +746,7 @@ namespace SongRequestManagerV2.Bots
                 if (!RequestBotConfig.Instance.LimitUserRequestsToSession) {
                     if (RequestTracker.ContainsKey(request._requestor.Id)) {
                         RequestTracker[request._requestor.Id].numRequests--;
-                    }   
+                    }
                 }
             }
             catch (Exception e) {

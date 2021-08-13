@@ -41,7 +41,7 @@ namespace SongRequestManagerV2.Views
         [Inject]
         private readonly IRequestBot _bot;
         [Inject]
-        private IChatManager _chatManager;
+        private readonly IChatManager _chatManager;
         [Inject]
         private readonly DynamicText.DynamicTextFactory _textFactory;
         [Inject]
@@ -133,19 +133,19 @@ namespace SongRequestManagerV2.Views
             this.DownloadProgress.ProgressChanged += this.Progress_ProgressChanged;
             SceneManager.activeSceneChanged += this.SceneManager_activeSceneChanged;
             try {
-                _rootScreenGo = new GameObject("SRMButton", typeof(CanvasScaler), typeof(RectMask2D), typeof(VRGraphicRaycaster), typeof(CurvedCanvasSettings));
-                _rootScreenGo.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", BeatSaberUI.PhysicsRaycasterWithCache);
-                var vertical = _rootScreenGo.AddComponent<VerticalLayoutGroup>();
+                this._rootScreenGo = new GameObject("SRMButton", typeof(CanvasScaler), typeof(RectMask2D), typeof(VRGraphicRaycaster), typeof(CurvedCanvasSettings));
+                this._rootScreenGo.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", BeatSaberUI.PhysicsRaycasterWithCache);
+                var vertical = this._rootScreenGo.AddComponent<VerticalLayoutGroup>();
                 var fitter = vertical.gameObject.AddComponent<ContentSizeFitter>();
                 fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
                 fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-                (_rootScreenGo.transform as RectTransform).sizeDelta = new Vector2(40f, 30f);
-                (_rootScreenGo.transform as RectTransform).SetParent(this.levelCollectionNavigationController.transform as RectTransform, false);
-                (_rootScreenGo.transform as RectTransform).anchoredPosition = new Vector2(70f, 80f);
-                _rootScreenGo.transform.localScale = Vector3.one * 2;
+                (this._rootScreenGo.transform as RectTransform).sizeDelta = new Vector2(40f, 30f);
+                (this._rootScreenGo.transform as RectTransform).SetParent(this.levelCollectionNavigationController.transform as RectTransform, false);
+                (this._rootScreenGo.transform as RectTransform).anchoredPosition = new Vector2(70f, 80f);
+                this._rootScreenGo.transform.localScale = Vector3.one * 2;
                 if (this._button == null) {
-                    this._button = UIHelper.CreateUIButton((_rootScreenGo.transform as RectTransform), "CancelButton", Vector2.zero, Vector2.zero, this.Action, "OPEN", null) as NoTransitionsButton;
+                    this._button = UIHelper.CreateUIButton((this._rootScreenGo.transform as RectTransform), "CancelButton", Vector2.zero, Vector2.zero, this.Action, "OPEN", null) as NoTransitionsButton;
                 }
             }
             catch (Exception e) {

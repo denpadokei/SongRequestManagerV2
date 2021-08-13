@@ -33,7 +33,7 @@ namespace SongRequestManagerV2.Bots
                     if (part.Length < RequestBot.partialhash) {
                         this.UpdateSearchEntry(part, id, Add);
                     }
-                        
+
                     for (var i = RequestBot.partialhash; i <= part.Length; i++) {
                         this.UpdateSearchEntry(part.Substring(0, i), id, Add);
                     }
@@ -63,7 +63,7 @@ namespace SongRequestManagerV2.Bots
                     va.Add(id);
                     return va;
                 });
-            }   
+            }
             else {
                 if (MapDatabase.SearchDictionary.TryRemove(key, out var result)) {
                     result?.Remove(id); // An empty keyword is fine, and actually uncommon

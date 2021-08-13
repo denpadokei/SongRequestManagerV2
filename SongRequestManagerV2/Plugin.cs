@@ -1,7 +1,6 @@
 ﻿using IPA;
 using IPA.Config.Stores;
 using IPA.Loader;
-using IPA.Utilities;
 using SiraUtil.Zenject;
 using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Installer;
@@ -47,9 +46,9 @@ namespace SongRequestManagerV2
             if (!Directory.Exists(DataPath)) {
                 Directory.CreateDirectory(DataPath);
             }
-            
+
         }
-        
+
         [OnExit]
         public void OnExit() => this.IsApplicationExiting = true;
         [OnEnable]
