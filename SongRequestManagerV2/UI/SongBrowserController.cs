@@ -24,6 +24,9 @@ namespace SongRequestManagerV2.UI
                 if (!SongBrowserPluginPresent) {
                     return;
                 }
+                if (_songBrowserMetaData.HVersion.Major != 6) {
+                    return;
+                }
                 var songBrowserUI = SongBrowserApplication.Instance.GetField<SongBrowserUI, SongBrowserApplication>("_songBrowserUI");
                 if (songBrowserUI) {
                     if (songBrowserUI.Model.Settings.filterMode != SongFilterMode.None

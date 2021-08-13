@@ -20,14 +20,11 @@ namespace SongRequestManagerV2
         public static string Version => _meta.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         private static PluginMetadata _meta;
-
         public static IPALogger Logger { get; private set; }
         public bool IsApplicationExiting { get; set; } = false;
         public static Plugin Instance { get; private set; }
 
         public static string DataPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "UserData", "Song Request ManagerV2");
-        public static bool SongBrowserPluginPresent { get; set; }
-
         [Init]
         public void Init(IPALogger log, IPA.Config.Config config, PluginMetadata meta, Zenjector zenjector)
         {
