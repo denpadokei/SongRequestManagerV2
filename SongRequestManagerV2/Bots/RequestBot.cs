@@ -890,12 +890,13 @@ namespace SongRequestManagerV2.Bots
                 return this.ChatManager.TwitchService?.LoggedInUser;
             }
             else {
+                var isInit = CurrentUser != null;
 
                 var obj = new
                 {
-                    Id = CurrentUser.platformUserId,
-                    UserName = CurrentUser.userName,
-                    DisplayName = CurrentUser.userName,
+                    Id = isInit ? CurrentUser.platformUserId : "",
+                    UserName = isInit ? CurrentUser.userName : "",
+                    DisplayName = isInit ? CurrentUser.userName : "",
                     Color = "#FFFFFFFF",
                     IsBroadcaster = true,
                     IsModerator = false,
