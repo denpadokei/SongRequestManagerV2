@@ -1,10 +1,5 @@
-﻿using IPA.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SongRequestManagerV2.Extentions
 {
@@ -22,7 +17,7 @@ namespace SongRequestManagerV2.Extentions
         /// <exception cref="T:System.MissingMethodException">if <paramref name="methodName" /> does not exist on <typeparamref name="T" /></exception>
         public static void InvokeMethod<T>(this T obj, string methodName, params object[] args)
         {
-            MethodInfo method = typeof(T).GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            var method = typeof(T).GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (method == null) {
                 throw new MissingMethodException("Method " + methodName + " does not exist", "methodName");
             }

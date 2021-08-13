@@ -1,7 +1,6 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
-using SongBrowser.Internals;
 using SongRequestManagerV2.Configuration;
 using Zenject;
 
@@ -129,6 +128,6 @@ namespace SongRequestManagerV2.Views
             set => RequestBotConfig.Instance.PPSearch = value;
         }
 
-        public void Initialize() => BSMLSettings.instance.AddSettingsMenu("SRM V2", ResourceName, this);
+        public void Initialize() => BSMLSettings.instance.AddSettingsMenu("SRM V2", this.ResourceName, this);
     }
 }

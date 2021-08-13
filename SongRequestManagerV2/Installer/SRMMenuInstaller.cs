@@ -5,7 +5,7 @@ using Zenject;
 
 namespace SongRequestManagerV2.Installers
 {
-    public class SRMInstaller : MonoInstaller
+    public class SRMMenuInstaller : MonoInstaller
     {
         public override void InstallBindings()
         {

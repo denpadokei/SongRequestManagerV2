@@ -44,7 +44,7 @@ namespace SongRequestManagerV2.Views
                 mykeyboard.SetAction("SEARCH", this._bot.Search);
                 mykeyboard.SetAction("RANKED", this._bot.PP);
                 mykeyboard.SetAction("NEWEST", this._bot.Newest);
-                
+
 
 
 #if UNRELEASED

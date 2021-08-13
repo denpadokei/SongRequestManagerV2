@@ -1,17 +1,11 @@
-﻿using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.Settings;
-using BS_Utils.Utilities;
-using IPA;
+﻿using IPA;
 using IPA.Config.Stores;
 using IPA.Loader;
-using IPA.Utilities;
 using SiraUtil.Zenject;
 using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Installer;
 using SongRequestManagerV2.Installers;
 using SongRequestManagerV2.Networks;
-using SongRequestManagerV2.UI;
-using SongRequestManagerV2.Views;
 using System;
 using System.IO;
 using System.Reflection;
@@ -26,14 +20,11 @@ namespace SongRequestManagerV2
         public static string Version => _meta.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         private static PluginMetadata _meta;
-
         public static IPALogger Logger { get; private set; }
-        public bool IsApplicationExiting = false;
+        public bool IsApplicationExiting { get; set; } = false;
         public static Plugin Instance { get; private set; }
 
         public static string DataPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "UserData", "Song Request ManagerV2");
-        public static bool SongBrowserPluginPresent;
-
         [Init]
         public void Init(IPALogger log, IPA.Config.Config config, PluginMetadata meta, Zenjector zenjector)
         {
@@ -43,7 +34,7 @@ namespace SongRequestManagerV2
             Logger.Debug("Logger initialized.");
             RequestBotConfig.Instance = config.Generated<RequestBotConfig>();
             zenjector.OnApp<SRMAppInstaller>();
-            zenjector.OnMenu<SRMInstaller>();
+            zenjector.OnMenu<SRMMenuInstaller>();
         }
 
         [OnStart]
@@ -53,39 +44,16 @@ namespace SongRequestManagerV2
                 Directory.CreateDirectory(DataPath);
             }
 
-            SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
-            // init sprites
-            Base64Sprites.Init();
         }
-        public static void SongBrowserCancelFilter()
-        {
-            if (SongBrowserPluginPresent) {
-                var songBrowserUI = SongBrowser.SongBrowserApplication.Instance.GetField<SongBrowser.UI.SongBrowserUI, SongBrowser.SongBrowserApplication>("_songBrowserUI");
-                if (songBrowserUI) {
-                    if (songBrowserUI.Model.Settings.filterMode != SongBrowser.DataAccess.SongFilterMode.None && songBrowserUI.Model.Settings.sortMode != SongBrowser.DataAccess.SongSortMode.Original) {
-                        songBrowserUI.CancelFilter();
-                    }
-                }
-                else {
-                    Logger.Debug("There was a problem obtaining SongBrowserUI object, unable to reset filters");
-                }
-            }
-        }
+
         [OnExit]
-        public void OnExit()
-        {
-            this.IsApplicationExiting = true;
-            
-        }
+        public void OnExit() => this.IsApplicationExiting = true;
         [OnEnable]
         public void OnEnabled()
         {
 
         }
         [OnDisable]
-        public void OnDisabled()
-        {
-            BouyomiPipeline.instance.Stop();
-        }
+        public void OnDisabled() => BouyomiPipeline.instance.Stop();
     }
 }

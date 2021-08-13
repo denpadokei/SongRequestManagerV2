@@ -23,6 +23,7 @@ using System.Timers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
+using System.Web;
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -36,13 +37,7 @@ namespace SongRequestManagerV2.Bots
     internal class RequestBot : BindableBase, IRequestBot, IInitializable, IDisposable
     {
         public static Dictionary<string, RequestUserTracker> RequestTracker { get; } = new Dictionary<string, RequestUserTracker>();
-        //private ChatServiceMultiplexer _chatService { get; set; }
-
-        //SpeechSynthesizer synthesizer = new SpeechSynthesizer();
-        //synthesizer.Volume = 100;  // 0...100
-        //    synthesizer.Rate = -2;     // -10...10
         public bool RefreshQueue { get; private set; } = false;
-
         private readonly bool _mapperWhitelist = false; // BUG: Need to clean these up a bit.
         private bool _isGameCore = false;
 
@@ -57,10 +52,10 @@ namespace SongRequestManagerV2.Bots
         private static StringListManager Whitelist = new StringListManager();
         private static StringListManager BlockedUser = new StringListManager();
 
-        private static readonly string duplicatelist = "duplicate.list"; // BUG: Name of the list, needs to use a different interface for this.
-        private static readonly string banlist = "banlist.unique"; // BUG: Name of the list, needs to use a different interface for this.
-        private static readonly string _whitelist = "whitelist.unique"; // BUG: Name of the list, needs to use a different interface for this.
-        private static readonly string _blockeduser = "blockeduser.unique";
+        private const string duplicatelist = "duplicate.list"; // BUG: Name of the list, needs to use a different interface for this.
+        private const string banlist = "banlist.unique"; // BUG: Name of the list, needs to use a different interface for this.
+        private const string whitelist = "whitelist.unique"; // BUG: Name of the list, needs to use a different interface for this.
+        private const string blockeduser = "blockeduser.unique";
 
         private static readonly Dictionary<string, string> songremap = new Dictionary<string, string>();
         public static Dictionary<string, string> deck = new Dictionary<string, string>(); // deck name/content
@@ -467,8 +462,6 @@ namespace SongRequestManagerV2.Bots
             }
         }
 
-
-        // if (!silence) this.ChatManager.QueueChatMessage($"{request.Key.song["songName"].Value}/{request.Key.song["songAuthorName"].Value} ({songId}) added to the blacklist.");
         private void SendChatMessage(string message)
         {
             try {
@@ -670,7 +663,7 @@ namespace SongRequestManagerV2.Bots
                     this._textFactory.Create().AddSong(song).QueueMessage(StringFormat.AddSongToQueueText.ToString());
                 }
             }
-            catch(NullReferenceException nullex) {
+            catch (NullReferenceException nullex) {
                 Logger.Error(nullex);
                 Logger.Error(nullex.Message);
                 Logger.Error(nullex.StackTrace);
@@ -727,15 +720,13 @@ namespace SongRequestManagerV2.Bots
         public void DequeueRequest(SongRequest request, bool updateUI = true)
         {
             try {
-                if (request.Status != RequestStatus.Wrongsong && request.Status != RequestStatus.SongSearch) {
+                // Wrong song requests are not logged into history, is it possible that other status states shouldn't be moved either?
+                if ((request.Status & (RequestStatus.Wrongsong | RequestStatus.SongSearch)) == 0) {
                     var reqs = new List<object>() { request };
                     var newList = reqs.Union(RequestManager.HistorySongs.ToArray());
                     RequestManager.HistorySongs.Clear();
                     RequestManager.HistorySongs.AddRange(newList);
-                    // Wrong song requests are not logged into history, is it possible that other status states shouldn't be moved either?
                 }
-
-
                 if (RequestManager.HistorySongs.Count > RequestBotConfig.Instance.RequestHistoryLimit) {
                     var diff = RequestManager.HistorySongs.Count - RequestBotConfig.Instance.RequestHistoryLimit;
                     var songs = RequestManager.HistorySongs.ToList();
@@ -748,18 +739,14 @@ namespace SongRequestManagerV2.Bots
                 RequestManager.RequestSongs.Clear();
                 RequestManager.RequestSongs.AddRange(requests);
                 this._requestManager.WriteHistory();
-
                 HistoryManager.AddSong(request);
                 this._requestManager.WriteRequest();
-
                 this.CurrentSong = null;
-
-
                 // Decrement the requestors request count, since their request is now out of the queue
-
                 if (!RequestBotConfig.Instance.LimitUserRequestsToSession) {
-                    if (RequestTracker.ContainsKey(request._requestor.Id))
+                    if (RequestTracker.ContainsKey(request._requestor.Id)) {
                         RequestTracker[request._requestor.Id].numRequests--;
+                    }
                 }
             }
             catch (Exception e) {
@@ -903,12 +890,13 @@ namespace SongRequestManagerV2.Bots
                 return this.ChatManager.TwitchService?.LoggedInUser;
             }
             else {
-                
+                var isInit = CurrentUser != null;
+
                 var obj = new
                 {
-                    Id = CurrentUser.platformUserId,
-                    UserName = CurrentUser.userName,
-                    DisplayName = CurrentUser.userName,
+                    Id = isInit ? CurrentUser.platformUserId : "",
+                    UserName = isInit ? CurrentUser.userName : "",
+                    DisplayName = isInit ? CurrentUser.userName : "",
                     Color = "#FFFFFFFF",
                     IsBroadcaster = true,
                     IsModerator = false,
@@ -926,7 +914,7 @@ namespace SongRequestManagerV2.Bots
                 return;
             }
 
-            if (!string.IsNullOrEmpty(user.Id) && this.ListCollectionManager.Contains(_blockeduser, user.Id.ToLower())) {
+            if (!string.IsNullOrEmpty(user.Id) && this.ListCollectionManager.Contains(blockeduser, user.Id.ToLower())) {
                 return;
             }
 
@@ -946,11 +934,6 @@ namespace SongRequestManagerV2.Bots
         #region ChatCommand
         // BUG: This one needs to be cleaned up a lot imo
         // BUG: This file needs to be split up a little, but not just yet... Its easier for me to move around in one massive file, since I can see the whole thing at once. 
-
-
-
-
-
         #region Utility functions
         public static int MaximumTwitchMessageLength => 498 - RequestBotConfig.Instance.BotPrefix.Length;
 
@@ -1042,7 +1025,7 @@ namespace SongRequestManagerV2.Bots
             if (filter.HasFlag(SongFilter.Duplicate) && this.ListCollectionManager.Contains(duplicatelist, songid))
                 return fast ? "X" : $"{metadata["songName"].Value} by  {metadata["levelAuthorName"].Value} already requested this session!";
 
-            if (this.ListCollectionManager.Contains(_whitelist, songid))
+            if (this.ListCollectionManager.Contains(whitelist, songid))
                 return "";
 
             if (filter.HasFlag(SongFilter.Duration) && metadata["duration"].AsFloat > RequestBotConfig.Instance.MaximumSongLength * 60)
@@ -1558,7 +1541,7 @@ namespace SongRequestManagerV2.Bots
                 this.UpdateRequestUI();
                 this.RefreshSongQuere();
                 this.RefreshQueue = true;
-                
+
             }
             Logger.Debug($"Total songs : {totalSongs}");
         }
@@ -1575,7 +1558,7 @@ namespace SongRequestManagerV2.Bots
             //state.msg($"Flags: {state.flags}");
             // MaxiumAddScanRange
             while (offset < RequestBotConfig.Instance.MaxiumScanRange) {
-                var requestUrl = !string.IsNullOrEmpty(id) ? $"{BEATMAPS_API_ROOT_URL}/maps/id/{this.Normalize.RemoveSymbols(state.Parameter, this.Normalize.SymbolsNoDash)}" : $"{BEATMAPS_API_ROOT_URL}/search/text/0?sortOrder=Latest";
+                var requestUrl = !string.IsNullOrEmpty(id) ? $"{BEATMAPS_API_ROOT_URL}/maps/id/{this.Normalize.RemoveSymbols(state.Parameter, this.Normalize.SymbolsNoDash)}" : $"{BEATMAPS_API_ROOT_URL}/search/text/0?q={HttpUtility.UrlEncode(this.Normalize.RemoveSymbols(state.Parameter, this.Normalize.SymbolsNoDash))}&sortOrder=Relevance";
                 var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
                 if (resp.IsSuccessStatusCode) {
@@ -1628,10 +1611,12 @@ namespace SongRequestManagerV2.Bots
         // General search version
         public async Task Addsongs(ParseState state)
         {
-
             var id = this.GetBeatSaverId(state.Parameter);
-            var requestUrl = (id != "") ? $"{BEATMAPS_API_ROOT_URL}/maps/id/{this.Normalize.RemoveSymbols(state.Parameter, this.Normalize.SymbolsNoDash)}" : $"{BEATMAPS_API_ROOT_URL}/search/text/0?q={state.Request}&sortOrder=Latest";
-
+            Logger.Debug($"beat saver id : {id}");
+            var requestUrl = (id != "") ? $"{BEATMAPS_API_ROOT_URL}/maps/id/{this.Normalize.RemoveSymbols(state.Parameter, this.Normalize.SymbolsNoDash)}" : $"{BEATMAPS_API_ROOT_URL}/search/text/0?q={HttpUtility.UrlEncode(this.Normalize.RemoveSymbols(state.Parameter, this.Normalize.SymbolsNoDash))}&sortOrder=Relevance";
+            Logger.Debug($"{state.Parameter}");
+            Logger.Debug($"{state.Request}");
+            Logger.Debug($"{requestUrl}");
             var errorMessage = "";
 
             if (RequestBotConfig.Instance.OfflineMode)
@@ -1656,7 +1641,7 @@ namespace SongRequestManagerV2.Bots
             if (state.Flags.HasFlag(CmdFlags.NoFilter))
                 filter = SongFilter.Queue;
             var songs = this.GetSongListFromResults(result, state.Parameter, ref errorMessage, filter, state.Sort != "" ? state.Sort : StringFormat.LookupSortOrder.ToString(), -1);
-
+            Logger.Debug($"error msg : {errorMessage}");
             foreach (var entry in songs) {
                 this.QueueSong(state, entry);
             }
@@ -1983,7 +1968,7 @@ namespace SongRequestManagerV2.Bots
                 if (song != null) {
                     var json = song.SongMetaData;
                     this._textFactory.Create().AddSong(json).QueueMessage(StringFormat.LinkSonglink.ToString());
-                }   
+                }
             }
             catch (Exception ex) {
                 Logger.Error(ex);
@@ -2267,8 +2252,8 @@ namespace SongRequestManagerV2.Bots
                 // Add query results to out song database.
                 if (result["docs"].IsArray) {
                     var downloadedsongs = result["docs"].AsArray;
-                    foreach (JSONObject currentSong in downloadedsongs.Children) {
-                        this._songMapFactory.Create(currentSong);
+                    foreach (var currentSong in downloadedsongs.Children) {
+                        this._songMapFactory.Create(currentSong.AsObject);
                     }
                 }
                 else {
