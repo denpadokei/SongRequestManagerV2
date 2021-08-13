@@ -92,6 +92,7 @@ namespace SongRequestManagerV2.Views
 
         internal void SetButtonColor()
         {
+            ImageView underLine = null;
             if (DateTime.Now.Month == 4 && DateTime.Now.Day == 1) {
                 if (RequestManager.RequestSongs.Any()) {
                     Dispatcher.RunCoroutine(this.ChangeButtonColor());
@@ -99,12 +100,18 @@ namespace SongRequestManagerV2.Views
                 else {
                     this.isChangeing = false;
                     var color = Color.red;
-                    this._button.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = color;
+                    underLine = this._button.GetComponentsInChildren<ImageView>(true).FirstOrDefault(x => x.name == "Underline");
+                    if (underLine != null) {
+                        underLine.color = color;
+                    }
                 }
             }
             else {
                 var color = RequestManager.RequestSongs.Any() ? Color.green : Color.red;
-                this._button.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = color;
+                underLine = this._button.GetComponentsInChildren<ImageView>(true).FirstOrDefault(x => x.name == "Underline");
+                if (underLine != null) {
+                    underLine.color = color;
+                }
             }
             this._button.interactable = true;
         }
@@ -332,11 +339,12 @@ namespace SongRequestManagerV2.Views
                 var green = UnityEngine.Random.Range(0f, 1f);
                 var blue = UnityEngine.Random.Range(0f, 1f);
                 var color = new Color(red, green, blue);
-                this._button.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = color;
+                var underLine = this._button.GetComponentsInChildren<ImageView>(true).FirstOrDefault(x => x.name == "Underline");
+                if (underLine != null) {
+                    underLine.color = color;
+                }
                 yield return this.waitForSeconds;
             }
         }
-
-
     }
 }
