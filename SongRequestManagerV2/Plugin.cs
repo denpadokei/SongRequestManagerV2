@@ -47,22 +47,9 @@ namespace SongRequestManagerV2
             if (!Directory.Exists(DataPath)) {
                 Directory.CreateDirectory(DataPath);
             }
-            SongBrowserPluginPresent = PluginManager.GetPlugin("Song Browser") != null;
+            
         }
-        public static void SongBrowserCancelFilter()
-        {
-            if (SongBrowserPluginPresent) {
-                var songBrowserUI = SongBrowser.SongBrowserApplication.Instance.GetField<SongBrowser.UI.SongBrowserUI, SongBrowser.SongBrowserApplication>("_songBrowserUI");
-                if (songBrowserUI) {
-                    if (songBrowserUI.Model.Settings.filterMode != SongBrowser.DataAccess.SongFilterMode.None && songBrowserUI.Model.Settings.sortMode != SongBrowser.DataAccess.SongSortMode.Original) {
-                        songBrowserUI.CancelFilter();
-                    }
-                }
-                else {
-                    Logger.Debug("There was a problem obtaining SongBrowserUI object, unable to reset filters");
-                }
-            }
-        }
+        
         [OnExit]
         public void OnExit() => this.IsApplicationExiting = true;
         [OnEnable]

@@ -37,20 +37,18 @@ namespace SongRequestManagerV2.Views
         [Inject]
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
         [Inject]
-        private readonly LevelSelectionNavigationController levelSelectionNavigationController;
-        [Inject]
         private readonly RequestFlowCoordinator _requestFlow;
         [Inject]
         private readonly IRequestBot _bot;
         [Inject]
-        private IChatManager ChatManager { get; }
+        private IChatManager _chatManager;
         [Inject]
         private readonly DynamicText.DynamicTextFactory _textFactory;
         [Inject]
         private readonly StringNormalization Normalize;
         [Inject]
         private readonly SongListUtils SongListUtils;
-
+        private GameObject _rootScreenGo;
         private Button _button;
 
         private readonly WaitForSeconds waitForSeconds = new WaitForSeconds(0.07f);
@@ -58,10 +56,6 @@ namespace SongRequestManagerV2.Views
         private volatile bool isChangeing = false;
         private bool isInGame = false;
         public Progress<double> DownloadProgress { get; } = new Progress<double>();
-
-        public HMUI.Screen Screen { get; set; }
-
-        public Canvas ButtonCanvas { get; set; }
 
         public FlowCoordinator Current => this._mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
 
@@ -139,19 +133,19 @@ namespace SongRequestManagerV2.Views
             this.DownloadProgress.ProgressChanged += this.Progress_ProgressChanged;
             SceneManager.activeSceneChanged += this.SceneManager_activeSceneChanged;
             try {
-                var screen = new GameObject("SRMButton", typeof(CanvasScaler), typeof(RectMask2D), typeof(VRGraphicRaycaster), typeof(CurvedCanvasSettings));
-                screen.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", BeatSaberUI.PhysicsRaycasterWithCache);
-                var vertical = screen.AddComponent<VerticalLayoutGroup>();
+                _rootScreenGo = new GameObject("SRMButton", typeof(CanvasScaler), typeof(RectMask2D), typeof(VRGraphicRaycaster), typeof(CurvedCanvasSettings));
+                _rootScreenGo.GetComponent<VRGraphicRaycaster>().SetField("_physicsRaycaster", BeatSaberUI.PhysicsRaycasterWithCache);
+                var vertical = _rootScreenGo.AddComponent<VerticalLayoutGroup>();
                 var fitter = vertical.gameObject.AddComponent<ContentSizeFitter>();
                 fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
                 fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-                (screen.transform as RectTransform).sizeDelta = new Vector2(40f, 30f);
-                (screen.transform as RectTransform).SetParent(this.levelCollectionNavigationController.transform as RectTransform, false);
-                (screen.transform as RectTransform).anchoredPosition = new Vector2(70f, 80f);
-                screen.transform.localScale = Vector3.one * 2;
+                (_rootScreenGo.transform as RectTransform).sizeDelta = new Vector2(40f, 30f);
+                (_rootScreenGo.transform as RectTransform).SetParent(this.levelCollectionNavigationController.transform as RectTransform, false);
+                (_rootScreenGo.transform as RectTransform).anchoredPosition = new Vector2(70f, 80f);
+                _rootScreenGo.transform.localScale = Vector3.one * 2;
                 if (this._button == null) {
-                    this._button = UIHelper.CreateUIButton((screen.transform as RectTransform), "CancelButton", Vector2.zero, Vector2.zero, this.Action, "OPEN", null) as NoTransitionsButton;
+                    this._button = UIHelper.CreateUIButton((_rootScreenGo.transform as RectTransform), "CancelButton", Vector2.zero, Vector2.zero, this.Action, "OPEN", null) as NoTransitionsButton;
                 }
             }
             catch (Exception e) {
@@ -178,6 +172,7 @@ namespace SongRequestManagerV2.Views
             this._requestFlow.PlayProcessEvent -= this.ProcessSongRequest;
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
             SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
+            Destroy(this._rootScreenGo);
             base.OnDestroy();
         }
         #endregion
@@ -243,10 +238,9 @@ namespace SongRequestManagerV2.Views
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #endif
-                        //  WebClient.DownloadSong($"https://beatsaver.com{request.SongNode["downloadURL"].Value}", System.Threading.CancellationToken.None, this.DownloadProgress);
                         var result = await request.DownloadZip(CancellationToken.None, this.DownloadProgress);
                         if (result == null) {
-                            this.ChatManager.QueueChatMessage("beatsaver is down now.");
+                            this._chatManager.QueueChatMessage("beatsaver is down now.");
                         }
                         using (var zipStream = new MemoryStream(result))
                         using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
