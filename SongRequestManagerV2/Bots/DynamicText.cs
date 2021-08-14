@@ -119,15 +119,26 @@ namespace SongRequestManagerV2.Bots
 
             this.Add("StarRating", Utility.GetStarRating(song)); // Add additional dynamic properties
             this.Add("Rating", Utility.GetRating(song));
-            this.Add("BeatsaverLink", $"https://beatsaver.com/beatmap/{song["id"].Value}");
-            this.Add("BeatsaberLink", $"https://beatsaver.com/maps/{song["id"].Value}");
+            this.Add("BeatsaverLink", $"https://beatsaver.com/maps/{song["id"].Value}");
+            this.Add("BeatsaberLink", $"https://bsaber.com/songs/{song["id"].Value}");
             return this;
         }
 
-        public string Parse(StringBuilder text, bool parselong = false) // We implement a path for ref or nonref
-=> this.Parse(text.ToString(), parselong);
+        /// <summary>
+        /// We implement a path for ref or nonref
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="parselong"></param>
+        /// <returns></returns>
+        public string Parse(StringBuilder text, bool parselong = false) => this.Parse(text.ToString(), parselong);
 
-        // Refactor, supports %variable%, and no longer uses split, should be closer to c++ speed.
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="parselong"></param>
+        /// <returns></returns>
+        /// <remarks>Refactor, supports %variable%, and no longer uses split, should be closer to c++ speed.</remarks>
         public string Parse(string text, bool parselong = false)
         {
             var output = new StringBuilder(text.Length); // We assume a starting capacity at LEAST = to length of original string;
