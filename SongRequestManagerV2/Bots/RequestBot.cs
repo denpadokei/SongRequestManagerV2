@@ -1111,7 +1111,7 @@ namespace SongRequestManagerV2.Bots
                 this.ChatManager.QueueChatMessage($"{id} is now on the ban list.");
             }
             else {
-                state.Msg(this._textFactory.Create().AddSong(song.SRMInfo).Parse(StringFormat.BanSongDetail), ", ");
+                state.Msg(this._textFactory.Create().AddSong(song.SongObject).Parse(StringFormat.BanSongDetail), ", ");
             }
         }
 
@@ -1765,7 +1765,7 @@ namespace SongRequestManagerV2.Bots
                 var count = 0;
 
                 foreach (SongRequest req in RequestManager.RequestSongs.ToArray()) {
-                    var song = req.SongMetaData;
+                    var song = req.SongNode;
                     queuesummary.Append(this._textFactory.Create().AddSong(song).Parse(StringFormat.QueueTextFileFormat));  // Format of Queue is now user configurable
 
                     if (++count > RequestBotConfig.Instance.MaximumQueueTextEntries) {
@@ -1966,7 +1966,7 @@ namespace SongRequestManagerV2.Bots
             {
                 var song = RequestManager.HistorySongs.FirstOrDefault() as SongRequest;
                 if (song != null) {
-                    var json = song.SongMetaData;
+                    var json = song.SongNode;
                     this._textFactory.Create().AddSong(json).QueueMessage(StringFormat.LinkSonglink.ToString());
                 }
             }
