@@ -191,8 +191,6 @@ namespace SongRequestManagerV2.Bots
         }
         #endregion
 
-
-
         public void Newest(Keyboard.KEY key)
         {
             this.ClearSearches();
@@ -611,7 +609,7 @@ namespace SongRequestManagerV2.Bots
                     }
                 }
                 else if (!autopick && songs.Count >= 4) {
-                    errorMessage = $"Request for '{request}' produces {songs.Count} results, narrow your search by adding a mapper name, or use https://beatmaps.io to look it up.";
+                    errorMessage = $"Request for '{request}' produces {songs.Count} results, narrow your search by adding a mapper name, or use https://beatsaver.com to look it up.";
                 }
                 else if (!autopick && songs.Count > 1 && songs.Count < 4) {
                     var msg = this._messageFactroy.Create().SetUp(1, 5);
