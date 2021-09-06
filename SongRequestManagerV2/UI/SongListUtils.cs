@@ -48,7 +48,10 @@ namespace SongRequestManagerV2
         {
             if (this._levelCollectionViewController) {
                 // handle if song browser is present
-                if (SongBrowserController.SongBrowserPluginPresent) {
+                if (BetterSongListController.BetterSongListPluginPresent) {
+                    BetterSongListController.ClearFilter();
+                }
+                else if (SongBrowserController.SongBrowserPluginPresent) {
                     SongBrowserController.SongBrowserCancelFilter();
                 }
 
