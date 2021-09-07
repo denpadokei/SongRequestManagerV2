@@ -1,6 +1,5 @@
 ﻿using IPA.Loader;
 using System;
-using System.Linq;
 using System.Reflection;
 
 namespace SongRequestManagerV2.UI
