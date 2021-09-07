@@ -1,6 +1,4 @@
 ﻿using IPA.Loader;
-using SongBrowser;
-using SongBrowser.Configuration;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -27,19 +25,19 @@ namespace SongRequestManagerV2.UI
                 if (_songBrowserMetaData.HVersion.Major != 6) {
                     return;
                 }
-                var asm = Assembly.GetAssembly(typeof(SongBrowserApplication));
-                var sbModule = asm.GetModule("SongBrowser.dll");
-                var configType = sbModule.GetType("SongBrowser.Configuration.PluginConfig");
+                var configType = Type.GetType("SongBrowser.Configuration.PluginConfig, SongBrowser");
                 var configInstance = configType.GetProperty("Instance", (BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)).GetValue(configType);
                 var filterModeProp = configType.GetProperty("FilterMode");
                 var sortModeProp = configType.GetProperty("SortMode");
-                var songBrowserUI = SongBrowserApplication.Instance.Ui;
-                if (filterModeProp != null && sortModeProp != null && songBrowserUI) {
-                    var filter = (SongFilterMode)filterModeProp.GetValue(configInstance);
-                    var sortMode = (SongSortMode)sortModeProp.GetValue(configInstance);
-                    if (filter != SongFilterMode.None
-                        && sortMode != SongSortMode.Original) {
-                        songBrowserUI.CancelFilter();
+                var sbAppInfo = Type.GetType("SongBrowser.SongBrowserApplication, SongBrowser");
+                var sbAppInstance = sbAppInfo.GetField("Instance", (BindingFlags.Static | BindingFlags.Public)).GetValue(sbAppInfo);
+                var songBrowserUIType = Type.GetType("SongBrowser.UI.SongBrowserUI, SongBrowser"); //SongBrowserApplication.Instance.Ui;
+                var songBrowserUI = sbAppInfo.GetProperty("Ui", BindingFlags.Public | BindingFlags.Instance).GetValue(sbAppInstance);
+                if (filterModeProp != null && sortModeProp != null && songBrowserUI != null) {
+                    var filter = (int)filterModeProp.GetValue(configInstance);
+                    var sortMode = (int)sortModeProp.GetValue(configInstance);
+                    if (filter != 0 && sortMode != 2) {
+                        songBrowserUIType.GetMethod("CancelFilter").Invoke(songBrowserUI, null);
                     }
                 }
                 else {

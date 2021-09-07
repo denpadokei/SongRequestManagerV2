@@ -54,7 +54,7 @@ namespace SongRequestManagerV2
                 else if (SongBrowserController.SongBrowserPluginPresent) {
                     SongBrowserController.SongBrowserCancelFilter();
                 }
-
+                yield return null;
                 // Make sure our custom songpack is selected
                 this.SelectCustomSongPack(2);
 

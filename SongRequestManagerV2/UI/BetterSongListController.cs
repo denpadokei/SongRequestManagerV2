@@ -24,9 +24,7 @@ namespace SongRequestManagerV2.UI
                 if (_betterSonglistMetaData.HVersion.Major != 0) {
                     return;
                 }
-                var asm = Assembly.GetAssembly(typeof(BetterSongList.Plugin));
-                var sbModule = asm.GetModule("BetterSongList.dll");
-                var filerUI = sbModule.GetType("BetterSongList.UI.FilterUI");
+                var filerUI = Type.GetType("BetterSongList.UI.FilterUI, BetterSongList");
                 var filterUIInstance = filerUI.GetField("persistentNuts", (BindingFlags.NonPublic | BindingFlags.Static)).GetValue(filerUI);
                 var filterDorpDown = (DropdownWithTableView)filerUI.GetField("_filterDropdown", (BindingFlags.NonPublic | BindingFlags.Instance)).GetValue(filterUIInstance);
                 if (filterDorpDown.selectedIndex != 0) {

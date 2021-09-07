@@ -3,19 +3,15 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9</LangVersion>
     <Version>6.1.1</Version>
-    <Platforms>x64</Platforms>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <NoWarn>;0649</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BetterSongList">
-      <HintPath>$(BeatSaberDir)\Plugins\BetterSongList.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="GameplayCore, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <Private>False</Private>
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\GameplayCore.dll</HintPath>
@@ -80,10 +76,6 @@
       <HintPath>$(BeatSaberDir)\Libs\SemVer.dll</HintPath>
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="SongBrowser">
-      <HintPath>$(BeatSaberDir)\Plugins\SongBrowser.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="SongCore">
       <Private>False</Private>
