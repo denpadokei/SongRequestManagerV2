@@ -34,8 +34,7 @@ namespace SongRequestManagerV2.UI
                 var songBrowserUI = sbAppInfo.GetProperty("Ui", BindingFlags.Public | BindingFlags.Instance).GetValue(sbAppInstance);
                 if (filterModeProp != null && sortModeProp != null && songBrowserUI != null) {
                     var filter = (int)filterModeProp.GetValue(configInstance);
-                    var sortMode = (int)sortModeProp.GetValue(configInstance);
-                    if (filter != 0 && sortMode != 2) {
+                    if (filter != 0) {
                         songBrowserUIType.GetMethod("CancelFilter").Invoke(songBrowserUI, null);
                     }
                 }

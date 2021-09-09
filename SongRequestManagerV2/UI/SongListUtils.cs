@@ -47,14 +47,6 @@ namespace SongRequestManagerV2
         public IEnumerator ScrollToLevel(string levelID, Action callback, bool isWip = false)
         {
             if (this._levelCollectionViewController) {
-                // handle if song browser is present
-                if (BetterSongListController.BetterSongListPluginPresent) {
-                    BetterSongListController.ClearFilter();
-                }
-                else if (SongBrowserController.SongBrowserPluginPresent) {
-                    SongBrowserController.SongBrowserCancelFilter();
-                }
-                yield return null;
                 // Make sure our custom songpack is selected
                 this.SelectCustomSongPack(2);
 
@@ -66,11 +58,19 @@ namespace SongRequestManagerV2
                 var customSong = isWip
                     ? tableView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsTableView>("_annotatedBeatmapLevelCollections").ElementAt(1)
                     : tableView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsTableView>("_annotatedBeatmapLevelCollections").FirstOrDefault();
-                this._levelFilteringNavigationController.HandleAnnotatedBeatmapLevelCollectionsViewControllerDidSelectAnnotatedBeatmapLevelCollection(customSong);
+                this._annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(tableView, customSong);
                 var song = isWip ? Loader.GetLevelById($"custom_level_{levelID.Split('_').Last().ToUpper()} WIP") : Loader.GetLevelByHash(levelID.Split('_').Last());
                 if (song == null) {
                     yield break;
                 }
+                // handle if song browser is present
+                if (BetterSongListController.BetterSongListPluginPresent) {
+                    BetterSongListController.ClearFilter();
+                }
+                else if (SongBrowserController.SongBrowserPluginPresent) {
+                    SongBrowserController.SongBrowserCancelFilter();
+                }
+                yield return null;
                 // get the table view
                 var levelsTableView = this._levelCollectionViewController.GetField<LevelCollectionTableView, LevelCollectionViewController>("_levelCollectionTableView");
                 levelsTableView.SelectLevel(song);
