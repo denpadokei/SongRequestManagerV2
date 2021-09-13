@@ -18,6 +18,7 @@ namespace SongRequestManagerV2.Interfaces
     {
         StringNormalization Normalize { get; }
         MapDatabase MapDatabase { get; }
+        SongRequest PlayNow { get; set; }
         SongRequest CurrentSong { get; set; }
         ListCollectionManager ListCollectionManager { get; }
         IChatManager ChatManager { get; }
