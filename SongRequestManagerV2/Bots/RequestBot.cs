@@ -110,7 +110,7 @@ namespace SongRequestManagerV2.Bots
 
             set => this.SetProperty(ref this.currentSong_, value);
         }
-
+        public SongRequest PlayNow { get; set; }
         /// <summary>
         /// This is string empty.
         /// </summary>
@@ -1960,18 +1960,10 @@ namespace SongRequestManagerV2.Bots
         // BUG: This requires a switch, or should be disabled for those who don't allow links
         public string ShowSongLink(ParseState state)
         {
-            try  // We're accessing an element across threads, and currentsong doesn't need to be defined
-            {
-                var song = RequestManager.HistorySongs.FirstOrDefault() as SongRequest;
-                if (song != null) {
-                    var json = song.SongNode;
-                    this._textFactory.Create().AddSong(json).QueueMessage(StringFormat.LinkSonglink.ToString());
-                }
+            if (this.PlayNow != null) {
+                var json = this.PlayNow.SongNode;
+                this._textFactory.Create().AddSong(json).QueueMessage(StringFormat.LinkSonglink.ToString());
             }
-            catch (Exception ex) {
-                Logger.Error(ex);
-            }
-
             return success;
         }
 

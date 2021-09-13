@@ -205,32 +205,38 @@ namespace SongRequestManagerV2.Views
             this._requestFlow.RefreshSongList(obj);
         }
 
+        /// <summary>
+        /// プレイボタンを押したときの処理
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="fromHistory"></param>
         private async void ProcessSongRequest(SongRequest request, bool fromHistory = false)
         {
+            if (!fromHistory && !RequestManager.RequestSongs.Any()) {
+                return;
+            }
+            if (fromHistory && !RequestManager.HistorySongs.Any()) {
+                return;
+            }
             await _downloadSemaphore.WaitAsync();
             try {
-                if ((RequestManager.RequestSongs.Any() && !fromHistory) || (RequestManager.HistorySongs.Any() && fromHistory)) {
-                    if (!fromHistory) {
-                        this._bot.SetRequestStatus(request, RequestStatus.Played);
-                        this._bot.DequeueRequest(request);
-                    }
+                this._bot.PlayNow = request;
+                if (!fromHistory) {
+                    this._bot.SetRequestStatus(request, RequestStatus.Played);
+                    this._bot.DequeueRequest(request);
+                }
 
-                    if (request == null) {
-                        return;
-                    }
-                    var songName = request.SongMetaData["songName"].Value;
-                    var songIndex = Regex.Replace($"{request.SongNode["id"].Value} ({request.SongMetaData["songName"].Value} - {request.SongMetaData["levelAuthorName"].Value})", "[\\\\:*/?\"<>|]", "_");
-                    songIndex = this.Normalize.RemoveDirectorySymbols(songIndex); // Remove invalid characters.
+                if (request == null) {
+                    return;
+                }
+                var songName = request.SongMetaData["songName"].Value;
+                var songIndex = Regex.Replace($"{request.SongNode["id"].Value} ({request.SongMetaData["songName"].Value} - {request.SongMetaData["levelAuthorName"].Value})", "[\\\\:*/?\"<>|]", "_");
+                songIndex = this.Normalize.RemoveDirectorySymbols(songIndex); // Remove invalid characters.
 
-                    var currentSongDirectory = request.IsWIP ? Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomWIPLevels", songIndex) : Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels", songIndex);
-                    var songHash = request.SongVersion["hash"].Value.ToUpper();
+                var currentSongDirectory = request.IsWIP ? Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomWIPLevels", songIndex) : Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels", songIndex);
+                var songHash = request.SongVersion["hash"].Value.ToUpper();
 
-                    if (Loader.GetLevelByHash(songHash) == null) {
-                        Utility.EmptyDirectory(".requestcache", false);
-
-                        if (Directory.Exists(currentSongDirectory)) {
-                            Utility.EmptyDirectory(currentSongDirectory, true);
-                        }
+                if (Loader.GetLevelByHash(songHash) == null) {
 #if UNRELEASED
                     // Direct download hack
                     var ext = Path.GetExtension(request.song["coverURL"].Value);
@@ -238,42 +244,41 @@ namespace SongRequestManagerV2.Views
 
                     var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
 #endif
-                        var result = await request.DownloadZip(CancellationToken.None, this.DownloadProgress);
-                        if (result == null) {
-                            this._chatManager.QueueChatMessage("beatsaver is down now.");
+                    var result = await request.DownloadZip(CancellationToken.None, this.DownloadProgress);
+                    if (result == null) {
+                        this._chatManager.QueueChatMessage("beatsaver is down now.");
+                    }
+                    using (var zipStream = new MemoryStream(result))
+                    using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
+                        try {
+                            // open zip archive from memory stream
+                            archive.ExtractToDirectory(currentSongDirectory);
                         }
-                        using (var zipStream = new MemoryStream(result))
-                        using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
-                            try {
-                                // open zip archive from memory stream
-                                archive.ExtractToDirectory(currentSongDirectory);
-                            }
-                            catch (Exception e) {
-                                Logger.Error($"Unable to extract ZIP! Exception");
-                                Logger.Error(e);
-                                return;
-                            }
-                            zipStream.Close();
+                        catch (Exception e) {
+                            Logger.Error($"Unable to extract ZIP! Exception");
+                            Logger.Error(e);
+                            return;
                         }
-                        Dispatcher.RunCoroutine(this.WaitForRefreshAndSchroll(request));
+                        zipStream.Close();
+                    }
+                    Dispatcher.RunCoroutine(this.WaitForRefreshAndSchroll(request));
 #if UNRELEASED
                         //if (!request.song.IsNull) // Experimental!
                         //{
                         //TwitchWebSocketClient.SendCommand("/marker "+ _textFactory.Create().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
                         //}B
 #endif
-                    }
-                    else {
-                        Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
-                        Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(songHash, () =>
-                        {
-                            this._bot.UpdateRequestUI();
-                        },
-                        request.IsWIP));
-                        if (!request.SongNode.IsNull) {
-                            // Display next song message
-                            this._textFactory.Create().AddUser(request._requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
-                        }
+                }
+                else {
+                    Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
+                    Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(songHash, () =>
+                    {
+                        this._bot.UpdateRequestUI();
+                    },
+                    request.IsWIP));
+                    if (!request.SongNode.IsNull) {
+                        // Display next song message
+                        this._textFactory.Create().AddUser(request._requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
                     }
                 }
             }
