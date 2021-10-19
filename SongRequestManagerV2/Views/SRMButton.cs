@@ -229,11 +229,7 @@ namespace SongRequestManagerV2.Views
                 if (request == null) {
                     return;
                 }
-                var songName = request.SongMetaData["songName"].Value;
-                var songIndex = Regex.Replace($"{request.SongNode["id"].Value} ({request.SongMetaData["songName"].Value} - {request.SongMetaData["levelAuthorName"].Value})", "[\\\\:*/?\"<>|]", "_");
-                songIndex = this.Normalize.RemoveDirectorySymbols(songIndex); // Remove invalid characters.
-
-                var currentSongDirectory = request.IsWIP ? Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomWIPLevels", songIndex) : Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels", songIndex);
+                var currentSongDirectory = this.CreateSongDirectory(request);
                 var songHash = request.SongVersion["hash"].Value.ToUpper();
 
                 if (Loader.GetLevelByHash(songHash) == null) {
@@ -259,7 +255,6 @@ namespace SongRequestManagerV2.Views
                             Logger.Error(e);
                             return;
                         }
-                        zipStream.Close();
                     }
                     Dispatcher.RunCoroutine(this.WaitForRefreshAndSchroll(request));
 #if UNRELEASED
@@ -288,6 +283,20 @@ namespace SongRequestManagerV2.Views
             finally {
                 _downloadSemaphore.Release();
             }
+        }
+
+        private string CreateSongDirectory(SongRequest request)
+        {
+            var songIndex = Regex.Replace($"{request.SongNode["id"].Value} ({request.SongMetaData["songName"].Value} - {request.SongMetaData["levelAuthorName"].Value})", "[\\\\:*/?\"<>|]", "_");
+            songIndex = this.Normalize.RemoveDirectorySymbols(songIndex); // Remove invalid characters.
+            var result = request.IsWIP ? Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomWIPLevels", songIndex) : Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels", songIndex);
+            var count = 1;
+            var resultLength = result.Length;
+            while (Directory.Exists(result)) {
+                result = $"{result.Substring(0, resultLength)}({count})";
+                count++;
+            }
+            return result;
         }
 
         private IEnumerator WaitForRefreshAndSchroll(SongRequest request)
