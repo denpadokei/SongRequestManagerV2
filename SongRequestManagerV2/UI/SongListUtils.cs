@@ -27,6 +27,7 @@ namespace SongRequestManagerV2
         [Inject]
         private readonly AnnotatedBeatmapLevelCollectionsViewController _annotatedBeatmapLevelCollectionsViewController;
         private bool _initialized = false;
+        private static readonly WaitForSeconds _waitHarfSeconds = new WaitForSeconds(.5f);
         [Inject]
         public void Constractor()
         {
