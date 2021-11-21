@@ -22,6 +22,5 @@ namespace SongRequestManagerV2
         public static void Notice(Exception e, [CallerFilePath] string path = null, [CallerMemberName] string member = null, [CallerLineNumber] int? num = null) => IPALogger.Notice($"{Path.GetFileName(path)}[{member}({num})] : {e}");
 
         public static void Notice(string message, [CallerFilePath] string path = null, [CallerMemberName] string member = null, [CallerLineNumber] int? num = null) => IPALogger.Notice($"{Path.GetFileName(path)}[{member}({num})] : {message}");
-
     }
 }

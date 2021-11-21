@@ -27,11 +27,11 @@ namespace SongRequestManagerV2.UI
                 if (_betterSonglistMetaData.HVersion.Major != 0) {
                     return;
                 }
-                Type filerUI = Type.GetType("BetterSongList.UI.FilterUI, BetterSongList");
-                object filterUIInstance = filerUI.GetField("persistentNuts", (BindingFlags.NonPublic | BindingFlags.Static)).GetValue(filerUI);
-                DropdownWithTableView filterDorpDown = (DropdownWithTableView)filerUI.GetField("_filterDropdown", (BindingFlags.NonPublic | BindingFlags.Instance)).GetValue(filterUIInstance);
+                var filerUI = Type.GetType("BetterSongList.UI.FilterUI, BetterSongList");
+                var filterUIInstance = filerUI.GetField("persistentNuts", (BindingFlags.NonPublic | BindingFlags.Static)).GetValue(filerUI);
+                var filterDorpDown = (DropdownWithTableView)filerUI.GetField("_filterDropdown", (BindingFlags.NonPublic | BindingFlags.Instance)).GetValue(filterUIInstance);
                 if (filterDorpDown.selectedIndex != 0) {
-                    MethodInfo setFilterMethod = filerUI.GetMethod("SetFilter", (BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
+                    var setFilterMethod = filerUI.GetMethod("SetFilter", (BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
                     setFilterMethod.Invoke(filerUI, new object[] { null, true, false });
                     ResetLevelCollectionTableSet();
                 }
@@ -54,8 +54,8 @@ namespace SongRequestManagerV2.UI
                 return;
             }
             try {
-                Type levelCollectionTableSet = Type.GetType("BetterSongList.HarmonyPatches.HookLevelCollectionTableSet, BetterSongList");
-                MethodInfo setFilterMethod = levelCollectionTableSet.GetMethod("Refresh", (BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
+                var levelCollectionTableSet = Type.GetType("BetterSongList.HarmonyPatches.HookLevelCollectionTableSet, BetterSongList");
+                var setFilterMethod = levelCollectionTableSet.GetMethod("Refresh", (BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
                 setFilterMethod.Invoke(levelCollectionTableSet, new object[] { asyncProcess });
             }
             catch (Exception e) {

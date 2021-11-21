@@ -48,12 +48,13 @@ namespace SongRequestManagerV2.UI
         {
             var imageData = Convert.FromBase64String(encodedData);
 
-            int width, height;
-            GetImageSize(imageData, out width, out height);
+            GetImageSize(imageData, out var width, out var height);
 
-            var texture = new Texture2D(width, height, TextureFormat.ARGB32, false, true);
-            texture.hideFlags = HideFlags.HideAndDontSave;
-            texture.filterMode = FilterMode.Trilinear;
+            var texture = new Texture2D(width, height, TextureFormat.ARGB32, false, true)
+            {
+                hideFlags = HideFlags.HideAndDontSave,
+                filterMode = FilterMode.Trilinear
+            };
             texture.LoadImage(imageData);
             return texture;
         }

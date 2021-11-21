@@ -35,6 +35,8 @@ namespace SongRequestManagerV2
 
         [Inject]
         private readonly DynamicText.DynamicTextFactory _textFactory;
+        [Inject]
+        private readonly MapDatabase _mapDatabase;
 
         /// <summary>説明 を取得、設定</summary>
         private string hint_;
@@ -118,7 +120,7 @@ namespace SongRequestManagerV2
             this._hash = this.SongVersion["hash"].Value;
             this._coverURL = this.SongVersion["coverURL"].Value;
             this._downloadURL = this.SongVersion["downloadURL"].Value;
-            if (MapDatabase.PPMap.TryGetValue(this.SongNode["id"].Value, out var pp)) {
+            if (this._mapDatabase.PPMap.TryGetValue(this.SongNode["id"].Value, out var pp)) {
                 this.SongNode.Add("pp", new JSONNumber(pp));
             }
             return this;
@@ -128,7 +130,7 @@ namespace SongRequestManagerV2
         internal void Setup()
         {
             var name = this.IsWIP ? $"<color=\"yellow\">[WIP]</color> {this._songName}" : this._songName;
-            if (RequestBotConfig.Instance.PPSearch && MapDatabase.PPMap.TryGetValue(this.SongNode["id"].Value, out var pp) && 0 < pp) {
+            if (RequestBotConfig.Instance.PPSearch && this._mapDatabase.PPMap.TryGetValue(this.SongNode["id"].Value, out var pp) && 0 < pp) {
                 this.SongName = $"{name} <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>";
             }
             else {

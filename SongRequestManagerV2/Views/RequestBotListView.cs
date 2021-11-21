@@ -195,7 +195,7 @@ namespace SongRequestManagerV2.Views
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
-        #region // コマンド
+        #region // イベントアクション
         public event Action<string> ChangeTitle;
         public event Action<SongRequest, bool> PlayProcessEvent;
         #endregion
@@ -252,6 +252,7 @@ namespace SongRequestManagerV2.Views
                                                          {
                                                              this.ProgressText = $"Download Progress - {progress * 100:0.00} %";
                                                          });
+
         public void UpdateRequestUI(bool selectRowCallback = false)
         {
             if (SceneManager.GetActiveScene().name == "GameCore") {
@@ -403,6 +404,7 @@ namespace SongRequestManagerV2.Views
         private void PostParse() =>
             // Set default RequestFlowCoordinator title
             ChangeTitle?.Invoke(this.IsShowHistory ? "Song Request History" : "Song Request Queue");
+
         [UIAction("history-click")]
         private void HistoryButtonClick()
         {
@@ -474,7 +476,7 @@ namespace SongRequestManagerV2.Views
         }
 
         [UIAction("selected-cell")]
-        private void SelectedCell(TableView tableView, object row)
+        private void SelectedCell(TableView _, object row)
         {
             var clip = this.randomSoundPicker?.PickRandomObject();
             if (clip) {

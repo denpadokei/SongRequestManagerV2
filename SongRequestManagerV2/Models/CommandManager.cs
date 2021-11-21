@@ -289,8 +289,10 @@ namespace SongRequestManagerV2.Models
         public void AddAliases(ISRMCommand command)
         {
             foreach (var entry in command.Aliases.Select(x => x.ToLower())) {
-                if (string.IsNullOrEmpty(entry))
+                if (string.IsNullOrEmpty(entry)) {
                     continue; // Make sure we don't get a blank command
+                }
+
                 this.Aliases.AddOrUpdate(entry, command, (s, c) => command);
             }
         }
@@ -299,42 +301,56 @@ namespace SongRequestManagerV2.Models
         {
             var unique = new SortedDictionary<string, ISRMCommand>();
 
-            if (target == null)
+            if (target == null) {
                 target = Commandsummary;
+            }
 
             foreach (var alias in this.Aliases) {
                 var BaseKey = alias.Value.Aliases.FirstOrDefault() ?? "";
-                if (!unique.ContainsKey(BaseKey))
+                if (!unique.ContainsKey(BaseKey)) {
                     unique.Add(BaseKey, alias.Value); // Create a sorted dictionary of each unique command object
+                }
             }
 
 
             foreach (var entry in unique) {
                 var command = entry.Value;
 
-                if (command.Flags.HasFlag(CmdFlags.Dynamic) || command.Flags.HasFlag(CmdFlags.Subcommand))
+                if (command.Flags.HasFlag(CmdFlags.Dynamic) || command.Flags.HasFlag(CmdFlags.Subcommand)) {
                     continue; // we do not allow customization of Subcommands or dynamic commands at this time
+                }
 
                 var cmdname = command.Aliases.FirstOrDefault() ?? "";
-                if (everything)
+                if (everything) {
                     cmdname += new string(' ', 20 - cmdname.Length);
+                }
 
                 if (command.Flags.HasFlag(CmdFlags.Variable) && (everything | command.ChangedParameters.HasFlag(ChangedFlags.Variable))) {
-                    if (everything)
+                    if (everything) {
                         target.Append("// ");
-                    target.Append($"{cmdname}= {command.UserParameter.ToString()}\r\n");
+                    }
+
+                    target.Append($"{cmdname}= {command.UserParameter}\r\n");
                 }
                 else {
                     if (everything || (command.ChangedParameters & ChangedFlags.Any) != 0) {
-                        if (everything)
+                        if (everything) {
                             target.Append("// ");
+                        }
+
                         target.Append($"{cmdname} =");
-                        if (everything || command.ChangedParameters.HasFlag(ChangedFlags.Aliases))
+                        if (everything || command.ChangedParameters.HasFlag(ChangedFlags.Aliases)) {
                             target.Append($" /alias {command.GetAliases()}");
-                        if (everything || command.ChangedParameters.HasFlag(ChangedFlags.Flags))
+                        }
+
+                        if (everything || command.ChangedParameters.HasFlag(ChangedFlags.Flags)) {
                             target.Append($" /flags {command.GetFlags()}");
-                        if (everything || command.ChangedParameters.HasFlag(ChangedFlags.Help))
+                        }
+
+                        if (everything || command.ChangedParameters.HasFlag(ChangedFlags.Help)) {
                             target.Append($" /sethelp {command.GetHelpText()}");
+                        }
+
                         target.Append("\r\n");
                     }
                 }
@@ -401,8 +417,9 @@ namespace SongRequestManagerV2.Models
                         while (sr.Peek() >= 0) {
                             var line = sr.ReadLine();
                             line.Trim(' ');
-                            if (line.Length < 2 || line.StartsWith("//"))
+                            if (line.Length < 2 || line.StartsWith("//")) {
                                 continue;
+                            }
 
                             UserSettings.Append(line).Append("\r\n");
                             // MAGICALLY configure the customized commands
@@ -410,13 +427,12 @@ namespace SongRequestManagerV2.Models
                         }
                         sr.Close();
                     }
-
                 }
-                catch {
+                catch (Exception e) {
                     // If it doesn't exist, or ends early, that's fine.
+                    Logger.Error(e);
                 }
             }
-
             this.WriteCommandConfiguration();
         }
 
@@ -428,9 +444,9 @@ namespace SongRequestManagerV2.Models
                 msg.Header("Usage: help < ");
                 foreach (var entry in this.Aliases) {
                     var botcmd = entry.Value;
-                    if (Utility.HasRights(botcmd, state.User, 0) && !botcmd.Flags.HasFlag(FlagParameter.Subcmd) && !botcmd.Flags.HasFlag(FlagParameter.Var))
-
+                    if (Utility.HasRights(botcmd, state.User, 0) && !botcmd.Flags.HasFlag(FlagParameter.Subcmd) && !botcmd.Flags.HasFlag(FlagParameter.Var)) {
                         msg.Add($"{entry.Key.TrimStart('!')}", " "); // BUG: Removes the built in ! in the commands, letting it slide... for now 
+                    }
                 }
                 msg.Add(">");
                 msg.End("...", $"No commands available >");
@@ -523,8 +539,10 @@ namespace SongRequestManagerV2.Models
         public string SubcmdCurrentSong(ParseState state)
         {
             try {
-                if (state.Parameter != "")
+                if (state.Parameter != "") {
                     state.Parameter += " ";
+                }
+
                 state.Parameter += (RequestManager.HistorySongs.FirstOrDefault() as SongRequest).SongNode["id"];
                 return "";
             }
@@ -538,8 +556,10 @@ namespace SongRequestManagerV2.Models
         public string SubcmdSelected(ParseState state)
         {
             try {
-                if (state.Parameter != "")
+                if (state.Parameter != "") {
                     state.Parameter += " ";
+                }
+
                 state.Parameter += this.Bot.CurrentSong.SongNode["id"];
                 return "";
             }
@@ -555,8 +575,9 @@ namespace SongRequestManagerV2.Models
         public string SubcmdCurrentUser(ParseState state)
         {
             try {
-                if (state.Parameter != "")
+                if (state.Parameter != "") {
                     state.Parameter += " ";
+                }
                 //state.parameter += RequestManager.HistorySongs[0][""];
                 return "";
             }
@@ -571,8 +592,10 @@ namespace SongRequestManagerV2.Models
         public string SubcmdPreviousSong(ParseState state)
         {
             try {
-                if (state.Parameter != "")
+                if (state.Parameter != "") {
                     state.Parameter += " ";
+                }
+
                 state.Parameter += (RequestManager.HistorySongs.GetConsumingEnumerable().ElementAt(1) as SongRequest).SongNode["id"];
                 return "";
             }
@@ -586,9 +609,11 @@ namespace SongRequestManagerV2.Models
         public string SubcmdNextSong(ParseState state)
         {
             try {
-                if (state.Parameter != "")
+                if (state.Parameter != "") {
                     state.Parameter += " ";
-                state.Parameter += (RequestManager.RequestSongs.FirstOrDefault() as SongRequest).SongNode["id"];
+                }
+
+                state.Parameter += (RequestManager.RequestSongs.FirstOrDefault()).SongNode["id"];
                 return "";
             }
             catch {
@@ -602,7 +627,7 @@ namespace SongRequestManagerV2.Models
         public string SubcmdShowflags(ParseState state)
         {
             if (state.Subparameter == "") {
-                this._chatManager.QueueChatMessage($"{state.Command} flags: {state._botcmd.Flags.ToString()}");
+                this._chatManager.QueueChatMessage($"{state.Command} flags: {state._botcmd.Flags}");
             }
             else {
 
@@ -622,9 +647,9 @@ namespace SongRequestManagerV2.Models
                 state._botcmd.Flags |= flag;
                 state._botcmd.UpdateCommand(ChangedFlags.Flags);
 
-                if (!state.Flags.HasFlag(CmdFlags.SilentResult))
-                    this._chatManager.QueueChatMessage($"{state.Command} flags: {state._botcmd.Flags.ToString()}");
-
+                if (!state.Flags.HasFlag(CmdFlags.SilentResult)) {
+                    this._chatManager.QueueChatMessage($"{state.Command} flags: {state._botcmd.Flags}");
+                }
             }
             catch {
                 return $"Unable to set  {state.Command} flags to {state.Subparameter}";
@@ -642,8 +667,9 @@ namespace SongRequestManagerV2.Models
             state._botcmd.Flags &= ~flag;
 
             state._botcmd.UpdateCommand(ChangedFlags.Flags);
-            if (!state.Flags.HasFlag(CmdFlags.SilentResult))
-                this._chatManager.QueueChatMessage($"{state.Command} flags: {state._botcmd.Flags.ToString()}");
+            if (!state.Flags.HasFlag(CmdFlags.SilentResult)) {
+                this._chatManager.QueueChatMessage($"{state.Command} flags: {state._botcmd.Flags}");
+            }
 
             return endcommand;
         }
@@ -654,8 +680,10 @@ namespace SongRequestManagerV2.Models
             // BUG: No parameter checking
             var key = state.Subparameter.ToLower();
             state._botcmd.Permittedusers = key;
-            if (!state.Flags.HasFlag(CmdFlags.SilentResult))
+            if (!state.Flags.HasFlag(CmdFlags.SilentResult)) {
                 this._chatManager.QueueChatMessage($"Permit custom userlist set to  {key}.");
+            }
+
             return endcommand;
         }
 
@@ -665,8 +693,10 @@ namespace SongRequestManagerV2.Models
             state.Subparameter.ToLower();
 
             if (state._botcmd.Aliases.Contains(state._botcmd.Aliases.FirstOrDefault() ?? "") || this.Aliases.ContainsKey(state._botcmd.Aliases.FirstOrDefault() ?? "")) {
-                foreach (var alias in state._botcmd.Aliases)
+                foreach (var alias in state._botcmd.Aliases) {
                     this.Aliases.TryRemove(alias, out _);
+                }
+
                 state._botcmd.Aliases.Clear();
                 state._botcmd.AddAliases(state.Subparameter.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
                 state._botcmd.UpdateCommand(ChangedFlags.Aliases);
@@ -685,8 +715,10 @@ namespace SongRequestManagerV2.Models
             state._botcmd.ShortHelp = state.Subparameter + state.Parameter; // This one's different
             state._botcmd.UpdateCommand(ChangedFlags.Help);
 
-            if (!state.Flags.HasFlag(CmdFlags.SilentResult))
+            if (!state.Flags.HasFlag(CmdFlags.SilentResult)) {
                 this._chatManager.QueueChatMessage($"{state.Command} help: {state._botcmd.ShortHelp}");
+            }
+
             return endcommand;
         }
 
@@ -743,8 +775,9 @@ namespace SongRequestManagerV2.Models
         // BUG: This is actually part of botcmd, please move
         public void ShowHelpMessage(ISRMCommand botcmd, IChatUser user, string param, bool showlong)
         {
-            if (botcmd.Flags.HasFlag(CmdFlags.Disabled))
+            if (botcmd.Flags.HasFlag(CmdFlags.Disabled)) {
                 return; // Make sure we're allowed to show help
+            }
 
             this._textFactory.Create().AddUser(user).AddBotCmd(botcmd).QueueMessage(botcmd.ShortHelp, showlong);
             return;
@@ -775,8 +808,9 @@ namespace SongRequestManagerV2.Models
             foreach (var entry in this.Aliases) {
                 var botcmd = entry.Value;
                 // BUG: Please refactor this its getting too damn long
-                if (Utility.HasRights(botcmd, requestor, 0) && !botcmd.Flags.HasFlag(FlagParameter.Var) && !botcmd.Flags.HasFlag(FlagParameter.Subcmd))
+                if (Utility.HasRights(botcmd, requestor, 0) && !botcmd.Flags.HasFlag(FlagParameter.Var) && !botcmd.Flags.HasFlag(FlagParameter.Subcmd)) {
                     msg.Add($"{entry.Key}", " "); // Only show commands you're allowed to use
+                }
             }
             msg.End("...", $"No commands available.");
         }
@@ -789,8 +823,9 @@ namespace SongRequestManagerV2.Models
             foreach (var entry in this.Aliases) {
                 var botcmd = entry.Value;
                 // BUG: Please refactor this its getting too damn long
-                if (Utility.HasRights(botcmd, requestor, 0) && botcmd.Flags.HasFlag(FlagParameter.Var))
+                if (Utility.HasRights(botcmd, requestor, 0) && botcmd.Flags.HasFlag(FlagParameter.Var)) {
                     msg.Add($"{entry.Key}", ", "); // Only show commands you're allowed to use
+                }
             }
             msg.End("...", $"No commands available.");
         }
@@ -817,8 +852,10 @@ namespace SongRequestManagerV2.Models
 
             var errorMessage = "";
             var filter = SongFilter.none;
-            if (state.Flags.HasFlag(CmdFlags.NoFilter))
+            if (state.Flags.HasFlag(CmdFlags.NoFilter)) {
                 filter = SongFilter.Queue;
+            }
+
             var songs = this.Bot.GetSongListFromResults(result, state.Parameter, ref errorMessage, filter, state.Sort != "" ? state.Sort : StringFormat.LookupSortOrder.ToString());
 
             JSONObject song;
@@ -842,10 +879,11 @@ namespace SongRequestManagerV2.Models
 
             var msg = this._queueFactory.Create().SetUp(RequestBotConfig.Instance.MaximumQueueMessages);
 
-            foreach (SongRequest req in RequestManager.RequestSongs.ToArray()) {
+            foreach (var req in RequestManager.RequestSongs.ToArray()) {
                 var song = req.SongNode;
-                if (msg.Add(this._textFactory.Create().AddSong(song).Parse(StringFormat.QueueListFormat), ", "))
+                if (msg.Add(this._textFactory.Create().AddSong(song).Parse(StringFormat.QueueListFormat), ", ")) {
                     break;
+                }
             }
             msg.End($" ... and {RequestManager.RequestSongs.Count - msg.Count} more songs.", "Queue is empty.");
             return;
@@ -859,8 +897,9 @@ namespace SongRequestManagerV2.Models
 
             foreach (var entry in RequestManager.HistorySongs.OfType<SongRequest>()) {
                 var song = entry.SongNode;
-                if (msg.Add(this._textFactory.Create().AddSong(song).Parse(StringFormat.HistoryListFormat), ", "))
+                if (msg.Add(this._textFactory.Create().AddSong(song).Parse(StringFormat.HistoryListFormat), ", ")) {
                     break;
+                }
             }
             msg.End($" ... and {RequestManager.HistorySongs.Count - msg.Count} more songs.", "History is empty.");
             return;
@@ -873,8 +912,9 @@ namespace SongRequestManagerV2.Models
             msg.Header($"{RequestBot.Played.Count} songs played tonight: ");
 
             foreach (var song in RequestBot.Played) {
-                if (msg.Add(song["songName"].Value + " (" + song["id"] + ")", ", "))
+                if (msg.Add(song["songName"].Value + " (" + song["id"] + ")", ", ")) {
                     break;
+                }
             }
             msg.End($" ... and {RequestBot.Played.Count - msg.Count} other songs.", "No songs have been played.");
             return;
@@ -889,8 +929,9 @@ namespace SongRequestManagerV2.Models
             msg.Header("Banlist ");
 
             foreach (var songId in this.Bot.ListCollectionManager.OpenList("banlist.unique").list) {
-                if (msg.Add(songId, ", "))
+                if (msg.Add(songId, ", ")) {
                     break;
+                }
             }
             msg.End($" ... and {this.Bot.ListCollectionManager.OpenList("banlist.unique").list.Count - msg.Count} more entries.", "is empty.");
 

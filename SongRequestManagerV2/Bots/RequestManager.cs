@@ -18,21 +18,20 @@ namespace SongRequestManagerV2
         [Inject]
         private readonly IChatManager _chatManager;
 
-        public static BlockingCollection<object> RequestSongs { get; } = new BlockingCollection<object>();
+        public static BlockingCollection<SongRequest> RequestSongs { get; } = new BlockingCollection<SongRequest>();
         private static readonly string requestsPath = Path.Combine(Plugin.DataPath, "SongRequestQueue.dat");
 
-        public static BlockingCollection<object> HistorySongs { get; } = new BlockingCollection<object>();
+        public static BlockingCollection<SongRequest> HistorySongs { get; } = new BlockingCollection<SongRequest>();
         private static readonly string historyPath = Path.Combine(Plugin.DataPath, "SongRequestHistory.dat");
 
-        public List<object> Read(string path)
+        public IEnumerable<SongRequest> Read(string path)
         {
-            var songs = new List<object>();
             if (!File.Exists(path)) {
-                return songs;
+                yield break;
             }
             var json = JSON.Parse(File.ReadAllText(path));
             if (json.IsNull) {
-                return songs;
+                yield break;
             }
             foreach (var j in json.AsArray) {
                 if (j.Value.IsNull) {
@@ -40,20 +39,20 @@ namespace SongRequestManagerV2
                 }
                 if (j.Value is JSONObject obj) {
                     var req = this.factory.Create().Init(obj);
-                    songs.Add(req);
+                    yield return req;
                 }
             }
-            return songs;
         }
 
-        public void Write(string path, IEnumerable<object> songs)
+        public void Write(string path, IEnumerable<SongRequest> songs)
         {
             try {
-                if (!Directory.Exists(Path.GetDirectoryName(path)))
+                if (!Directory.Exists(Path.GetDirectoryName(path))) {
                     Directory.CreateDirectory(Path.GetDirectoryName(path));
+                }
 
                 var arr = new JSONArray();
-                foreach (var song in songs.Where(x => x != null).Select(x => x as SongRequest)) {
+                foreach (var song in songs.Where(x => x != null)) {
                     try {
                         arr.Add(song.ToJson());
                     }
@@ -78,7 +77,6 @@ namespace SongRequestManagerV2
                 Logger.Error(e);
                 this._chatManager.QueueChatMessage("There was an error reading the request queue.");
             }
-
         }
 
         public void WriteRequest() => this.Write(requestsPath, RequestSongs);
@@ -90,13 +88,12 @@ namespace SongRequestManagerV2
                 var list = this.Read(historyPath);
                 HistorySongs.AddRange(this.Read(historyPath));
                 foreach (var item in list) {
-                    HistoryManager.AddSong(item as SongRequest);
+                    HistoryManager.AddSong(item);
                 }
             }
             catch {
                 this._chatManager.QueueChatMessage("There was an error reading the request history.");
             }
-
         }
 
         public void WriteHistory() => this.Write(historyPath, HistorySongs);

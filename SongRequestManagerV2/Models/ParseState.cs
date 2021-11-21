@@ -39,8 +39,10 @@ namespace SongRequestManagerV2.Models
 
             this.Flags = state.Flags;
             this.Parameter = state.Parameter;
-            if (parameter != null)
+            if (parameter != null) {
                 this.Parameter = parameter;
+            }
+
             this.Subparameter = state.Subparameter;
             this.Command = state.Command;
             this.Info = state.Info;
@@ -65,37 +67,45 @@ namespace SongRequestManagerV2.Models
         {
             var commandstart = 0;
 
-            if (this.Parameter.Length < 2)
+            if (this.Parameter.Length < 2) {
                 return notsubcommand;
+            }
+
             var subcommandend = this.Parameter.IndexOfAny(new[] { ' ', '/' }, 1);
-            if (subcommandend == -1)
+            if (subcommandend == -1) {
                 subcommandend = this.Parameter.Length;
+            }
 
             var subcommandsectionend = this.Parameter.IndexOf('/', 1);
-            if (subcommandsectionend == -1)
+            if (subcommandsectionend == -1) {
                 subcommandsectionend = this.Parameter.Length;
+            }
 
             //RequestBot.Instance.QueueChatMessage($"parameter [{parameter}] ({subcommandend},{subcommandsectionend})");
 
             var commandlength = subcommandend - commandstart;
 
-            if (commandlength == 0)
+            if (commandlength == 0) {
                 return notsubcommand;
+            }
 
             var subcommand = this.Parameter.Substring(commandstart, commandlength).ToLower();
 
             this.Subparameter = (subcommandsectionend - subcommandend > 0) ? this.Parameter.Substring(subcommandend, subcommandsectionend - subcommandend).Trim(' ') : "";
 
 
-            if (!this._commandManager.Aliases.TryGetValue(subcommand, out var subcmd))
+            if (!this._commandManager.Aliases.TryGetValue(subcommand, out var subcmd)) {
                 return notsubcommand;
+            }
 
-            if (!subcmd.Flags.HasFlag(CmdFlags.Subcommand))
+            if (!subcmd.Flags.HasFlag(CmdFlags.Subcommand)) {
                 return notsubcommand;
+            }
             // BUG: Need to check subcmd permissions here.     
 
-            if (!Utility.HasRights(subcmd, this.User, this.Flags))
+            if (!Utility.HasRights(subcmd, this.User, this.Flags)) {
                 return this.Error($"No permission to use {subcommand}");
+            }
 
             if (subcmd.Flags.HasFlag(CmdFlags.NoParameter)) {
                 this.Parameter = this.Parameter.Substring(subcommandend).Trim(' ');
@@ -117,8 +127,10 @@ namespace SongRequestManagerV2.Models
 
         public string Msg(string text, string result = "")
         {
-            if (!this.Flags.HasFlag(CmdFlags.SilentResult))
+            if (!this.Flags.HasFlag(CmdFlags.SilentResult)) {
                 this._textFactory.Create().AddUser(this.User).AddBotCmd(this._botcmd).QueueMessage(text);
+            }
+
             return result;
         }
 
@@ -146,8 +158,10 @@ namespace SongRequestManagerV2.Models
             while (true) {
                 var errormsg = this.ExecuteSubcommand();
                 Logger.Debug($"errormsg : {errormsg}");
-                if (errormsg == notsubcommand)
+                if (errormsg == notsubcommand) {
                     break;
+                }
+
                 if (errormsg != "") {
                     if (errormsg == _done) {
                         this.Flags |= CmdFlags.Disabled; // Temporarily disable the rest of the command - flags is local parse state flag.
@@ -166,8 +180,9 @@ namespace SongRequestManagerV2.Models
                 this._botcmd.ChangedParameters |= ChangedFlags.Saved;
             }
 
-            if (this._botcmd.Flags.HasFlag(CmdFlags.Disabled) || this.Flags.HasFlag(CmdFlags.Disabled))
+            if (this._botcmd.Flags.HasFlag(CmdFlags.Disabled) || this.Flags.HasFlag(CmdFlags.Disabled)) {
                 return; // Disabled commands fail silently
+            }
 
             // Check permissions first
 
@@ -177,8 +192,10 @@ namespace SongRequestManagerV2.Models
             // Num is Nani?
             if (!allow && !this._botcmd.Flags.HasFlag(CmdFlags.BypassRights) && !this._listCollectionManager.Contains(this._botcmd.Permittedusers, this.User.UserName.ToLower())) {
                 var twitchpermission = this._botcmd.Flags & CmdFlags.TwitchLevel;
-                if (!this._botcmd.Flags.HasFlag(CmdFlags.SilentCheck))
-                    this._chatManager.QueueChatMessage($"{this.Command} is restricted to {twitchpermission.ToString()}");
+                if (!this._botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) {
+                    this._chatManager.QueueChatMessage($"{this.Command} is restricted to {twitchpermission}");
+                }
+
                 return;
             }
 
@@ -191,8 +208,10 @@ namespace SongRequestManagerV2.Models
             // Check regex
 
             if (!this._botcmd.Regexfilter.IsMatch(this.Parameter)) {
-                if (!this._botcmd.Flags.HasFlag(CmdFlags.SilentCheck))
+                if (!this._botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) {
                     this._commandManager.ShowHelpMessage(this._botcmd, this.User, this.Parameter, false);
+                }
+
                 return;
             }
 
@@ -213,10 +232,14 @@ namespace SongRequestManagerV2.Models
         {
             var commandlength = 0;
             // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
-            while (commandlength < request.Length && (request[commandlength] != '=' && request[commandlength] != '/' && request[commandlength] != ' '))
+            while (commandlength < request.Length && (request[commandlength] != '=' && request[commandlength] != '/' && request[commandlength] != ' ')) {
                 commandlength++;  // Command name ends with #... for now, I'll clean up some more later    
-            if (commandlength == 0)
+            }
+
+            if (commandlength == 0) {
                 return "";
+            }
+
             return request.Substring(0, commandlength).ToLower();
         }
 
@@ -230,13 +253,18 @@ namespace SongRequestManagerV2.Models
             var parameterstart = 0;
 
             // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
-            while (parameterstart < this.Request.Length && (this.Request[parameterstart] != '=' && this.Request[parameterstart] != '/' && this.Request[parameterstart] != ' '))
+            while (parameterstart < this.Request.Length && (this.Request[parameterstart] != '=' && this.Request[parameterstart] != '/' && this.Request[parameterstart] != ' ')) {
                 parameterstart++;  // Command name ends with #... for now, I'll clean up some more later           
+            }
+
             var commandlength = parameterstart - commandstart;
-            while (parameterstart < this.Request.Length && this.Request[parameterstart] == ' ')
+            while (parameterstart < this.Request.Length && this.Request[parameterstart] == ' ') {
                 parameterstart++; // Eat the space(s) if that's the separator after the command
-            if (commandlength == 0)
+            }
+
+            if (commandlength == 0) {
                 return this;
+            }
 
             this.Command = this.Request.Substring(commandstart, commandlength).ToLower();
 

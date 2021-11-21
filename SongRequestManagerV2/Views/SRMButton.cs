@@ -81,13 +81,12 @@ namespace SongRequestManagerV2.Views
             if (this.Current is LevelSelectionFlowCoordinator) {
                 this.Current.PresentFlowCoordinator(this._requestFlow, null, AnimationDirection.Horizontal, false, false);
             }
-            return;
         }
 
         internal void SetButtonColor()
         {
             ImageView underLine = null;
-            if (DateTime.Now.Month == 4 && DateTime.Now.Day == 1) {
+            if (Utility.IsAprilFool()) {
                 if (RequestManager.RequestSongs.Any()) {
                     Dispatcher.RunCoroutine(this.ChangeButtonColor());
                 }

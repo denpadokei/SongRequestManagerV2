@@ -66,10 +66,12 @@ namespace SongRequestManagerV2.Bots
 
         public void End(string overflowtext = "", string emptymsg = "")
         {
-            if (this.Count == 0)
+            if (this.Count == 0) {
                 this._chatManager.QueueChatMessage(emptymsg); // Note, this means header doesn't get printed either for empty lists                
-            else if (this.messageCount > this.maxMessages && this.overflowcount > 0)
+            }
+            else if (this.messageCount > this.maxMessages && this.overflowcount > 0) {
                 this._chatManager.QueueChatMessage(this.msgBuilder.ToString() + overflowtext);
+            }
             else {
                 this.msgBuilder.Length -= this.separatorlength;
                 this._chatManager.QueueChatMessage(this.msgBuilder.ToString());

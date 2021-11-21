@@ -43,11 +43,11 @@ namespace SongRequestManagerV2
             if (!Directory.Exists(DataPath)) {
                 Directory.CreateDirectory(DataPath);
             }
-
         }
 
         [OnExit]
         public void OnExit() => this.IsApplicationExiting = true;
+
         [OnEnable]
         public void OnEnabled()
         {

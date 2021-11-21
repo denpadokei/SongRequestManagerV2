@@ -31,6 +31,5 @@ namespace SongRequestManagerV2.Extentions
                 final?.Invoke();
             }
         }
-
     }
 }
