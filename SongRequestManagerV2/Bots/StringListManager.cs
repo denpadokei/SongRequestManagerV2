@@ -51,8 +51,9 @@ namespace SongRequestManagerV2.Bots
 
                 return true;
             }
-            catch {
+            catch (Exception e) {
                 // Ignoring this for now, I expect it to fail
+                Logger.Error(e);
             }
 
             return false;
@@ -83,8 +84,9 @@ namespace SongRequestManagerV2.Bots
                 File.WriteAllText(listfilename, output);
                 return true;
             }
-            catch {
-                // Ignoring this for now, failed write can be silent
+            catch (Exception e) {
+                // Ignoring this for now, I expect it to fail
+                Logger.Error(e);
             }
             return false;
         }

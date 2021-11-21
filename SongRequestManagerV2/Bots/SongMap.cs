@@ -25,7 +25,12 @@ namespace SongRequestManagerV2.Bots
             else {
                 this.SongVersion = this.SongObject["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString()).AsObject;
             }
-            this.LevelId = levelId;
+            if (string.IsNullOrEmpty(levelId)) {
+                this.LevelId = this.SongObject["id"].Value;
+            }
+            else {
+                this.LevelId = levelId;
+            }
             this.Path = path;
         }
 

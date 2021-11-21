@@ -2356,6 +2356,7 @@ namespace SongRequestManagerV2.Bots
                 else {
                     var map = this._songMapFactory.Create(result.AsObject);
                     this.MapDatabase.IndexSong(map);
+                    songs.Add(map.SongObject);
                 }
             }
 
@@ -2407,74 +2408,67 @@ namespace SongRequestManagerV2.Bots
             this.MapDatabase.SaveDatabase();
             yield break;
         }
+#if false
+        //public string GetIdentifier()
+        //{
+        //    var combinedJson = "";
+        //    foreach (var diffLevel in difficultyLevels)
+        //    {
+        //        if (!File.Exists(path + "/" + diffLevel.jsonPath))
+        //        {
+        //            continue;
+        //        }
 
+        //        diffLevel.json = File.ReadAllText(path + "/" + diffLevel.jsonPath);
+        //        combinedJson += diffLevel.json;
+        //    }
 
-        /*
+        //    var hash = Utils.CreateMD5FromString(combinedJson);
+        //    levelId = hash + "∎" + string.Join("∎", songName, songSubName, GetSongAuthor(), beatsPerMinute.ToString()) + "∎";
+        //    return levelId;
+        //}
 
-         public string GetIdentifier()
-         {
-             var combinedJson = "";
-             foreach (var diffLevel in difficultyLevels)
-             {
-                 if (!File.Exists(path + "/" + diffLevel.jsonPath))
-                 {
-                     continue;
-                 }
+        //public static string GetLevelID(Song song)
+        //{
+        //    string[] values = new string[] { song.hash, song.songName, song.songSubName, song.authorName, song.beatsPerMinute };
+        //    return string.Join("∎", values) + "∎";
+        //}
 
-                 diffLevel.json = File.ReadAllText(path + "/" + diffLevel.jsonPath);
-                 combinedJson += diffLevel.json;
-             }
+        //public static BeatmapLevelSO GetLevel(string levelId)
+        //{
+        //    return SongLoader.CustomLevelCollectionSO.beatmapLevels.FirstOrDefault(x => x.levelID == levelId) as BeatmapLevelSO;
+        //}
 
-             var hash = Utils.CreateMD5FromString(combinedJson);
-             levelId = hash + "∎" + string.Join("∎", songName, songSubName, GetSongAuthor(), beatsPerMinute.ToString()) + "∎";
-             return levelId;
-         }
+        //public static bool CreateMD5FromFile(string path, out string hash)
+        //{
+        //    hash = "";
+        //    if (!File.Exists(path)) return false;
+        //    using (MD5 md5 = MD5.Create())
+        //    {
+        //        using (var stream = File.OpenRead(path))
+        //        {
+        //            byte[] hashBytes = md5.ComputeHash(stream);
 
-         public static string GetLevelID(Song song)
-         {
-             string[] values = new string[] { song.hash, song.songName, song.songSubName, song.authorName, song.beatsPerMinute };
-             return string.Join("∎", values) + "∎";
-         }
+        //            StringBuilder sb = new StringBuilder();
+        //            foreach (byte hashByte in hashBytes)
+        //            {
+        //                sb.Append(hashByte.ToString("X2"));
+        //            }
 
-         public static BeatmapLevelSO GetLevel(string levelId)
-         {
-             return SongLoader.CustomLevelCollectionSO.beatmapLevels.FirstOrDefault(x => x.levelID == levelId) as BeatmapLevelSO;
-         }
+        //            hash = sb.ToString();
+        //            return true;
+        //        }
+        //    }
+        //}
 
-         public static bool CreateMD5FromFile(string path, out string hash)
-         {
-             hash = "";
-             if (!File.Exists(path)) return false;
-             using (MD5 md5 = MD5.Create())
-             {
-                 using (var stream = File.OpenRead(path))
-                 {
-                     byte[] hashBytes = md5.ComputeHash(stream);
+        //public void RequestSongByLevelID(string levelId, Action<Song> callback)
+        //{
+        //    StartCoroutine(RequestSongByLevelIDCoroutine(levelId, callback));
+        //}
 
-                     StringBuilder sb = new StringBuilder();
-                     foreach (byte hashByte in hashBytes)
-                     {
-                         sb.Append(hashByte.ToString("X2"));
-                     }
-
-                     hash = sb.ToString();
-                     return true;
-                 }
-             }
-         }
-
-         public void RequestSongByLevelID(string levelId, Action<Song> callback)
-         {
-             StartCoroutine(RequestSongByLevelIDCoroutine(levelId, callback));
-         }
-
-         // Beatsaver.com filtered characters
-         '@', '*', '+', '-', '<', '~', '>', '(', ')'
-
-
-
-         */
-
+        //// Beatsaver.com filtered characters
+        //'@', '*', '+', '-', '<', '~', '>', '(', ')'
+#endif
         public string CreateMD5FromString(string input)
         {
             // Use input string to calculate MD5 hash
