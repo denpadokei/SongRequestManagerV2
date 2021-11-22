@@ -17,7 +17,7 @@ namespace SongRequestManagerV2.Interfaces
     public interface IRequestBot : INotifyPropertyChanged
     {
         StringNormalization Normalize { get; }
-        MapDatabase MapDatabase { get; }
+        //MapDatabase MapDatabase { get; }
         SongRequest PlayNow { get; set; }
         SongRequest CurrentSong { get; set; }
         ListCollectionManager ListCollectionManager { get; }
@@ -55,8 +55,9 @@ namespace SongRequestManagerV2.Interfaces
         void ClearSearches();
         string CloseQueue(ParseState state);
         void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target);
-        bool CreateMD5FromFile(string path, out string hash);
-        string CreateMD5FromString(string input);
+        string GenerateIvailedHash(string dir);
+        //bool CreateMD5FromFile(string path, out string hash);
+        //string CreateMD5FromString(string input);
         void DequeueRequest(SongRequest request, bool updateUI = true);
         string DequeueSong(ParseState state);
         bool DoesContainTerms(string request, ref string[] terms);
@@ -66,7 +67,7 @@ namespace SongRequestManagerV2.Interfaces
         string GetBeatSaverId(string request);
         string GetGCCount(ParseState state);
         Task GetPPData();
-        List<JSONObject> GetSongListFromResults(JSONNode result, string SearchString, ref string errorMessage, SongFilter filter = (SongFilter)(-1), string sortby = "-rating", int reverse = 1);
+        List<JSONObject> GetSongListFromResults(JSONNode result, string SearchString, SongFilter filter = (SongFilter)(-1), string sortby = "-rating", int reverse = 1);
         string IsRequestInQueue(string request, bool fast = false);
         string Listaccess(ParseState state);
         void ListList(IChatUser requestor, string request);
@@ -90,17 +91,14 @@ namespace SongRequestManagerV2.Interfaces
         string QueueLottery(ParseState state);
         void QueueSong(ParseState state, JSONObject song);
         string QueueStatus(ParseState state);
-        Task ReadArchive(ParseState state);
         string Readdeck(ParseState state);
         void ReadRemapList();
         void RefreshSongQuere();
-        IEnumerator RefreshSongs(ParseState state);
         void Remap(IChatUser requestor, string request);
         void RemoveFromlist(IChatUser requestor, string request);
         string Restoredeck(ParseState state);
         void RunScript(IChatUser requestor, string request);
         void RunStartupScripts();
-        IEnumerator SaveSongDatabase(ParseState state);
         void ScheduledCommand(string command, ElapsedEventArgs e);
         void Search(Keyboard.KEY key);
         IChatUser GetLoginUser();

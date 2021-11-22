@@ -6,7 +6,7 @@ using Zenject;
 
 namespace SongRequestManagerV2.Bots
 {
-    public class SongMap
+    public class SongMap : IEquatable<SongMap>, IComparable<SongMap>
     {
         public JSONObject SongObject { get; set; }
         public JSONObject SongVersion { get; private set; }
@@ -15,7 +15,8 @@ namespace SongRequestManagerV2.Bots
         public string LevelId { get; set; }
         public float PP { get; set; } = 0;
 
-        public SongMap(JSONObject song, string levelId = "", string path = "")
+        [Inject]
+        public SongMap(JSONObject song, string levelId, string path, MapDatabase mapDatabase)
         {
             this.SongObject = song;
             var versions = this.SongObject["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString());
@@ -32,11 +33,7 @@ namespace SongRequestManagerV2.Bots
                 this.LevelId = levelId;
             }
             this.Path = path;
-        }
 
-        [Inject]
-        private void Constractor(MapDatabase database)
-        {
             if (!this.SongObject["srm_info"].IsObject) {
                 var srmJson = new JSONObject();
                 srmJson.Add("id", this.SongObject["id"].Value);
@@ -78,7 +75,7 @@ namespace SongRequestManagerV2.Bots
                     if (degrees360 || degrees90) {
                         srmJson.Add("maptype", "360");
                     }
-                    if (database.PPMap.TryGetValue(this.SongObject["id"].Value, out var songpp)) {
+                    if (mapDatabase.PPMap.TryGetValue(this.SongObject["id"].Value, out var songpp)) {
                         srmJson.Add("pp", songpp);
                     }
 
@@ -89,17 +86,32 @@ namespace SongRequestManagerV2.Bots
                 }
             }
         }
-
+        public bool Equals(SongMap other)
+        {
+            if (other == null) {
+                return false;
+            }
+            return string.Equals(other.SongVersion["hash"].Value, this.SongVersion["hash"].Value, StringComparison.InvariantCultureIgnoreCase);
+        }
+        public int CompareTo(SongMap other)
+        {
+            return string.Compare(other.SRMInfo["id"].Value, this.SRMInfo["id"].Value, true);
+        }
+        public override int GetHashCode()
+        {
+            return this.SongVersion["hash"].Value.ToUpper().GetHashCode();
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is SongMap map) {
+                return this.Equals(map);
+            }
+            else {
+                return base.Equals(obj);
+            }
+        }
         public class SongMapFactory : PlaceholderFactory<JSONObject, string, string, SongMap>
         {
-            /// <summary>
-            /// Create songmap.
-            /// </summary>
-            /// <param name="param1">Song</param>
-            /// <param name="param2">Level ID</param>
-            /// <param name="param3">Path</param>
-            /// <returns></returns>
-            public override SongMap Create(JSONObject param1, string param2 = "", string param3 = "") => base.Create(param1, param2, param3);
         }
     }
 }
