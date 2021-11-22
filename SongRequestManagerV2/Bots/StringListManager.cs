@@ -37,6 +37,9 @@ namespace SongRequestManagerV2.Bots
 
             try {
                 var listfilename = Path.Combine(Plugin.DataPath, filename);
+                if (!File.Exists(listfilename)) {
+                    File.WriteAllText(listfilename, "");
+                }
                 var fileContent = File.ReadAllText(listfilename);
                 if (listfilename.EndsWith(".script")) {
                     this.list = fileContent.Split(lineseparator, StringSplitOptions.RemoveEmptyEntries).ToList();

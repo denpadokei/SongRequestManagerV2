@@ -127,9 +127,6 @@ namespace SongRequestManagerV2.Models
             commands.Add(this._commandFactory.Create().Setup("!addpp").AsyncAction(this.Bot.AddsongsFromRank).Help(FlagParameter.Mod, "usage: %alias% <listname>%|%... Adds the rank maps from %beatsaver%, filtered by the previous selected allowmappers command", _nothing));
             commands.Add(this._commandFactory.Create().Setup("!backup").Action(this.Bot.BackupStreamcore).Help(CmdFlags.Broadcaster, "Backup %SRM% directory.", _anything));
 
-            //new COMMAND("!refreshsongs").Coroutine(RefreshSongs).Help(Broadcaster, "Adds custom songs to bot list. This is a pre-release feature."); // BUG: Broken in 1.10
-            commands.Add(this._commandFactory.Create().Setup("!savesongdatabase").Coroutine(this.Bot.SaveSongDatabase).Help(FlagParameter.Broadcaster));
-
             commands.Add(this._commandFactory.Create().Setup("!queuestatus").Action(this.Bot.QueueStatus).Help(FlagParameter.Mod, "usage: %alias% %|% Show current queue status", _nothing));
 
             commands.Add(this._commandFactory.Create().Setup("!QueueLottery").Action(this.Bot.QueueLottery).Help(FlagParameter.Broadcaster, "usage: %alias% <entry count> %|% Shuffle the queue and reduce to <entry count> entries. Close the queue.", _anything));
@@ -817,9 +814,7 @@ namespace SongRequestManagerV2.Models
 
         internal void ShowFormatList(IChatUser requestor, string request)
         {
-
             var msg = this._queueFactory.Create();
-
             foreach (var entry in this.Aliases) {
                 var botcmd = entry.Value;
                 // BUG: Please refactor this its getting too damn long
@@ -837,26 +832,21 @@ namespace SongRequestManagerV2.Models
             var id = this.Bot.GetBeatSaverId(state.Parameter);
 
             JSONNode result = null;
+            var requestUrl = (id != "") ? $"{RequestBot.BEATMAPS_API_ROOT_URL}/maps/detail/{id}" : $"{RequestBot.BEATMAPS_API_ROOT_URL}/search/text/0?q={this.normalize.NormalizeBeatSaverString(state.Parameter)}";
+            var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
-            if (!RequestBotConfig.Instance.OfflineMode) {
-                var requestUrl = (id != "") ? $"{RequestBot.BEATMAPS_API_ROOT_URL}/maps/detail/{id}" : $"{RequestBot.BEATMAPS_API_ROOT_URL}/search/text/0?q={this.normalize.NormalizeBeatSaverString(state.Parameter)}";
-                var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
-
-                if (resp.IsSuccessStatusCode) {
-                    result = resp.ConvertToJsonNode();
-                }
-                else {
-                    Logger.Debug($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
-                }
+            if (resp.IsSuccessStatusCode) {
+                result = resp.ConvertToJsonNode();
             }
-
-            var errorMessage = "";
+            else {
+                Logger.Debug($"Error {resp.ReasonPhrase} occured when trying to request song {requestUrl}!");
+            }
             var filter = SongFilter.none;
             if (state.Flags.HasFlag(CmdFlags.NoFilter)) {
                 filter = SongFilter.Queue;
             }
 
-            var songs = this.Bot.GetSongListFromResults(result, state.Parameter, ref errorMessage, filter, state.Sort != "" ? state.Sort : StringFormat.LookupSortOrder.ToString());
+            var songs = this.Bot.GetSongListFromResults(result, state.Parameter, filter, state.Sort != "" ? state.Sort : StringFormat.LookupSortOrder.ToString());
 
             JSONObject song;
 
@@ -865,7 +855,6 @@ namespace SongRequestManagerV2.Models
             foreach (var entry in songs) {
                 //entry.Add("pp", 100);
                 //SongBrowserPlugin.DataAccess.ScoreSaberDataFile
-
                 song = entry;
                 msg.Add(this._textFactory.Create().AddSong(song).Parse(StringFormat.LookupSongDetail), ", ");
             }

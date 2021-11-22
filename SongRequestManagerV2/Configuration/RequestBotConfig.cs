@@ -31,11 +31,7 @@ namespace SongRequestManagerV2.Configuration
         public virtual int MaximumQueueMessages { get; set; } = 1;
         public virtual string LastBackup { get; set; } = DateTime.MinValue.ToString();
         public virtual string BackupPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "userdata", "backup");
-        public virtual bool OfflineMode { get; set; } = false;
-        public virtual string OfflinePath { get; set; } = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels");
-        public virtual bool LocalSearch { get; set; } = false;
         public virtual bool PPSearch { get; set; } = true;
-        public virtual string AdditionalSongPath { get; set; } = "";
         public virtual bool IsStartServer { get; set; } = false;
         public virtual int ReceivePort { get; set; } = 50001;
         public virtual bool IsSendBouyomi { get; set; } = false;
@@ -46,6 +42,10 @@ namespace SongRequestManagerV2.Configuration
         public virtual bool EableAprilFool { get; set; } = true;
         // 使ってない設定達 R.I.P
 #if false
+        public virtual bool OfflineMode { get; set; } = false;
+        public virtual string OfflinePath { get; set; } = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels");
+        public virtual string AdditionalSongPath { get; set; } = "";
+        public virtual bool LocalSearch { get; set; } = false;
         public virtual bool PersistentRequestQueue { get; set; } = true;
         public virtual bool AutoplaySong { get; set; } = false; // Pressing play will automatically attempt to play the song you selected at the highest difficulty level it has
         public virtual int MaximumLookupMessages { get; set; } = 1;
