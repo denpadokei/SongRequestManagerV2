@@ -262,18 +262,29 @@ namespace SongRequestManagerV2.Views
             {
                 try {
                     this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? "Queue Open" : "Queue Closed";
-                    this._queueButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red;
+                    this.PerformanceMode = RequestBotConfig.Instance.PerformanceMode;
                     this.HistoryHoverHint = this.IsShowHistory ? "Go back to your current song request queue." : "View the history of song requests from the current session.";
                     this.HistoryButtonText = this.IsShowHistory ? "Requests" : "History";
                     this.PlayButtonText = this.IsShowHistory ? "Replay" : "Play";
-                    this.PerformanceMode = RequestBotConfig.Instance.PerformanceMode;
                     this.RefreshSongQueueList(selectRowCallback);
+                    var underline = this._queueButton.GetComponentsInChildren<ImageView>(true).FirstOrDefault(x => x.name == "Underline");
+                    if (underline != null) {
+                        underline.color = RequestBotConfig.Instance.RequestQueueOpen ? Color.green : Color.red;
+                    }
+                }
+                catch (Exception e) {
+                    Logger.Error(e);
+                }
+                try {
+                    var underline = this._playButton.GetComponentsInChildren<ImageView>(true).FirstOrDefault(x => x.name == "Underline");
+                    if (underline != null) {
+                        underline.color = this.SelectedRow >= 0 ? Color.green : Color.red;
+                    }
                 }
                 catch (Exception e) {
                     Logger.Error(e);
                 }
             });
-            Dispatcher.RunOnMainThread(() => this._playButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = this.SelectedRow >= 0 ? Color.green : Color.red);
         }
         /// <summary>
         /// Alter the state of the buttons based on selection
@@ -323,7 +334,6 @@ namespace SongRequestManagerV2.Views
         public void RefreshSongQueueList(bool selectRowCallback = false)
         {
             try {
-                //UpdateSelectSongInfo();
                 lock (_lockObject) {
                     this.Songs.Clear();
                     if (this.IsShowHistory) {
@@ -460,7 +470,6 @@ namespace SongRequestManagerV2.Views
             if (this._requestTable.NumberOfCells() > 0) {
                 RequestBot.Played.Add(this._bot.CurrentSong.SongNode);
                 this._bot.WriteJSON(RequestBot.playedfilename, RequestBot.Played);
-
                 this.SetUIInteractivity(false);
                 this.PlayProcessEvent?.Invoke(this._bot.CurrentSong, this.IsShowHistory);
             }
@@ -660,8 +669,6 @@ namespace SongRequestManagerV2.Views
                 catch (Exception e) {
                     Logger.Error(e);
                 }
-                //this._requestTable.tableView.selectionType = TableViewSelectionType.Single;
-
             }
             catch (Exception e) {
                 Logger.Error(e);

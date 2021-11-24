@@ -26,16 +26,6 @@ namespace SongRequestManagerV2
         private readonly LevelFilteringNavigationController _levelFilteringNavigationController;
         [Inject]
         private readonly AnnotatedBeatmapLevelCollectionsViewController _annotatedBeatmapLevelCollectionsViewController;
-        private bool _initialized = false;
-        private static readonly WaitForSeconds _waitHarfSeconds = new WaitForSeconds(.5f);
-        [Inject]
-        public void Constractor()
-        {
-            if (!this._initialized) {
-                this._initialized = true;
-            }
-        }
-
         private void SelectCustomSongPack(int index)
         {
             // get the Level Filtering Nav Controller, the top bar

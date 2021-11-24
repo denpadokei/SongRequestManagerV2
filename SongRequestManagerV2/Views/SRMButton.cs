@@ -125,7 +125,8 @@ namespace SongRequestManagerV2.Views
         {
             this._bot.ChangeButtonColor += this.SetButtonColor;
             this._bot.RefreshListRequest += this.RefreshListRequest;
-            this._requestFlow.QueueStatusChanged += this.OnQueueStatusChanged;
+            RequestBotConfig.Instance.ConfigChangedEvent += this.OnConfigChangedEvent;
+            this._requestFlow.QueueStatusChanged += this.ChangeButtonText;
             this._requestFlow.PlayProcessEvent += this.ProcessSongRequest;
 
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
@@ -159,7 +160,15 @@ namespace SongRequestManagerV2.Views
             this.SetButtonColor();
         }
 
-        private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1) => this.isInGame = string.Equals(arg1.name, "GameCore", StringComparison.CurrentCultureIgnoreCase);
+        private void OnConfigChangedEvent(RequestBotConfig obj)
+        {
+            Dispatcher.RunOnMainThread(this.ChangeButtonText);
+        }
+
+        private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1)
+        {
+            this.isInGame = string.Equals(arg1.name, "GameCore", StringComparison.CurrentCultureIgnoreCase);
+        }
 
         #region Unity message
         protected override void OnDestroy()
@@ -167,26 +176,31 @@ namespace SongRequestManagerV2.Views
             Logger.Debug("OnDestroy");
             this._bot.ChangeButtonColor -= this.SetButtonColor;
             this._bot.RefreshListRequest -= this.RefreshListRequest;
-            this._requestFlow.QueueStatusChanged -= this.OnQueueStatusChanged;
+            RequestBotConfig.Instance.ConfigChangedEvent -= this.OnConfigChangedEvent;
             this._requestFlow.PlayProcessEvent -= this.ProcessSongRequest;
             this.DownloadProgress.ProgressChanged -= this.Progress_ProgressChanged;
             SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
             Destroy(this._rootScreenGo);
             base.OnDestroy();
         }
-        #endregion
 
-        private void OnQueueStatusChanged()
+        public void OnEnable()
+        {
+            this.ChangeButtonText();
+        }
+        #endregion
+        private void ChangeButtonText()
         {
             try {
                 var externalComponents = this._button.gameObject.GetComponentsInChildren<ExternalComponents>(true).FirstOrDefault();
                 var textMesh = externalComponents.components.FirstOrDefault(x => x as TextMeshProUGUI) as TextMeshProUGUI;
-
-                if (RequestBotConfig.Instance.RequestQueueOpen) {
-                    textMesh.text = "OPEN";
-                }
-                else {
-                    textMesh.text = "CLOSE";
+                if (textMesh != null) {
+                    if (RequestBotConfig.Instance.RequestQueueOpen) {
+                        textMesh.text = "OPEN";
+                    }
+                    else {
+                        textMesh.text = "CLOSE";
+                    }
                 }
             }
             catch (Exception e) {

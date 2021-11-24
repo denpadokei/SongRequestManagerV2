@@ -41,7 +41,7 @@ namespace SongRequestManagerV2.Bots
         private readonly bool _mapperWhitelist = false; // BUG: Need to clean these up a bit.
         private bool _isGameCore = false;
 
-        public static System.Random Generator { get; } = new System.Random(); // BUG: Should at least seed from unity?
+        public static System.Random Generator { get; } = new System.Random(Environment.TickCount); // BUG: Should at least seed from unity?
         public static List<JSONObject> Played { get; private set; } = new List<JSONObject>(); // Played list
         public static List<BotEvent> Events { get; } = new List<BotEvent>();
         public static UserInfo CurrentUser { get; private set; }
@@ -517,19 +517,18 @@ namespace SongRequestManagerV2.Bots
             return result;
         }
 
-        internal void UpdateSongMap(JSONObject song) => WebClient.GetAsync($"{BEATMAPS_API_ROOT_URL}/maps/id/{song["id"].Value}", System.Threading.CancellationToken.None).Await(resp =>
-                                                      {
-                                                          if (resp.IsSuccessStatusCode) {
-                                                              var result = resp.ConvertToJsonNode();
-
-                                                              this.ChatManager.QueueChatMessage($"{result.AsObject}");
-
-                                                              if (result != null && result["id"].Value != "") {
-                                                                  var map = this._songMapFactory.Create(result.AsObject, "", "");
-                                                                  this.MapDatabase.IndexSong(map);
-                                                              }
-                                                          }
-                                                      }, null, null);
+        internal async Task UpdateSongMap(JSONObject song)
+        {
+            var resp = await WebClient.GetAsync($"{BEATMAPS_API_ROOT_URL}/maps/id/{song["id"].Value}", System.Threading.CancellationToken.None);
+            if (resp.IsSuccessStatusCode) {
+                var result = resp.ConvertToJsonNode();
+                this.ChatManager.QueueChatMessage($"{result.AsObject}");
+                if (result != null && result["id"].Value != "") {
+                    var map = this._songMapFactory.Create(result.AsObject, "", "");
+                    this.MapDatabase.IndexSong(map);
+                }
+            }
+        }
 
         // BUG: Testing major changes. This will get seriously refactored soon.
         internal async Task CheckRequest(RequestInfo requestInfo)

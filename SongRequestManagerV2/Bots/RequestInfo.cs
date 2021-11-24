@@ -1,7 +1,6 @@
 ﻿using ChatCore.Interfaces;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
-//using StreamCore.Twitch;
 using System;
 
 namespace SongRequestManagerV2

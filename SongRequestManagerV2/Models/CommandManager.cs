@@ -54,7 +54,7 @@ namespace SongRequestManagerV2.Models
 
         #endregion
 
-        public ConcurrentDictionary<string, ISRMCommand> Aliases { get; private set; } = new ConcurrentDictionary<string, ISRMCommand>(); // There can be only one (static)!
+        public ConcurrentDictionary<string, ISRMCommand> Aliases { get; } = new ConcurrentDictionary<string, ISRMCommand>(); // There can be only one (static)!
 
         public void Initialize()
         {
@@ -593,7 +593,7 @@ namespace SongRequestManagerV2.Models
                     state.Parameter += " ";
                 }
 
-                state.Parameter += (RequestManager.HistorySongs.GetConsumingEnumerable().ElementAt(1) as SongRequest).SongNode["id"];
+                state.Parameter += (RequestManager.HistorySongs.GetConsumingEnumerable().ElementAt(1)).SongNode["id"];
                 return "";
             }
             catch {
