@@ -134,6 +134,9 @@ namespace SongRequestManagerV2
                 do {
                     try {
                         // create new request messsage
+#if DEBUG
+                        Logger.Debug(url);
+#endif
                         var req = new HttpRequestMessage(methodType, url);
                         if (retryCount != 0) {
                             await Task.Delay(1000);

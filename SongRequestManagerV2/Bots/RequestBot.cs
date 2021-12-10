@@ -3,6 +3,7 @@ using ChatCore.Models.Twitch;
 using SongRequestManagerV2.SimpleJSON;
 using IPA.Loader;
 using SongRequestManagerV2.Bases;
+using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
@@ -24,10 +25,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 using System.Web;
+
 #if DEBUG
 using System.Diagnostics;
 #endif
-using SongRequestManagerV2.Configuration;
 #if OLDVERSION
 using TMPro;
 #endif
@@ -155,11 +156,11 @@ namespace SongRequestManagerV2.Bots
         {
             if (!this.disposedValue) {
                 if (disposing) {
-                    // TODO: マネージド状態を破棄します (マネージド オブジェクト)
                     Logger.Debug("Dispose call");
                     this.timer.Elapsed -= this.Timer_Elapsed;
                     this.timer.Dispose();
                     SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
+                    RequestBotConfig.Instance.ConfigChangedEvent -= this.OnConfigChangedEvent;
                     try {
                         if (BouyomiPipeline.instance != null) {
                             BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
@@ -169,20 +170,9 @@ namespace SongRequestManagerV2.Bots
                         Logger.Error(e);
                     }
                 }
-
-                // TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
-                // TODO: 大きなフィールドを null に設定します
                 this.disposedValue = true;
             }
         }
-
-        // // TODO: 'Dispose(bool disposing)' にアンマネージド リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします
-        // ~RequestBot()
-        // {
-        //     // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
-        //     Dispose(disposing: false);
-        // }
-
         public void Dispose()
         {
             // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
@@ -274,6 +264,7 @@ namespace SongRequestManagerV2.Bots
         internal void OnConfigChangedEvent(RequestBotConfig config)
         {
             this.UpdateRequestUI();
+            this.WriteQueueStatusToFile(this.QueueMessage(RequestBotConfig.Instance.RequestQueueOpen));
             this.UpdateUIRequest?.Invoke(true);
             this.SetButtonIntactivityRequest?.Invoke(true);
         }

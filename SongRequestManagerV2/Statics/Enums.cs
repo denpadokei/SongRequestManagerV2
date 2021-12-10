@@ -79,54 +79,132 @@ namespace SongRequestManagerV2.Statics
     public enum CmdFlags
     {
         None = 0,
-        Everyone = 1, // Im
+        /// <summary>
+        /// Im
+        /// </summary>
+        Everyone = 1,
         Sub = 2,
         Mod = 4,
         Broadcaster = 8,
         VIP = 16,
-        UserList = 32,  // If this is enabled, users on a list are allowed to use a command (this is an OR, so leave restrictions to Broadcaster if you want ONLY users on a list)
-        TwitchLevel = 63, // This is used to show ONLY the twitch user flags when showing permissions
+        /// <summary>
+        /// If this is enabled, users on a list are allowed to use a command (this is an OR, so leave restrictions to Broadcaster if you want ONLY users on a list)
+        /// </summary>
+        UserList = 32,
+        /// <summary>
+        ///  This is used to show ONLY the twitch user flags when showing permissions
+        /// </summary>
+        TwitchLevel = 63,
+        /// <summary>
+        /// Using the command without the right access level will show permissions error. Mostly used for commands that can be unlocked at different tiers.
+        /// </summary>
+        ShowRestrictions = 64,
+        /// <summary>
+        ///  Bypass right check on command, allowing error messages, and a later code based check. Often used for help only commands. 
+        /// </summary>
+        BypassRights = 128,
+        /// <summary>
+        /// Return no results on failed preflight checks.
+        /// </summary>
+        NoFilter = 256,
 
-        ShowRestrictions = 64, // Using the command without the right access level will show permissions error. Mostly used for commands that can be unlocked at different tiers.
+        /// <summary>
+        /// Enable link to web documentation
+        /// </summary>
+        HelpLink = 512,
+        /// <summary>
+        ///  Reply in a whisper to the user (future feature?). Allow commands to send the results to the user, avoiding channel spam
+        /// </summary>
+        WhisperReply = 1024,
+        /// <summary>
+        /// Applies a timeout to regular users after a command is succesfully invoked this is just a concept atm
+        /// </summary>
+        Timeout = 2048,
+        /// <summary>
+        /// Applies a timeout to regular users after a command is succesfully invoked this is just a concept atm
+        /// </summary>
+        TimeoutSub = 4096,
+        /// <summary>
+        /// Auto pick first song when adding
+        /// </summary>
+        Autopick = 8192,
+        /// <summary>
+        /// Auto pick first song when adding
+        /// </summary>
+        Local = 16384,
 
-        BypassRights = 128, // Bypass right check on command, allowing error messages, and a later code based check. Often used for help only commands. 
-        NoFilter = 256, // Return no results on failed preflight checks.
+        /// <summary>
+        /// Turn off any links that the command may normally generate
+        /// </summary>
+        NoLinks = 32768,
+        /// <summary>
+        /// Command produces no output at all - but still executes
+        /// </summary>
+        //Silent = 65536,
+        /// <summary>
+        /// Turn off command output limits, This can result in excessive channel spam
+        /// </summary>
+        Verbose = 131072,
+        /// <summary>
+        /// Log every use of the command to a file
+        /// </summary>
+        Log = 262144,
+        /// <summary>
+        /// Enable regex check
+        /// </summary>
+        RegEx = 524288,
+        /// <summary>
+        /// Use it for whatever bit makes you happy 
+        /// </summary>
+        UserFlag1 = 1048576,
+        /// <summary>
+        /// The (subcommand) takes no parameter
+        /// </summary>
+        NoParameter = 2097152,
 
-        HelpLink = 512, // Enable link to web documentation
+        /// <summary>
+        /// This is a variable 
+        /// </summary>
+        Variable = 4194304,
+        /// <summary>
+        /// This command is generated dynamically, and cannot be saved/loaded 
+        /// </summary>
+        Dynamic = 8388608,
 
-        WhisperReply = 1024, // Reply in a whisper to the user (future feature?). Allow commands to send the results to the user, avoiding channel spam
+        /// <summary>
+        /// Request is moved directly to queue, bypassing song check
+        /// </summary>
+        ToQueue = 16277216,
 
-        Timeout = 2048, // Applies a timeout to regular users after a command is succesfully invoked this is just a concept atm
-        TimeoutSub = 4096, // Applies a timeout to Subs
-        Autopick = 8192, // Auto pick first song when adding
-        Local = 16384, // The command is being executed from console and therefore always full priveledge
+        /// <summary>
+        /// Private, used by ATT command. Its possible to have multiple aliases for the same flag
+        /// </summary>
+        MoveToTop = 1 << 25,
 
-        NoLinks = 32768, // Turn off any links that the command may normally generate
-
-        //Silent = 65536, // Command produces no output at all - but still executes
-        Verbose = 131072, // Turn off command output limits, This can result in excessive channel spam
-        Log = 262144, // Log every use of the command to a file
-        RegEx = 524288, // Enable regex check
-        UserFlag1 = 1048576, // Use it for whatever bit makes you happy 
-        NoParameter = 2097152, // The (subcommand) takes no parameter
-
-        Variable = 4194304, // This is a variable 
-        Dynamic = 8388608, // This command is generated dynamically, and cannot be saved/loaded 
-
-        ToQueue = 16277216, //  Request is moved directly to queue, bypassing song check
-
-        MoveToTop = 1 << 25, // Private, used by ATT command. Its possible to have multiple aliases for the same flag
-
-        SilentCheck = 1 << 26, // Initial command check failure returns no message
-        SilentError = 1 << 27, // Command failure returns no message
-        SilentResult = 1 << 28, // Command returns no visible results
+        /// <summary>
+        /// Initial command check failure returns no message
+        /// </summary>
+        SilentCheck = 1 << 26,
+        /// <summary>
+        /// Command failure returns no message
+        /// </summary>
+        SilentError = 1 << 27,
+        /// <summary>
+        /// Command returns no visible results
+        /// </summary>
+        SilentResult = 1 << 28,
 
         Silent = SilentCheck | SilentError | SilentResult,
 
-        Subcommand = 1 << 29, // This is a subcommand, it may only be invoked within a command
+        /// <summary>
+        /// This is a subcommand, it may only be invoked within a command
+        /// </summary>
+        Subcommand = 1 << 29,
 
-        Disabled = 1 << 30, // If ON, the command will not be added to the alias list at all.
-
+        /// <summary>
+        /// If ON, the command will not be added to the alias list at all.
+        /// </summary>
+        Disabled = 1 << 30,
     }
     #endregion
 

@@ -21,7 +21,7 @@ namespace SongRequestManagerV2.Installer
             this.Container.BindFactory<DynamicText, DynamicText.DynamicTextFactory>().AsCached();
             this.Container.BindInterfacesAndSelfTo<ChatManager>().AsSingle();
             this.Container.BindInterfacesAndSelfTo<StringNormalization>().AsSingle();
-            this.Container.BindInterfacesAndSelfTo<NotifySound>().FromNewComponentOnNewGameObject("NotifySound").AsSingle();
+            this.Container.BindInterfacesAndSelfTo<NotifySound>().FromNewComponentOnNewGameObject(nameof(NotifySound)).AsSingle();
             this.Container.Bind<ListCollectionManager>().AsSingle();
             this.Container.BindInterfacesAndSelfTo<RequestBot>().AsSingle();
         }

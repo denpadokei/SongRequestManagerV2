@@ -154,6 +154,7 @@ namespace SongRequestManagerV2.Views
 
             if (RequestBotConfig.Instance.AutoOpenRequestQueue && !RequestBotConfig.Instance.RequestQueueOpen) {
                 RequestBotConfig.Instance.RequestQueueOpen = true;
+                this._bot.WriteQueueStatusToFile(this._bot.QueueMessage(true));
             }
 
             this._bot.UpdateRequestUI();

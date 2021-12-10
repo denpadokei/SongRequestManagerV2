@@ -104,7 +104,7 @@ namespace SongRequestManagerV2.Bases
                 this.Subcommand(state);
             }
             else if (this.AsyncSubCommand != null) {
-                this.AsyncSubCommand(state).Await(null, null, null);
+                _ = this.AsyncSubCommand(state);
             }
 
             return success;
