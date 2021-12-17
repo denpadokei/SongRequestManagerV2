@@ -69,6 +69,8 @@ namespace SongRequestManagerV2.Bots
         public const string SCRAPED_SCORE_SABER_ALL_JSON_URL = "https://cdn.wes.cloud/beatstar/bssb/v2-ranked.json";
         public const string BEATMAPS_API_ROOT_URL = "https://beatsaver.com/api";
         public const string BEATMAPS_CDN_ROOT_URL = "https://cdn.beatsaver.com";
+        public const string BEATMAPS_AS_CDN_ROOT_URL = "https://as.cdn.beatsaver.com";
+        public const string BEATMAPS_NA_CDN_ROOT_URL = "https://na.cdn.beatsaver.com";
 
         private readonly System.Timers.Timer timer = new System.Timers.Timer(500);
 
