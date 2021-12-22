@@ -3,6 +3,7 @@ using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.SimpleJSON;
 using SongRequestManagerV2.Utils;
+using UnityEngine;
 
 namespace SongRequestManagerV2.Installer
 {
@@ -21,7 +22,7 @@ namespace SongRequestManagerV2.Installer
             this.Container.BindFactory<DynamicText, DynamicText.DynamicTextFactory>().AsCached();
             this.Container.BindInterfacesAndSelfTo<ChatManager>().AsSingle();
             this.Container.BindInterfacesAndSelfTo<StringNormalization>().AsSingle();
-            this.Container.BindInterfacesAndSelfTo<NotifySound>().FromNewComponentOnNewGameObject(nameof(NotifySound)).AsSingle();
+            this.Container.BindInterfacesAndSelfTo<NotifySound>().FromNewComponentOn(new GameObject(nameof(NotifySound))).AsSingle();
             this.Container.Bind<ListCollectionManager>().AsSingle();
             this.Container.BindInterfacesAndSelfTo<RequestBot>().AsSingle();
         }

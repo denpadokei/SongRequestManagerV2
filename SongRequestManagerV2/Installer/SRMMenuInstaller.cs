@@ -1,6 +1,7 @@
 ﻿using SiraUtil;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Views;
+using UnityEngine;
 using Zenject;
 
 namespace SongRequestManagerV2.Installers
@@ -17,7 +18,7 @@ namespace SongRequestManagerV2.Installers
             this.Container.BindInterfacesAndSelfTo<RequestBotListView>().FromNewComponentAsViewController().AsSingle();
             this.Container.BindInterfacesAndSelfTo<KeyboardViewController>().FromNewComponentAsViewController().AsSingle();
             this.Container.BindInterfacesAndSelfTo<SongRequestManagerSettings>().FromNewComponentAsViewController().AsSingle();
-            this.Container.BindInterfacesAndSelfTo<RequestFlowCoordinator>().FromNewComponentOnNewGameObject(nameof(RequestFlowCoordinator)).AsSingle();
+            this.Container.BindInterfacesAndSelfTo<RequestFlowCoordinator>().FromNewComponentOn(new GameObject(nameof(RequestFlowCoordinator))).AsSingle();
             this.Container.BindInterfacesAndSelfTo<SRMButton>().FromNewComponentAsViewController().AsSingle().NonLazy();
         }
     }
