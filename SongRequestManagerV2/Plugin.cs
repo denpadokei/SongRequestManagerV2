@@ -33,8 +33,11 @@ namespace SongRequestManagerV2
             Logger = log;
             Logger.Debug("Logger initialized.");
             RequestBotConfig.Instance = config.Generated<RequestBotConfig>();
-            zenjector.OnApp<SRMAppInstaller>();
-            zenjector.OnMenu<SRMMenuInstaller>();
+            //zenjector.OnApp<SRMAppInstaller>();
+            //zenjector.OnMenu<SRMMenuInstaller>();
+
+            zenjector.Install<SRMAppInstaller>(Location.App);
+            zenjector.Install<SRMMenuInstaller>(Location.Menu);
         }
 
         [OnStart]
