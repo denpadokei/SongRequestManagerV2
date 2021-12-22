@@ -119,7 +119,7 @@ namespace SongRequestManagerV2
             }
             this._hash = this.SongVersion["hash"].Value;
             this._coverURL = this.SongVersion["coverURL"].Value;
-            this._downloadURL = this.SongVersion["downloadURL"].Value;
+            this._downloadURL = this.SongVersion["downloadURL"].Value.Replace(RequestBot.BEATMAPS_AS_CDN_ROOT_URL, RequestBot.BEATMAPS_CDN_ROOT_URL);
             if (this._mapDatabase.PPMap.TryGetValue(this.SongNode["id"].Value, out var pp)) {
                 this.SongNode.Add("pp", new JSONNumber(pp));
             }
