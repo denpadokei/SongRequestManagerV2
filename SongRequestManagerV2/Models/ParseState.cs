@@ -134,12 +134,20 @@ namespace SongRequestManagerV2.Models
             return result;
         }
 
-        public string Error(string Error) => this.Text(Error);
+        public string Error(string Error)
+        {
+            return this.Text(Error);
+        }
 
-        public string Helptext(bool showlong = false) => this._textFactory.Create().AddUser(this.User).AddBotCmd(this._botcmd).Parse(this._botcmd.ShortHelp, showlong);
+        public string Helptext(bool showlong = false)
+        {
+            return this._textFactory.Create().AddUser(this.User).AddBotCmd(this._botcmd).Parse(this._botcmd.ShortHelp, showlong);
+        }
 
         public string Text(string text) // Return a formatted text message
-=> this._textFactory.Create().AddUser(this.User).AddBotCmd(this._botcmd).Parse(text);
+        {
+            return this._textFactory.Create().AddUser(this.User).AddBotCmd(this._botcmd).Parse(text);
+        }
 
         private static readonly string _done = "X";
         public void ExecuteCommand()

@@ -67,9 +67,11 @@ namespace SongRequestManagerV2.Configuration
         /// <summary>
         /// Call this to force BSIPA to update the config file. This is also called by BSIPA if it detects the file was modified.
         /// </summary>
-        public virtual void Changed() =>
+        public virtual void Changed()
+        {
             // Do stuff when the config is changed.
-            this.ConfigChangedEvent?.Invoke(this);
+            ConfigChangedEvent?.Invoke(this);
+        }
 
         /// <summary>
         /// Call this to have BSIPA copy the values from <paramref name="other"/> into this config.

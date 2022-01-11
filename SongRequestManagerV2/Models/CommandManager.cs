@@ -540,7 +540,7 @@ namespace SongRequestManagerV2.Models
                     state.Parameter += " ";
                 }
 
-                state.Parameter += (RequestManager.HistorySongs.FirstOrDefault() as SongRequest).SongNode["id"];
+                state.Parameter += RequestManager.HistorySongs.FirstOrDefault().SongNode["id"];
                 return "";
             }
             catch {

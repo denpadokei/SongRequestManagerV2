@@ -113,7 +113,10 @@ namespace SongRequestManagerV2.Bots
             return true;
         }
 
-        public bool Removeentry(string entry) => this.list.Remove(entry);
+        public bool Removeentry(string entry)
+        {
+            return this.list.Remove(entry);
+        }
 
         // Picks a random entry and returns it, removing it from the list
         public string Drawentry()
@@ -140,9 +143,15 @@ namespace SongRequestManagerV2.Bots
             return result;
         }
 
-        public int Count() => this.list.Count;
+        public int Count()
+        {
+            return this.list.Count;
+        }
 
-        public void Clear() => this.list.Clear();
+        public void Clear()
+        {
+            this.list.Clear();
+        }
 
         public void LowercaseList()
         {

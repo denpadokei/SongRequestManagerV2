@@ -38,9 +38,15 @@ namespace SongRequestManagerV2.Utils
         /// メッセージを送信キューへ追加します。
         /// </summary>
         /// <param name="message">ストリームサービスへ送信したい文字列</param>
-        public void QueueChatMessage(string message) => this.SendMessageQueue.Enqueue($"{RequestBotConfig.Instance.BotPrefix}{message}");
+        public void QueueChatMessage(string message)
+        {
+            this.SendMessageQueue.Enqueue($"{RequestBotConfig.Instance.BotPrefix}{message}");
+        }
 
-        private void MultiplexerInstance_OnTextMessageReceived(IChatService arg1, IChatMessage arg2) => this.RecieveChatMessage.Enqueue(arg2);
+        private void MultiplexerInstance_OnTextMessageReceived(IChatService arg1, IChatMessage arg2)
+        {
+            this.RecieveChatMessage.Enqueue(arg2);
+        }
 
         private void MultiplexerInstance_OnJoinChannel(IChatService arg1, IChatChannel arg2)
         {

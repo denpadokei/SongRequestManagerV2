@@ -17,7 +17,10 @@ namespace SongRequestManagerV2.Models
         public bool IsModerator { get; set; }
 
         public IChatBadge[] Badges { get; set; }
-        ChatCore.Utilities.JSONObject IChatUser.ToJson() => null;
+        ChatCore.Utilities.JSONObject IChatUser.ToJson()
+        {
+            return null;
+        }
 
         public RequesterEntity()
         {

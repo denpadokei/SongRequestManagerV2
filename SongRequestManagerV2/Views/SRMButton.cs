@@ -57,7 +57,13 @@ namespace SongRequestManagerV2.Views
         private bool isInGame = false;
         public Progress<double> DownloadProgress { get; } = new Progress<double>();
 
-        public FlowCoordinator Current => this._mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
+        public FlowCoordinator Current
+        {
+            get
+            {
+                return this._mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
+            }
+        }
 
         private static readonly SemaphoreSlim _downloadSemaphore = new SemaphoreSlim(1, 1);
 
@@ -209,7 +215,10 @@ namespace SongRequestManagerV2.Views
             }
         }
 
-        private void Progress_ProgressChanged(object sender, double e) => this._requestFlow.ChangeProgressText(e);
+        private void Progress_ProgressChanged(object sender, double e)
+        {
+            this._requestFlow.ChangeProgressText(e);
+        }
 
         private void RefreshListRequest(bool obj)
         {

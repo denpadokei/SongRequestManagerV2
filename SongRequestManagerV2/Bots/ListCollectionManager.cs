@@ -92,7 +92,10 @@ namespace SongRequestManagerV2.Bots
             return false;
         }
 
-        public bool Remove(string listname, string key, ListFlags flags = ListFlags.Unchanged) => this.Remove(ref listname, ref key, flags);
+        public bool Remove(string listname, string key, ListFlags flags = ListFlags.Unchanged)
+        {
+            return this.Remove(ref listname, ref key, flags);
+        }
 
         public bool Remove(ref string listname, ref string key, ListFlags flags = ListFlags.Unchanged)
         {

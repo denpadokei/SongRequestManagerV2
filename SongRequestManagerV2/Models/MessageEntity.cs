@@ -38,6 +38,9 @@ namespace SongRequestManagerV2.Models
             this.Metadata = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
         }
 
-        public ChatCore.Utilities.JSONObject ToJson() => throw new NotImplementedException();
+        public ChatCore.Utilities.JSONObject ToJson()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

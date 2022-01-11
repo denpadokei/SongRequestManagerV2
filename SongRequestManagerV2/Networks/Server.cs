@@ -17,9 +17,15 @@ namespace SongRequestManagerV2.Networks
         /// <summary>ポート を取得、設定</summary>
         public int Port
         {
-            get => this.port_;
+            get
+            {
+                return this.port_;
+            }
 
-            set => this.SetProperty(ref this.port_, value);
+            set
+            {
+                this.SetProperty(ref this.port_, value);
+            }
         }
 
         /// <summary>IPアドレス を取得、設定</summary>
@@ -27,9 +33,15 @@ namespace SongRequestManagerV2.Networks
         /// <summary>IPアドレス を取得、設定</summary>
         public string IP
         {
-            get => this.ip_;
+            get
+            {
+                return this.ip_;
+            }
 
-            set => this.SetProperty(ref this.ip_, value);
+            set
+            {
+                this.SetProperty(ref this.ip_, value);
+            }
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -37,9 +49,15 @@ namespace SongRequestManagerV2.Networks
         /// <summary>説明 を取得、設定</summary>
         public bool IsRunning
         {
-            get => this.isRunning_;
+            get
+            {
+                return this.isRunning_;
+            }
 
-            set => this.SetProperty(ref this.isRunning_, value);
+            set
+            {
+                this.SetProperty(ref this.isRunning_, value);
+            }
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -47,9 +65,15 @@ namespace SongRequestManagerV2.Networks
         /// <summary>説明 を取得、設定</summary>
         public string Message
         {
-            get => this.message_;
+            get
+            {
+                return this.message_;
+            }
 
-            set => this.SetProperty(ref this.message_, value);
+            set
+            {
+                this.SetProperty(ref this.message_, value);
+            }
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -57,9 +81,15 @@ namespace SongRequestManagerV2.Networks
         /// <summary>説明 を取得、設定</summary>
         public byte[] ResBytes
         {
-            get => this.resBytes_;
+            get
+            {
+                return this.resBytes_;
+            }
 
-            set => this.SetProperty(ref this.resBytes_, value);
+            set
+            {
+                this.SetProperty(ref this.resBytes_, value);
+            }
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -130,7 +160,10 @@ namespace SongRequestManagerV2.Networks
             }
         }
 
-        public void StopServer() => this.IsRunning = false;
+        public void StopServer()
+        {
+            this.IsRunning = false;
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド

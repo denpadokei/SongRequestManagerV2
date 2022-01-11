@@ -132,7 +132,10 @@ namespace SongRequestManagerV2.Bots
         /// <param name="text"></param>
         /// <param name="parselong"></param>
         /// <returns></returns>
-        public string Parse(StringBuilder text, bool parselong = false) => this.Parse(text.ToString(), parselong);
+        public string Parse(StringBuilder text, bool parselong = false)
+        {
+            return this.Parse(text.ToString(), parselong);
+        }
 
         /// <summary>
         /// 

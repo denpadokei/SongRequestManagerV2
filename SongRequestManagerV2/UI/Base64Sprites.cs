@@ -21,9 +21,15 @@ namespace SongRequestManagerV2.UI
             VersusChallengeIcon = Base64ToSprite(VersusChallengeBase64);
         }
 
-        public static string SpriteToBase64(Sprite input) => Convert.ToBase64String(input.texture.EncodeToJPG());
+        public static string SpriteToBase64(Sprite input)
+        {
+            return Convert.ToBase64String(input.texture.EncodeToJPG());
+        }
 
-        public static string Texture2DToBase64(Texture2D tex) => Convert.ToBase64String(tex.EncodeToJPG());
+        public static string Texture2DToBase64(Texture2D tex)
+        {
+            return Convert.ToBase64String(tex.EncodeToJPG());
+        }
 
         public static Sprite Base64ToSprite(string base64)
         {
@@ -65,6 +71,9 @@ namespace SongRequestManagerV2.UI
             height = ReadInt(imageData, 3 + 15 + 2 + 2);
         }
 
-        private static int ReadInt(byte[] imageData, int offset) => (imageData[offset] << 8) | imageData[offset + 1];
+        private static int ReadInt(byte[] imageData, int offset)
+        {
+            return (imageData[offset] << 8) | imageData[offset + 1];
+        }
     }
 }

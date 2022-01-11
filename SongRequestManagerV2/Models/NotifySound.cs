@@ -14,7 +14,10 @@ namespace SongRequestManagerV2.Models
         private AudioSource audioSource;
         private AudioClip notifySoundClip;
 
-        public void Initialize() => Dispatcher.RunCoroutine(this.LoadSound());
+        public void Initialize()
+        {
+            Dispatcher.RunCoroutine(this.LoadSound());
+        }
 
         public void PlaySound()
         {

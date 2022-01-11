@@ -1,5 +1,4 @@
 ﻿using ChatCore.Interfaces;
-using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
@@ -180,11 +179,20 @@ namespace SongRequestManagerV2.Bases
         }
 
         #region Command List Save / Load functionality
-        public string GetHelpText() => this.ShortHelp;
+        public string GetHelpText()
+        {
+            return this.ShortHelp;
+        }
 
-        public string GetFlags() => this.Flags.ToString();
+        public string GetFlags()
+        {
+            return this.Flags.ToString();
+        }
 
-        public string GetAliases() => String.Join(",", this.Aliases.ToArray());
+        public string GetAliases()
+        {
+            return String.Join(",", this.Aliases.ToArray());
+        }
         #endregion
 
         private string Variable(ParseState state) // Basically show the value of a variable without parsing

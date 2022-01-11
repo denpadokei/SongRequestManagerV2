@@ -16,8 +16,21 @@ namespace SongRequestManagerV2
     [Plugin(RuntimeOptions.DynamicInit)]
     public class Plugin
     {
-        public string Name => "Song Request ManagerV2";
-        public static string Version => _meta.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public string Name
+        {
+            get
+            {
+                return "Song Request ManagerV2";
+            }
+        }
+
+        public static string Version
+        {
+            get
+            {
+                return _meta.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            }
+        }
 
         private static PluginMetadata _meta;
         public static IPALogger Logger { get; private set; }
@@ -49,7 +62,10 @@ namespace SongRequestManagerV2
         }
 
         [OnExit]
-        public void OnExit() => this.IsApplicationExiting = true;
+        public void OnExit()
+        {
+            this.IsApplicationExiting = true;
+        }
 
         [OnEnable]
         public void OnEnabled()
@@ -57,6 +73,9 @@ namespace SongRequestManagerV2
 
         }
         [OnDisable]
-        public void OnDisabled() => BouyomiPipeline.instance.Stop();
+        public void OnDisabled()
+        {
+            BouyomiPipeline.instance.Stop();
+        }
     }
 }

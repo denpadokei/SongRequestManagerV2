@@ -28,7 +28,10 @@ namespace SongRequestManagerV2.Networks
             _ = this._server.RunServer();
         }
 
-        public void Stop() => this._server.StopServer();
+        public void Stop()
+        {
+            this._server.StopServer();
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
@@ -56,7 +59,7 @@ namespace SongRequestManagerV2.Networks
                     }
                 }
                 else if (args.PropertyName == nameof(server.Message)) {
-                    this.ReceiveMessege?.Invoke(server.Message);
+                    ReceiveMessege?.Invoke(server.Message);
                 }
             }
         }

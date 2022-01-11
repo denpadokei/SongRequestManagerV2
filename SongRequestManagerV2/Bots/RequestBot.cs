@@ -1,6 +1,5 @@
 ﻿using ChatCore.Interfaces;
 using ChatCore.Models.Twitch;
-using SongRequestManagerV2.SimpleJSON;
 using IPA.Loader;
 using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Configuration;
@@ -8,6 +7,7 @@ using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Networks;
+using SongRequestManagerV2.SimpleJSON;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;
@@ -21,10 +21,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Web;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
-using System.Web;
 
 #if DEBUG
 using System.Diagnostics;
@@ -109,9 +109,15 @@ namespace SongRequestManagerV2.Bots
         /// <summary>SongRequest を取得、設定</summary>
         public SongRequest CurrentSong
         {
-            get => this.currentSong_;
+            get
+            {
+                return this.currentSong_;
+            }
 
-            set => this.SetProperty(ref this.currentSong_, value);
+            set
+            {
+                this.SetProperty(ref this.currentSong_, value);
+            }
         }
         public SongRequest PlayNow { get; set; }
         /// <summary>
@@ -267,14 +273,17 @@ namespace SongRequestManagerV2.Bots
         {
             this.UpdateRequestUI();
             this.WriteQueueStatusToFile(this.QueueMessage(RequestBotConfig.Instance.RequestQueueOpen));
-            this.UpdateUIRequest?.Invoke(true);
-            this.SetButtonIntactivityRequest?.Invoke(true);
+            UpdateUIRequest?.Invoke(true);
+            SetButtonIntactivityRequest?.Invoke(true);
         }
 
         // BUG: Prototype code, used for testing.
 
 
-        public void ScheduledCommand(string command, ElapsedEventArgs e) => this.Parse(this.GetLoginUser(), command);
+        public void ScheduledCommand(string command, ElapsedEventArgs e)
+        {
+            this.Parse(this.GetLoginUser(), command);
+        }
 
         public void RunStartupScripts()
         {
@@ -296,7 +305,10 @@ namespace SongRequestManagerV2.Bots
 #endif
         }
 
-        private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1) => this._isGameCore = arg1.name == "GameCore";
+        private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1)
+        {
+            this._isGameCore = arg1.name == "GameCore";
+        }
 
         private async void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -687,11 +699,14 @@ namespace SongRequestManagerV2.Bots
             }
         }
 
-        public void RefreshSongQuere() => Dispatcher.RunOnMainThread(() =>
-                                        {
-                                            this.RefreshListRequest?.Invoke(false);
-                                            this.RefreshQueue = true;
-                                        });
+        public void RefreshSongQuere()
+        {
+            Dispatcher.RunOnMainThread(() =>
+            {
+                RefreshListRequest?.Invoke(false);
+                this.RefreshQueue = true;
+            });
+        }
 
         public void DequeueRequest(SongRequest request, bool updateUI = true)
         {
@@ -736,7 +751,10 @@ namespace SongRequestManagerV2.Bots
             }
         }
 
-        public void SetRequestStatus(SongRequest request, RequestStatus status, bool fromHistory = false) => request.Status = status;
+        public void SetRequestStatus(SongRequest request, RequestStatus status, bool fromHistory = false)
+        {
+            request.Status = status;
+        }
 
         public void Blacklist(SongRequest request, bool fromHistory, bool skip)
         {
@@ -866,7 +884,7 @@ namespace SongRequestManagerV2.Bots
                 return ex.ToString();
             }
             finally {
-                this.ReceviedRequest?.Invoke();
+                ReceviedRequest?.Invoke();
             }
         }
 
@@ -922,13 +940,19 @@ namespace SongRequestManagerV2.Bots
         // BUG: This one needs to be cleaned up a lot imo
         // BUG: This file needs to be split up a little, but not just yet... Its easier for me to move around in one massive file, since I can see the whole thing at once. 
         #region Utility functions
-        public static int MaximumTwitchMessageLength => 498 - RequestBotConfig.Instance.BotPrefix.Length;
+        public static int MaximumTwitchMessageLength
+        {
+            get
+            {
+                return 498 - RequestBotConfig.Instance.BotPrefix.Length;
+            }
+        }
 
         public string ChatMessage(ParseState state)
         {
             var dt = this._textFactory.Create().AddUser(state.User);
             try {
-                dt.AddSong((RequestManager.HistorySongs.FirstOrDefault() as SongRequest).SongMetaData); // Exposing the current song 
+                dt.AddSong(RequestManager.HistorySongs.FirstOrDefault().SongMetaData); // Exposing the current song 
             }
             catch (Exception ex) {
                 Logger.Error(ex);
@@ -938,7 +962,10 @@ namespace SongRequestManagerV2.Bots
             return success;
         }
 
-        public void RunScript(IChatUser requestor, string request) => this.ListCollectionManager.Runscript(request);
+        public void RunScript(IChatUser requestor, string request)
+        {
+            this.ListCollectionManager.Runscript(request);
+        }
         #endregion
 
         #region Filter support functions
@@ -1073,7 +1100,10 @@ namespace SongRequestManagerV2.Bots
             return ""; // Empty string: The request is not in the RequestManager.RequestSongs
         }
         // unhappy about naming here
-        private bool IsInQueue(string request) => !(this.IsRequestInQueue(request) == "");
+        private bool IsInQueue(string request)
+        {
+            return !(this.IsRequestInQueue(request) == "");
+        }
 
         public string ClearDuplicateList(ParseState state)
         {
@@ -1168,7 +1198,10 @@ namespace SongRequestManagerV2.Bots
         #endregion
 
         #region Deck Commands
-        public string Restoredeck(ParseState state) => this.Readdeck(this._stateFactory.Create().Setup(state, "savedqueue"));
+        public string Restoredeck(ParseState state)
+        {
+            return this.Readdeck(this._stateFactory.Create().Setup(state, "savedqueue"));
+        }
 
         public void Writedeck(IChatUser requestor, string request)
         {
@@ -1621,7 +1654,7 @@ namespace SongRequestManagerV2.Bots
                     }
                     foreach (var doc in result["docs"].Children) {
                         var entry = doc.AsObject;
-                         var map = this._songMapFactory.Create(entry, "", "");
+                        var map = this._songMapFactory.Create(entry, "", "");
                         this.MapDatabase.IndexSong(map);
                         if (this.Mapperfiltered(entry, true)) {
                             continue; // This forces the mapper filter
@@ -1712,9 +1745,15 @@ namespace SongRequestManagerV2.Bots
 
         #region Move Request To Top/Bottom
 
-        public void MoveRequestToTop(IChatUser requestor, string request) => this.MoveRequestPositionInQueue(requestor, request, true);
+        public void MoveRequestToTop(IChatUser requestor, string request)
+        {
+            this.MoveRequestPositionInQueue(requestor, request, true);
+        }
 
-        public void MoveRequestToBottom(IChatUser requestor, string request) => this.MoveRequestPositionInQueue(requestor, request, false);
+        public void MoveRequestToBottom(IChatUser requestor, string request)
+        {
+            this.MoveRequestPositionInQueue(requestor, request, false);
+        }
 
         public void MoveRequestPositionInQueue(IChatUser requestor, string request, bool top)
         {
@@ -1777,7 +1816,10 @@ namespace SongRequestManagerV2.Bots
         #region Queue Related
 
         // This function existing to unify the queue message strings, and to allow user configurable QueueMessages in the future
-        public string QueueMessage(bool QueueState) => QueueState ? "Queue is open" : "Queue is closed";
+        public string QueueMessage(bool QueueState)
+        {
+            return QueueState ? "Queue is open" : "Queue is closed";
+        }
 
         public string OpenQueue(ParseState state)
         {
@@ -2190,7 +2232,10 @@ namespace SongRequestManagerV2.Bots
 
         // This code is currently in an extreme state of flux. Underlying implementation will change.
 
-        public void OpenList(IChatUser requestor, string request) => this.ListCollectionManager.OpenList(request.ToLower());
+        public void OpenList(IChatUser requestor, string request)
+        {
+            this.ListCollectionManager.OpenList(request.ToLower());
+        }
 
         public List<JSONObject> ReadJSON(string path)
         {
@@ -2318,7 +2363,7 @@ namespace SongRequestManagerV2.Bots
                 combinedBytes = combinedBytes.Concat(File.ReadAllBytes(file)).ToArray();
             }
 
-            var hash = CreateSha1FromBytes(combinedBytes.ToArray());
+            var hash = this.CreateSha1FromBytes(combinedBytes.ToArray());
             return hash;
         }
 

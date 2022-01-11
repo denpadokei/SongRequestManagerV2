@@ -462,7 +462,10 @@ namespace SongRequestManagerV2.Bots
         }
 
 
-        public void Clear(KEY key) => key.kb.KeyboardText.text = "";
+        public void Clear(KEY key)
+        {
+            key.kb.KeyboardText.text = "";
+        }
 
         public void Enter(KEY key)
         {

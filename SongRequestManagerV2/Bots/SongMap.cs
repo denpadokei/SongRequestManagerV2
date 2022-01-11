@@ -10,7 +10,14 @@ namespace SongRequestManagerV2.Bots
     {
         public JSONObject SongObject { get; set; }
         public JSONObject SongVersion { get; private set; }
-        public JSONObject SRMInfo => this.SongObject["srm_info"].AsObject;
+        public JSONObject SRMInfo
+        {
+            get
+            {
+                return this.SongObject["srm_info"].AsObject;
+            }
+        }
+
         public string Path { get; set; }
         public string LevelId { get; set; }
         public float PP { get; set; } = 0;

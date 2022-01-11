@@ -31,11 +31,20 @@ namespace SongRequestManagerV2
             this._content = body;
         }
 
-        public byte[] ContentToBytes() => this._content;
+        public byte[] ContentToBytes()
+        {
+            return this._content;
+        }
 
-        public string ContentToString() => Encoding.UTF8.GetString(this._content);
+        public string ContentToString()
+        {
+            return Encoding.UTF8.GetString(this._content);
+        }
 
-        public JSONNode ConvertToJsonNode() => JSONNode.Parse(this.ContentToString());
+        public JSONNode ConvertToJsonNode()
+        {
+            return JSONNode.Parse(this.ContentToString());
+        }
     }
 
     internal static class WebClient
@@ -173,7 +182,7 @@ namespace SongRequestManagerV2
                         }
 
                         if (contentLength != null) {
-                            progress?.Report((double)totalRead / (double)contentLength);
+                            progress?.Report(totalRead / (double)contentLength);
                         }
 
                         await memoryStream.WriteAsync(buffer, 0, bytesRead).ConfigureAwait(false);
