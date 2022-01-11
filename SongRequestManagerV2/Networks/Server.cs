@@ -17,15 +17,9 @@ namespace SongRequestManagerV2.Networks
         /// <summary>ポート を取得、設定</summary>
         public int Port
         {
-            get
-            {
-                return this.port_;
-            }
+            get => this.port_;
 
-            set
-            {
-                this.SetProperty(ref this.port_, value);
-            }
+            set => this.SetProperty(ref this.port_, value);
         }
 
         /// <summary>IPアドレス を取得、設定</summary>
@@ -33,15 +27,9 @@ namespace SongRequestManagerV2.Networks
         /// <summary>IPアドレス を取得、設定</summary>
         public string IP
         {
-            get
-            {
-                return this.ip_;
-            }
+            get => this.ip_;
 
-            set
-            {
-                this.SetProperty(ref this.ip_, value);
-            }
+            set => this.SetProperty(ref this.ip_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -49,15 +37,9 @@ namespace SongRequestManagerV2.Networks
         /// <summary>説明 を取得、設定</summary>
         public bool IsRunning
         {
-            get
-            {
-                return this.isRunning_;
-            }
+            get => this.isRunning_;
 
-            set
-            {
-                this.SetProperty(ref this.isRunning_, value);
-            }
+            set => this.SetProperty(ref this.isRunning_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -65,15 +47,9 @@ namespace SongRequestManagerV2.Networks
         /// <summary>説明 を取得、設定</summary>
         public string Message
         {
-            get
-            {
-                return this.message_;
-            }
+            get => this.message_;
 
-            set
-            {
-                this.SetProperty(ref this.message_, value);
-            }
+            set => this.SetProperty(ref this.message_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -81,15 +57,9 @@ namespace SongRequestManagerV2.Networks
         /// <summary>説明 を取得、設定</summary>
         public byte[] ResBytes
         {
-            get
-            {
-                return this.resBytes_;
-            }
+            get => this.resBytes_;
 
-            set
-            {
-                this.SetProperty(ref this.resBytes_, value);
-            }
+            set => this.SetProperty(ref this.resBytes_, value);
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*

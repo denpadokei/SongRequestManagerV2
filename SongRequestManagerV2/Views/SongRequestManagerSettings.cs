@@ -9,248 +9,140 @@ namespace SongRequestManagerV2.Views
     [HotReload]
     public class SongRequestManagerSettings : BSMLAutomaticViewController, IInitializable
     {
-        public string ResourceName
-        {
-            get
-            {
-                return "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml";
-            }
-        }
+        public string ResourceName => "SongRequestManagerV2.Views.SongRequestManagerSettings.bsml";
 
         [UIValue("autopick-first-song")]
         public bool AutopickFirstSong
         {
-            get
-            {
-                return RequestBotConfig.Instance.AutopickFirstSong;
-            }
+            get => RequestBotConfig.Instance.AutopickFirstSong;
 
-            set
-            {
-                RequestBotConfig.Instance.AutopickFirstSong = value;
-            }
+            set => RequestBotConfig.Instance.AutopickFirstSong = value;
         }
         [UIValue("clear-nofail")]
         public bool ClearNofail
         {
-            get
-            {
-                return RequestBotConfig.Instance.ClearNoFail;
-            }
+            get => RequestBotConfig.Instance.ClearNoFail;
 
-            set
-            {
-                RequestBotConfig.Instance.ClearNoFail = value;
-            }
+            set => RequestBotConfig.Instance.ClearNoFail = value;
         }
 
         [UIValue("lowest-allowed-rating")]
         public float LowestAllowedRating
         {
-            get
-            {
-                return RequestBotConfig.Instance.LowestAllowedRating;
-            }
+            get => RequestBotConfig.Instance.LowestAllowedRating;
 
-            set
-            {
-                RequestBotConfig.Instance.LowestAllowedRating = value;
-            }
+            set => RequestBotConfig.Instance.LowestAllowedRating = value;
         }
 
         [UIValue("maximum-song-length")]
         public int MaximumSongLength
         {
-            get
-            {
-                return (int)RequestBotConfig.Instance.MaximumSongLength;
-            }
+            get => (int)RequestBotConfig.Instance.MaximumSongLength;
 
-            set
-            {
-                RequestBotConfig.Instance.MaximumSongLength = value;
-            }
+            set => RequestBotConfig.Instance.MaximumSongLength = value;
         }
 
         [UIValue("minimum-njs")]
         public int MinimumNJS
         {
-            get
-            {
-                return (int)RequestBotConfig.Instance.MinimumNJS;
-            }
+            get => (int)RequestBotConfig.Instance.MinimumNJS;
 
-            set
-            {
-                RequestBotConfig.Instance.MinimumNJS = value;
-            }
+            set => RequestBotConfig.Instance.MinimumNJS = value;
         }
 
         [UIValue("tts-support")]
         public bool TtsSupport
         {
-            get
-            {
-                return !string.IsNullOrEmpty(RequestBotConfig.Instance.BotPrefix);
-            }
+            get => !string.IsNullOrEmpty(RequestBotConfig.Instance.BotPrefix);
 
-            set
-            {
-                RequestBotConfig.Instance.BotPrefix = value ? "! " : "";
-            }
+            set => RequestBotConfig.Instance.BotPrefix = value ? "! " : "";
         }
 
         [UIValue("user-request-limit")]
         public int UserRequestLimit
         {
-            get
-            {
-                return RequestBotConfig.Instance.UserRequestLimit;
-            }
+            get => RequestBotConfig.Instance.UserRequestLimit;
 
-            set
-            {
-                RequestBotConfig.Instance.UserRequestLimit = value;
-            }
+            set => RequestBotConfig.Instance.UserRequestLimit = value;
         }
 
         [UIValue("sub-request-limit")]
         public int SubRequestLimit
         {
-            get
-            {
-                return RequestBotConfig.Instance.SubRequestLimit;
-            }
+            get => RequestBotConfig.Instance.SubRequestLimit;
 
-            set
-            {
-                RequestBotConfig.Instance.SubRequestLimit = value;
-            }
+            set => RequestBotConfig.Instance.SubRequestLimit = value;
         }
 
         [UIValue("mod-request-limit")]
         public int ModRequestLimit
         {
-            get
-            {
-                return RequestBotConfig.Instance.ModRequestLimit;
-            }
+            get => RequestBotConfig.Instance.ModRequestLimit;
 
-            set
-            {
-                RequestBotConfig.Instance.ModRequestLimit = value;
-            }
+            set => RequestBotConfig.Instance.ModRequestLimit = value;
         }
 
         [UIValue("vip-bonus-requests")]
         public int VipBonusRequests
         {
-            get
-            {
-                return RequestBotConfig.Instance.VipBonusRequests;
-            }
+            get => RequestBotConfig.Instance.VipBonusRequests;
 
-            set
-            {
-                RequestBotConfig.Instance.VipBonusRequests = value;
-            }
+            set => RequestBotConfig.Instance.VipBonusRequests = value;
         }
 
         [UIValue("mod-full-rights")]
         public bool ModFullRights
         {
-            get
-            {
-                return RequestBotConfig.Instance.ModFullRights;
-            }
+            get => RequestBotConfig.Instance.ModFullRights;
 
-            set
-            {
-                RequestBotConfig.Instance.ModFullRights = value;
-            }
+            set => RequestBotConfig.Instance.ModFullRights = value;
         }
 
         [UIValue("limit-user-requests-to-session")]
         public bool LimitUserRequestsToSession
         {
-            get
-            {
-                return RequestBotConfig.Instance.LimitUserRequestsToSession;
-            }
+            get => RequestBotConfig.Instance.LimitUserRequestsToSession;
 
-            set
-            {
-                RequestBotConfig.Instance.LimitUserRequestsToSession = value;
-            }
+            set => RequestBotConfig.Instance.LimitUserRequestsToSession = value;
         }
 
         [UIValue("session-reset-after-xhours")]
         public int SessionResetAfterXHours
         {
-            get
-            {
-                return RequestBotConfig.Instance.SessionResetAfterXHours;
-            }
+            get => RequestBotConfig.Instance.SessionResetAfterXHours;
 
-            set
-            {
-                RequestBotConfig.Instance.SessionResetAfterXHours = value;
-            }
+            set => RequestBotConfig.Instance.SessionResetAfterXHours = value;
         }
 
         [UIValue("performance-mode")]
         public bool PerformanceMode
         {
-            get
-            {
-                return RequestBotConfig.Instance.PerformanceMode;
-            }
+            get => RequestBotConfig.Instance.PerformanceMode;
 
-            set
-            {
-                RequestBotConfig.Instance.PerformanceMode = value;
-            }
+            set => RequestBotConfig.Instance.PerformanceMode = value;
         }
 
         [UIValue("is-sound-enable")]
         public bool IsSoundEnable
         {
-            get
-            {
-                return RequestBotConfig.Instance.NotifySound;
-            }
+            get => RequestBotConfig.Instance.NotifySound;
 
-            set
-            {
-                RequestBotConfig.Instance.NotifySound = value;
-            }
+            set => RequestBotConfig.Instance.NotifySound = value;
         }
 
         [UIValue("volume")]
         public int Volume
         {
-            get
-            {
-                return RequestBotConfig.Instance.SoundVolume;
-            }
+            get => RequestBotConfig.Instance.SoundVolume;
 
-            set
-            {
-                RequestBotConfig.Instance.SoundVolume = value;
-            }
+            set => RequestBotConfig.Instance.SoundVolume = value;
         }
         [UIValue("pp-sarch")]
         public bool PPSerch
         {
-            get
-            {
-                return RequestBotConfig.Instance.PPSearch;
-            }
+            get => RequestBotConfig.Instance.PPSearch;
 
-            set
-            {
-                RequestBotConfig.Instance.PPSearch = value;
-            }
+            set => RequestBotConfig.Instance.PPSearch = value;
         }
 
         public void Initialize()

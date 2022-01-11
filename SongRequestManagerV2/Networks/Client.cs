@@ -16,15 +16,9 @@ namespace SongRequestManagerV2.Networks
         /// <summary>説明 を取得、設定</summary>
         public string IP
         {
-            get
-            {
-                return this.ip_;
-            }
+            get => this.ip_;
 
-            set
-            {
-                this.SetProperty(ref this.ip_, value);
-            }
+            set => this.SetProperty(ref this.ip_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -32,15 +26,9 @@ namespace SongRequestManagerV2.Networks
         /// <summary>説明 を取得、設定</summary>
         public int Port
         {
-            get
-            {
-                return this.port_;
-            }
+            get => this.port_;
 
-            set
-            {
-                this.SetProperty(ref this.port_, value);
-            }
+            set => this.SetProperty(ref this.port_, value);
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*

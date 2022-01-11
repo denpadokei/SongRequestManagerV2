@@ -16,21 +16,9 @@ namespace SongRequestManagerV2
     [Plugin(RuntimeOptions.DynamicInit)]
     public class Plugin
     {
-        public string Name
-        {
-            get
-            {
-                return "Song Request ManagerV2";
-            }
-        }
+        public string Name => "Song Request ManagerV2";
 
-        public static string Version
-        {
-            get
-            {
-                return _meta.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            }
-        }
+        public static string Version => _meta.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         private static PluginMetadata _meta;
         public static IPALogger Logger { get; private set; }

@@ -109,15 +109,9 @@ namespace SongRequestManagerV2.Bots
         /// <summary>SongRequest を取得、設定</summary>
         public SongRequest CurrentSong
         {
-            get
-            {
-                return this.currentSong_;
-            }
+            get => this.currentSong_;
 
-            set
-            {
-                this.SetProperty(ref this.currentSong_, value);
-            }
+            set => this.SetProperty(ref this.currentSong_, value);
         }
         public SongRequest PlayNow { get; set; }
         /// <summary>
@@ -940,13 +934,7 @@ namespace SongRequestManagerV2.Bots
         // BUG: This one needs to be cleaned up a lot imo
         // BUG: This file needs to be split up a little, but not just yet... Its easier for me to move around in one massive file, since I can see the whole thing at once. 
         #region Utility functions
-        public static int MaximumTwitchMessageLength
-        {
-            get
-            {
-                return 498 - RequestBotConfig.Instance.BotPrefix.Length;
-            }
-        }
+        public static int MaximumTwitchMessageLength => 498 - RequestBotConfig.Instance.BotPrefix.Length;
 
         public string ChatMessage(ParseState state)
         {

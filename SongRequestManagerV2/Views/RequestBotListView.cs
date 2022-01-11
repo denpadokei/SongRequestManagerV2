@@ -31,15 +31,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("play-button-text")]
         public string PlayButtonText
         {
-            get
-            {
-                return this.playButtonName_ ?? "PLAY";
-            }
+            get => this.playButtonName_ ?? "PLAY";
 
-            set
-            {
-                this.SetProperty(ref this.playButtonName_, value);
-            }
+            set => this.SetProperty(ref this.playButtonName_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -48,15 +42,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("skip-button-text")]
         public string SkipButtonName
         {
-            get
-            {
-                return this.skipButtonName_ ?? "SKIP";
-            }
+            get => this.skipButtonName_ ?? "SKIP";
 
-            set
-            {
-                this.SetProperty(ref this.skipButtonName_, value);
-            }
+            set => this.SetProperty(ref this.skipButtonName_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -65,15 +53,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("history-button-text")]
         public string HistoryButtonText
         {
-            get
-            {
-                return this.historyButtonText_ ?? "HISTORY";
-            }
+            get => this.historyButtonText_ ?? "HISTORY";
 
-            set
-            {
-                this.SetProperty(ref this.historyButtonText_, value);
-            }
+            set => this.SetProperty(ref this.historyButtonText_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -82,15 +64,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("history-hint")]
         public string HistoryHoverHint
         {
-            get
-            {
-                return this.historyHoverHint_ ?? "";
-            }
+            get => this.historyHoverHint_ ?? "";
 
-            set
-            {
-                this.SetProperty(ref this.historyHoverHint_, value);
-            }
+            set => this.SetProperty(ref this.historyHoverHint_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -99,15 +75,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("queue-button-text")]
         public string QueueButtonText
         {
-            get
-            {
-                return this.queueButtonText_ ?? "QUEUQ CLOSE";
-            }
+            get => this.queueButtonText_ ?? "QUEUQ CLOSE";
 
-            set
-            {
-                this.SetProperty(ref this.queueButtonText_, value);
-            }
+            set => this.SetProperty(ref this.queueButtonText_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -116,15 +86,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("blacklist-button-text")]
         public string BlackListButtonText
         {
-            get
-            {
-                return this.blacklistButtonText_ ?? "BLACK LIST";
-            }
+            get => this.blacklistButtonText_ ?? "BLACK LIST";
 
-            set
-            {
-                this.SetProperty(ref this.blacklistButtonText_, value);
-            }
+            set => this.SetProperty(ref this.blacklistButtonText_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -136,15 +100,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("progress-text")]
         public string ProgressText
         {
-            get
-            {
-                return this.progressText_ ?? "Download Progress - 0 %";
-            }
+            get => this.progressText_ ?? "Download Progress - 0 %";
 
-            set
-            {
-                this.SetProperty(ref this.progressText_, value);
-            }
+            set => this.SetProperty(ref this.progressText_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -153,15 +111,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("history-button-enable")]
         public bool IsHistoryButtonEnable
         {
-            get
-            {
-                return this.isHistoryButtonEnable_;
-            }
+            get => this.isHistoryButtonEnable_;
 
-            set
-            {
-                this.SetProperty(ref this.isHistoryButtonEnable_, value);
-            }
+            set => this.SetProperty(ref this.isHistoryButtonEnable_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -170,15 +122,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("play-button-enable")]
         public bool IsPlayButtonEnable
         {
-            get
-            {
-                return this.isPlayButtonEnable_;
-            }
+            get => this.isPlayButtonEnable_;
 
-            set
-            {
-                this.SetProperty(ref this.isPlayButtonEnable_, value);
-            }
+            set => this.SetProperty(ref this.isPlayButtonEnable_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -187,15 +133,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("skip-button-enable")]
         public bool IsSkipButtonEnable
         {
-            get
-            {
-                return this.isSkipButtonEnable_;
-            }
+            get => this.isSkipButtonEnable_;
 
-            set
-            {
-                this.SetProperty(ref this.isSkipButtonEnable_, value);
-            }
+            set => this.SetProperty(ref this.isSkipButtonEnable_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -204,15 +144,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("blacklist-button-enable")]
         public bool IsBlacklistButtonEnable
         {
-            get
-            {
-                return this.isBlacklistButtonEnable_;
-            }
+            get => this.isBlacklistButtonEnable_;
 
-            set
-            {
-                this.SetProperty(ref this.isBlacklistButtonEnable_, value);
-            }
+            set => this.SetProperty(ref this.isBlacklistButtonEnable_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -221,15 +155,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("performance-mode")]
         public bool PerformanceMode
         {
-            get
-            {
-                return this.isPerformanceMode_;
-            }
+            get => this.isPerformanceMode_;
 
-            set
-            {
-                this.SetProperty(ref this.isPerformanceMode_, value);
-            }
+            set => this.SetProperty(ref this.isPerformanceMode_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -237,15 +165,9 @@ namespace SongRequestManagerV2.Views
         /// <summary>説明 を取得、設定</summary>
         public bool IsShowHistory
         {
-            get
-            {
-                return this.isShowHistory_;
-            }
+            get => this.isShowHistory_;
 
-            set
-            {
-                this.SetProperty(ref this.isShowHistory_, value);
-            }
+            set => this.SetProperty(ref this.isShowHistory_, value);
         }
 
         private int SelectedRow
@@ -267,15 +189,9 @@ namespace SongRequestManagerV2.Views
         /// <summary>説明 を取得、設定</summary>
         public bool IsActiveButton
         {
-            get
-            {
-                return this.isActiveButton_;
-            }
+            get => this.isActiveButton_;
 
-            set
-            {
-                this.SetProperty(ref this.isActiveButton_, value);
-            }
+            set => this.SetProperty(ref this.isActiveButton_, value);
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -781,15 +697,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("title")]
         public string Title
         {
-            get
-            {
-                return this.title_ ?? "";
-            }
+            get => this.title_ ?? "";
 
-            set
-            {
-                this.SetProperty(ref this.title_, value);
-            }
+            set => this.SetProperty(ref this.title_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -798,15 +708,9 @@ namespace SongRequestManagerV2.Views
         [UIValue("message")]
         public string Message
         {
-            get
-            {
-                return this.message_ ?? "";
-            }
+            get => this.message_ ?? "";
 
-            set
-            {
-                this.SetProperty(ref this.message_, value);
-            }
+            set => this.SetProperty(ref this.message_, value);
         }
 
         [UIAction("yes-click")]

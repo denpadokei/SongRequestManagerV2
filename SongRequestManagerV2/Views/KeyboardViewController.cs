@@ -13,13 +13,7 @@ namespace SongRequestManagerV2.Views
         [Inject]
         private readonly IRequestBot _bot;
 
-        public override string Content
-        {
-            get
-            {
-                return @"<bg></bg>";
-            }
-        }
+        public override string Content => @"<bg></bg>";
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {

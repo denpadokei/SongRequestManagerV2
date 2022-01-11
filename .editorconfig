@@ -80,14 +80,14 @@ csharp_style_var_for_built_in_types = true
 csharp_style_var_when_type_is_apparent = true
 
 # 式のようなメンバー
-csharp_style_expression_bodied_accessors = false
+csharp_style_expression_bodied_accessors = true:suggestion
 csharp_style_expression_bodied_constructors = false
-csharp_style_expression_bodied_indexers = false
+csharp_style_expression_bodied_indexers = true:suggestion
 csharp_style_expression_bodied_lambdas = true
 csharp_style_expression_bodied_local_functions = false
 csharp_style_expression_bodied_methods = false
 csharp_style_expression_bodied_operators = true
-csharp_style_expression_bodied_properties = false
+csharp_style_expression_bodied_properties = true:suggestion
 
 # パターン マッチング設定
 csharp_style_pattern_matching_over_as_with_null_check = false

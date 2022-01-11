@@ -6,13 +6,7 @@ namespace SongRequestManagerV2
 {
     public static class Logger
     {
-        private static IPA.Logging.Logger IPALogger
-        {
-            get
-            {
-                return Plugin.Logger;
-            }
-        }
+        private static IPA.Logging.Logger IPALogger => Plugin.Logger;
 
         public static void Debug(string message, [CallerFilePath] string path = null, [CallerMemberName] string member = null, [CallerLineNumber] int? num = null)
         {

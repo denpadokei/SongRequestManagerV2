@@ -68,13 +68,7 @@ namespace SongRequestManagerV2.SimpleJSON
             private readonly Type type;
             private Dictionary<string, JSONNode>.Enumerator m_Object;
             private List<JSONNode>.Enumerator m_Array;
-            public bool IsValid
-            {
-                get
-                {
-                    return this.type != Type.None;
-                }
-            }
+            public bool IsValid => this.type != Type.None;
 
             public Enumerator(List<JSONNode>.Enumerator aArrayEnum)
             {
@@ -120,13 +114,7 @@ namespace SongRequestManagerV2.SimpleJSON
             public ValueEnumerator(List<JSONNode>.Enumerator aArrayEnum) : this(new Enumerator(aArrayEnum)) { }
             public ValueEnumerator(Dictionary<string, JSONNode>.Enumerator aDictEnum) : this(new Enumerator(aDictEnum)) { }
             public ValueEnumerator(Enumerator aEnumerator) { this.m_Enumerator = aEnumerator; }
-            public JSONNode Current
-            {
-                get
-                {
-                    return this.m_Enumerator.Current.Value;
-                }
-            }
+            public JSONNode Current => this.m_Enumerator.Current.Value;
 
             public bool MoveNext()
             {
@@ -144,13 +132,7 @@ namespace SongRequestManagerV2.SimpleJSON
             public KeyEnumerator(List<JSONNode>.Enumerator aArrayEnum) : this(new Enumerator(aArrayEnum)) { }
             public KeyEnumerator(Dictionary<string, JSONNode>.Enumerator aDictEnum) : this(new Enumerator(aDictEnum)) { }
             public KeyEnumerator(Enumerator aEnumerator) { this.m_Enumerator = aEnumerator; }
-            public string Current
-            {
-                get
-                {
-                    return this.m_Enumerator.Current.Key;
-                }
-            }
+            public string Current => this.m_Enumerator.Current.Key;
 
             public bool MoveNext()
             {
@@ -174,21 +156,9 @@ namespace SongRequestManagerV2.SimpleJSON
                     this.m_Enumerator = this.m_Node.GetEnumerator();
                 }
             }
-            public KeyValuePair<string, JSONNode> Current
-            {
-                get
-                {
-                    return this.m_Enumerator.Current;
-                }
-            }
+            public KeyValuePair<string, JSONNode> Current => this.m_Enumerator.Current;
 
-            object IEnumerator.Current
-            {
-                get
-                {
-                    return this.m_Enumerator.Current;
-                }
-            }
+            object IEnumerator.Current => this.m_Enumerator.Current;
 
             public bool MoveNext()
             {
@@ -229,69 +199,27 @@ namespace SongRequestManagerV2.SimpleJSON
 
         public abstract JSONNodeType Tag { get; }
 
-        public virtual JSONNode this[int aIndex] { get { return null; } set { } }
+        public virtual JSONNode this[int aIndex] { get => null; set { } }
 
-        public virtual JSONNode this[string aKey] { get { return null; } set { } }
+        public virtual JSONNode this[string aKey] { get => null; set { } }
 
-        public virtual string Value { get { return ""; } set { } }
+        public virtual string Value { get => ""; set { } }
 
-        public virtual int Count
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public virtual int Count => 0;
 
-        public virtual bool IsNumber
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool IsNumber => false;
 
-        public virtual bool IsString
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool IsString => false;
 
-        public virtual bool IsBoolean
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool IsBoolean => false;
 
-        public virtual bool IsNull
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool IsNull => false;
 
-        public virtual bool IsArray
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool IsArray => false;
 
-        public virtual bool IsObject
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool IsObject => false;
 
-        public virtual bool Inline { get { return false; } set { } }
+        public virtual bool Inline { get => false; set { } }
 
         public virtual void Add(string aKey, JSONNode aItem)
         {
@@ -369,29 +297,11 @@ namespace SongRequestManagerV2.SimpleJSON
         internal abstract void WriteToStringBuilder(StringBuilder aSB, int aIndent, int aIndentInc, JSONTextMode aMode);
 
         public abstract Enumerator GetEnumerator();
-        public IEnumerable<KeyValuePair<string, JSONNode>> Linq
-        {
-            get
-            {
-                return new LinqEnumerator(this);
-            }
-        }
+        public IEnumerable<KeyValuePair<string, JSONNode>> Linq => new LinqEnumerator(this);
 
-        public KeyEnumerator Keys
-        {
-            get
-            {
-                return new KeyEnumerator(this.GetEnumerator());
-            }
-        }
+        public KeyEnumerator Keys => new KeyEnumerator(this.GetEnumerator());
 
-        public ValueEnumerator Values
-        {
-            get
-            {
-                return new ValueEnumerator(this.GetEnumerator());
-            }
-        }
+        public ValueEnumerator Values => new ValueEnumerator(this.GetEnumerator());
 
         #endregion common interface
 
@@ -408,36 +318,21 @@ namespace SongRequestManagerV2.SimpleJSON
 
                 return 0.0;
             }
-            set
-            {
-                this.Value = value.ToString(CultureInfo.InvariantCulture);
-            }
+            set => this.Value = value.ToString(CultureInfo.InvariantCulture);
         }
 
         public virtual int AsInt
         {
-            get
-            {
-                return (int)this.AsDouble;
-            }
+            get => (int)this.AsDouble;
 
-            set
-            {
-                this.AsDouble = value;
-            }
+            set => this.AsDouble = value;
         }
 
         public virtual float AsFloat
         {
-            get
-            {
-                return (float)this.AsDouble;
-            }
+            get => (float)this.AsDouble;
 
-            set
-            {
-                this.AsDouble = value;
-            }
+            set => this.AsDouble = value;
         }
 
         public virtual bool AsBool
@@ -450,10 +345,7 @@ namespace SongRequestManagerV2.SimpleJSON
 
                 return !string.IsNullOrEmpty(this.Value);
             }
-            set
-            {
-                this.Value = (value) ? "true" : "false";
-            }
+            set => this.Value = (value) ? "true" : "false";
         }
 
         public virtual long AsLong
@@ -466,10 +358,7 @@ namespace SongRequestManagerV2.SimpleJSON
 
                 return 0L;
             }
-            set
-            {
-                this.Value = value.ToString();
-            }
+            set => this.Value = value.ToString();
         }
 
         public virtual ulong AsULong
@@ -482,27 +371,12 @@ namespace SongRequestManagerV2.SimpleJSON
 
                 return 0;
             }
-            set
-            {
-                this.Value = value.ToString();
-            }
+            set => this.Value = value.ToString();
         }
 
-        public virtual JSONArray AsArray
-        {
-            get
-            {
-                return this as JSONArray;
-            }
-        }
+        public virtual JSONArray AsArray => this as JSONArray;
 
-        public virtual JSONObject AsObject
-        {
-            get
-            {
-                return this as JSONObject;
-            }
-        }
+        public virtual JSONObject AsObject => this as JSONObject;
 
 
         #endregion typecasting properties
@@ -844,32 +718,14 @@ namespace SongRequestManagerV2.SimpleJSON
         private bool inline = false;
         public override bool Inline
         {
-            get
-            {
-                return this.inline;
-            }
+            get => this.inline;
 
-            set
-            {
-                this.inline = value;
-            }
+            set => this.inline = value;
         }
 
-        public override JSONNodeType Tag
-        {
-            get
-            {
-                return JSONNodeType.Array;
-            }
-        }
+        public override JSONNodeType Tag => JSONNodeType.Array;
 
-        public override bool IsArray
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool IsArray => true;
 
         public override Enumerator GetEnumerator()
         {
@@ -903,10 +759,7 @@ namespace SongRequestManagerV2.SimpleJSON
 
         public override JSONNode this[string aKey]
         {
-            get
-            {
-                return new JSONLazyCreator(this);
-            }
+            get => new JSONLazyCreator(this);
 
             set
             {
@@ -918,13 +771,7 @@ namespace SongRequestManagerV2.SimpleJSON
             }
         }
 
-        public override int Count
-        {
-            get
-            {
-                return this.m_List.Count;
-            }
-        }
+        public override int Count => this.m_List.Count;
 
         public override void Add(string aKey, JSONNode aItem)
         {
@@ -1022,32 +869,14 @@ namespace SongRequestManagerV2.SimpleJSON
         private bool inline = false;
         public override bool Inline
         {
-            get
-            {
-                return this.inline;
-            }
+            get => this.inline;
 
-            set
-            {
-                this.inline = value;
-            }
+            set => this.inline = value;
         }
 
-        public override JSONNodeType Tag
-        {
-            get
-            {
-                return JSONNodeType.Object;
-            }
-        }
+        public override JSONNodeType Tag => JSONNodeType.Object;
 
-        public override bool IsObject
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool IsObject => true;
 
         public override Enumerator GetEnumerator()
         {
@@ -1105,13 +934,7 @@ namespace SongRequestManagerV2.SimpleJSON
             }
         }
 
-        public override int Count
-        {
-            get
-            {
-                return this.m_Dict.Count;
-            }
-        }
+        public override int Count => this.m_Dict.Count;
 
         public override void Add(string aKey, JSONNode aItem)
         {
@@ -1249,21 +1072,9 @@ namespace SongRequestManagerV2.SimpleJSON
     {
         private string m_Data;
 
-        public override JSONNodeType Tag
-        {
-            get
-            {
-                return JSONNodeType.String;
-            }
-        }
+        public override JSONNodeType Tag => JSONNodeType.String;
 
-        public override bool IsString
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool IsString => true;
 
         public override Enumerator GetEnumerator()
         {
@@ -1272,15 +1083,9 @@ namespace SongRequestManagerV2.SimpleJSON
 
         public override string Value
         {
-            get
-            {
-                return this.m_Data;
-            }
+            get => this.m_Data;
 
-            set
-            {
-                this.m_Data = value;
-            }
+            set => this.m_Data = value;
         }
 
         public JSONString(string aData)
@@ -1331,21 +1136,9 @@ namespace SongRequestManagerV2.SimpleJSON
     {
         private double m_Data;
 
-        public override JSONNodeType Tag
-        {
-            get
-            {
-                return JSONNodeType.Number;
-            }
-        }
+        public override JSONNodeType Tag => JSONNodeType.Number;
 
-        public override bool IsNumber
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool IsNumber => true;
 
         public override Enumerator GetEnumerator()
         {
@@ -1354,10 +1147,7 @@ namespace SongRequestManagerV2.SimpleJSON
 
         public override string Value
         {
-            get
-            {
-                return this.m_Data.ToString(CultureInfo.InvariantCulture);
-            }
+            get => this.m_Data.ToString(CultureInfo.InvariantCulture);
 
             set
             {
@@ -1369,39 +1159,21 @@ namespace SongRequestManagerV2.SimpleJSON
 
         public override double AsDouble
         {
-            get
-            {
-                return this.m_Data;
-            }
+            get => this.m_Data;
 
-            set
-            {
-                this.m_Data = value;
-            }
+            set => this.m_Data = value;
         }
         public override long AsLong
         {
-            get
-            {
-                return (long)this.m_Data;
-            }
+            get => (long)this.m_Data;
 
-            set
-            {
-                this.m_Data = value;
-            }
+            set => this.m_Data = value;
         }
         public override ulong AsULong
         {
-            get
-            {
-                return (ulong)this.m_Data;
-            }
+            get => (ulong)this.m_Data;
 
-            set
-            {
-                this.m_Data = value;
-            }
+            set => this.m_Data = value;
         }
 
         public JSONNumber(double aData)
@@ -1471,21 +1243,9 @@ namespace SongRequestManagerV2.SimpleJSON
     {
         private bool m_Data;
 
-        public override JSONNodeType Tag
-        {
-            get
-            {
-                return JSONNodeType.Boolean;
-            }
-        }
+        public override JSONNodeType Tag => JSONNodeType.Boolean;
 
-        public override bool IsBoolean
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool IsBoolean => true;
 
         public override Enumerator GetEnumerator()
         {
@@ -1494,10 +1254,7 @@ namespace SongRequestManagerV2.SimpleJSON
 
         public override string Value
         {
-            get
-            {
-                return this.m_Data.ToString();
-            }
+            get => this.m_Data.ToString();
 
             set
             {
@@ -1508,15 +1265,9 @@ namespace SongRequestManagerV2.SimpleJSON
         }
         public override bool AsBool
         {
-            get
-            {
-                return this.m_Data;
-            }
+            get => this.m_Data;
 
-            set
-            {
-                this.m_Data = value;
-            }
+            set => this.m_Data = value;
         }
 
         public JSONBool(bool aData)
@@ -1577,21 +1328,9 @@ namespace SongRequestManagerV2.SimpleJSON
         }
         private JSONNull() { }
 
-        public override JSONNodeType Tag
-        {
-            get
-            {
-                return JSONNodeType.NullValue;
-            }
-        }
+        public override JSONNodeType Tag => JSONNodeType.NullValue;
 
-        public override bool IsNull
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool IsNull => true;
 
         public override Enumerator GetEnumerator()
         {
@@ -1600,19 +1339,13 @@ namespace SongRequestManagerV2.SimpleJSON
 
         public override string Value
         {
-            get
-            {
-                return "null";
-            }
+            get => "null";
 
             set { }
         }
         public override bool AsBool
         {
-            get
-            {
-                return false;
-            }
+            get => false;
 
             set { }
         }
@@ -1646,13 +1379,7 @@ namespace SongRequestManagerV2.SimpleJSON
     {
         private JSONNode m_Node = null;
         private readonly string m_Key = null;
-        public override JSONNodeType Tag
-        {
-            get
-            {
-                return JSONNodeType.None;
-            }
-        }
+        public override JSONNodeType Tag => JSONNodeType.None;
 
         public override Enumerator GetEnumerator()
         {
@@ -1686,28 +1413,16 @@ namespace SongRequestManagerV2.SimpleJSON
 
         public override JSONNode this[int aIndex]
         {
-            get
-            {
-                return new JSONLazyCreator(this);
-            }
+            get => new JSONLazyCreator(this);
 
-            set
-            {
-                this.Set(new JSONArray()).Add(value);
-            }
+            set => this.Set(new JSONArray()).Add(value);
         }
 
         public override JSONNode this[string aKey]
         {
-            get
-            {
-                return new JSONLazyCreator(this, aKey);
-            }
+            get => new JSONLazyCreator(this, aKey);
 
-            set
-            {
-                this.Set(new JSONObject()).Add(aKey, value);
-            }
+            set => this.Set(new JSONObject()).Add(aKey, value);
         }
 
         public override void Add(JSONNode aItem)
@@ -1748,28 +1463,19 @@ namespace SongRequestManagerV2.SimpleJSON
         public override int AsInt
         {
             get { this.Set(new JSONNumber(0)); return 0; }
-            set
-            {
-                this.Set(new JSONNumber(value));
-            }
+            set => this.Set(new JSONNumber(value));
         }
 
         public override float AsFloat
         {
             get { this.Set(new JSONNumber(0.0f)); return 0.0f; }
-            set
-            {
-                this.Set(new JSONNumber(value));
-            }
+            set => this.Set(new JSONNumber(value));
         }
 
         public override double AsDouble
         {
             get { this.Set(new JSONNumber(0.0)); return 0.0; }
-            set
-            {
-                this.Set(new JSONNumber(value));
-            }
+            set => this.Set(new JSONNumber(value));
         }
 
         public override long AsLong
@@ -1823,27 +1529,12 @@ namespace SongRequestManagerV2.SimpleJSON
         public override bool AsBool
         {
             get { this.Set(new JSONBool(false)); return false; }
-            set
-            {
-                this.Set(new JSONBool(value));
-            }
+            set => this.Set(new JSONBool(value));
         }
 
-        public override JSONArray AsArray
-        {
-            get
-            {
-                return this.Set(new JSONArray());
-            }
-        }
+        public override JSONArray AsArray => this.Set(new JSONArray());
 
-        public override JSONObject AsObject
-        {
-            get
-            {
-                return this.Set(new JSONObject());
-            }
-        }
+        public override JSONObject AsObject => this.Set(new JSONObject());
 
         internal override void WriteToStringBuilder(StringBuilder aSB, int aIndent, int aIndentInc, JSONTextMode aMode)
         {

@@ -44,15 +44,9 @@ namespace SongRequestManagerV2
         [UIValue("hover-hint")]
         public string Hint
         {
-            get
-            {
-                return this.hint_ ?? "";
-            }
+            get => this.hint_ ?? "";
 
-            set
-            {
-                this.SetProperty(ref this.hint_, value);
-            }
+            set => this.SetProperty(ref this.hint_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -61,15 +55,9 @@ namespace SongRequestManagerV2
         [UIValue("song-name")]
         public string SongName
         {
-            get
-            {
-                return this.songName_ ?? "";
-            }
+            get => this.songName_ ?? "";
 
-            set
-            {
-                this.SetProperty(ref this.songName_, value);
-            }
+            set => this.SetProperty(ref this.songName_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -78,25 +66,13 @@ namespace SongRequestManagerV2
         [UIValue("author-name")]
         public string AuthorName
         {
-            get
-            {
-                return this.authorName_ ?? "";
-            }
+            get => this.authorName_ ?? "";
 
-            set
-            {
-                this.SetProperty(ref this.authorName_, value);
-            }
+            set => this.SetProperty(ref this.authorName_, value);
         }
 
         public JSONObject SongNode { get; private set; }
-        public JSONObject SongMetaData
-        {
-            get
-            {
-                return this.SongNode["metadata"].AsObject;
-            }
-        }
+        public JSONObject SongMetaData => this.SongNode["metadata"].AsObject;
 
         public JSONObject SongVersion { get; private set; }
         public bool IsWIP { get; private set; }
