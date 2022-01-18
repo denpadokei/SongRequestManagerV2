@@ -51,11 +51,11 @@ namespace SongRequestManagerV2.Networks
         {
             string sMessage = null;
             byte bCode = 0;
-            Int16 iVoice = 1;
-            Int16 iVolume = -1;
-            Int16 iSpeed = -1;
-            Int16 iTone = -1;
-            Int16 iCommand = 0x0001;
+            short iVoice = 1;
+            short iVolume = -1;
+            short iSpeed = -1;
+            short iTone = -1;
+            short iCommand = 0x0001;
 
 
             //引数処理
@@ -67,10 +67,10 @@ namespace SongRequestManagerV2.Networks
                     sMessage = messages[0];
                     break;
                 case 5:
-                    iSpeed = Int16.Parse(messages[0]);
-                    iTone = Int16.Parse(messages[1]);
-                    iVolume = Int16.Parse(messages[2]);
-                    iVoice = Int16.Parse(messages[3]);
+                    iSpeed = short.Parse(messages[0]);
+                    iTone = short.Parse(messages[1]);
+                    iVolume = short.Parse(messages[2]);
+                    iVoice = short.Parse(messages[3]);
                     sMessage = messages[4];
                     break;
                 default:

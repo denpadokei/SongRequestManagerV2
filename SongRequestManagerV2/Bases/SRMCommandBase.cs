@@ -191,7 +191,7 @@ namespace SongRequestManagerV2.Bases
 
         public string GetAliases()
         {
-            return String.Join(",", this.Aliases.ToArray());
+            return string.Join(",", this.Aliases.ToArray());
         }
         #endregion
 

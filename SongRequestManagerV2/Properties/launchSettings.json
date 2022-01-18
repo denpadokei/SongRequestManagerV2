@@ -3,7 +3,8 @@
     "SongRequestManagerV2": {
       "commandName": "Project",
       "commandLineArgs": "\"D:\\Oculus\\Software\\hyperbolic-magnetism-beat-saber\\Beat Saber.exe\" --verbose --debug fpfc",
-      "workingDirectory": "D:\\Oculus\\Software\\hyperbolic-magnetism-beat-saber"
+      "workingDirectory": "D:\\Oculus\\Software\\hyperbolic-magnetism-beat-saber",
+      "nativeDebugging": true
     },
     "プロファイル 1": {
       "commandName": "Executable",

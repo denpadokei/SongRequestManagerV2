@@ -1,7 +1,7 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
   <horizontal horizontal-fit='MinSize' child-align='MiddleLeft'>
     <vertical min-width='50' child-align='LowerLeft' horizontal-fit='Unconstrained'>
-      <checkbox text='PerformanceMode' value='performance-mode' bind-value='true' apply-on-change='true' hover-hint='Only execute command in menu.' preferred-width='50'></checkbox>
+      <checkbox text='~performance-mode-text' value='performance-mode' bind-value='true' apply-on-change='true' hover-hint='Only execute command in menu.' preferred-width='50'></checkbox>
       <text text='~progress-text' align='BottomLeft' word-wrapping='false' overflow-mode='Overflow' anchor-max-x='0' anchor-min-x='0' anchor-max-y='1' anchor-min-y='0'></text>
     </vertical>
     <vertical min-width='80'>

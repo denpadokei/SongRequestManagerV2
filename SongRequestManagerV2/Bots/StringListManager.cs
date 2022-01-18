@@ -83,7 +83,7 @@ namespace SongRequestManagerV2.Bots
             try {
                 var listfilename = Path.Combine(Plugin.DataPath, filename);
 
-                var output = String.Join(separator, this.list.ToArray());
+                var output = string.Join(separator, this.list.ToArray());
                 File.WriteAllText(listfilename, output);
                 return true;
             }

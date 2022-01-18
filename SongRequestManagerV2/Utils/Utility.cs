@@ -115,7 +115,11 @@ namespace SongRequestManagerV2.Utils
 
         public static bool IsAprilFool()
         {
-            return RequestBotConfig.Instance.EableAprilFool && DateTime.Now.Month == 4 && DateTime.Now.Day == 1;
+#if DEBUG
+            return RequestBotConfig.Instance.EnableAprilFool;
+#else
+            return RequestBotConfig.Instance.EnableAprilFool && DateTime.Now.Month == 4 && DateTime.Now.Day == 1;
+#endif
         }
     }
 }
