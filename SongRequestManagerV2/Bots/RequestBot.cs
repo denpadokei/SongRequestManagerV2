@@ -788,7 +788,7 @@ namespace SongRequestManagerV2.Bots
             if (_beatSaverRegex.IsMatch(request)) {
                 var requestparts = request.Split(new char[] { '-' }, 2);
                 //return requestparts[0];
-                if (Int32.TryParse(requestparts[1], out var o)) {
+                if (int.TryParse(requestparts[1], out var o)) {
                     // this.ChatManager.QueueChatMessage($"key={o.ToString("x")}");
                     return o.ToString("x");
                 }
@@ -1884,7 +1884,7 @@ namespace SongRequestManagerV2.Bots
 
         public string QueueLottery(ParseState state)
         {
-            Int32.TryParse(state.Parameter, out var entrycount);
+            int.TryParse(state.Parameter, out var entrycount);
             var list = RequestManager.RequestSongs.OfType<SongRequest>().ToList();
             this.Shuffle(list);
 

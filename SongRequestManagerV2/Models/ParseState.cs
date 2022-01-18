@@ -11,7 +11,7 @@ namespace SongRequestManagerV2.Models
     public class ParseState
     {
         public IChatUser User { get; set; }
-        public String Request { get; set; }
+        public string Request { get; set; }
         public CmdFlags Flags { get; set; }
         public string Info { get; set; }
         public string Command { get; set; } = null;

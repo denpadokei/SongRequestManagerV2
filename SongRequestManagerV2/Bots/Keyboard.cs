@@ -173,7 +173,7 @@ namespace SongRequestManagerV2.Bots
             return;
         }
 
-        private bool ReadFloat(ref String data, ref int Position, ref float result)
+        private bool ReadFloat(ref string data, ref int Position, ref float result)
         {
             if (Position >= data.Length) {
                 return false;

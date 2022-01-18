@@ -39,7 +39,7 @@ namespace SongRequestManagerV2.Configuration
         public virtual bool PerformanceMode { get; set; } = false;
         public virtual bool NotifySound { get; set; } = false;
         public virtual int SoundVolume { get; set; } = 50;
-        public virtual bool EableAprilFool { get; set; } = true;
+        public virtual bool EnableAprilFool { get; set; } = true;
         // 使ってない設定達 R.I.P
 #if false
         public virtual bool OfflineMode { get; set; } = false;
