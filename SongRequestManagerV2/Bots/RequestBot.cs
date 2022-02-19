@@ -2043,10 +2043,24 @@ namespace SongRequestManagerV2.Bots
         // BUG: This requires a switch, or should be disabled for those who don't allow links
         public string ShowSongLink(ParseState state)
         {
-            if (this.PlayNow != null) {
-                var json = this.PlayNow.SongNode;
-                this._textFactory.Create().AddSong(json).QueueMessage(StringFormat.LinkSonglink.ToString());
+            JSONObject json = null;
+            switch (RequestBotConfig.Instance.LinkType) {
+                case LinkType.OnlyRequest:
+                    if (this.PlayNow == null) {
+                        return success;
+                    }
+                    json = this.PlayNow.SongNode;
+                    break;
+                case LinkType.All:
+                    if (SongInfomationProvider.CurrentSongLevel == null) {
+                        return success;
+                    }
+                    json = SongInfomationProvider.CurrentSongLevel;
+                    break;
+                default:
+                    return success;
             }
+            this._textFactory.Create().AddSong(json).QueueMessage(StringFormat.LinkSonglink.ToString());
             return success;
         }
 

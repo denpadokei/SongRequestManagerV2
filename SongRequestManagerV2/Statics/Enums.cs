@@ -209,4 +209,10 @@ namespace SongRequestManagerV2.Statics
     #endregion
 
     [Flags] public enum SongFilter { none = 0, Queue = 1, Blacklist = 2, Mapper = 4, Duplicate = 8, Remap = 16, Rating = 32, Duration = 64, NJS = 128, All = -1 };
+
+    public enum LinkType
+    {
+        OnlyRequest,
+        All
+    }
 }
