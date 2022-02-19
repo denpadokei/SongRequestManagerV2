@@ -16,6 +16,7 @@
     <checkbox text='Notify Sound' value='is-sound-enable' ></checkbox>
     <slider-setting text='Volume' increment='10' integer-only='true' min='0' max='100' value='volume' ></slider-setting>
     <bool-setting text='PP Serch' value='pp-sarch' bind-value='true' ></bool-setting>
+	<dropdown-list-setting text='!link type' value='link-type' choices='link-types'></dropdown-list-setting>
   </settings-container>
 </bg>
 

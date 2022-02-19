@@ -123,6 +123,9 @@ namespace SongRequestManagerV2.Bots
             this.Add("Rating", Utility.GetRating(song));
             this.Add("BeatsaverLink", $"https://beatsaver.com/maps/{song["id"].Value}");
             this.Add("BeatsaberLink", $"https://bsaber.com/songs/{song["id"].Value}");
+            if (!string.IsNullOrEmpty(song["id"].Value)) {
+                this.Add("key", song["id"].Value);
+            }
             return this;
         }
 

@@ -2,6 +2,10 @@
 using BeatSaberMarkupLanguage.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
 using SongRequestManagerV2.Configuration;
+using SongRequestManagerV2.Statics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Zenject;
 
 namespace SongRequestManagerV2.Views
@@ -144,7 +148,21 @@ namespace SongRequestManagerV2.Views
 
             set => RequestBotConfig.Instance.PPSearch = value;
         }
+        [UIValue("link-types")]
+        public List<object> LinkTypes { get; } = new List<object>()
+            {
+                LinkType.OnlyRequest.ToString(),
+                LinkType.All.ToString()
+            };
 
+        
+        [UIValue("link-type")]
+        public string Current
+        {
+            get => RequestBotConfig.Instance.LinkType.ToString();
+
+            set => RequestBotConfig.Instance.LinkType = Enum.GetValues(typeof(LinkType)).OfType<LinkType>().FirstOrDefault(x => x.ToString() == value);
+        }
         public void Initialize()
         {
             BSMLSettings.instance.AddSettingsMenu("SRM V2", this.ResourceName, this);

@@ -1,4 +1,7 @@
 ﻿using IPA.Config.Stores;
+using IPA.Config.Stores.Attributes;
+using IPA.Config.Stores.Converters;
+using SongRequestManagerV2.Statics;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -40,6 +43,8 @@ namespace SongRequestManagerV2.Configuration
         public virtual bool NotifySound { get; set; } = false;
         public virtual int SoundVolume { get; set; } = 50;
         public virtual bool EnableAprilFool { get; set; } = true;
+        [UseConverter(typeof(EnumConverter<LinkType>))]
+        public virtual LinkType LinkType { get; set; } = LinkType.All;
         // 使ってない設定達 R.I.P
 #if false
         public virtual bool OfflineMode { get; set; } = false;
