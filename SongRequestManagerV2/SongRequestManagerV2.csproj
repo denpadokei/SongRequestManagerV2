@@ -4,6 +4,7 @@
     <LangVersion>9</LangVersion>
     <Version>7.2.0</Version>
     <Platforms>AnyCPU</Platforms>
+	<AssemblySearchPaths>$(ReferencePath)</AssemblySearchPaths>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -196,16 +197,15 @@
     <EmbeddedResource Include="Views\RequestBotListView.bsml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Sound\NotifySound.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+	  <OutputCopy Include="$(OutputPath)SongRequestManagerV2.dll" OutputPath="Plugins\SongRequestManagerV2.dll" />
+	  <OutputCopy Include="Sound\NotifySound.wav" OutputPath="UserData\Song Request ManagerV2\NotifySound\NotifySound.wav" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="BeatSaberModdingTools.Tasks" Version="1.4.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="BeatSaberModdingTools.Tasks" Version="2.0.0-beta1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resource.Designer.cs">
       <DesignTime>True</DesignTime>
