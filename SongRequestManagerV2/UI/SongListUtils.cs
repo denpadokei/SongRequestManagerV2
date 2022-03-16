@@ -1,5 +1,4 @@
-﻿using BS_Utils.Utilities;
-using HMUI;
+﻿using HMUI;
 using IPA.Utilities;
 using SongCore;
 using SongRequestManagerV2.Configuration;
@@ -43,7 +42,7 @@ namespace SongRequestManagerV2
 
                 this._levelFilteringNavigationController.UpdateCustomSongs();
 
-                yield return new WaitWhile(() => this._levelFilteringNavigationController.GetField<CancellationTokenSource>("_cancellationTokenSource") != null);
+                yield return new WaitWhile(() => this._levelFilteringNavigationController.GetField<CancellationTokenSource, LevelFilteringNavigationController>("_cancellationTokenSource") != null);
                 var gridView = this._annotatedBeatmapLevelCollectionsViewController.GetField<AnnotatedBeatmapLevelCollectionsGridView, AnnotatedBeatmapLevelCollectionsViewController>("_annotatedBeatmapLevelCollectionsGridView");
                 gridView.SelectAndScrollToCellWithIdx(isWip ? 1 : 0);
                 var customSong = isWip

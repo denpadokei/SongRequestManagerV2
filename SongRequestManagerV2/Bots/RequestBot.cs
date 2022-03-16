@@ -123,7 +123,7 @@ namespace SongRequestManagerV2.Bots
 
         #region 構築・破棄
         [Inject]
-        private void Constractor()
+        private void Constractor(IPlatformUserModel platformUserModel)
         {
             Logger.Debug("Constractor call");
             if (RequestBotConfig.Instance.PPSearch) {
@@ -134,13 +134,8 @@ namespace SongRequestManagerV2.Bots
                 });
             }
             this.Setup();
-            //this.MapDatabase.LoadDatabase();
-            //if (RequestBotConfig.Instance.LocalSearch) {
-            //    // This is a background process
-            //    this.MapDatabase.LoadCustomSongs().Await(null);
-            //}
             if (CurrentUser == null) {
-                BS_Utils.Gameplay.GetUserInfo.GetUserAsync().Await(r =>
+                platformUserModel.GetUserInfo().Await(r =>
                 {
                     CurrentUser = r;
                 });
