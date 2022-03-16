@@ -47,11 +47,6 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="BS_Utils">
-      <HintPath>$(BeatSaberDir)\Plugins\BS_Utils.dll</HintPath>
-      <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="ChatCore">
       <HintPath>$(BeatSaberDir)\Libs\ChatCore.dll</HintPath>
       <Private>False</Private>

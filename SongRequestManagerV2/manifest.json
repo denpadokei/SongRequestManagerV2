@@ -5,13 +5,12 @@
   "gameVersion": "1.19.1",
   "id": "SongRequestManagerV2",
   "name": "Song Request Manager V2",
-  "version": "7.2.0",
+  "version": "7.2.1",
   "dependsOn": {
-    "BSIPA": "^4.2.0",
+    "BSIPA": "^4.2.2",
     "ChatCore": "^2.1.2",
-    "BS Utils": "^1.11.0",
-    "SiraUtil": "^3.0.0",
-    "BeatSaberMarkupLanguage": "^1.5.9"
+    "SiraUtil": "^3.0.5",
+    "BeatSaberMarkupLanguage": "^1.6.2"
   },
   "features": [
     "print",
