@@ -45,7 +45,7 @@ namespace SongRequestManagerV2.UI
         /// リセット用メソッド
         /// </summary>
         /// <param name="asyncProcess"></param>
-        public static void ResetLevelCollectionTableSet(bool asyncProcess = false)
+        public static void ResetLevelCollectionTableSet(bool asyncProcess = false, bool clearAsyncResult = true)
         {
             if (!BetterSongListPluginPresent) {
                 return;
@@ -56,7 +56,7 @@ namespace SongRequestManagerV2.UI
             try {
                 var levelCollectionTableSet = Type.GetType("BetterSongList.HarmonyPatches.HookLevelCollectionTableSet, BetterSongList");
                 var setFilterMethod = levelCollectionTableSet.GetMethod("Refresh", (BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
-                setFilterMethod.Invoke(levelCollectionTableSet, new object[] { asyncProcess });
+                setFilterMethod.Invoke(levelCollectionTableSet, new object[] { asyncProcess, clearAsyncResult });
             }
             catch (Exception e) {
                 Logger.Error(e);
