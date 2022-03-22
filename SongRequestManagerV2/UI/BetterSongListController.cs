@@ -30,9 +30,9 @@ namespace SongRequestManagerV2.UI
                 var filerUI = Type.GetType("BetterSongList.UI.FilterUI, BetterSongList");
                 var filterUIInstance = filerUI.GetField("persistentNuts", (BindingFlags.NonPublic | BindingFlags.Static)).GetValue(filerUI);
                 var filterDorpDown = (DropdownWithTableView)filerUI.GetField("_filterDropdown", (BindingFlags.NonPublic | BindingFlags.Instance)).GetValue(filterUIInstance);
-                if (filterDorpDown.selectedIndex != 0) {
+                if (filterDorpDown.selectedIndex != 6) {
                     var setFilterMethod = filerUI.GetMethod("SetFilter", (BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
-                    setFilterMethod.Invoke(filerUI, new object[] { null, true, false });
+                    setFilterMethod.Invoke(filerUI, new object[] { "All", true, false });
                     ResetLevelCollectionTableSet();
                 }
             }
