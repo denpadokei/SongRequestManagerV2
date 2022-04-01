@@ -13,7 +13,6 @@ ChatCoreに対応したリクエストマネージャー
 https://github.com/brian91292/StreamCore~~  
 [ChatCore](https://github.com/brian91292/ChatCore)  
 [SiraUtil](https://github.com/Auros/SiraUtil)  
-[BS Utils](https://github.com/Kylemc1413/Beat-Saber-Utils)  
 [BeatSaberMarkupLanguage](https://github.com/monkeymanboy/BeatSaberMarkupLanguage)  
 ~~Song Request Manager is an integrated, fully Customizable song request bot and Console for BeatSaber. It started life as an extensive rewrite of the built in song request bot in https://github.com/brian91292/BeatSaber-EnhancedTwitchChat, but quickly grew in scope and features. Its now a separate but dependent module. This mod and its companions, EnhancedStreamChat and StreamCore, are direct upgrades from the original EnhancedTwitchChat release, by the original authors.~~
 
@@ -50,7 +49,9 @@ then filter out the ! lines on your tts client.
   
 # Dependencies
 ~~Enhanced Twitch Chat depends on [EnhancedStreamChat] and [StreamCore], [CustomUI](https://www.modsaber.org/mod/customui/), [SongLoader](https://www.modsaber.org/mod/song-loader/), and [AsyncTwitch](https://www.modsaber.org/mod/asynctwitchlib/). Make sure to install them, or Song Request Manager Chat won't work!~~  
-[CustomUI](https://www.modsaber.org/mod/customui/), [SongLoader](https://www.modsaber.org/mod/song-loader/), and [ChatCore](https://github.com/brian91292/ChatCore).
+[ChatCore](https://github.com/brian91292/ChatCore)  
+[SiraUtil](https://github.com/Auros/SiraUtil)  
+[BeatSaberMarkupLanguage](https://github.com/monkeymanboy/BeatSaberMarkupLanguage)  
   
 # Installation
 Copy SongRequestManagerV2.dll to your Beat Saber\Plugins folder, and install all of its dependencies. That's it!
