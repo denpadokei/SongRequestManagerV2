@@ -155,15 +155,6 @@ namespace SongRequestManagerV2.Views
                 LinkType.All.ToString()
             };
 
-        [UIValue("performance-mode")]
-        public bool PeformanceMode
-        {
-            get => RequestBotConfig.Instance.PerformanceMode;
-
-            set => RequestBotConfig.Instance.PerformanceMode = value;
-        }
-
-
         [UIValue("link-type")]
         public string Current
         {

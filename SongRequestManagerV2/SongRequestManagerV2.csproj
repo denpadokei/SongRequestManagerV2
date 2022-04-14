@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9</LangVersion>
-    <Version>7.2.4</Version>
+    <Version>7.2.5</Version>
     <Platforms>AnyCPU</Platforms>
 	<AssemblySearchPaths>$(ReferencePath)</AssemblySearchPaths>
   </PropertyGroup>
