@@ -11,7 +11,7 @@ namespace SongRequestManagerV2.Utils
 {
     public class ChatManager : IChatManager, IDisposable
     {
-        private bool disposedValue;
+        private bool _disposedValue;
 
         public ChatCoreInstance CoreInstance { get; private set; }
         public ChatServiceMultiplexer MultiplexerInstance { get; private set; }
@@ -66,18 +66,18 @@ namespace SongRequestManagerV2.Utils
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.disposedValue) {
+            if (!this._disposedValue) {
                 if (disposing) {
                     // TODO: マネージド状態を破棄します (マネージド オブジェクト)
                     Logger.Debug("Dispose call");
                     this.MultiplexerInstance.OnLogin -= this.MultiplexerInstance_OnLogin;
                     this.MultiplexerInstance.OnJoinChannel -= this.MultiplexerInstance_OnJoinChannel;
-                    this.MultiplexerInstance.OnTextMessageReceived += this.MultiplexerInstance_OnTextMessageReceived;
+                    this.MultiplexerInstance.OnTextMessageReceived -= this.MultiplexerInstance_OnTextMessageReceived;
                 }
 
                 // TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
                 // TODO: 大きなフィールドを null に設定します
-                this.disposedValue = true;
+                this._disposedValue = true;
             }
         }
 

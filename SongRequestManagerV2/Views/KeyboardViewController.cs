@@ -23,11 +23,6 @@ namespace SongRequestManagerV2.Views
                 KeyboardContainer.sizeDelta = new Vector2(60f, 40f);
 
                 var mykeyboard = this._factiry.Create().Setup(KeyboardContainer, "");
-
-#if UNRELEASED
-                //mykeyboard.AddKeys(BOTKEYS, 0.4f);
-                RequestBot.AddKeyboard(mykeyboard, "emotes.kbd", 0.4f);
-#endif
                 mykeyboard.AddKeys(Keyboard.QWERTY); // You can replace this with DVORAK if you like
                 mykeyboard.DefaultActions();
                 const string SEARCH = @"
@@ -44,13 +39,6 @@ namespace SongRequestManagerV2.Views
                 mykeyboard.SetAction("SEARCH", this._bot.Search);
                 mykeyboard.SetAction("RANKED", this._bot.PP);
                 mykeyboard.SetAction("NEWEST", this._bot.Newest);
-
-
-
-#if UNRELEASED
-                RequestBot.AddKeyboard(mykeyboard, "decks.kbd", 0.4f);
-#endif
-
                 // The UI for this might need a bit of work.
                 mykeyboard.AddKeyboard("RightPanel.kbd");
             }

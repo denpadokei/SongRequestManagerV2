@@ -34,7 +34,7 @@ namespace SongRequestManagerV2.Views
         [Inject]
         private readonly MainFlowCoordinator _mainFlowCoordinator;
         [Inject]
-        private readonly LevelCollectionNavigationController levelCollectionNavigationController;
+        private readonly LevelCollectionNavigationController _levelCollectionNavigationController;
         [Inject]
         private readonly RequestFlowCoordinator _requestFlow;
         [Inject]
@@ -44,21 +44,21 @@ namespace SongRequestManagerV2.Views
         [Inject]
         private readonly DynamicText.DynamicTextFactory _textFactory;
         [Inject]
-        private readonly StringNormalization Normalize;
+        private readonly StringNormalization _normalize;
         [Inject]
-        private readonly SongListUtils SongListUtils;
+        private readonly SongListUtils _songListUtils;
         private GameObject _rootScreenGo;
         private Button _button;
 
-        private readonly WaitForSeconds waitForSeconds = new WaitForSeconds(0.07f);
+        private readonly WaitForSeconds _waitForSeconds = new WaitForSeconds(0.07f);
 
-        private volatile bool isChangeing = false;
-        private bool isInGame = false;
+        private volatile bool _isChangeing = false;
+        private bool _isInGame = false;
         public Progress<double> DownloadProgress { get; } = new Progress<double>();
 
         public FlowCoordinator Current => this._mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
 
-        private static readonly SemaphoreSlim _downloadSemaphore = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim s_downloadSemaphore = new SemaphoreSlim(1, 1);
 
         [UIAction("action")]
         public void Action()
@@ -90,7 +90,7 @@ namespace SongRequestManagerV2.Views
                     Dispatcher.RunCoroutine(this.ChangeButtonColor());
                 }
                 else {
-                    this.isChangeing = false;
+                    this._isChangeing = false;
                     var color = Color.red;
                     underLine = this._button.GetComponentsInChildren<ImageView>(true).FirstOrDefault(x => x.name == "Underline");
                     if (underLine != null) {
@@ -140,7 +140,7 @@ namespace SongRequestManagerV2.Views
                 fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
                 (this._rootScreenGo.transform as RectTransform).sizeDelta = new Vector2(40f, 30f);
-                (this._rootScreenGo.transform as RectTransform).SetParent(this.levelCollectionNavigationController.transform as RectTransform, false);
+                (this._rootScreenGo.transform as RectTransform).SetParent(this._levelCollectionNavigationController.transform as RectTransform, false);
                 (this._rootScreenGo.transform as RectTransform).anchoredPosition = new Vector2(70f, 80f);
                 this._rootScreenGo.transform.localScale = Vector3.one * 2;
                 if (this._button == null) {
@@ -167,7 +167,7 @@ namespace SongRequestManagerV2.Views
 
         private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1)
         {
-            this.isInGame = string.Equals(arg1.name, "GameCore", StringComparison.CurrentCultureIgnoreCase);
+            this._isInGame = string.Equals(arg1.name, "GameCore", StringComparison.CurrentCultureIgnoreCase);
         }
 
         #region Unity message
@@ -215,7 +215,7 @@ namespace SongRequestManagerV2.Views
 
         private void RefreshListRequest(bool obj)
         {
-            if (this.isInGame) {
+            if (this._isInGame) {
                 return;
             }
             this._requestFlow.RefreshSongList(obj);
@@ -234,7 +234,7 @@ namespace SongRequestManagerV2.Views
             if (fromHistory && !RequestManager.HistorySongs.Any()) {
                 return;
             }
-            await _downloadSemaphore.WaitAsync();
+            await s_downloadSemaphore.WaitAsync();
             try {
                 this._bot.PlayNow = request;
                 if (!fromHistory) {
@@ -249,13 +249,6 @@ namespace SongRequestManagerV2.Views
                 var songHash = request.SongVersion["hash"].Value.ToUpper();
 
                 if (Loader.GetLevelByHash(songHash) == null) {
-#if UNRELEASED
-                    // Direct download hack
-                    var ext = Path.GetExtension(request.song["coverURL"].Value);
-                    var k = request.song["coverURL"].Value.Replace(ext, ".zip");
-
-                    var songZip = await Plugin.WebClient.DownloadSong($"https://beatsaver.com{k}", System.Threading.CancellationToken.None);
-#endif
                     var result = await request.DownloadZip(CancellationToken.None, this.DownloadProgress);
                     if (result == null) {
                         this._chatManager.QueueChatMessage("beatsaver is down now.");
@@ -267,22 +260,16 @@ namespace SongRequestManagerV2.Views
                             archive.ExtractToDirectory(currentSongDirectory);
                         }
                         catch (Exception e) {
-                            Logger.Error($"Unable to extract ZIP! Exception");
+                            this._chatManager.QueueChatMessage($"Oops! Sorry unable to extract ZIP!");
                             Logger.Error(e);
                             return;
                         }
                     }
                     Dispatcher.RunCoroutine(this.WaitForRefreshAndSchroll(request));
-#if UNRELEASED
-                        //if (!request.song.IsNull) // Experimental!
-                        //{
-                        //TwitchWebSocketClient.SendCommand("/marker "+ _textFactory.Create().AddUser(ref request.requestor).AddSong(request.song).Parse(NextSonglink.ToString()));
-                        //}B
-#endif
                 }
                 else {
                     Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
-                    Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel(songHash, () =>
+                    Dispatcher.RunCoroutine(this._songListUtils.ScrollToLevel(songHash, () =>
                     {
                         this._bot.UpdateRequestUI();
                     },
@@ -297,14 +284,14 @@ namespace SongRequestManagerV2.Views
                 Logger.Error(e);
             }
             finally {
-                _downloadSemaphore.Release();
+                s_downloadSemaphore.Release();
             }
         }
 
         private string CreateSongDirectory(SongRequest request)
         {
             var songIndex = Regex.Replace($"{request.SongNode["id"].Value} ({request.SongMetaData["songName"].Value} - {request.SongMetaData["levelAuthorName"].Value})", "[\\\\:*/?\"<>|]", "_");
-            songIndex = this.Normalize.RemoveDirectorySymbols(songIndex); // Remove invalid characters.
+            songIndex = this._normalize.RemoveDirectorySymbols(songIndex); // Remove invalid characters.
             var result = request.IsWIP ? Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomWIPLevels", songIndex) : Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels", songIndex);
             var count = 1;
             var resultLength = result.Length;
@@ -318,12 +305,12 @@ namespace SongRequestManagerV2.Views
         private IEnumerator WaitForRefreshAndSchroll(SongRequest request)
         {
             yield return null;
-            if (this.isInGame) {
+            if (this._isInGame) {
                 // ダウンロード中に1曲やるかーって人向けの処理
                 while (true) {
-                    yield return new WaitWhile(() => this.isInGame);
+                    yield return new WaitWhile(() => this._isInGame);
                     yield return new WaitForSeconds(4.0f);
-                    if (!this.isInGame) {
+                    if (!this._isInGame) {
                         break;
                     }
                     yield return new WaitWhile(() => !Loader.AreSongsLoaded && Loader.AreSongsLoading);
@@ -338,7 +325,7 @@ namespace SongRequestManagerV2.Views
                 Utility.EmptyDirectory(".requestcache", true);
 
                 Dispatcher.RunOnMainThread(() => this.BackButtonPressed());
-                Dispatcher.RunCoroutine(this.SongListUtils.ScrollToLevel($"custom_level_{request.SongVersion["hash"].Value.ToLower()}", () =>
+                Dispatcher.RunCoroutine(this._songListUtils.ScrollToLevel($"custom_level_{request.SongVersion["hash"].Value.ToLower()}", () =>
                 {
                     this._bot.UpdateRequestUI();
                 },
@@ -354,11 +341,11 @@ namespace SongRequestManagerV2.Views
 
         private IEnumerator ChangeButtonColor()
         {
-            if (this.isChangeing) {
+            if (this._isChangeing) {
                 yield break;
             }
-            this.isChangeing = true;
-            while (this.isChangeing) {
+            this._isChangeing = true;
+            while (this._isChangeing) {
                 var red = UnityEngine.Random.Range(0f, 1f);
                 var green = UnityEngine.Random.Range(0f, 1f);
                 var blue = UnityEngine.Random.Range(0f, 1f);
@@ -367,7 +354,7 @@ namespace SongRequestManagerV2.Views
                 if (underLine != null) {
                     underLine.color = color;
                 }
-                yield return this.waitForSeconds;
+                yield return this._waitForSeconds;
             }
         }
     }

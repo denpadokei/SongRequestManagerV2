@@ -19,24 +19,24 @@ namespace SongRequestManagerV2.Bots
     public class Keyboard
     {
         public List<KEY> keys = new List<KEY>();
-        private bool SabotageState = false;
-        private bool EnableInputField = true;
-        private bool Shift = false;
-        private bool Caps = false;
-        private RectTransform container;
-        private Vector2 currentposition;
-        private Vector2 baseposition;
-        private float scale = 0.5f; // BUG: Effect of changing this has NOT beed tested. assume changing it doesn't work.
-        private readonly float padding = 0.5f;
-        private readonly float buttonwidth = 12f;
-        public TextMeshProUGUI KeyboardText;
-        private TextMeshProUGUI KeyboardCursor;
-        public Button BaseButton;
+        private bool _sabotageState = false;
+        private bool _enableInputField = true;
+        private bool _shift = false;
+        private bool _caps = false;
+        private RectTransform _container;
+        private Vector2 _currentposition;
+        private Vector2 _baseposition;
+        private float _scale = 0.5f; // BUG: Effect of changing this has NOT beed tested. assume changing it doesn't work.
+        private readonly float _padding = 0.5f;
+        private readonly float _buttonwidth = 12f;
+        private TextMeshProUGUI _keyboardCursor;
+        public TextMeshProUGUI KeyboardText { get; private set; }
+        public Button BaseButton { get; private set; }
         [Inject]
         private readonly IRequestBot _bot;
         [Inject]
         private readonly CommandManager _commandManager;
-        private readonly KEY dummy = new KEY(); // This allows for some lazy programming, since unfound key searches will point to this instead of null. It still logs an error though
+        private readonly KEY _dummy = new KEY(); // This allows for some lazy programming, since unfound key searches will point to this instead of null. It still logs an error though
 
         // Keyboard spaces and CR/LF are significicant.
         // A slash following a space or CR/LF alters the width of the space
@@ -83,7 +83,7 @@ namespace SongRequestManagerV2.Bots
                 }
                 Logger.Debug($"Keyboard: Unable to set property of Key  [{index}]");
 
-                return this.dummy;
+                return this._dummy;
             }
         }
 
@@ -129,7 +129,7 @@ namespace SongRequestManagerV2.Bots
 
         private KEY AddKey(string keylabel, float width = 12, float height = 10, int color = 0xffffff)
         {
-            var position = this.currentposition;
+            var position = this._currentposition;
             //position.x += width / 4;
 
             var co = Color.white;
@@ -153,7 +153,7 @@ namespace SongRequestManagerV2.Bots
         // BUG: Refactor this within a keybard parser subclass once everything works.
         private void EmitKey(ref float spacing, ref float Width, ref string Label, ref string Key, ref bool space, ref string newvalue, ref float height, ref int color)
         {
-            this.currentposition.x += spacing;
+            this._currentposition.x += spacing;
 
             if (Label != "") {
                 this.AddKey(Label, Width, height, color).Set(newvalue);
@@ -163,7 +163,7 @@ namespace SongRequestManagerV2.Bots
             }
 
             spacing = 0;
-            Width = this.buttonwidth;
+            Width = this._buttonwidth;
             height = 10f;
             Label = "";
             Key = "";
@@ -201,10 +201,10 @@ namespace SongRequestManagerV2.Bots
         // It might possible to make grep do this, but it would be even harder to read than this!
         public Keyboard AddKeys(string Keyboard, float scale = 0.5f)
         {
-            this.scale = scale;
+            this._scale = scale;
             var space = true;
-            var spacing = this.padding;
-            var width = this.buttonwidth;
+            var spacing = this._padding;
+            var width = this._buttonwidth;
             var height = 10f;
             var Label = "";
             var Key = "";
@@ -220,12 +220,12 @@ namespace SongRequestManagerV2.Bots
                         case '@': // Position key
                             this.EmitKey(ref spacing, ref width, ref Label, ref Key, ref space, ref newvalue, ref height, ref color);
                             p++;
-                            if (this.ReadFloat(ref Keyboard, ref p, ref this.currentposition.x)) {
-                                this.baseposition.x = this.currentposition.x;
+                            if (this.ReadFloat(ref Keyboard, ref p, ref this._currentposition.x)) {
+                                this._baseposition.x = this._currentposition.x;
                                 if (p < Keyboard.Length && Keyboard[p] == ',') {
                                     p++;
-                                    this.ReadFloat(ref Keyboard, ref p, ref this.currentposition.y);
-                                    this.baseposition.y = this.currentposition.y;
+                                    this.ReadFloat(ref Keyboard, ref p, ref this._currentposition.y);
+                                    this._baseposition.y = this._currentposition.y;
                                 }
                             }
                             continue;
@@ -234,7 +234,7 @@ namespace SongRequestManagerV2.Bots
                             {
                                 this.EmitKey(ref spacing, ref width, ref Label, ref Key, ref space, ref newvalue, ref height, ref color);
                                 p++;
-                                this.ReadFloat(ref Keyboard, ref p, ref this.scale);
+                                this.ReadFloat(ref Keyboard, ref p, ref this._scale);
                                 continue;
                             }
 
@@ -370,10 +370,10 @@ namespace SongRequestManagerV2.Bots
 
         public Keyboard Setup(RectTransform container, string DefaultKeyboard = QWERTY, bool EnableInputField = true, float x = 0, float y = 0)
         {
-            this.EnableInputField = EnableInputField;
-            this.container = container;
-            this.baseposition = new Vector2(-50 + x, 23 + y);
-            this.currentposition = this.baseposition;
+            this._enableInputField = EnableInputField;
+            this._container = container;
+            this._baseposition = new Vector2(-50 + x, 23 + y);
+            this._currentposition = this._baseposition;
             //bool addhint = true;
 
             this.SetButtonType();
@@ -386,15 +386,15 @@ namespace SongRequestManagerV2.Bots
             this.KeyboardText.alignment = TextAlignmentOptions.Center;
             this.KeyboardText.enableWordWrapping = false;
             this.KeyboardText.text = "";
-            this.KeyboardText.enabled = this.EnableInputField;
+            this.KeyboardText.enabled = this._enableInputField;
             //KeyboardText
 
-            this.KeyboardCursor = BeatSaberUI.CreateText(container, "|", new Vector2(0, 0));
-            this.KeyboardCursor.fontSize = 6f;
-            this.KeyboardCursor.color = Color.cyan;
-            this.KeyboardCursor.alignment = TextAlignmentOptions.Left;
-            this.KeyboardCursor.enableWordWrapping = false;
-            this.KeyboardCursor.enabled = this.EnableInputField;
+            this._keyboardCursor = BeatSaberUI.CreateText(container, "|", new Vector2(0, 0));
+            this._keyboardCursor.fontSize = 6f;
+            this._keyboardCursor.color = Color.cyan;
+            this._keyboardCursor.alignment = TextAlignmentOptions.Left;
+            this._keyboardCursor.enableWordWrapping = false;
+            this._keyboardCursor.enabled = this._enableInputField;
 
             this.DrawCursor(); // BUG: Doesn't handle trailing spaces.. seriously, wtf.
 
@@ -412,55 +412,16 @@ namespace SongRequestManagerV2.Bots
 
         public Keyboard NextRow(float _ = 0)
         {
-            this.currentposition.y -= this.currentposition.x == this.baseposition.x ? 3 : 6; // Next row on an empty row only results in a half row advance
-            this.currentposition.x = this.baseposition.x;
+            this._currentposition.y -= this._currentposition.x == this._baseposition.x ? 3 : 6; // Next row on an empty row only results in a half row advance
+            this._currentposition.x = this._baseposition.x;
             return this;
         }
 
         public Keyboard SetScale(float scale)
         {
-            this.scale = scale;
+            this._scale = scale;
             return this;
         }
-
-        private void Newest(KEY _)
-        {
-            this.ClearSearches();
-
-
-            this._bot.Parse(this._bot.GetLoginUser(), $"!addnew/top", CmdFlags.Local);
-        }
-
-        private void Search(KEY key)
-        {
-            if (key.kb.KeyboardText.text.StartsWith("!")) {
-                this.Enter(key);
-            }
-
-#if UNRELEASED
-            ClearSearches();
-            SRMCommand.Parse(GetLoginUser(), $"!addsongs/top {key.kb.KeyboardText.text}",RequestBot.CmdFlags.Local);
-            Clear(key);
-#endif
-        }
-
-        private void ClearSearches()
-        {
-            foreach (var item in RequestManager.RequestSongs.GetConsumingEnumerable()) {
-                if (item.Status == RequestStatus.SongSearch) {
-                    this._bot.DequeueRequest(item, false);
-                }
-            }
-        }
-
-        private void ClearSearch(KEY _)
-        {
-            this.ClearSearches();
-
-            this._bot.UpdateRequestUI();
-            this._bot.RefreshSongQuere();
-        }
-
 
         public void Clear(KEY key)
         {
@@ -493,38 +454,38 @@ namespace SongRequestManagerV2.Bots
 
         private void SHIFT(KEY key)
         {
-            key.kb.Shift = !key.kb.Shift;
+            key.kb._shift = !key.kb._shift;
 
             foreach (var k in key.kb.keys) {
-                var x = key.kb.Shift ? k.shifted : k.value;
+                var x = key.kb._shift ? k.shifted : k.value;
                 //if (key.kb.Caps) x = k.value.ToUpper();
                 if (k.shifted != "") {
                     k.mybutton.SetButtonText(x);
                 }
 
                 if (k.name == "SHIFT") {
-                    k.mybutton.GetComponentInChildren<Image>().color = key.kb.Shift ? Color.green : Color.white;
+                    k.mybutton.GetComponentInChildren<Image>().color = key.kb._shift ? Color.green : Color.white;
                 }
             }
         }
 
         private void CAPS(KEY key)
         {
-            key.kb.Caps = !key.kb.Caps;
-            key.mybutton.GetComponentInChildren<Image>().color = key.kb.Caps ? Color.green : Color.white;
+            key.kb._caps = !key.kb._caps;
+            key.mybutton.GetComponentInChildren<Image>().color = key.kb._caps ? Color.green : Color.white;
         }
 
         private void SABOTAGE(KEY key)
         {
-            this.SabotageState = !this.SabotageState;
-            key.mybutton.GetComponentInChildren<Image>().color = this.SabotageState ? Color.green : Color.red;
-            var text = "!sabotage " + (this.SabotageState ? "on" : "off");
+            this._sabotageState = !this._sabotageState;
+            key.mybutton.GetComponentInChildren<Image>().color = this._sabotageState ? Color.green : Color.red;
+            var text = "!sabotage " + (this._sabotageState ? "on" : "off");
             this._bot.Parse(this._bot.GetLoginUser(), text, CmdFlags.Local);
         }
 
         private void DrawCursor()
         {
-            if (!this.EnableInputField) {
+            if (!this._enableInputField) {
                 return;
             }
 
@@ -533,9 +494,41 @@ namespace SongRequestManagerV2.Bots
             v.y = 30f; // BUG: This needs to be derived from the text position
             // BUG: I do not know why that 30f is here, It makes things work, but I can't understand WHY! Me stupid.
             v.x = v.x / 2 + 30f - 0.5f; // BUG: The .5 gets rid of the trailing |, but technically, we need to calculate its width and store it
-            (this.KeyboardCursor.transform as RectTransform).anchoredPosition = v;
+            (this._keyboardCursor.transform as RectTransform).anchoredPosition = v;
+        }
+#if false
+        private void Newest(KEY _)
+        {
+            this.ClearSearches();
+
+
+            this._bot.Parse(this._bot.GetLoginUser(), $"!addnew/top", CmdFlags.Local);
         }
 
+        private void Search(KEY key)
+        {
+            if (key.kb.KeyboardText.text.StartsWith("!")) {
+                this.Enter(key);
+            }
+        }
+
+        private void ClearSearch(KEY _)
+        {
+            this.ClearSearches();
+
+            this._bot.UpdateRequestUI();
+            this._bot.RefreshSongQuere();
+        }
+
+        private void ClearSearches()
+        {
+            foreach (var item in RequestManager.RequestSongs.GetConsumingEnumerable()) {
+                if (item.Status == RequestStatus.SongSearch) {
+                    this._bot.DequeueRequest(item, false);
+                }
+            }
+        }
+#endif
         public class KEY
         {
             public string name = "";
@@ -565,7 +558,7 @@ namespace SongRequestManagerV2.Bots
                 this.kb = kb;
 
                 this.name = text;
-                this.mybutton = Button.Instantiate(kb.BaseButton, kb.container, false);
+                this.mybutton = Button.Instantiate(kb.BaseButton, kb._container, false);
 
                 (this.mybutton.transform as RectTransform).anchorMin = new Vector2(0.5f, 0.5f);
                 (this.mybutton.transform as RectTransform).anchorMax = new Vector2(0.5f, 0.5f);
@@ -573,7 +566,7 @@ namespace SongRequestManagerV2.Bots
                 var txt = this.mybutton.GetComponentInChildren<TMP_Text>();
                 this.mybutton.ToggleWordWrapping(false);
 
-                this.mybutton.transform.localScale = new Vector3(kb.scale, kb.scale, 1.0f);
+                this.mybutton.transform.localScale = new Vector3(kb._scale, kb._scale, 1.0f);
                 this.mybutton.SetButtonTextSize(5f);
                 this.mybutton.SetButtonText(text);
                 this.mybutton.GetComponentInChildren<Image>().color = color;
@@ -587,13 +580,13 @@ namespace SongRequestManagerV2.Bots
 
                 // Adjust starting position so button aligns to upper left of current drawing position
 
-                position.x += kb.scale * width / 2;
-                position.y -= kb.scale * height / 2;
+                position.x += kb._scale * width / 2;
+                position.y -= kb._scale * height / 2;
                 (this.mybutton.transform as RectTransform).anchoredPosition = position;
 
                 (this.mybutton.transform as RectTransform).sizeDelta = new Vector2(width, height);
 
-                kb.currentposition.x += width * kb.scale + kb.padding;
+                kb._currentposition.x += width * kb._scale + kb._padding;
 
                 this.mybutton.onClick.RemoveAllListeners();
 
@@ -615,12 +608,12 @@ namespace SongRequestManagerV2.Bots
                     }
 
                     {
-                        var x = kb.Shift ? this.shifted : this.value;
+                        var x = kb._shift ? this.shifted : this.value;
                         if (x == "") {
                             x = this.value;
                         }
 
-                        if (kb.Caps) {
+                        if (kb._caps) {
                             x = this.value.ToUpper();
                         }
 

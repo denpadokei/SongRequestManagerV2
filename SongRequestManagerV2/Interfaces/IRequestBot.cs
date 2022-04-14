@@ -44,7 +44,6 @@ namespace SongRequestManagerV2.Interfaces
         string BackupStreamcore(ParseState state);
         Task Ban(ParseState state);
         void Blacklist(SongRequest request, bool fromHistory, bool skip);
-        void BlockedUserList(IChatUser requestor, string request);
         string ChatMessage(ParseState state);
         string ClearDuplicateList(ParseState state);
         string ClearEvents(ParseState state);
@@ -115,7 +114,6 @@ namespace SongRequestManagerV2.Interfaces
         void Unmap(IChatUser requestor, string request);
         string Unqueuelist(ParseState state);
         void UpdateRequestUI(bool writeSummary = true);
-        void WhiteList(IChatUser requestor, string request);
         string Who(ParseState state);
         void Writedeck(IChatUser requestor, string request);
         void Writelist(IChatUser requestor, string request);

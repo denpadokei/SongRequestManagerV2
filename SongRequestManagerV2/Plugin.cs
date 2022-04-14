@@ -18,9 +18,9 @@ namespace SongRequestManagerV2
     {
         public string Name => "Song Request ManagerV2";
 
-        public static string Version => _meta.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static string Version => s_meta.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-        private static PluginMetadata _meta;
+        private static PluginMetadata s_meta;
         public static IPALogger Logger { get; private set; }
         public bool IsApplicationExiting { get; set; } = false;
         public static Plugin Instance { get; private set; }
@@ -30,7 +30,7 @@ namespace SongRequestManagerV2
         public void Init(IPALogger log, IPA.Config.Config config, PluginMetadata meta, Zenjector zenjector)
         {
             Instance = this;
-            _meta = meta;
+            s_meta = meta;
             Logger = log;
             Logger.Debug("Logger initialized.");
             RequestBotConfig.Instance = config.Generated<RequestBotConfig>();
@@ -61,7 +61,7 @@ namespace SongRequestManagerV2
         [OnDisable]
         public void OnDisabled()
         {
-            BouyomiPipeline.instance.Stop();
+            BouyomiPipeline.instance?.Stop();
         }
     }
 }

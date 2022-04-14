@@ -27,159 +27,137 @@ namespace SongRequestManagerV2.Views
         #region // プロパティ
         // ui elements
         /// <summary>説明 を取得、設定</summary>
-        private string playButtonName_;
+        private string _playButtonName_;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("play-button-text")]
         public string PlayButtonText
         {
-            get => this.playButtonName_ ?? "PLAY";
+            get => this._playButtonName_ ?? "PLAY";
 
-            set => this.SetProperty(ref this.playButtonName_, value);
+            set => this.SetProperty(ref this._playButtonName_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private string skipButtonName_;
+        private string _skipButtonName_;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("skip-button-text")]
         public string SkipButtonName
         {
-            get => this.skipButtonName_ ?? "SKIP";
+            get => this._skipButtonName_ ?? "SKIP";
 
-            set => this.SetProperty(ref this.skipButtonName_, value);
+            set => this.SetProperty(ref this._skipButtonName_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private string historyButtonText_;
+        private string _historyButtonText_;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("history-button-text")]
         public string HistoryButtonText
         {
-            get => this.historyButtonText_ ?? "HISTORY";
+            get => this._historyButtonText_ ?? "HISTORY";
 
-            set => this.SetProperty(ref this.historyButtonText_, value);
+            set => this.SetProperty(ref this._historyButtonText_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private string historyHoverHint_;
+        private string _historyHoverHint;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("history-hint")]
         public string HistoryHoverHint
         {
-            get => this.historyHoverHint_ ?? "";
+            get => this._historyHoverHint ?? "";
 
-            set => this.SetProperty(ref this.historyHoverHint_, value);
+            set => this.SetProperty(ref this._historyHoverHint, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private string queueButtonText_;
+        private string _queueButtonText;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("queue-button-text")]
         public string QueueButtonText
         {
-            get => this.queueButtonText_ ?? "QUEUQ CLOSE";
+            get => this._queueButtonText ?? "QUEUQ CLOSE";
 
-            set => this.SetProperty(ref this.queueButtonText_, value);
+            set => this.SetProperty(ref this._queueButtonText, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private string blacklistButtonText_;
+        private string _blacklistButtonText;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("blacklist-button-text")]
         public string BlackListButtonText
         {
-            get => this.blacklistButtonText_ ?? "BLACK LIST";
+            get => this._blacklistButtonText ?? "BLACK LIST";
 
-            set => this.SetProperty(ref this.blacklistButtonText_, value);
+            set => this.SetProperty(ref this._blacklistButtonText, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
         [UIValue("requests")]
         public List<object> Songs { get; } = new List<object>();
         /// <summary>説明 を取得、設定</summary>
-        private string progressText_;
+        private string _progressText;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("progress-text")]
         public string ProgressText
         {
-            get => this.progressText_ ?? "Download Progress - 0 %";
+            get => this._progressText ?? "Download Progress - 0 %";
 
-            set => this.SetProperty(ref this.progressText_, value);
+            set => this.SetProperty(ref this._progressText, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private bool isHistoryButtonEnable_;
+        private bool _isHistoryButtonEnable;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("history-button-enable")]
         public bool IsHistoryButtonEnable
         {
-            get => this.isHistoryButtonEnable_;
+            get => this._isHistoryButtonEnable;
 
-            set => this.SetProperty(ref this.isHistoryButtonEnable_, value);
+            set => this.SetProperty(ref this._isHistoryButtonEnable, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private bool isPlayButtonEnable_;
+        private bool _isPlayButtonEnable;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("play-button-enable")]
         public bool IsPlayButtonEnable
         {
-            get => this.isPlayButtonEnable_;
+            get => this._isPlayButtonEnable;
 
-            set => this.SetProperty(ref this.isPlayButtonEnable_, value);
+            set => this.SetProperty(ref this._isPlayButtonEnable, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private bool isSkipButtonEnable_;
+        private bool _isSkipButtonEnable;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("skip-button-enable")]
         public bool IsSkipButtonEnable
         {
-            get => this.isSkipButtonEnable_;
+            get => this._isSkipButtonEnable;
 
-            set => this.SetProperty(ref this.isSkipButtonEnable_, value);
+            set => this.SetProperty(ref this._isSkipButtonEnable, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private bool isBlacklistButtonEnable_;
+        private bool _isBlacklistButtonEnable;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("blacklist-button-enable")]
         public bool IsBlacklistButtonEnable
         {
-            get => this.isBlacklistButtonEnable_;
+            get => this._isBlacklistButtonEnable;
 
-            set => this.SetProperty(ref this.isBlacklistButtonEnable_, value);
+            set => this.SetProperty(ref this._isBlacklistButtonEnable, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private string _pefomanceModeText;
-        /// <summary>説明 を取得、設定</summary>
-        [UIValue("performance-mode-text")]
-        public string PerformanceModeText
-        {
-            get => this._pefomanceModeText ?? "";
-
-            set => this.SetProperty(ref this._pefomanceModeText, value);
-        }
-
-        /// <summary>説明 を取得、設定</summary>
-        private bool isPerformanceMode_;
-        /// <summary>説明 を取得、設定</summary>
-        [UIValue("performance-mode")]
-        public bool PerformanceMode
-        {
-            get => this.isPerformanceMode_;
-
-            set => this.SetProperty(ref this.isPerformanceMode_, value);
-        }
-
-        /// <summary>説明 を取得、設定</summary>
-        private bool isShowHistory_ = false;
+        private bool _isShowHistory = false;
         /// <summary>説明 を取得、設定</summary>
         public bool IsShowHistory
         {
-            get => this.isShowHistory_;
+            get => this._isShowHistory;
 
-            set => this.SetProperty(ref this.isShowHistory_, value);
+            set => this.SetProperty(ref this._isShowHistory, value);
         }
 
         private int SelectedRow
@@ -196,14 +174,14 @@ namespace SongRequestManagerV2.Views
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private bool isActiveButton_;
+        private bool _isActiveButton;
         [UIValue("is-active-button")]
         /// <summary>説明 を取得、設定</summary>
         public bool IsActiveButton
         {
-            get => this.isActiveButton_;
+            get => this._isActiveButton;
 
-            set => this.SetProperty(ref this.isActiveButton_, value);
+            set => this.SetProperty(ref this._isActiveButton, value);
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -219,10 +197,12 @@ namespace SongRequestManagerV2.Views
             this._bot.SetButtonIntactivityRequest -= this.SetUIInteractivity;
             this._bot.PropertyChanged -= this.OnBotPropertyChanged;
             Loader.SongsLoadedEvent -= this.SongLoader_SongsLoadedEvent;
-            if (this.audioSource != null) {
-                Destroy(this.audioSource);
-                this.audioSource = null;
+            if (this._audioSource != null) {
+                Destroy(this._audioSource);
+                this._audioSource = null;
             }
+            this._onConfirm = null;
+            this._onDecline = null;
             base.OnDestroy();
         }
         #endregion
@@ -234,9 +214,6 @@ namespace SongRequestManagerV2.Views
             if (args.PropertyName == nameof(this.IsShowHistory)) {
                 this.UpdateRequestUI(true);
                 this.SetUIInteractivity();
-            }
-            else if (args.PropertyName == nameof(this.PerformanceMode)) {
-                RequestBotConfig.Instance.PerformanceMode = this.PerformanceMode;
             }
         }
 
@@ -250,7 +227,7 @@ namespace SongRequestManagerV2.Views
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            if (!this.confirmDialogActive) {
+            if (!this._confirmDialogActive) {
                 this.IsShowHistory = false;
             }
             this.UpdateRequestUI();
@@ -277,8 +254,6 @@ namespace SongRequestManagerV2.Views
             {
                 try {
                     this.QueueButtonText = RequestBotConfig.Instance.RequestQueueOpen ? ResourceWrapper.Get("BUTTON_QUEUE_OPEN") : ResourceWrapper.Get("BUTTON_QUEUE_CLOSE");
-                    this.PerformanceModeText = ResourceWrapper.Get("TEXT_PEFORMANCE_MODE");
-                    this.PerformanceMode = RequestBotConfig.Instance.PerformanceMode;
                     this.HistoryHoverHint = this.IsShowHistory ? ResourceWrapper.Get("HOVERHINT_REQUESTS") : ResourceWrapper.Get("HOVERHINT_HISTORY");
                     this.HistoryButtonText = this.IsShowHistory ? ResourceWrapper.Get("BUTTON_REQUESTS") : ResourceWrapper.Get("BUTTON_HISTORY");
                     this.PlayButtonText = this.IsShowHistory ? ResourceWrapper.Get("BUTTON_REPLAY") : ResourceWrapper.Get("BUTTON_PLAY");
@@ -350,7 +325,7 @@ namespace SongRequestManagerV2.Views
         public void RefreshSongQueueList(bool selectRowCallback = false)
         {
             try {
-                lock (_lockObject) {
+                lock (s_lockObject) {
                     this.Songs.Clear();
                     if (this.IsShowHistory) {
                         this.Songs.AddRange(RequestManager.HistorySongs);
@@ -377,44 +352,6 @@ namespace SongRequestManagerV2.Views
                 Logger.Error(e);
             }
         }
-
-#if UNRELEASED
-        public void InvokeBeatSaberButton(String buttonName)
-        {
-            Button buttonInstance = Resources.FindObjectsOfTypeAll<Button>().First(x => (x.name == buttonName));
-            buttonInstance.onClick.Invoke();
-        }
-
-        public void ColorDeckButtons(KEYBOARD kb, Color basecolor, Color Present)
-        {
-            if (!RequestManager.HistorySongs.Any()) return;
-            foreach (KEYBOARD.KEY key in kb.keys) {
-                foreach (var item in RequestBot.deck) {
-                    string search = $"!{item.Key}/selected/toggle";
-                    if (key.value.StartsWith(search)) {
-                        string deckname = item.Key.ToLower() + ".deck";
-                        Color color = (_bot.ListCollectionManager.Contains(deckname, _bot.CurrentSong._song["id"].Value)) ? Present : basecolor;
-                        key.mybutton.GetComponentInChildren<Image>().color = color;
-                    }
-                }
-            }
-        }
-
-        public void UpdateSelectSongInfo()
-        {
-
-            if (RequestManager.HistorySongs.Count > 0)
-            {
-                var currentsong = CurrentlySelectedSong();
-
-                _CurrentSongName.text = currentsong.song["songName"].Value;
-                _CurrentSongName2.text = $"{currentsong.song["songAuthorName"].Value} ({currentsong.song["version"].Value})";
-
-                ColorDeckButtons(CenterKeys, Color.white, Color.magenta);
-            }
-
-        }
-#endif
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
@@ -427,21 +364,27 @@ namespace SongRequestManagerV2.Views
             }
         }
         [UIAction("#post-parse")]
+#pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
         private void PostParse()
+#pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
             // Set default RequestFlowCoordinator title
             ChangeTitle?.Invoke(this.IsShowHistory ? ResourceWrapper.Get("TEXT_FLOWCORDINATER_TITLE_HISTORY") : ResourceWrapper.Get("TEXT_FLOWCORDINATER_TITLE_QUEUE"));
         }
 
         [UIAction("history-click")]
+#pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
         private void HistoryButtonClick()
+#pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
             this.IsShowHistory = !this.IsShowHistory;
 
             ChangeTitle?.Invoke(this.IsShowHistory ? ResourceWrapper.Get("TEXT_FLOWCORDINATER_TITLE_HISTORY") : ResourceWrapper.Get("TEXT_FLOWCORDINATER_TITLE_QUEUE"));
         }
         [UIAction("skip-click")]
+#pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
         private void SkipButtonClick()
+#pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
             if (this._requestTable.NumberOfCells() > 0) {
                 void _onConfirm()
@@ -449,41 +392,45 @@ namespace SongRequestManagerV2.Views
                     // skip it
                     this._bot.Skip(this._bot.CurrentSong);
                     // indicate dialog is no longer active
-                    this.confirmDialogActive = false;
+                    this._confirmDialogActive = false;
                 }
 
                 // get song
                 var song = this._bot.CurrentSong.SongMetaData;
 
                 // indicate dialog is active
-                this.confirmDialogActive = true;
+                this._confirmDialogActive = true;
 
                 // show dialog
-                this.ShowDialog("Skip Song Warning", $"Skipping {song["songName"].Value} by {song["songAuthorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { this.confirmDialogActive = false; });
+                this.ShowDialog("Skip Song Warning", $"Skipping {song["songName"].Value} by {song["songAuthorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { this._confirmDialogActive = false; });
             }
         }
         [UIAction("blacklist-click")]
+#pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
         private void BlacklistButtonClick()
+#pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
             if (this._requestTable.NumberOfCells() > 0) {
                 void _onConfirm()
                 {
                     this._bot.Blacklist(this._bot.CurrentSong, this.IsShowHistory, true);
-                    this.confirmDialogActive = false;
+                    this._confirmDialogActive = false;
                 }
 
                 // get song
                 var song = this._bot.CurrentSong.SongMetaData;
 
                 // indicate dialog is active
-                this.confirmDialogActive = true;
+                this._confirmDialogActive = true;
 
                 // show dialog
-                this.ShowDialog("Blacklist Song Warning", $"Blacklisting {song["songName"].Value} by {song["songAuthorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { this.confirmDialogActive = false; });
+                this.ShowDialog("Blacklist Song Warning", $"Blacklisting {song["songName"].Value} by {song["songAuthorName"].Value}\r\nDo you want to continue?", _onConfirm, () => { this._confirmDialogActive = false; });
             }
         }
         [UIAction("play-click")]
+#pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
         private void PlayButtonClick()
+#pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
             if (this._requestTable.NumberOfCells() > 0) {
                 RequestBot.Played.Add(this._bot.CurrentSong.SongNode);
@@ -494,7 +441,9 @@ namespace SongRequestManagerV2.Views
         }
 
         [UIAction("queue-click")]
+#pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
         private void QueueButtonClick()
+#pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
             RequestBotConfig.Instance.RequestQueueOpen = !RequestBotConfig.Instance.RequestQueueOpen;
             this._bot.WriteQueueStatusToFile(this._bot.QueueMessage(RequestBotConfig.Instance.RequestQueueOpen));
@@ -503,11 +452,13 @@ namespace SongRequestManagerV2.Views
         }
 
         [UIAction("selected-cell")]
+#pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
         private void SelectedCell(TableView _, object row)
+#pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
-            var clip = this.randomSoundPicker?.PickRandomObject();
+            var clip = this._randomSoundPicker?.PickRandomObject();
             if (clip) {
-                this.audioSource?.PlayOneShot(clip, 1f);
+                this._audioSource?.PlayOneShot(clip, 1f);
             }
             this._bot.CurrentSong = row as SongRequest;
             this._playButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = this.SelectedRow >= 0 ? Color.green : Color.red;
@@ -522,28 +473,12 @@ namespace SongRequestManagerV2.Views
         {
             this._requestTable?.tableView?.ReloadData();
         }
-
-#if UNRELEASED
-        private IPreviewBeatmapLevel CustomLevelForRow(int row)
-        {
-            // get level id from hash
-            var levelIds = SongCore.Collections.levelIDsForHash(SongInfoForRow(row)._song["hash"]);
-            if (levelIds.Count == 0) return null;
-
-            // lookup song from level id
-            return SongCore.Loader.CustomLevels.FirstOrDefault(s => string.Equals(s.Value.levelID, levelIds.First(), StringComparison.OrdinalIgnoreCase)).Value ?? null;
-        }
-        private void PlayPreview(IPreviewBeatmapLevel level)
-        {
-            _songPreviewPlayer.CrossfadeTo(level.previewAudioClip, level.previewStartTime, level.previewDuration);
-        }
-#endif
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
-        private static readonly object _lockObject = new object();
-        private bool confirmDialogActive = false;
-        private Keyboard CenterKeys;
+        private static readonly object s_lockObject = new object();
+        private bool _confirmDialogActive = false;
+        private Keyboard _centerKeys;
 
         [UIComponent("request-list")]
         private readonly CustomCellListTableData _requestTable;
@@ -560,29 +495,15 @@ namespace SongRequestManagerV2.Views
         private readonly IRequestBot _bot;
         [Inject]
         private readonly IChatManager _chatManager;
-        private AudioSource audioSource;
-        private RandomObjectPicker<AudioClip> randomSoundPicker;
-#if UNRELEASED
-        private TextMeshProUGUI _CurrentSongName;
-        private TextMeshProUGUI _CurrentSongName2;
-        private SongPreviewPlayer _songPreviewPlayer;
-        string SONGLISTKEY = @"
-[blacklist last]/0'!block/current%CR%'
-
-[fun +]/25'!fun/current/toggle%CR%' [hard +]/25'!hard/current/toggle%CR%'
-[dance +]/25'!dance/current/toggle%CR%' [chill +]/25'!chill/current/toggle%CR%'
-[brutal +]/25'!brutal/current/toggle%CR%' [sehria +]/25'!sehria/current/toggle%CR%'
-
-[rock +]/25'!rock/current/toggle%CR%' [metal +]/25'!metal/current/toggle%CR%'  
-[anime +]/25'!anime/current/toggle%CR%' [pop +]/25'!pop/current/toggle%CR%' 
-
-[Random song!]/0'!decklist draw%CR%'";
-#endif
+        private AudioSource _audioSource;
+        private RandomObjectPicker<AudioClip> _randomSoundPicker;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄
         [Inject]
+#pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
         private void Constractor()
+#pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
             this._bot.UpdateUIRequest -= this.UpdateRequestUI;
             this._bot.UpdateUIRequest += this.UpdateRequestUI;
@@ -594,50 +515,25 @@ namespace SongRequestManagerV2.Views
 
         public void Initialize()
         {
-            this.audioSource = Instantiate(Resources.FindObjectsOfTypeAll<BasicUIAudioManager>().FirstOrDefault().GetField<AudioSource, BasicUIAudioManager>("_audioSource"));
-            this.audioSource.pitch = 1;
+            this._audioSource = Instantiate(Resources.FindObjectsOfTypeAll<BasicUIAudioManager>().FirstOrDefault().GetField<AudioSource, BasicUIAudioManager>("_audioSource"));
+            this._audioSource.pitch = 1;
             var clips = Resources.FindObjectsOfTypeAll<BasicUIAudioManager>().FirstOrDefault().GetField<AudioClip[], BasicUIAudioManager>("_clickSounds");
-            this.randomSoundPicker = new RandomObjectPicker<AudioClip>(clips, 0.07f);
+            this._randomSoundPicker = new RandomObjectPicker<AudioClip>(clips, 0.07f);
             try {
                 Loader.SongsLoadedEvent += this.SongLoader_SongsLoadedEvent;
-#if UNRELEASED
-                    _songPreviewPlayer = Resources.FindObjectsOfTypeAll<SongPreviewPlayer>().FirstOrDefault();
-#endif
             }
             catch (Exception e) {
                 Logger.Error(e);
             }
             try {
                 try {
-                    this.CenterKeys = this._factiry.Create().Setup(this.rectTransform, "", false, -15, 15);
-                    this.CenterKeys.AddKeyboard("CenterPanel.kbd");
+                    this._centerKeys = this._factiry.Create().Setup(this.rectTransform, "", false, -15, 15);
+                    this._centerKeys.AddKeyboard("CenterPanel.kbd");
                 }
                 catch (Exception e) {
                     Logger.Error(e);
                 }
-#if UNRELEASED
-                // BUG: Need additional modes disabling one shot buttons
-                // BUG: Need to make sure the buttons are usable on older headsets
-
-                _CurrentSongName = BeatSaberUI.CreateText(container, "", new Vector2(-35, 37f));
-                _CurrentSongName.fontSize = 3f;
-                _CurrentSongName.color = Color.cyan;
-                _CurrentSongName.alignment = TextAlignmentOptions.Left;
-                _CurrentSongName.enableWordWrapping = false;
-                _CurrentSongName.text = "";
-
-                _CurrentSongName2 = BeatSaberUI.CreateText(container, "", new Vector2(-35, 34f));
-                _CurrentSongName2.fontSize = 3f;
-                _CurrentSongName2.color = Color.cyan;
-                _CurrentSongName2.alignment = TextAlignmentOptions.Left;
-                _CurrentSongName2.enableWordWrapping = false;
-                _CurrentSongName2.text = "";
-                
-                //CenterKeys.AddKeys(SONGLISTKEY);
-                RequestBot.AddKeyboard(CenterKeys, "mainpanel.kbd");
-                ColorDeckButtons(CenterKeys, Color.white, Color.magenta);
-#endif
-                this.CenterKeys.DefaultActions();
+                this._centerKeys.DefaultActions();
                 try {
                     #region History button
                     // History button
@@ -699,47 +595,51 @@ namespace SongRequestManagerV2.Views
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region Modal
-        private Action OnConfirm;
-        private Action OnDecline;
+        private Action _onConfirm;
+        private Action _onDecline;
 
         [UIComponent("modal")]
-        internal ModalView modal;
+        internal ModalView _modal;
         /// <summary>説明 を取得、設定</summary>
-        private string title_;
+        private string _title;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("title")]
         public string Title
         {
-            get => this.title_ ?? "";
+            get => this._title ?? "";
 
-            set => this.SetProperty(ref this.title_, value);
+            set => this.SetProperty(ref this._title, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private string message_;
+        private string _message;
         /// <summary>説明 を取得、設定</summary>
         [UIValue("message")]
         public string Message
         {
-            get => this.message_ ?? "";
+            get => this._message ?? "";
 
-            set => this.SetProperty(ref this.message_, value);
+            set => this.SetProperty(ref this._message, value);
         }
 
         [UIAction("yes-click")]
+#pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
         private void YesClick()
+#pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
-            this.modal.Hide(true);
-            this.OnConfirm?.Invoke();
-            this.OnConfirm = null;
+            this._modal.Hide(true);
+            this._onConfirm?.Invoke();
+            this._onConfirm = null;
         }
 
         [UIAction("no-click")]
+#pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
         private void NoClick()
+#pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
-            this.modal.Hide(true);
-            this.OnDecline?.Invoke();
-            this.OnDecline = null;
+            this._modal.Hide(true);
+            this._onDecline?.Invoke();
+            this._onDecline = null;
         }
 
         [UIAction("show-dialog")]
@@ -748,10 +648,10 @@ namespace SongRequestManagerV2.Views
             this.Title = title;
             this.Message = message;
 
-            this.OnConfirm = onConfirm;
-            this.OnDecline = onDecline;
+            this._onConfirm = onConfirm;
+            this._onDecline = onDecline;
 
-            this.modal.Show(true);
+            this._modal.Show(true);
         }
         #endregion
     }
