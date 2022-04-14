@@ -21,7 +21,7 @@ namespace SongRequestManagerV2.Models
         public ISRMCommand _botcmd = null;
 
         public string Subparameter { get; set; } = "";
-        private const string notsubcommand = "NotSubcmd";
+        private static readonly string s_notsubcommand = "NotSubcmd";
         [Inject]
         private readonly IChatManager _chatManager;
         [Inject]
@@ -68,7 +68,7 @@ namespace SongRequestManagerV2.Models
             var commandstart = 0;
 
             if (this.Parameter.Length < 2) {
-                return notsubcommand;
+                return s_notsubcommand;
             }
 
             var subcommandend = this.Parameter.IndexOfAny(new[] { ' ', '/' }, 1);
@@ -86,7 +86,7 @@ namespace SongRequestManagerV2.Models
             var commandlength = subcommandend - commandstart;
 
             if (commandlength == 0) {
-                return notsubcommand;
+                return s_notsubcommand;
             }
 
             var subcommand = this.Parameter.Substring(commandstart, commandlength).ToLower();
@@ -95,11 +95,11 @@ namespace SongRequestManagerV2.Models
 
 
             if (!this._commandManager.Aliases.TryGetValue(subcommand, out var subcmd)) {
-                return notsubcommand;
+                return s_notsubcommand;
             }
 
             if (!subcmd.Flags.HasFlag(CmdFlags.Subcommand)) {
-                return notsubcommand;
+                return s_notsubcommand;
             }
             // BUG: Need to check subcmd permissions here.     
 
@@ -149,7 +149,7 @@ namespace SongRequestManagerV2.Models
             return this._textFactory.Create().AddUser(this.User).AddBotCmd(this._botcmd).Parse(text);
         }
 
-        private static readonly string _done = "X";
+        private static readonly string s_done = "X";
         public void ExecuteCommand()
         {
             if (!this._commandManager.Aliases.TryGetValue(this.Command, out this._botcmd)) {
@@ -166,12 +166,12 @@ namespace SongRequestManagerV2.Models
             while (true) {
                 var errormsg = this.ExecuteSubcommand();
                 Logger.Debug($"errormsg : {errormsg}");
-                if (errormsg == notsubcommand) {
+                if (errormsg == s_notsubcommand) {
                     break;
                 }
 
                 if (errormsg != "") {
-                    if (errormsg == _done) {
+                    if (errormsg == s_done) {
                         this.Flags |= CmdFlags.Disabled; // Temporarily disable the rest of the command - flags is local parse state flag.
                         continue;
                     }
@@ -209,7 +209,7 @@ namespace SongRequestManagerV2.Models
 
             if (this.Parameter == "?") // Handle per command help requests - If permitted.
             {
-                this._commandManager.ShowHelpMessage(this._botcmd, this.User, this.Parameter, true);
+                this._commandManager.ShowHelpMessage(this._botcmd, this.User, true);
                 return;
             }
 
@@ -217,7 +217,7 @@ namespace SongRequestManagerV2.Models
 
             if (!this._botcmd.Regexfilter.IsMatch(this.Parameter)) {
                 if (!this._botcmd.Flags.HasFlag(CmdFlags.SilentCheck)) {
-                    this._commandManager.ShowHelpMessage(this._botcmd, this.User, this.Parameter, false);
+                    this._commandManager.ShowHelpMessage(this._botcmd, this.User, false);
                 }
 
                 return;
