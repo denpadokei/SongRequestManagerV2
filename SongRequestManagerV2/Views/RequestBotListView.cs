@@ -525,6 +525,7 @@ namespace SongRequestManagerV2.Views
             if (!this._updateChecker.AnyUpdate) {
                 return;
             }
+            this.ActiveUpdateButton = false;
             this._updateChecker.UpdateMod().Await(r =>
             {
                 if (r) {

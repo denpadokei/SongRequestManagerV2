@@ -24,10 +24,21 @@ namespace SongRequestManagerV2.Models
         {
             this._gameVersion = new Hive.Versioning.Version(Application.version);
         }
-        public async Task<bool> CheckUpdate(PluginMetadata metadata)
+
+        public Task<bool> CheckUpdate(PluginMetadata metadata)
         {
-            var apiRoot = metadata.PluginSourceLink?.ToString()?.Replace(@"github.com", @"api.github.com/repos");
-            var version = metadata.HVersion;
+            if (metadata == null) {
+                return Task.FromResult(false);
+            }
+            return this.CheckUpdate(metadata.HVersion, metadata.PluginSourceLink?.ToString());
+        }
+
+        public async Task<bool> CheckUpdate(Hive.Versioning.Version version, string githubURL)
+        {
+            if (string.IsNullOrEmpty(githubURL)) {
+                return false;
+            }
+            var apiRoot = githubURL.Replace(@"github.com", @"api.github.com/repos");
             this.AnyUpdate = false;
             var res = await WebClient.GetAsync($"{apiRoot}{s_latest}", CancellationToken.None);
             if (res == null || !res.IsSuccessStatusCode) {
@@ -40,11 +51,11 @@ namespace SongRequestManagerV2.Models
             foreach (var releseJson in releases.AsArray.Children) {
                 var asaets = releseJson["assets"].AsArray;
                 var tag = "";
-                foreach (var item in asaets.Children) {
-                    if (item["content_type"].Value != "application/x-zip-compressed") {
+                foreach (var asset in asaets.Children) {
+                    if (asset["content_type"].Value != "application/x-zip-compressed") {
                         continue;
                     }
-                    var fileVersion = s_zipFileRegex.Match(item["name"].Value).Value.Replace("bs", "");
+                    var fileVersion = s_zipFileRegex.Match(asset["name"].Value).Value.Replace("bs", "");
                     if (string.IsNullOrEmpty(fileVersion)) {
                         continue;
                     }
@@ -52,7 +63,7 @@ namespace SongRequestManagerV2.Models
                     if (this._gameVersion < fileBSVersion) {
                         continue;
                     }
-                    this.DownloadURL = item["browser_download_url"].Value;
+                    this.DownloadURL = asset["browser_download_url"].Value;
                     tag = releseJson["tag_name"].Value;
                     break;
                 }

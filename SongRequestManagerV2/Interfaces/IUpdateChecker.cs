@@ -9,7 +9,7 @@ namespace SongRequestManagerV2.Interfaces
         bool AnyUpdate { get; }
         Version CurrentLatestVersion { get; }
         string DownloadURL { get; }
-
+        Task<bool> CheckUpdate(Version version, string githubURL);
         Task<bool> CheckUpdate(PluginMetadata metadata);
         Task<bool> UpdateMod();
     }
