@@ -17,6 +17,7 @@ namespace SongRequestManagerV2.Models
         private const string s_latest = "/releases";
         private static readonly Regex s_zipFileRegex = new Regex(@"bs([0-9]+\.){2}[0-9]+");
         private static readonly string s_pending = Path.Combine(Environment.CurrentDirectory, "IPA", "Pending");
+        private object _lockObject = new object();
         public Hive.Versioning.Version CurrentLatestVersion { get; private set; } = new Hive.Versioning.Version(0, 0, 0);
         public string DownloadURL { get; private set; } = "";
         public bool AnyUpdate { get; private set; } = false;
@@ -92,20 +93,23 @@ namespace SongRequestManagerV2.Models
             if (zip == null || !zip.IsSuccessStatusCode) {
                 return false;
             }
-            var tmpFolder = Path.GetTempPath();
-            tmpFolder = Path.Combine(tmpFolder, Guid.NewGuid().ToString());
             try {
-                using (var ms = new MemoryStream(zip.ContentToBytes()))
-                using (var archive = new ZipArchive(ms)) {
-                    archive.ExtractToDirectory(tmpFolder);
+                lock (this._lockObject) {
+                    var tmpFolder = Path.GetTempPath();
+                    tmpFolder = Path.Combine(tmpFolder, Guid.NewGuid().ToString());
+                    using (var ms = new MemoryStream(zip.ContentToBytes()))
+                    using (var archive = new ZipArchive(ms)) {
+                        archive.ExtractToDirectory(tmpFolder);
+                    }
+                    this.CopyDirectory(tmpFolder, s_pending);
+                    Directory.Delete(tmpFolder, true);
                 }
-                this.CopyDirectory(tmpFolder, s_pending);
-                Directory.Delete(tmpFolder, true);
             }
             catch (Exception e) {
                 Logger.Error(e);
                 return false;
             }
+            this.AnyUpdate = false;
             return true;
         }
 
