@@ -17,7 +17,7 @@ namespace SongRequestManagerV2.Models
         private const string s_latest = "/releases";
         private static readonly Regex s_zipFileRegex = new Regex(@"bs([0-9]+\.){2}[0-9]+");
         private static readonly string s_pending = Path.Combine(Environment.CurrentDirectory, "IPA", "Pending");
-        private object _lockObject = new object();
+        private readonly object _lockObject = new object();
         public Hive.Versioning.Version CurrentLatestVersion { get; private set; } = new Hive.Versioning.Version(0, 0, 0);
         public string DownloadURL { get; private set; } = "";
         public bool AnyUpdate { get; private set; } = false;
