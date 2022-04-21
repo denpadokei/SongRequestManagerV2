@@ -6,6 +6,7 @@ using SongCore;
 using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Configuration;
+using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Localizes;
 using System;
@@ -159,6 +160,8 @@ namespace SongRequestManagerV2.Views
 
             set => this.SetProperty(ref this._isShowHistory, value);
         }
+        [UIValue("version")]
+        public string Version { get => $"<size=120%>Version - {Plugin.Version}"; set { } }
 
         private int SelectedRow
         {
@@ -182,6 +185,49 @@ namespace SongRequestManagerV2.Views
             get => this._isActiveButton;
 
             set => this.SetProperty(ref this._isActiveButton, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private bool _anyUpdate;
+        [UIValue("any-update")]
+        /// <summary>説明 を取得、設定</summary>
+        public bool AnyUpdate
+        {
+            get => this._anyUpdate;
+
+            set => this.SetProperty(ref this._anyUpdate, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private string _notifyNewVersionText = "";
+        [UIValue("new-version-text")]
+        /// <summary>説明 を取得、設定</summary>
+        public string NotifyNewVersionText
+        {
+            get => this._notifyNewVersionText;
+
+            set => this.SetProperty(ref this._notifyNewVersionText, value);
+        }
+        /// <summary>説明 を取得、設定</summary>
+        private string _updateButtonText = "";
+        [UIValue("update-button-text")]
+        /// <summary>説明 を取得、設定</summary>
+        public string UpdateButtonText
+        {
+            get => this._updateButtonText;
+
+            set => this.SetProperty(ref this._updateButtonText, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private bool _activeUpdateButton;
+        [UIValue("update-button-active")]
+        /// <summary>説明 を取得、設定</summary>
+        public bool ActiveUpdateButton
+        {
+            get => this._activeUpdateButton;
+
+            set => this.SetProperty(ref this._activeUpdateButton, value);
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -473,6 +519,24 @@ namespace SongRequestManagerV2.Views
         {
             this._requestTable?.tableView?.ReloadData();
         }
+        [UIAction("update")]
+        private void UpdateSRM()
+        {
+            if (!this._updateChecker.AnyUpdate) {
+                return;
+            }
+            this.ActiveUpdateButton = false;
+            this._updateChecker.UpdateMod().Await(r =>
+            {
+                if (r) {
+                    this.ActiveUpdateButton = false;
+                    this.NotifyNewVersionText = ResourceWrapper.Get("TEXT_UPDATE_SUCCESS");
+                }
+                else {
+                    this.ActiveUpdateButton = true;
+                }
+            });
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
@@ -497,12 +561,13 @@ namespace SongRequestManagerV2.Views
         private readonly IChatManager _chatManager;
         private AudioSource _audioSource;
         private RandomObjectPicker<AudioClip> _randomSoundPicker;
+        private IUpdateChecker _updateChecker;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄
         [Inject]
 #pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
-        private void Constractor()
+        private void Constractor(IUpdateChecker updateChecker)
 #pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
             this._bot.UpdateUIRequest -= this.UpdateRequestUI;
@@ -511,9 +576,10 @@ namespace SongRequestManagerV2.Views
             this._bot.SetButtonIntactivityRequest += this.SetUIInteractivity;
             this._bot.PropertyChanged -= this.OnBotPropertyChanged;
             this._bot.PropertyChanged += this.OnBotPropertyChanged;
+            this._updateChecker = updateChecker;
         }
 
-        public void Initialize()
+        public async void Initialize()
         {
             this._audioSource = Instantiate(Resources.FindObjectsOfTypeAll<BasicUIAudioManager>().FirstOrDefault().GetField<AudioSource, BasicUIAudioManager>("_audioSource"));
             this._audioSource.pitch = 1;
@@ -586,9 +652,19 @@ namespace SongRequestManagerV2.Views
                 catch (Exception e) {
                     Logger.Error(e);
                 }
+                this.UpdateButtonText = ResourceWrapper.Get("BUTTON_SRM_UPDATE");
             }
             catch (Exception e) {
                 Logger.Error(e);
+            }
+            var anyUpdate = await this._updateChecker.CheckUpdate(Plugin.MetaData);
+            if (anyUpdate) {
+                this.AnyUpdate = true;
+                this.NotifyNewVersionText = ResourceWrapper.Get("TEXT_NOTIFY_NEW_UPDATE").Replace("%NEWVERSION%", $"{this._updateChecker.CurrentLatestVersion}");
+                this.ActiveUpdateButton = true;
+            }
+            else {
+                this.AnyUpdate = false;
             }
         }
 

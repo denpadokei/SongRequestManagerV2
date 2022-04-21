@@ -141,6 +141,9 @@
   <data name="BUTTON_SKIP" xml:space="preserve">
     <value>とばすわ</value>
   </data>
+  <data name="BUTTON_SRM_UPDATE" xml:space="preserve">
+    <value>アップデート</value>
+  </data>
   <data name="HOVERHINT_HISTORY" xml:space="preserve">
     <value>履歴を確認しまっせ</value>
   </data>
@@ -156,7 +159,15 @@
   <data name="TEXT_FLOWCORDINATER_TITLE_QUEUE" xml:space="preserve">
     <value>きゅーですわ</value>
   </data>
+  <data name="TEXT_NOTIFY_NEW_UPDATE" xml:space="preserve">
+    <value>新しいもんがあるみたいや
+アップデートしまっか？ - %NEWVERSION%</value>
+  </data>
   <data name="TEXT_PEFORMANCE_MODE" xml:space="preserve">
     <value>ゲーム中おとなしくしますわ</value>
+  </data>
+  <data name="TEXT_UPDATE_SUCCESS" xml:space="preserve">
+    <value>すんだで
+再起動したら新しゅうなっとるわ</value>
   </data>
 </root>

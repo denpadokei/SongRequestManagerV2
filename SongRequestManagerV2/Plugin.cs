@@ -21,6 +21,7 @@ namespace SongRequestManagerV2
         public static string Version => s_meta.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         private static PluginMetadata s_meta;
+        public static PluginMetadata MetaData => s_meta;
         public static IPALogger Logger { get; private set; }
         public bool IsApplicationExiting { get; set; } = false;
         public static Plugin Instance { get; private set; }
