@@ -24,6 +24,7 @@ namespace SongRequestManagerV2.Installer
             this.Container.BindInterfacesAndSelfTo<NotifySound>().FromNewComponentOn(new GameObject(nameof(NotifySound))).AsSingle();
             this.Container.Bind<ListCollectionManager>().AsSingle();
             this.Container.BindInterfacesAndSelfTo<RequestBot>().AsSingle();
+            this.Container.BindInterfacesAndSelfTo<UpdateChecker>().AsSingle().NonLazy();
         }
     }
 }

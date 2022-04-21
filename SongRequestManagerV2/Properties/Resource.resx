@@ -141,6 +141,9 @@
   <data name="BUTTON_SKIP" xml:space="preserve">
     <value>SKIP</value>
   </data>
+  <data name="BUTTON_SRM_UPDATE" xml:space="preserve">
+    <value>Update</value>
+  </data>
   <data name="HOVERHINT_HISTORY" xml:space="preserve">
     <value>View the history of song requests from the current session.</value>
   </data>
@@ -156,7 +159,13 @@
   <data name="TEXT_FLOWCORDINATER_TITLE_QUEUE" xml:space="preserve">
     <value>Song Request Queue</value>
   </data>
+  <data name="TEXT_NOTIFY_NEW_UPDATE" xml:space="preserve">
+    <value>A new version exists. Do you want to update? - %NEWVERSION%</value>
+  </data>
   <data name="TEXT_PEFORMANCE_MODE" xml:space="preserve">
     <value>PerformanceMode</value>
+  </data>
+  <data name="TEXT_UPDATE_SUCCESS" xml:space="preserve">
+    <value>Success. Reboot to update to the new version.</value>
   </data>
 </root>

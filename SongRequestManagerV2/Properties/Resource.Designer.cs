@@ -133,6 +133,15 @@ namespace SongRequestManagerV2.Properties {
         }
         
         /// <summary>
+        ///   Update に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string BUTTON_SRM_UPDATE {
+            get {
+                return ResourceManager.GetString("BUTTON_SRM_UPDATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   View the history of song requests from the current session. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string HOVERHINT_HISTORY {
@@ -178,11 +187,29 @@ namespace SongRequestManagerV2.Properties {
         }
         
         /// <summary>
+        ///   A new version exists. Do you want to update? - %NEWVERSION% に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string TEXT_NOTIFY_NEW_UPDATE {
+            get {
+                return ResourceManager.GetString("TEXT_NOTIFY_NEW_UPDATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   PerformanceMode に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string TEXT_PEFORMANCE_MODE {
             get {
                 return ResourceManager.GetString("TEXT_PEFORMANCE_MODE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Success. Reboot to update to the new version. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string TEXT_UPDATE_SUCCESS {
+            get {
+                return ResourceManager.GetString("TEXT_UPDATE_SUCCESS", resourceCulture);
             }
         }
     }
