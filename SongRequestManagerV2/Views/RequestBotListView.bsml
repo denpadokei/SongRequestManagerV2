@@ -2,8 +2,8 @@
   <horizontal horizontal-fit='MinSize' child-align='MiddleLeft'>
     <vertical min-width='50' child-align='LowerLeft' horizontal-fit='PreferredSize'>
       <text text='~version' />
-      <vertical active='~any-update'>
-        <text text='~new-version-text' />
+      <vertical active='~any-update' vertical-fit='PreferredSize'>
+        <text text='~new-version-text' color='lime'/>
         <button text='~update-button-text' active='~update-button-active' on-click='update' />
       </vertical>
       <text text='~progress-text' align='BottomLeft' word-wrapping='false' overflow-mode='Overflow' anchor-max-x='0' anchor-min-x='0' anchor-max-y='1' anchor-min-y='0' size-delta-x='50'></text>

@@ -187,7 +187,8 @@ namespace SongRequestManagerV2.Properties {
         }
         
         /// <summary>
-        ///   新しいもんがあるみたいや、アップデートしまっか？ - %NEWVERSION% に類似しているローカライズされた文字列を検索します。
+        ///   新しいもんがあるみたいや
+        ///アップデートしまっか？ - %NEWVERSION% に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string TEXT_NOTIFY_NEW_UPDATE {
             get {
@@ -205,7 +206,8 @@ namespace SongRequestManagerV2.Properties {
         }
         
         /// <summary>
-        ///   すんだで、再起動したらあたらしゅうなっとるわ に類似しているローカライズされた文字列を検索します。
+        ///   すんだで
+        ///再起動したら新しゅうなっとるわ に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string TEXT_UPDATE_SUCCESS {
             get {

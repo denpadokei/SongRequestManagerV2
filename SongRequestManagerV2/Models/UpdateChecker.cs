@@ -52,8 +52,8 @@ namespace SongRequestManagerV2.Models
                     if (this._gameVersion < fileBSVersion) {
                         continue;
                     }
+                    this.DownloadURL = item["browser_download_url"].Value;
                     tag = releseJson["tag_name"].Value;
-                    this.DownloadURL = releseJson["browser_download_url"].Value;
                     break;
                 }
                 if (string.IsNullOrEmpty(tag)) {
@@ -65,6 +65,7 @@ namespace SongRequestManagerV2.Models
                 }
                 else {
                     this.CurrentLatestVersion = latestVersion;
+                    this.AnyUpdate = true;
                     return true;
                 }
             }
@@ -81,6 +82,7 @@ namespace SongRequestManagerV2.Models
                 return false;
             }
             var tmpFolder = Path.GetTempPath();
+            tmpFolder = Path.Combine(tmpFolder, Guid.NewGuid().ToString());
             try {
                 using (var ms = new MemoryStream(zip.ContentToBytes()))
                 using (var archive = new ZipArchive(ms)) {

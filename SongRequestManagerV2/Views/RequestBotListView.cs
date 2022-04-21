@@ -660,6 +660,7 @@ namespace SongRequestManagerV2.Views
             if (anyUpdate) {
                 this.AnyUpdate = true;
                 this.NotifyNewVersionText = ResourceWrapper.Get("TEXT_NOTIFY_NEW_UPDATE").Replace("%NEWVERSION%", $"{this._updateChecker.CurrentLatestVersion}");
+                this.ActiveUpdateButton = true;
             }
             else {
                 this.AnyUpdate = false;

@@ -160,12 +160,14 @@
     <value>きゅーですわ</value>
   </data>
   <data name="TEXT_NOTIFY_NEW_UPDATE" xml:space="preserve">
-    <value>新しいもんがあるみたいや、アップデートしまっか？ - %NEWVERSION%</value>
+    <value>新しいもんがあるみたいや
+アップデートしまっか？ - %NEWVERSION%</value>
   </data>
   <data name="TEXT_PEFORMANCE_MODE" xml:space="preserve">
     <value>ゲーム中おとなしくしますわ</value>
   </data>
   <data name="TEXT_UPDATE_SUCCESS" xml:space="preserve">
-    <value>すんだで、再起動したらあたらしゅうなっとるわ</value>
+    <value>すんだで
+再起動したら新しゅうなっとるわ</value>
   </data>
 </root>

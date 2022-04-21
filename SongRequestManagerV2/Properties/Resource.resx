@@ -160,12 +160,14 @@
     <value>Song Request Queue</value>
   </data>
   <data name="TEXT_NOTIFY_NEW_UPDATE" xml:space="preserve">
-    <value>A new version exists. Do you want to update? - %NEWVERSION%</value>
+    <value>A new version exists. 
+Do you want to update? - %NEWVERSION%</value>
   </data>
   <data name="TEXT_PEFORMANCE_MODE" xml:space="preserve">
     <value>PerformanceMode</value>
   </data>
   <data name="TEXT_UPDATE_SUCCESS" xml:space="preserve">
-    <value>Success. Reboot to update to the new version.</value>
+    <value>Success.
+Reboot to update to the new version.</value>
   </data>
 </root>
