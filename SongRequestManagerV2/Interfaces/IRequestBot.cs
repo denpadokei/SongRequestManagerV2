@@ -1,4 +1,4 @@
-﻿using ChatCore.Interfaces;
+﻿using CatCore.Models.Shared;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.SimpleJSON;

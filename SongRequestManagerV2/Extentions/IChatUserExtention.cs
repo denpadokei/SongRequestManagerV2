@@ -1,5 +1,5 @@
-﻿using ChatCore.Interfaces;
-using ChatCore.Models.Twitch;
+﻿using CatCore.Models.Shared;
+using CatCore.Models.Twitch.IRC;
 using SongRequestManagerV2.SimpleJSON;
 
 namespace SongRequestManagerV2.Extentions
@@ -16,12 +16,12 @@ namespace SongRequestManagerV2.Extentions
             obj.Add(nameof(chatUser.IsBroadcaster), new JSONBool(chatUser.IsBroadcaster));
             obj.Add(nameof(chatUser.IsModerator), new JSONBool(chatUser.IsModerator));
             var badges = new JSONArray();
-            if (chatUser.Badges != null) {
-                foreach (var badge in chatUser.Badges) {
-                    badges.Add(JSON.Parse(badge.ToJson().ToString()));
-                }
-                obj.Add(nameof(chatUser.Badges), badges);
-            }
+            //if (chatUser.Badges != null) {
+            //    foreach (var badge in chatUser.Badges) {
+            //        badges.Add(JSON.Parse(badge.ToJson().ToString()));
+            //    }
+            //    obj.Add(nameof(chatUser.Badges), badges);
+            //}
             if (chatUser is TwitchUser twitchUser) {
                 obj.Add(nameof(twitchUser.IsSubscriber), twitchUser.IsSubscriber);
                 obj.Add(nameof(twitchUser.IsTurbo), twitchUser.IsTurbo);

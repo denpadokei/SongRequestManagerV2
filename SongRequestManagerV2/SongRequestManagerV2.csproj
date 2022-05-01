@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9</LangVersion>
-    <Version>7.3.0</Version>
+    <Version>8.0.0</Version>
     <Platforms>AnyCPU</Platforms>
 	<AssemblySearchPaths>$(ReferencePath)</AssemblySearchPaths>
   </PropertyGroup>
@@ -47,8 +47,8 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="ChatCore">
-      <HintPath>$(BeatSaberDir)\Libs\ChatCore.dll</HintPath>
+    <Reference Include="CatCore">
+      <HintPath>$(BeatSaberDir)\Libs\CatCore.dll</HintPath>
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>

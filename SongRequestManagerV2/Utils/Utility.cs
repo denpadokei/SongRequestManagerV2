@@ -1,5 +1,5 @@
-﻿using ChatCore.Interfaces;
-using ChatCore.Models.Twitch;
+﻿using CatCore.Models.Shared;
+using CatCore.Models.Twitch.IRC;
 using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.SimpleJSON;

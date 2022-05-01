@@ -1,18 +1,23 @@
-﻿using ChatCore.Interfaces;
-using ChatCore.Services;
-using ChatCore.Services.Twitch;
+﻿using CatCore;
+using CatCore.Models.Twitch.IRC;
+using CatCore.Services.Multiplexer;
+using CatCore.Services.Twitch.Interfaces;
 using System.Collections.Concurrent;
-using Zenject;
 
 namespace SongRequestManagerV2.Interfaces
 {
-    public interface IChatManager : IInitializable
+    public interface IChatManager
     {
-        ConcurrentQueue<IChatMessage> RecieveChatMessage { get; }
+        CatCoreInstance CoreInstance { get; }
+        ChatServiceMultiplexer MultiplexerInstance { get; }
+        ConcurrentQueue<MultiplexedMessage> RecieveChatMessage { get; }
         ConcurrentQueue<RequestInfo> RequestInfos { get; }
         ConcurrentQueue<string> SendMessageQueue { get; }
-        ChatServiceMultiplexer MultiplexerInstance { get; }
-        TwitchService TwitchService { get; }
+        ITwitchService TwitchService { get; }
+        ITwitchChannelManagementService TwitchChannelManagementService { get; }
+        ITwitchUserStateTrackerService TwitchUserStateTrackerService { get; }
+        TwitchUserState OwnUserData { get; }
+
         void QueueChatMessage(string message);
     }
 }

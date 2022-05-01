@@ -2,13 +2,13 @@
   "$schema": "https://raw.githubusercontent.com/beat-saber-modding-group/BSIPA-MetadataFileSchema/master/Schema.json",
   "author": "denpadokei",
   "description": "Song Request Manager on twitch",
-  "gameVersion": "1.19.0",
+  "gameVersion": "1.21.0",
   "id": "SongRequestManagerV2",
   "name": "Song Request Manager V2",
-  "version": "7.3.0",
+  "version": "8.0.0-rc1",
   "dependsOn": {
     "BSIPA": "^4.2.0",
-    "ChatCore": "^2.1.2",
+    "CatCore": "^1.0.0",
     "SiraUtil": "^3.0.0",
     "BeatSaberMarkupLanguage": "^1.5.0"
   },

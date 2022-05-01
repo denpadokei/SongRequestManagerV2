@@ -1,17 +1,21 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
-using ChatCore.Interfaces;
-using ChatCore.Models;
-using ChatCore.Models.Twitch;
+using CatCore.Models.Shared;
+using CatCore.Models.Twitch.IRC;
+using CatCore.Models.Twitch.Media;
 using HMUI;
+using Newtonsoft.Json;
 using SongCore;
 using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Configuration;
+using SongRequestManagerV2.Models;
 using SongRequestManagerV2.SimpleJSON;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -227,7 +231,7 @@ namespace SongRequestManagerV2
                 obj.Add("status", new JSONString(this.Status.ToString()));
                 obj.Add("requestInfo", new JSONString(this._requestInfo));
                 obj.Add("time", new JSONString(this.RequestTime.ToFileTime().ToString()));
-                obj.Add("requestor", JSON.Parse(this._requestor.ToJson().ToString()));
+                obj.Add("requestor", JsonConvert.SerializeObject(this._requestor));
                 obj.Add("song", this.SongNode);
                 return obj;
             }
@@ -240,12 +244,30 @@ namespace SongRequestManagerV2
         private IChatUser CreateRequester(JSONObject obj)
         {
             try {
-                var temp = new TwitchUser(obj["requestor"].AsObject.ToString());
+                var requesterText = obj["requestor"].Value;
+                var userObj = JSONNode.Parse(requesterText);
+                var badges = userObj["Badges"].AsArray;
+                var badgeList = new List<IChatBadge>();
+                foreach (var badge in badges.Children) {
+                    var tmp = new TwitchBadge(badge["Id"].Value, badge["Name"].Value, badge["Uri"].Value);
+                    badgeList.Add(tmp);
+                }
+                var temp = new TwitchUser(
+                    userObj["Id"].Value,
+                    userObj["UserName"].Value,
+                    userObj["DisplayName"].Value,
+                    userObj["Color"].Value,
+                    userObj["IsModerator"].AsBool,
+                    userObj["IsBroadcaster"].AsBool,
+                    userObj["IsSubscriber"].AsBool,
+                    userObj["IsTurbo"].AsBool,
+                    userObj["IsVip"],
+                    new ReadOnlyCollection<IChatBadge>(badgeList));
                 return temp;
             }
             catch (Exception e) {
                 Logger.Error(e);
-                return new UnknownChatUser(obj["requestor"].AsObject.ToString());
+                return new GenericChatUser(obj["requestor"].AsObject.ToString());
             }
         }
 

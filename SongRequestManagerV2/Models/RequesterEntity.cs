@@ -1,4 +1,7 @@
-﻿using ChatCore.Interfaces;
+﻿
+
+using CatCore.Models.Shared;
+using SongRequestManagerV2.SimpleJSON;
 
 namespace SongRequestManagerV2.Models
 {
@@ -17,7 +20,8 @@ namespace SongRequestManagerV2.Models
         public bool IsModerator { get; set; }
 
         public IChatBadge[] Badges { get; set; }
-        ChatCore.Utilities.JSONObject IChatUser.ToJson()
+
+        private JSONObject ToJson()
         {
             return null;
         }

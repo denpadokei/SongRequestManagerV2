@@ -1,12 +1,12 @@
-﻿using ChatCore.Interfaces;
-using ChatCore.Models.Twitch;
+﻿using CatCore.Models.Shared;
+using CatCore.Models.Twitch.IRC;
+using CatCore.Services.Multiplexer;
 using IPA.Loader;
 using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
-using SongRequestManagerV2.Networks;
 using SongRequestManagerV2.SimpleJSON;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
@@ -22,7 +22,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Web;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 
@@ -150,14 +149,6 @@ namespace SongRequestManagerV2.Bots
                     this._timer.Dispose();
                     SceneManager.activeSceneChanged -= this.SceneManager_activeSceneChanged;
                     RequestBotConfig.Instance.ConfigChangedEvent -= this.OnConfigChangedEvent;
-                    try {
-                        if (BouyomiPipeline.instance != null) {
-                            BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
-                        }
-                    }
-                    catch (Exception e) {
-                        Logger.Error(e);
-                    }
                 }
                 this._disposedValue = true;
             }
@@ -236,7 +227,7 @@ namespace SongRequestManagerV2.Bots
             return this.ListCollectionManager.Contains(excludefilename, msg.Sender.UserName.ToLower(), ListFlags.Uncached);
         }
 
-        internal void RecievedMessages(IChatMessage msg)
+        internal void RecievedMessages(MultiplexedMessage msg)
         {
             Logger.Debug($"Received Message : {msg.Message}");
 #if DEBUG
@@ -352,16 +343,6 @@ namespace SongRequestManagerV2.Bots
 
             this.WriteQueueSummaryToFile();
             this.WriteQueueStatusToFile(this.QueueMessage(RequestBotConfig.Instance.RequestQueueOpen));
-
-            if (RequestBotConfig.Instance.IsStartServer) {
-                BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
-                BouyomiPipeline.instance.ReceiveMessege += this.Instance_ReceiveMessege;
-                BouyomiPipeline.instance.Start();
-            }
-            else {
-                BouyomiPipeline.instance.ReceiveMessege -= this.Instance_ReceiveMessege;
-                BouyomiPipeline.instance.Stop();
-            }
         }
 
         private void SendChatMessage(string message)
@@ -369,9 +350,9 @@ namespace SongRequestManagerV2.Bots
             try {
                 Logger.Debug($"Sending message: \"{message}\"");
 
-                if (this.ChatManager.TwitchService != null) {
-                    foreach (var channel in this.ChatManager.TwitchService.Channels) {
-                        this.ChatManager.TwitchService.SendTextMessage($"{message}", channel.Value);
+                if (this.ChatManager.TwitchChannelManagementService != null) {
+                    foreach (var channel in this.ChatManager.TwitchChannelManagementService.GetAllActiveChannels()) {
+                        channel.SendMessage($"{message}");
                     }
                 }
             }
@@ -789,8 +770,22 @@ namespace SongRequestManagerV2.Bots
 
         public IChatUser GetLoginUser()
         {
-            if (this.ChatManager.TwitchService?.LoggedInUser != null) {
-                return this.ChatManager.TwitchService?.LoggedInUser;
+            if (this.ChatManager.OwnUserData != null) {
+                var user = this.ChatManager.OwnUserData;
+                var obj = new
+                {
+                    Id = user.UserId,
+                    UserName = user.UserId,
+                    DisplayName = user.DisplayName,
+                    Color = user.Color,
+                    IsBroadcaster = true,
+                    IsModerator = user.IsModerator,
+                    IsSubscriber = user.IsSubscriber,
+                    IsTurbo = user.IsTurbo,
+                    IsVip = user.IsVip,
+                    Badges = Array.Empty<IChatBadge>()
+                };
+                return new TwitchUser(obj.Id, obj.UserName, obj.DisplayName, obj.Color, obj.IsModerator, obj.IsBroadcaster, obj.IsSubscriber, obj.IsTurbo, obj.IsVip, new System.Collections.ObjectModel.ReadOnlyCollection<IChatBadge>(obj.Badges));
             }
             else {
                 var isInit = CurrentUser != null;
@@ -808,7 +803,7 @@ namespace SongRequestManagerV2.Bots
                     IsStaff = false,
                     Badges = Array.Empty<IChatBadge>()
                 };
-                return new TwitchUser(JsonUtility.ToJson(obj));
+                return new TwitchUser(obj.Id, obj.UserName, obj.DisplayName, obj.Color, obj.IsModerator, obj.IsBroadcaster, obj.IsSubscriber, false, false, new System.Collections.ObjectModel.ReadOnlyCollection<IChatBadge>(obj.Badges));
             }
         }
         public void Parse(IChatUser user, string request, CmdFlags flags = 0, string info = "")
@@ -823,15 +818,6 @@ namespace SongRequestManagerV2.Bots
 
             // This will be used for all parsing type operations, allowing subcommands efficient access to parse state logic
             this._stateFactory.Create().Setup(user, request, flags, info).ParseCommand();
-        }
-        private void Instance_ReceiveMessege(string obj)
-        {
-            var message = new MessageEntity()
-            {
-                Message = obj
-            };
-
-            this.RecievedMessages(message);
         }
 
         #region ChatCommand
