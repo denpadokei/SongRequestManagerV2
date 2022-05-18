@@ -1,6 +1,6 @@
 ﻿using SongRequestManagerV2.Models;
 
-namespace SongRequestManagerV2.Installer
+namespace SongRequestManagerV2.Installes
 {
     public class SRMGameInstaller : Zenject.Installer
     {
