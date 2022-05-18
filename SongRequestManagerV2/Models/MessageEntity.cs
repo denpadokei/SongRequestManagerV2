@@ -1,8 +1,7 @@
-﻿using ChatCore.Interfaces;
-using ChatCore.Models;
+﻿using CatCore.Models.Shared;
+using SongRequestManagerV2.Interfaces;
+using SongRequestManagerV2.SimpleJSON;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace SongRequestManagerV2.Models
 {
@@ -21,24 +20,21 @@ namespace SongRequestManagerV2.Models
         public string Message { get; set; }
 
         public IChatUser Sender { get; set; }
+        public IChatEmote[] Emotes { get; private set; }
 
-        public IChatChannel Channel { get; set; }
-
-        public IChatEmote[] Emotes { get; set; }
-
-        public ReadOnlyDictionary<string, string> Metadata { get; set; }
+        public bool IsMentioned => throw new NotImplementedException();
 
         public MessageEntity()
         {
             this.Id = "";
             this.Message = "";
-            this.Sender = new RequesterEntity();
-            this.Channel = new UnknownChatChannel();
+            this.Sender = new GenericChatUser();
+            //this.Channel = new UnknownChatChannel();
             this.Emotes = new IChatEmote[0];
-            this.Metadata = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
+            //this.Metadata = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
         }
 
-        public ChatCore.Utilities.JSONObject ToJson()
+        public JSONObject ToJson()
         {
             throw new NotImplementedException();
         }
