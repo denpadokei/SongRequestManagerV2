@@ -56,14 +56,14 @@ namespace SongRequestManagerV2.Models
                     if (asset["content_type"].Value != "application/x-zip-compressed") {
                         continue;
                     }
-                    var fileVersion = s_zipFileRegex.Match(asset["name"].Value).Value.Replace("bs", "");
-                    if (string.IsNullOrEmpty(fileVersion)) {
-                        continue;
-                    }
-                    var fileBSVersion = new Hive.Versioning.Version(fileVersion);
-                    if (this._gameVersion < fileBSVersion) {
-                        continue;
-                    }
+                    //var fileVersion = s_zipFileRegex.Match(asset["name"].Value).Value.Replace("bs", "");
+                    //if (string.IsNullOrEmpty(fileVersion)) {
+                    //    continue;
+                    //}
+                    //var fileBSVersion = new Hive.Versioning.Version(fileVersion);
+                    //if (this._gameVersion < fileBSVersion) {
+                    //    continue;
+                    //}
                     this.DownloadURL = asset["browser_download_url"].Value;
                     tag = releseJson["tag_name"].Value;
                     break;
@@ -72,7 +72,7 @@ namespace SongRequestManagerV2.Models
                     continue;
                 }
                 var latestVersion = new Hive.Versioning.Version(tag);
-                if (latestVersion <= version) {
+                if (latestVersion <= version || latestVersion.Major != version.Major) {
                     return false;
                 }
                 else {
