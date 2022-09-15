@@ -1918,7 +1918,7 @@ namespace SongRequestManagerV2.Bots
             var total = 0;
             foreach (var songrequest in RequestManager.RequestSongs) {
                 try {
-                    total += songrequest.SongMetaData["songduration"];
+                    total += songrequest.SongMetaData["duration"];
                 }
                 catch (Exception e) {
                     Logger.Error(e);
