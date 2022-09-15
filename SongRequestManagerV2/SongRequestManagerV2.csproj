@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9</LangVersion>
-    <Version>8.0.0</Version>
+    <Version>8.0.1</Version>
     <Platforms>AnyCPU</Platforms>
 	<AssemblySearchPaths>$(ReferencePath)</AssemblySearchPaths>
   </PropertyGroup>
@@ -191,7 +191,7 @@
 	  <OutputCopy Include="Sound\NotifySound.wav" OutputPath="UserData\Song Request ManagerV2\NotifySound\NotifySound.wav" />
   </ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="BeatSaberModdingTools.Tasks" Version="2.0.0-beta1">
+		<PackageReference Include="BeatSaberModdingTools.Tasks" Version="2.0.0-beta4">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
