@@ -50,30 +50,29 @@ namespace SongRequestManagerV2.Models
                 return false;
             }
             foreach (var releseJson in releases.AsArray.Children) {
+                var tag = releseJson["tag_name"].Value;
+                if (string.IsNullOrEmpty(tag)) {
+                    continue;
+                }
                 var asaets = releseJson["assets"].AsArray;
-                var tag = "";
                 foreach (var asset in asaets.Children) {
                     if (asset["content_type"].Value != "application/x-zip-compressed") {
                         continue;
                     }
-                    //var fileVersion = s_zipFileRegex.Match(asset["name"].Value).Value.Replace("bs", "");
-                    //if (string.IsNullOrEmpty(fileVersion)) {
-                    //    continue;
-                    //}
-                    //var fileBSVersion = new Hive.Versioning.Version(fileVersion);
-                    //if (this._gameVersion < fileBSVersion) {
-                    //    continue;
-                    //}
+                    var fileVersion = s_zipFileRegex.Match(asset["name"].Value).Value.Replace("bs", "");
+                    if (string.IsNullOrEmpty(fileVersion)) {
+                        continue;
+                    }
+                    var fileBSVersion = new Hive.Versioning.Version(fileVersion);
+                    if (this._gameVersion < fileBSVersion) {
+                        continue;
+                    }
                     this.DownloadURL = asset["browser_download_url"].Value;
-                    tag = releseJson["tag_name"].Value;
                     break;
-                }
-                if (string.IsNullOrEmpty(tag)) {
-                    continue;
                 }
                 var latestVersion = new Hive.Versioning.Version(tag);
                 if (latestVersion <= version || latestVersion.Major != version.Major) {
-                    return false;
+                    continue;
                 }
                 else {
                     this.CurrentLatestVersion = latestVersion;
