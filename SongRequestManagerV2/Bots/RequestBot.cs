@@ -66,6 +66,11 @@ namespace SongRequestManagerV2.Bots
         public const string BEATMAPS_AS_CDN_ROOT_URL = "https://as.cdn.beatsaver.com";
         public const string BEATMAPS_NA_CDN_ROOT_URL = "https://na.cdn.beatsaver.com";
 
+        //To Fix %beatsaver% Variable in Help
+        public const string BEATSAVER_HOME = "https://beatsaver.com";
+        
+        
+
         private readonly System.Timers.Timer _timer = new System.Timers.Timer(500);
 
         [Inject]
