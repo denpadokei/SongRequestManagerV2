@@ -71,10 +71,10 @@ namespace SongRequestManagerV2.Models
             this.Aliases.Clear();
 
             #region 初期化ごにょごにょ
-            commands.Add(this._commandFactory.Create().Setup("!bsr", "!request", "!add", "!srm").Action(this.Bot.ProcessSongRequest).Help(FlagParameter.Everyone, "usage: %alias%<songname> or <song id>, omit <,>'s. %|%This adds a song to the request queue. Try and be a little specific. You can look up songs on %beatsaver%", s_atleast1));
-            commands.Add(this._commandFactory.Create().Setup("!lookup", "!find").AsyncAction(this.LookupSongs).Help(FlagParameter.Mod | FlagParameter.Sub | FlagParameter.VIP, "usage: %alias%<song name> or <song id>, omit <>'s.%|%Get a list of songs from %beatsaver% matching your search criteria.", s_atleast1));
+            commands.Add(this._commandFactory.Create().Setup("!bsr", "!request", "!add", "!srm").Action(this.Bot.ProcessSongRequest).Help(FlagParameter.Everyone, "usage: %alias%<songname> or <song id>, omit <,>'s. %|%This adds a song to the request queue. Try and be a little specific. You can look up songs on " + RequestBot.BEATSAVER_HOME, s_atleast1));
+            commands.Add(this._commandFactory.Create().Setup("!lookup", "!find").AsyncAction(this.LookupSongs).Help(FlagParameter.Mod | FlagParameter.Sub | FlagParameter.VIP, "usage: %alias%<song name> or <song id>, omit <>'s.%|%Get a list of songs from " + RequestBot.BEATSAVER_HOME + " matching your search criteria.", s_atleast1));
 
-            commands.Add(this._commandFactory.Create().Setup("!link").Action(this.Bot.ShowSongLink).Help(FlagParameter.Everyone, "usage: %alias% %|%... Shows song details, and an %beatsaver% link to the current song", s_nothing));
+            commands.Add(this._commandFactory.Create().Setup("!link").Action(this.Bot.ShowSongLink).Help(FlagParameter.Everyone, "usage: %alias% %|%... Shows song details, and a " + RequestBot.BEATSAVER_HOME + " link to the current song", s_nothing));
 
             commands.Add(this._commandFactory.Create().Setup("!open").Action(this.Bot.OpenQueue).Help(FlagParameter.Mod, "usage: %alias%%|%... Opens the queue allowing song requests.", s_nothing));
             commands.Add(this._commandFactory.Create().Setup("!close").Action(this.Bot.CloseQueue).Help(FlagParameter.Mod, "usage: %alias%%|%... Closes the request queue.", s_nothing));
@@ -86,7 +86,7 @@ namespace SongRequestManagerV2.Models
 
             commands.Add(this._commandFactory.Create().Setup("!modadd").Action(this.Bot.ModAdd).Help(FlagParameter.Mod, "usage: %alias%<songname> or <song id>, omit <,>'s. %|%This adds a song to the request queue. This ignores ALL filters including bans.", s_atleast1));
             commands.Add(this._commandFactory.Create().Setup("!mtt").Action(this.Bot.MoveRequestToTop).Help(FlagParameter.Mod, "usage: %alias%<songname>,<username>,<song id> %|%... Moves a song to the top of the request queue.", s_atleast1));
-            commands.Add(this._commandFactory.Create().Setup("!att").Action(this.Bot.AddToTop).Help(FlagParameter.Mod, "usage: %alias%<songname> or <song id>, omit <,>'s. %|%This adds a song to the top of the request queue. Try and be a little specific. You can look up songs on %beatsaver%", s_atleast1));
+            commands.Add(this._commandFactory.Create().Setup("!att").Action(this.Bot.AddToTop).Help(FlagParameter.Mod, "usage: %alias%<songname> or <song id>, omit <,>'s. %|%This adds a song to the top of the request queue. Try and be a little specific. You can look up songs on " + RequestBot.BEATSAVER_HOME , s_atleast1));
             commands.Add(this._commandFactory.Create().Setup("!last", "!demote", "!later").Action(this.Bot.MoveRequestToBottom).Help(FlagParameter.Mod, "usage: %alias%<songname>,<username>,<song id> %|%... Moves a song to the bottom of the request queue.", s_atleast1));
             commands.Add(this._commandFactory.Create().Setup("!remove").Action(this.Bot.DequeueSong).Help(FlagParameter.Mod, "usage: %alias%<songname>,<username>,<song id> %|%... Removes a song from the queue.", s_atleast1));
             commands.Add(this._commandFactory.Create().Setup("!wrongsong", "!wrong", "!oops").Action(this.Bot.WrongSong).Help(FlagParameter.Everyone, "usage: %alias%%|%... Removes your last requested song form the queue. It can be requested again later.", s_nothing));
@@ -122,11 +122,11 @@ namespace SongRequestManagerV2.Models
             commands.Add(this._commandFactory.Create().Setup("!every").Action(this.Bot.Every).Help(FlagParameter.Broadcaster, "usage: every <minutes> %|% Run a command every <minutes>.", s_atleast1));
             commands.Add(this._commandFactory.Create().Setup("!in").Action(this.Bot.EventIn).Help(FlagParameter.Broadcaster, "usage: in <minutes> <bot command>.", s_atleast1));
             commands.Add(this._commandFactory.Create().Setup("!clearevents").Action(this.Bot.ClearEvents).Help(FlagParameter.Broadcaster, "usage: %alias% %|% Clear all timer events."));
-            commands.Add(this._commandFactory.Create().Setup("!addnew", "!addlatest").AsyncAction(this.Bot.AddsongsFromnewest).Help(FlagParameter.Mod, "usage: %alias% <listname>%|%... Adds the latest maps from %beatsaver%, filtered by the previous selected allowmappers command", s_nothing));
-            commands.Add(this._commandFactory.Create().Setup("!addpp").AsyncAction(this.Bot.AddsongsFromRank).Help(FlagParameter.Mod, "usage: %alias% <listname>%|%... Adds the rank maps from %beatsaver%, filtered by the previous selected allowmappers command", s_nothing));
+            commands.Add(this._commandFactory.Create().Setup("!addnew", "!addlatest").AsyncAction(this.Bot.AddsongsFromnewest).Help(FlagParameter.Mod, "usage: %alias% <listname>%|%... Adds the latest maps from " + RequestBot.BEATSAVER_HOME + " , filtered by the previous selected allowmappers command", s_nothing));
+            commands.Add(this._commandFactory.Create().Setup("!addpp").AsyncAction(this.Bot.AddsongsFromRank).Help(FlagParameter.Mod, "usage: %alias% <listname>%|%... Adds the rank maps from " + RequestBot.BEATSAVER_HOME + " , filtered by the previous selected allowmappers command", s_nothing));
             commands.Add(this._commandFactory.Create().Setup("!backup").Action(this.Bot.BackupStreamcore).Help(CmdFlags.Broadcaster, "Backup %SRM% directory.", s_anything));
 
-            commands.Add(this._commandFactory.Create().Setup("!queuestatus").Action(this.Bot.QueueStatus).Help(FlagParameter.Mod, "usage: %alias% %|% Show current queue status", s_nothing));
+            commands.Add(this._commandFactory.Create().Setup("!queuestatus").Action(this.Bot.QueueStatus).Help(FlagParameter.Everyone, "usage: %alias% %|% Show current queue status", s_nothing));
 
             commands.Add(this._commandFactory.Create().Setup("!QueueLottery").Action(this.Bot.QueueLottery).Help(FlagParameter.Broadcaster, "usage: %alias% <entry count> %|% Shuffle the queue and reduce to <entry count> entries. Close the queue.", s_anything));
 
