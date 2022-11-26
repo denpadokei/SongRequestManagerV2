@@ -1606,6 +1606,7 @@ namespace SongRequestManagerV2.Bots
                 var song = req.SongMetaData;
 
                 var moveRequest = false;
+
                 if (moveId == "") {
                     var terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["songAuthorName"].Value, song["levelAuthorName"].Value, req.SongNode["id"].Value, (RequestManager.RequestSongs.ToArray()[i])._requestor.UserName };
                     if (this.DoesContainTerms(request, ref terms)) {
@@ -1613,7 +1614,7 @@ namespace SongRequestManagerV2.Bots
                     }
                 }
                 else {
-                    if (song["id"].Value == moveId) {
+                    if (req._songID == moveId) {
                         moveRequest = true;
                     }
                 }
