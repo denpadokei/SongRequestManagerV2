@@ -75,6 +75,8 @@ namespace SongRequestManagerV2
             set => this.SetProperty(ref this.authorName_, value);
         }
 
+                
+
         public JSONObject SongNode { get; private set; }
         public JSONObject SongMetaData => this.SongNode["metadata"].AsObject;
 
@@ -89,6 +91,9 @@ namespace SongRequestManagerV2
         private string _hash;
         private string _coverURL;
         private string _downloadURL;
+
+        //Allow song id to be queried
+        public string _songID;
 
         private static readonly ConcurrentDictionary<string, Texture2D> _cachedTextures = new ConcurrentDictionary<string, Texture2D>();
 
@@ -113,6 +118,7 @@ namespace SongRequestManagerV2
             this.Status = status;
             this.RequestTime = requestTime;
             this._requestInfo = requestInfo;
+            this._songID = song["id"];
             var version = this.SongNode["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString());
             if (version == null) {
                 this.SongVersion = this.SongNode["versions"].AsArray.Children.OrderBy(x => DateTime.Parse(x["createdAt"].Value)).LastOrDefault().AsObject;
