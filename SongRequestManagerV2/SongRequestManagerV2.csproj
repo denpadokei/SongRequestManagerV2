@@ -5,6 +5,8 @@
     <Version>8.0.3</Version>
     <Platforms>AnyCPU</Platforms>
 	<AssemblySearchPaths>$(ReferencePath)</AssemblySearchPaths>
+    <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
+    <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>

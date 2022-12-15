@@ -23,7 +23,7 @@ namespace SongRequestManagerV2.Models
         public bool AnyUpdate { get; private set; } = false;
         public void Initialize()
         {
-            this._gameVersion = new Hive.Versioning.Version(Application.version);
+            this._gameVersion = new Hive.Versioning.Version(Application.version.Replace("_", "-"));
         }
 
         public Task<bool> CheckUpdate(PluginMetadata metadata)
