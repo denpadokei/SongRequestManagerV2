@@ -341,7 +341,7 @@ namespace SongRequestManagerV2.Views
 
                 var playButtonEnabled = toggled;
                 if (toggled && !this.IsShowHistory) {
-                    var isChallenge = this._bot.CurrentSong._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
+                    var isChallenge = this._bot.CurrentSong.RequestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
                     playButtonEnabled = !isChallenge && toggled;
                 }
                 this.IsPlayButtonEnable = playButtonEnabled;
@@ -510,7 +510,7 @@ namespace SongRequestManagerV2.Views
             this._playButton.GetComponentsInChildren<ImageView>().FirstOrDefault(x => x.name == "Underline").color = this.SelectedRow >= 0 ? Color.green : Color.red;
 
             if (!this.IsShowHistory) {
-                var isChallenge = this._bot.CurrentSong._requestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
+                var isChallenge = this._bot.CurrentSong.RequestInfo.IndexOf("!challenge", StringComparison.OrdinalIgnoreCase) >= 0;
                 this.IsPlayButtonEnable = !isChallenge;
             }
             this.SetUIInteractivity();

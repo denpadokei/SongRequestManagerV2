@@ -276,7 +276,7 @@ namespace SongRequestManagerV2.Views
                     request.IsWIP));
                     if (!request.SongNode.IsNull) {
                         // Display next song message
-                        this._textFactory.Create().AddUser(request._requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
+                        this._textFactory.Create().AddUser(request.Requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
                     }
                 }
             }
@@ -290,7 +290,7 @@ namespace SongRequestManagerV2.Views
 
         private string CreateSongDirectory(SongRequest request)
         {
-            var songIndex = Regex.Replace($"{request.SongNode["id"].Value} ({request.SongMetaData["songName"].Value} - {request.SongMetaData["levelAuthorName"].Value})", "[\\\\:*/?\"<>|]", "_");
+            var songIndex = Regex.Replace($"{request.ID} ({request.SongMetaData["songName"].Value} - {request.SongMetaData["levelAuthorName"].Value})", "[\\\\:*/?\"<>|]", "_");
             songIndex = this._normalize.RemoveDirectorySymbols(songIndex); // Remove invalid characters.
             var result = request.IsWIP ? Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomWIPLevels", songIndex) : Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data", "CustomLevels", songIndex);
             var count = 1;
@@ -334,7 +334,7 @@ namespace SongRequestManagerV2.Views
                 ((IProgress<double>)this.DownloadProgress).Report(0d);
                 if (!request.SongNode.IsNull) {
                     // Display next song message
-                    this._textFactory.Create().AddUser(request._requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
+                    this._textFactory.Create().AddUser(request.Requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
                 }
             }
         }
