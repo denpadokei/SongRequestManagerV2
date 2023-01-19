@@ -35,7 +35,7 @@ namespace SongRequestManagerV2.Utils
             {
                 songName = songObject["songName"].Value,
                 levelAuthorName = songObject["levelAuthorName"].Value,
-                key = song.SongNode["id"].Value,
+                key = song.ID,
                 hash = version["hash"].Value.ToUpper(),
                 levelid = $"custom_level_{version["hash"].Value.ToUpper()}",
                 dateAdded = song.RequestTime.ToLocalTime()

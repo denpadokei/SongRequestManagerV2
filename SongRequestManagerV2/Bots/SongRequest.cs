@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
@@ -74,21 +75,28 @@ namespace SongRequestManagerV2
 
             set => this.SetProperty(ref this.authorName_, value);
         }
-
+        /// <summary>
+        /// beatsaver json object<br />
+        /// https://api.beatsaver.com/docs/index.html?url=./swagger.json
+        /// </summary>
         public JSONObject SongNode { get; private set; }
         public JSONObject SongMetaData => this.SongNode["metadata"].AsObject;
 
         public JSONObject SongVersion { get; private set; }
         public bool IsWIP { get; private set; }
-        public IChatUser _requestor;
+        public IChatUser Requestor { get; private set; }
         public DateTime RequestTime { get; private set; }
         public RequestStatus Status { get; set; }
-        public string _requestInfo; // Contains extra song info, Like : Sub/Donation request, Deck pick, Empty Queue pick,Mapper request, etc.
-        public string _songName;
-        public string _authorName;
+        public string RequestInfo; // Contains extra song info, Like : Sub/Donation request, Deck pick, Empty Queue pick,Mapper request, etc.
+        /// <summary>
+        /// bsr key
+        /// </summary>
+        public string ID { get; private set; }
         private string _hash;
         private string _coverURL;
         private string _downloadURL;
+        private string _songName;
+        private string _rating;
 
         private static readonly ConcurrentDictionary<string, Texture2D> _cachedTextures = new ConcurrentDictionary<string, Texture2D>();
 
@@ -108,11 +116,11 @@ namespace SongRequestManagerV2
         {
             this.SongNode = song;
             this._songName = this.SongMetaData["songName"].Value;
-            this._authorName = this.SongMetaData["levelAuthorName"].Value;
-            this._requestor = requestor;
+            this.ID = this.SongNode["id"].Value?.ToLower();
+            this.Requestor = requestor;
             this.Status = status;
             this.RequestTime = requestTime;
-            this._requestInfo = requestInfo;
+            this.RequestInfo = requestInfo;
             var version = this.SongNode["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString());
             if (version == null) {
                 this.SongVersion = this.SongNode["versions"].AsArray.Children.OrderBy(x => DateTime.Parse(x["createdAt"].Value)).LastOrDefault().AsObject;
@@ -128,7 +136,7 @@ namespace SongRequestManagerV2
             this._downloadURL = this.SongVersion["downloadURL"].Value
                 .Replace(RequestBot.BEATMAPS_AS_CDN_ROOT_URL, RequestBot.BEATMAPS_CDN_ROOT_URL)
                 .Replace(RequestBot.BEATMAPS_NA_CDN_ROOT_URL, RequestBot.BEATMAPS_CDN_ROOT_URL);
-            if (this._mapDatabase.PPMap.TryGetValue(this.SongNode["id"].Value, out var pp)) {
+            if (this._mapDatabase.PPMap.TryGetValue(this.ID, out var pp)) {
                 this.SongNode.Add("pp", new JSONNumber(pp));
             }
             return this;
@@ -137,14 +145,16 @@ namespace SongRequestManagerV2
         [UIAction("#post-parse")]
         internal void Setup()
         {
-            var name = this.IsWIP ? $"<color=\"yellow\">[WIP]</color> {this._songName}" : this._songName;
-            if (RequestBotConfig.Instance.PPSearch && this._mapDatabase.PPMap.TryGetValue(this.SongNode["id"].Value, out var pp) && 0 < pp) {
-                this.SongName = $"{name} <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>";
+            var builder = new StringBuilder();
+            builder.Append(this.IsWIP ? $"<color=\"yellow\">[WIP]</color> {this._songName}" : this._songName);
+            if (RequestBotConfig.Instance.PPSearch && this._mapDatabase.PPMap.TryGetValue(this.ID, out var pp) && 0 < pp) {
+                this._rating = $" <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>";
             }
             else {
-                this.SongName = $"{name} <size=50%>{Utility.GetRating(this.SongNode)}</size>";
+                this._rating = $" <size=50%>{Utility.GetRating(this.SongNode)}</size>";
             }
-
+            builder.Append(this._rating);
+            this.SongName = builder.ToString();
             this.SetCover();
         }
 
@@ -167,13 +177,13 @@ namespace SongRequestManagerV2
 
         public void SetCover()
         {
-            Dispatcher.RunOnMainThread(async () =>
+            Dispatcher.RunOnMainThread((Action)(async () =>
             {
                 try {
                     this._coverImage.enabled = false;
-                    var dt = this._textFactory.Create().AddSong(this.SongNode).AddUser(this._requestor); // Get basic fields
+                    var dt = this._textFactory.Create().AddSong(this.SongNode).AddUser(this.Requestor); // Get basic fields
                     dt.Add("Status", this.Status.ToString());
-                    dt.Add("Info", (this._requestInfo != "") ? " / " + this._requestInfo : "");
+                    dt.Add("Info", (this.RequestInfo != "") ? " / " + this.RequestInfo : "");
                     dt.Add("RequestTime", this.RequestTime.ToLocalTime().ToString("hh:mm"));
                     this.AuthorName = dt.Parse(StringFormat.QueueListRow2);
                     this.Hint = dt.Parse(StringFormat.SongHintText);
@@ -221,7 +231,7 @@ namespace SongRequestManagerV2
                 finally {
                     this._coverImage.enabled = true;
                 }
-            });
+            }));
         }
 
         public JSONObject ToJson()
@@ -229,9 +239,9 @@ namespace SongRequestManagerV2
             try {
                 var obj = new JSONObject();
                 obj.Add("status", new JSONString(this.Status.ToString()));
-                obj.Add("requestInfo", new JSONString(this._requestInfo));
+                obj.Add("requestInfo", new JSONString(this.RequestInfo));
                 obj.Add("time", new JSONString(this.RequestTime.ToFileTime().ToString()));
-                obj.Add("requestor", JsonConvert.SerializeObject(this._requestor));
+                obj.Add("requestor", JsonConvert.SerializeObject(this.Requestor));
                 obj.Add("song", this.SongNode);
                 return obj;
             }

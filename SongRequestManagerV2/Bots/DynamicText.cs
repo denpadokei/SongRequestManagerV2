@@ -42,13 +42,13 @@ namespace SongRequestManagerV2.Bots
         public DynamicText AddLinks()
         {
             if (this.AllowLinks) {
-                this.Add("beatmaps.io", "https://beatmaps.io");
+                this.Add("beatsaver", "https://beatsaver.com");
                 this.Add("beatsaber", "https://beatsaber.com");
                 this.Add("scoresaber", "https://scoresaber.com");
             }
             else {
                 this.Add("beatsaver", "beatsaver site");
-                this.Add("beatsaver", "beatsaber site");
+                this.Add("beatsaber", "beatsaber site");
                 this.Add("scoresaber", "scoresaber site");
             }
 
@@ -101,18 +101,6 @@ namespace SongRequestManagerV2.Bots
         public DynamicText AddSong(JSONObject song, string prefix = "")
         {
             this.AddJSON(song, prefix); // Add the song JSON
-
-            //SongMap map;
-            //if (MapDatabase.MapLibrary.TryGetValue(song["id"].Value, out map) && map.pp>0)
-            //{
-            //    Add("pp", map.pp.ToString());
-            //}
-            //else
-            //{
-            //    Add("pp", "");
-            //}
-
-
             if (song["pp"].AsFloat > 0) {
                 this.Add("PP", song["pp"].AsInt.ToString() + " PP");
             }

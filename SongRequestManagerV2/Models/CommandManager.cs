@@ -476,7 +476,7 @@ namespace SongRequestManagerV2.Models
                     state.Parameter += " ";
                 }
 
-                state.Parameter += RequestManager.HistorySongs.FirstOrDefault().SongNode["id"];
+                state.Parameter += RequestManager.HistorySongs.FirstOrDefault().ID;
                 return "";
             }
             catch {
@@ -493,7 +493,7 @@ namespace SongRequestManagerV2.Models
                     state.Parameter += " ";
                 }
 
-                state.Parameter += this.Bot.CurrentSong.SongNode["id"];
+                state.Parameter += this.Bot.CurrentSong.ID;
                 return "";
             }
             catch {
@@ -529,7 +529,7 @@ namespace SongRequestManagerV2.Models
                     state.Parameter += " ";
                 }
 
-                state.Parameter += (RequestManager.HistorySongs.GetConsumingEnumerable().ElementAt(1)).SongNode["id"];
+                state.Parameter += (RequestManager.HistorySongs.GetConsumingEnumerable().ElementAt(1)).ID;
                 return "";
             }
             catch {
@@ -546,7 +546,7 @@ namespace SongRequestManagerV2.Models
                     state.Parameter += " ";
                 }
 
-                state.Parameter += (RequestManager.RequestSongs.FirstOrDefault()).SongNode["id"];
+                state.Parameter += (RequestManager.RequestSongs.FirstOrDefault()).ID;
                 return "";
             }
             catch {
