@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
@@ -74,7 +75,10 @@ namespace SongRequestManagerV2
 
             set => this.SetProperty(ref this.authorName_, value);
         }
-
+        /// <summary>
+        /// beatsaver json object<br />
+        /// https://api.beatsaver.com/docs/index.html?url=./swagger.json
+        /// </summary>
         public JSONObject SongNode { get; private set; }
         public JSONObject SongMetaData => this.SongNode["metadata"].AsObject;
 
@@ -91,6 +95,8 @@ namespace SongRequestManagerV2
         private string _hash;
         private string _coverURL;
         private string _downloadURL;
+        private string _songName;
+        private string _rating;
 
         private static readonly ConcurrentDictionary<string, Texture2D> _cachedTextures = new ConcurrentDictionary<string, Texture2D>();
 
@@ -109,8 +115,7 @@ namespace SongRequestManagerV2
         public SongRequest Init(JSONObject song, IChatUser requestor, DateTime requestTime, RequestStatus status = RequestStatus.Invalid, string requestInfo = "")
         {
             this.SongNode = song;
-            this.SongName = this.SongMetaData["songName"].Value;
-            this.AuthorName = this.SongMetaData["levelAuthorName"].Value;
+            this._songName = this.SongMetaData["songName"].Value;
             this.ID = this.SongNode["id"].Value?.ToLower();
             this.Requestor = requestor;
             this.Status = status;
@@ -140,14 +145,16 @@ namespace SongRequestManagerV2
         [UIAction("#post-parse")]
         internal void Setup()
         {
-            var name = this.IsWIP ? $"<color=\"yellow\">[WIP]</color> {this.SongName}" : this.SongName;
+            var builder = new StringBuilder();
+            builder.Append(this.IsWIP ? $"<color=\"yellow\">[WIP]</color> {this._songName}" : this._songName);
             if (RequestBotConfig.Instance.PPSearch && this._mapDatabase.PPMap.TryGetValue(this.ID, out var pp) && 0 < pp) {
-                this.SongName = $"{name} <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>";
+                this._rating = $" <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>";
             }
             else {
-                this.SongName = $"{name} <size=50%>{Utility.GetRating(this.SongNode)}</size>";
+                this._rating = $" <size=50%>{Utility.GetRating(this.SongNode)}</size>";
             }
-
+            builder.Append(this._rating);
+            this.SongName = builder.ToString();
             this.SetCover();
         }
 
