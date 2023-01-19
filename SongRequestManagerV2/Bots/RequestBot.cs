@@ -638,7 +638,7 @@ namespace SongRequestManagerV2.Bots
         public void Blacklist(SongRequest request, bool fromHistory, bool skip)
         {
             // Add the song to the blacklist
-            this.ListCollectionManager.Add(s_banlist, request.SongMetaData["id"].Value);
+            this.ListCollectionManager.Add(s_banlist, request.SongNode["id"].Value);
 
             this.ChatManager.QueueChatMessage($"{request.SongMetaData["songName"].Value} by {request.SongMetaData["songAuthorName"].Value} ({request.SongMetaData["id"].Value}) added to the blacklist.");
 
@@ -830,7 +830,7 @@ namespace SongRequestManagerV2.Bots
         {
             var dt = this._textFactory.Create().AddUser(state.User);
             try {
-                dt.AddSong(RequestManager.HistorySongs.FirstOrDefault().SongMetaData); // Exposing the current song 
+                dt.AddSong(RequestManager.HistorySongs.FirstOrDefault().SongNode); // Exposing the current song 
             }
             catch (Exception ex) {
                 Logger.Error(ex);
@@ -957,7 +957,7 @@ namespace SongRequestManagerV2.Bots
         public string IsRequestInQueue(string request, bool fast = false)
         {
             foreach (var req in RequestManager.RequestSongs) {
-                var song = req.SongMetaData;
+                var song = req.SongNode;
                 if (string.Equals(song["id"].Value, request, StringComparison.InvariantCultureIgnoreCase)) {
                     return fast ? "X" : $"Request {song["songName"].Value} by {song["songAuthorName"].Value} ({song["id"].Value}) already exists in queue!";
                 }
@@ -1149,7 +1149,7 @@ namespace SongRequestManagerV2.Bots
                     }
 
                     if (dequeueSong) {
-                        this.ChatManager.QueueChatMessage($"{song.SongMetaData["songName"].Value} ({song.SongMetaData["id"].Value}) removed.");
+                        this.ChatManager.QueueChatMessage($"{song.SongMetaData["songName"].Value} ({song.SongNode["id"].Value}) removed.");
                         this.Skip(song);
                         return s_success;
                     }
@@ -1209,10 +1209,11 @@ namespace SongRequestManagerV2.Bots
 
             var lastuser = "";
             foreach (var entry in queue) {
-                var song = entry.SongMetaData;
+                var song = entry.SongNode;
+                var songMeta = entry.SongMetaData;
 
                 if (string.IsNullOrEmpty(songId)) {
-                    var terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["songAuthorName"].Value, song["levelAuthorName"].Value, song["id"].Value, entry._requestor.UserName };
+                    var terms = new string[] { songMeta["songName"].Value, songMeta["songSubName"].Value, songMeta["songAuthorName"].Value, songMeta["levelAuthorName"].Value, song["id"].Value, entry._requestor.UserName };
 
                     if (this.DoesContainTerms(request, ref terms)) {
                         result = entry;
@@ -1309,11 +1310,11 @@ namespace SongRequestManagerV2.Bots
             }
 
             foreach (var entry in RequestManager.RequestSongs.OfType<SongRequest>()) {
-                var song = entry.SongMetaData;
+                var songMeta = entry.SongMetaData;
 
                 if (entry.SongNode["id"].Value == songId) {
                     entry._requestInfo = "!" + parts[1];
-                    this.ChatManager.QueueChatMessage($"{song["songName"].Value} : {parts[1]}");
+                    this.ChatManager.QueueChatMessage($"{songMeta["songName"].Value} : {parts[1]}");
                     return s_success;
                 }
             }
@@ -1600,11 +1601,13 @@ namespace SongRequestManagerV2.Bots
             var moveId = this.GetBeatSaverId(request);
             for (var i = RequestManager.RequestSongs.Count - 1; i >= 0; i--) {
                 var req = RequestManager.RequestSongs.ElementAt(i);
-                var song = req.SongMetaData;
+                var song = req.SongNode;
+                var songMeta = req.SongMetaData;
+                
 
                 var moveRequest = false;
-                if (moveId == "") {
-                    var terms = new string[] { song["songName"].Value, song["songSubName"].Value, song["songAuthorName"].Value, song["levelAuthorName"].Value, req.SongNode["id"].Value, (RequestManager.RequestSongs.ToArray()[i])._requestor.UserName };
+                if (string.IsNullOrEmpty(moveId)) {
+                    var terms = new string[] { songMeta["songName"].Value, songMeta["songSubName"].Value, songMeta["songAuthorName"].Value, songMeta["levelAuthorName"].Value, song["id"].Value, (RequestManager.RequestSongs.ToArray()[i])._requestor.UserName };
                     if (this.DoesContainTerms(request, ref terms)) {
                         moveRequest = true;
                     }
@@ -1642,7 +1645,7 @@ namespace SongRequestManagerV2.Bots
                     // And write a summary to file
                     this.WriteQueueSummaryToFile();
 
-                    this.ChatManager.QueueChatMessage($"{song["songName"].Value} ({song["id"].Value}) {(top ? "promoted" : "demoted")}.");
+                    this.ChatManager.QueueChatMessage($"{songMeta["songName"].Value} ({songMeta["id"].Value}) {(top ? "promoted" : "demoted")}.");
                     return;
                 }
             }

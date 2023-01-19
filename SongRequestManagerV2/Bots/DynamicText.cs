@@ -101,18 +101,6 @@ namespace SongRequestManagerV2.Bots
         public DynamicText AddSong(JSONObject song, string prefix = "")
         {
             this.AddJSON(song, prefix); // Add the song JSON
-
-            //SongMap map;
-            //if (MapDatabase.MapLibrary.TryGetValue(song["id"].Value, out map) && map.pp>0)
-            //{
-            //    Add("pp", map.pp.ToString());
-            //}
-            //else
-            //{
-            //    Add("pp", "");
-            //}
-
-
             if (song["pp"].AsFloat > 0) {
                 this.Add("PP", song["pp"].AsInt.ToString() + " PP");
             }
