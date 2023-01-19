@@ -42,13 +42,13 @@ namespace SongRequestManagerV2.Bots
         public DynamicText AddLinks()
         {
             if (this.AllowLinks) {
-                this.Add("beatmaps.io", "https://beatmaps.io");
+                this.Add("beatsaver", "https://beatsaver.com");
                 this.Add("beatsaber", "https://beatsaber.com");
                 this.Add("scoresaber", "https://scoresaber.com");
             }
             else {
                 this.Add("beatsaver", "beatsaver site");
-                this.Add("beatsaver", "beatsaber site");
+                this.Add("beatsaber", "beatsaber site");
                 this.Add("scoresaber", "scoresaber site");
             }
 
