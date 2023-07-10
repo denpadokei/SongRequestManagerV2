@@ -89,9 +89,9 @@ namespace SongRequestManagerV2.Bots
 
         public void SetButtonType(string ButtonName = "A")
         {
-            this.BaseButton = Resources.FindObjectsOfTypeAll<Button>().FirstOrDefault(x => (x.name == ButtonName));
+            this.BaseButton = Resources.FindObjectsOfTypeAll<Button>().FirstOrDefault(x => x.name == ButtonName);
             if (this.BaseButton == null) {
-                this.BaseButton = Resources.FindObjectsOfTypeAll<Button>().FirstOrDefault(x => (x.name == "KeyboardButton"));
+                this.BaseButton = Resources.FindObjectsOfTypeAll<Button>().FirstOrDefault(x => x.name == "KeyboardButton");
             }
         }
 
@@ -156,10 +156,10 @@ namespace SongRequestManagerV2.Bots
             this._currentposition.x += spacing;
 
             if (Label != "") {
-                this.AddKey(Label, Width, height, color).Set(newvalue);
+                _ = this.AddKey(Label, Width, height, color).Set(newvalue);
             }
             else if (Key != "") {
-                this.AddKey(Key[0].ToString(), Key[1].ToString()).Set(newvalue);
+                _ = this.AddKey(Key[0].ToString(), Key[1].ToString()).Set(newvalue);
             }
 
             spacing = 0;
@@ -224,7 +224,7 @@ namespace SongRequestManagerV2.Bots
                                 this._baseposition.x = this._currentposition.x;
                                 if (p < Keyboard.Length && Keyboard[p] == ',') {
                                     p++;
-                                    this.ReadFloat(ref Keyboard, ref p, ref this._currentposition.y);
+                                    _ = this.ReadFloat(ref Keyboard, ref p, ref this._currentposition.y);
                                     this._baseposition.y = this._currentposition.y;
                                 }
                             }
@@ -234,7 +234,7 @@ namespace SongRequestManagerV2.Bots
                             {
                                 this.EmitKey(ref spacing, ref width, ref Label, ref Key, ref space, ref newvalue, ref height, ref color);
                                 p++;
-                                this.ReadFloat(ref Keyboard, ref p, ref this._scale);
+                                _ = this.ReadFloat(ref Keyboard, ref p, ref this._scale);
                                 continue;
                             }
 
@@ -245,7 +245,7 @@ namespace SongRequestManagerV2.Bots
                         case '\n':
                             this.EmitKey(ref spacing, ref width, ref Label, ref Key, ref space, ref newvalue, ref height, ref color);
                             space = true;
-                            this.NextRow();
+                            _ = this.NextRow();
                             break;
 
                         case ' ':
@@ -289,7 +289,7 @@ namespace SongRequestManagerV2.Bots
                             if (this.ReadFloat(ref Keyboard, ref p, ref number)) {
                                 if (p < Keyboard.Length && Keyboard[p] == ',') {
                                     p++;
-                                    this.ReadFloat(ref Keyboard, ref p, ref height);
+                                    _ = this.ReadFloat(ref Keyboard, ref p, ref height);
                                 }
 
                                 if (space) {
@@ -318,7 +318,6 @@ namespace SongRequestManagerV2.Bots
                             newvalue = Keyboard.Substring(newvaluep, p - newvaluep);
                             break;
 
-
                         default:
                             Logger.Debug($"Unable to parse keyboard at position {p} char [{Keyboard[p]}]: [{Keyboard}]");
                             return this;
@@ -328,7 +327,6 @@ namespace SongRequestManagerV2.Bots
                 }
 
                 this.EmitKey(ref spacing, ref width, ref Label, ref Key, ref space, ref newvalue, ref height, ref color);
-
             }
             catch (Exception ex) {
                 Logger.Error($"Unable to parse keyboard at position {p} : [{Keyboard}]");
@@ -343,7 +341,7 @@ namespace SongRequestManagerV2.Bots
             try {
                 var fileContent = File.ReadAllText(Path.Combine(Plugin.DataPath, keyboardname));
                 if (fileContent.Length > 0) {
-                    this.AddKeys(fileContent, scale);
+                    _ = this.AddKeys(fileContent, scale);
                 }
             }
             catch {
@@ -403,8 +401,8 @@ namespace SongRequestManagerV2.Bots
             // BUG: These are here on a temporary basis, they will be moving out as soon as API is finished
 
             if (DefaultKeyboard != "") {
-                this.AddKeys(DefaultKeyboard);
-                this.DefaultActions();
+                _ = this.AddKeys(DefaultKeyboard);
+                _ = this.DefaultActions();
             }
 
             return this;
@@ -493,7 +491,7 @@ namespace SongRequestManagerV2.Bots
 
             v.y = 30f; // BUG: This needs to be derived from the text position
             // BUG: I do not know why that 30f is here, It makes things work, but I can't understand WHY! Me stupid.
-            v.x = v.x / 2 + 30f - 0.5f; // BUG: The .5 gets rid of the trailing |, but technically, we need to calculate its width and store it
+            v.x = (v.x / 2) + 30f - 0.5f; // BUG: The .5 gets rid of the trailing |, but technically, we need to calculate its width and store it
             (this._keyboardCursor.transform as RectTransform).anchoredPosition = v;
         }
 #if false
@@ -586,7 +584,7 @@ namespace SongRequestManagerV2.Bots
 
                 (this.mybutton.transform as RectTransform).sizeDelta = new Vector2(width, height);
 
-                kb._currentposition.x += width * kb._scale + kb._padding;
+                kb._currentposition.x += (width * kb._scale) + kb._padding;
 
                 this.mybutton.onClick.RemoveAllListeners();
 
@@ -619,7 +617,6 @@ namespace SongRequestManagerV2.Bots
 
                         kb.KeyboardText.text += x;
                         kb.DrawCursor();
-
                     }
                 });
                 var myHintText = UIHelper.AddHintText(this.mybutton.transform as RectTransform, this.value);

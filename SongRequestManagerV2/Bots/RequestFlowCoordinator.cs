@@ -5,7 +5,7 @@ using SongRequestManagerV2.Views;
 using System;
 using Zenject;
 
-namespace SongRequestManagerV2
+namespace SongRequestManagerV2.Bots
 {
     public class RequestFlowCoordinator : FlowCoordinator, IInitializable, IDisposable
     {

@@ -28,10 +28,7 @@ namespace SongRequestManagerV2.Models
 
         public Task<bool> CheckUpdate(PluginMetadata metadata)
         {
-            if (metadata == null) {
-                return Task.FromResult(false);
-            }
-            return this.CheckUpdate(metadata.HVersion, metadata.PluginSourceLink?.ToString());
+            return metadata == null ? Task.FromResult(false) : this.CheckUpdate(metadata.HVersion, metadata.PluginSourceLink?.ToString());
         }
 
         public async Task<bool> CheckUpdate(Hive.Versioning.Version version, string githubURL)
@@ -118,7 +115,7 @@ namespace SongRequestManagerV2.Models
                 return;
             }
             if (!Directory.Exists(destDir)) {
-                Directory.CreateDirectory(destDir);
+                _ = Directory.CreateDirectory(destDir);
             }
             foreach (var file in Directory.EnumerateFiles(sourceDir)) {
                 File.Copy(file, Path.Combine(destDir, Path.GetFileName(file)), true);

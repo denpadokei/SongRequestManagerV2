@@ -2,13 +2,12 @@
 using CatCore.Models.Twitch.IRC;
 using CatCore.Services.Multiplexer;
 using IPA.Loader;
-using IPA.Utilities;
 using SongRequestManagerV2.Bases;
 using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Models;
-using SongRequestManagerV2.SimpleJSON;
+using SongRequestManagerV2.SimpleJsons;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;
@@ -46,7 +45,6 @@ namespace SongRequestManagerV2.Bots
         public static List<JSONObject> Played { get; private set; } = new List<JSONObject>(); // Played list
         public static List<BotEvent> Events { get; } = new List<BotEvent>();
         public static UserInfo CurrentUser { get; private set; }
-
 
         private static StringListManager s_mapperwhitelist = new StringListManager(); // BUG: This needs to switch to list manager interface
         private static StringListManager s_mapperBanlist = new StringListManager(); // BUG: This needs to switch to list manager interface
@@ -252,7 +250,6 @@ namespace SongRequestManagerV2.Bots
 
         // BUG: Prototype code, used for testing.
 
-
         public void ScheduledCommand(string command, ElapsedEventArgs e)
         {
             this.Parse(this.GetLoginUser(), command);
@@ -310,7 +307,7 @@ namespace SongRequestManagerV2.Bots
                 try {
                     var timeSinceBackup = DateTime.Now - DateTime.Parse(RequestBotConfig.Instance.LastBackup);
                     if (timeSinceBackup > TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours)) {
-                        this.Backup();
+                        _ = this.Backup();
                     }
                 }
                 catch (Exception ex) {
@@ -331,8 +328,8 @@ namespace SongRequestManagerV2.Bots
                 }
                 this._requestManager.ReadRequest(); // Might added the timespan check for this too. To be decided later.
                 this._requestManager.ReadHistory();
-                this.ListCollectionManager.OpenList("banlist.unique");
-                this.ListCollectionManager.ClearOldList("duplicate.list", TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours));
+                _ = this.ListCollectionManager.OpenList("banlist.unique");
+                _ = this.ListCollectionManager.ClearOldList("duplicate.list", TimeSpan.FromHours(RequestBotConfig.Instance.SessionResetAfterXHours));
 
                 this.UpdateRequestUI();
                 RequestBotConfig.Instance.ConfigChangedEvent += this.OnConfigChangedEvent;
@@ -373,12 +370,9 @@ namespace SongRequestManagerV2.Bots
                         result = song2["stats"].AsObject["score"].AsFloat.CompareTo(song1["stats"].AsObject["score"].AsFloat);
                         break;
                     case "pp":
-                        if (this.MapDatabase.PPMap.TryGetValue(song1["id"].Value, out var pp1) && this.MapDatabase.PPMap.TryGetValue(song2["id"].Value, out var pp2)) {
-                            result = pp2.CompareTo(pp1);
-                        }
-                        else {
-                            result = 0;
-                        }
+                        result = this.MapDatabase.PPMap.TryGetValue(song1["id"].Value, out var pp1) && this.MapDatabase.PPMap.TryGetValue(song2["id"].Value, out var pp2)
+                            ? pp2.CompareTo(pp1)
+                            : 0;
                         break;
                     case "id":
                         // BUG: This hack makes sorting by version and ID sort of work. In reality, we're comparing 1-2 numbers
@@ -393,11 +387,7 @@ namespace SongRequestManagerV2.Bots
                     continue;
                 }
 
-                if (s[0] == '-') {
-                    return -result;
-                }
-
-                return result;
+                return s[0] == '-' ? -result : result;
             }
             return result;
         }
@@ -503,12 +493,9 @@ namespace SongRequestManagerV2.Bots
                     return;
                 }
                 else {
-                    if (!requestInfo.Flags.HasFlag(CmdFlags.NoFilter)) {
-                        errorMessage = this.SongSearchFilter(songs.First(), false);
-                    }
-                    else {
-                        errorMessage = this.SongSearchFilter(songs.First(), false, SongFilter.Queue);
-                    }
+                    errorMessage = !requestInfo.Flags.HasFlag(CmdFlags.NoFilter)
+                        ? this.SongSearchFilter(songs.First(), false)
+                        : this.SongSearchFilter(songs.First(), false, SongFilter.Queue);
                 }
 
                 // Display reason why chosen song was rejected, if filter is triggered. Do not add filtered songs
@@ -524,7 +511,7 @@ namespace SongRequestManagerV2.Bots
                 if (RequestBotConfig.Instance.NotifySound) {
                     this._notifySound.PlaySound();
                 }
-                if ((requestInfo.Flags.HasFlag(CmdFlags.MoveToTop))) {
+                if (requestInfo.Flags.HasFlag(CmdFlags.MoveToTop)) {
                     var reqs = new List<SongRequest>() { req };
                     var newList = reqs.Union(RequestManager.RequestSongs.ToArray());
                     RequestManager.RequestSongs.Clear();
@@ -606,7 +593,7 @@ namespace SongRequestManagerV2.Bots
                     RequestManager.HistorySongs.AddRange(songs);
                 }
                 var requests = RequestManager.RequestSongs.ToList();
-                requests.Remove(request);
+                _ = requests.Remove(request);
                 RequestManager.RequestSongs.Clear();
                 RequestManager.RequestSongs.AddRange(requests);
                 this._requestManager.WriteHistory();
@@ -639,7 +626,7 @@ namespace SongRequestManagerV2.Bots
         public void Blacklist(SongRequest request, bool fromHistory, bool skip)
         {
             // Add the song to the blacklist
-            this.ListCollectionManager.Add(s_banlist, request.ID);
+            _ = this.ListCollectionManager.Add(s_banlist, request.ID);
 
             this.ChatManager.QueueChatMessage($"{request.SongMetaData["songName"].Value} by {request.SongMetaData["songAuthorName"].Value} ({request.SongMetaData["id"].Value}) added to the blacklist.");
 
@@ -682,7 +669,6 @@ namespace SongRequestManagerV2.Bots
             return "";
         }
 
-
         public string AddToTop(ParseState state)
         {
             var newstate = this._stateFactory.Create().Setup(state); // Must use copies here, since these are all threads
@@ -698,7 +684,6 @@ namespace SongRequestManagerV2.Bots
             newstate.Info = "Unfiltered";
             return this.ProcessSongRequest(newstate);
         }
-
 
         public string ProcessSongRequest(ParseState state)
         {
@@ -735,12 +720,9 @@ namespace SongRequestManagerV2.Bots
                 }
 
                 if (!state.User.IsBroadcaster && RequestTracker[state.User.Id].numRequests >= limit) {
-                    if (RequestBotConfig.Instance.LimitUserRequestsToSession) {
-                        this._textFactory.Create().Add("Requests", RequestTracker[state.User.Id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You've already used %Requests% requests this stream. Subscribers are limited to %RequestLimit%.");
-                    }
-                    else {
-                        this._textFactory.Create().Add("Requests", RequestTracker[state.User.Id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You already have %Requests% on the queue. You can add another once one is played. Subscribers are limited to %RequestLimit%.");
-                    }
+                    _ = RequestBotConfig.Instance.LimitUserRequestsToSession
+                        ? this._textFactory.Create().Add("Requests", RequestTracker[state.User.Id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You've already used %Requests% requests this stream. Subscribers are limited to %RequestLimit%.")
+                        : this._textFactory.Create().Add("Requests", RequestTracker[state.User.Id].numRequests.ToString()).Add("RequestLimit", RequestBotConfig.Instance.SubRequestLimit.ToString()).QueueMessage("You already have %Requests% on the queue. You can add another once one is played. Subscribers are limited to %RequestLimit%.");
 
                     return s_success;
                 }
@@ -768,7 +750,6 @@ namespace SongRequestManagerV2.Bots
             }
         }
 
-
         public IChatUser GetLoginUser()
         {
             if (this.ChatManager.OwnUserData != null) {
@@ -777,13 +758,13 @@ namespace SongRequestManagerV2.Bots
                 {
                     Id = user.UserId,
                     UserName = user.UserId,
-                    DisplayName = user.DisplayName,
-                    Color = user.Color,
+                    user.DisplayName,
+                    user.Color,
                     IsBroadcaster = true,
-                    IsModerator = user.IsModerator,
-                    IsSubscriber = user.IsSubscriber,
-                    IsTurbo = user.IsTurbo,
-                    IsVip = user.IsVip,
+                    user.IsModerator,
+                    user.IsSubscriber,
+                    user.IsTurbo,
+                    user.IsVip,
                     Badges = Array.Empty<IChatBadge>()
                 };
                 return new TwitchUser(obj.Id, obj.UserName, obj.DisplayName, obj.Color, obj.IsModerator, obj.IsBroadcaster, obj.IsSubscriber, obj.IsTurbo, obj.IsVip, new System.Collections.ObjectModel.ReadOnlyCollection<IChatBadge>(obj.Badges));
@@ -818,7 +799,7 @@ namespace SongRequestManagerV2.Bots
             }
 
             // This will be used for all parsing type operations, allowing subcommands efficient access to parse state logic
-            this._stateFactory.Create().Setup(user, request, flags, info).ParseCommand();
+            _ = this._stateFactory.Create().Setup(user, request, flags, info).ParseCommand();
         }
 
         #region ChatCommand
@@ -831,13 +812,13 @@ namespace SongRequestManagerV2.Bots
         {
             var dt = this._textFactory.Create().AddUser(state.User);
             try {
-                dt.AddSong(RequestManager.HistorySongs.FirstOrDefault().SongNode); // Exposing the current song 
+                _ = dt.AddSong(RequestManager.HistorySongs.FirstOrDefault().SongNode); // Exposing the current song 
             }
             catch (Exception ex) {
                 Logger.Error(ex);
             }
 
-            dt.QueueMessage(state.Parameter);
+            _ = dt.QueueMessage(state.Parameter);
             return s_success;
         }
 
@@ -871,23 +852,11 @@ namespace SongRequestManagerV2.Bots
         public bool Filtersong(JSONObject song)
         {
             var songid = song["id"].Value;
-            if (this.IsInQueue(songid)) {
-                return true;
-            }
-
-            if (this.ListCollectionManager.Contains(s_banlist, songid)) {
-                return true;
-            }
-
-            if (this.ListCollectionManager.Contains(s_duplicatelist, songid)) {
-                return true;
-            }
-
-            return false;
+            return this.IsInQueue(songid)
+|| this.ListCollectionManager.Contains(s_banlist, songid) || this.ListCollectionManager.Contains(s_duplicatelist, songid);
         }
 
         // Returns error text if filter triggers, or "" otherwise, "fast" version returns X if filter triggers
-
 
         /// <summary>
         /// 
@@ -939,19 +908,13 @@ namespace SongRequestManagerV2.Bots
                 }
             }
 
-            if (filter.HasFlag(SongFilter.NJS) && njs < RequestBotConfig.Instance.MinimumNJS) {
-                return fast ? "X" : $"{metadata["songName"].Value} ({metadata["duration"].Value}) by {metadata["levelAuthorName"].Value} ({songid}) NJS ({njs}) is too low!";
-            }
-
-            if (filter.HasFlag(SongFilter.Remap) && s_songremap.ContainsKey(songid)) {
-                return fast ? "X" : $"no permitted results found!";
-            }
-
-            if (filter.HasFlag(SongFilter.Rating) && stats["score"].AsFloat < RequestBotConfig.Instance.LowestAllowedRating && stats["score"].AsFloat != 0) {
-                return fast ? "X" : $"{metadata["songName"].Value} by {metadata["levelAuthorName"].Value} is below {RequestBotConfig.Instance.LowestAllowedRating}% rating!";
-            }
-
-            return "";
+            return filter.HasFlag(SongFilter.NJS) && njs < RequestBotConfig.Instance.MinimumNJS
+                ? fast ? "X" : $"{metadata["songName"].Value} ({metadata["duration"].Value}) by {metadata["levelAuthorName"].Value} ({songid}) NJS ({njs}) is too low!"
+                : filter.HasFlag(SongFilter.Remap) && s_songremap.ContainsKey(songid)
+                ? fast ? "X" : $"no permitted results found!"
+                : filter.HasFlag(SongFilter.Rating) && stats["score"].AsFloat < RequestBotConfig.Instance.LowestAllowedRating && stats["score"].AsFloat != 0
+                ? fast ? "X" : $"{metadata["songName"].Value} by {metadata["levelAuthorName"].Value} is below {RequestBotConfig.Instance.LowestAllowedRating}% rating!"
+                : "";
         }
 
         // checks if request is in the RequestManager.RequestSongs - needs to improve interface
@@ -1015,13 +978,13 @@ namespace SongRequestManagerV2.Bots
                 }
             }
 
-            this.ListCollectionManager.Add(s_banlist, id);
+            _ = this.ListCollectionManager.Add(s_banlist, id);
 
             if (song == null) {
                 this.ChatManager.QueueChatMessage($"{id} is now on the ban list.");
             }
             else {
-                state.Msg(this._textFactory.Create().AddSong(song.SongObject).Parse(StringFormat.BanSongDetail), ", ");
+                _ = state.Msg(this._textFactory.Create().AddSong(song.SongObject).Parse(StringFormat.BanSongDetail), ", ");
             }
         }
 
@@ -1055,7 +1018,7 @@ namespace SongRequestManagerV2.Bots
 
             if (this.ListCollectionManager.Contains(s_banlist, unbanvalue)) {
                 this.ChatManager.QueueChatMessage($"Removed {request} from the ban list.");
-                this.ListCollectionManager.Remove(s_banlist, unbanvalue);
+                _ = this.ListCollectionManager.Remove(s_banlist, unbanvalue);
             }
             else {
                 this.ChatManager.QueueChatMessage($"{request} is not on the ban list.");
@@ -1083,10 +1046,10 @@ namespace SongRequestManagerV2.Bots
                 foreach (var req in RequestManager.RequestSongs.ToArray()) {
                     var song = req.SongNode;
                     if (count > 0) {
-                        sb.Append(",");
+                        _ = sb.Append(",");
                     }
 
-                    sb.Append(req.ID);
+                    _ = sb.Append(req.ID);
                     count++;
                 }
                 File.WriteAllText(queuefile, sb.ToString());
@@ -1104,7 +1067,8 @@ namespace SongRequestManagerV2.Bots
             try {
                 var queuefile = Path.Combine(Plugin.DataPath, state.Parameter + ".deck");
                 if (!File.Exists(queuefile)) {
-                    using (File.Create(queuefile)) { };
+                    using (File.Create(queuefile)) {
+                    };
                 }
 
                 var fileContent = File.ReadAllText(queuefile);
@@ -1117,7 +1081,7 @@ namespace SongRequestManagerV2.Bots
 
                     var newstate = this._stateFactory.Create().Setup(state); // Must use copies here, since these are all threads
                     newstate.Parameter = integerStrings[n];
-                    this.ProcessSongRequest(newstate);
+                    _ = this.ProcessSongRequest(newstate);
                 }
             }
             catch {
@@ -1159,7 +1123,6 @@ namespace SongRequestManagerV2.Bots
             return $"{state.Parameter} was not found in the queue.";
         }
         #endregion
-
 
         // BUG: Will use a new interface to the list manager
         public void MapperAllowList(IChatUser requestor, string request)
@@ -1220,17 +1183,17 @@ namespace SongRequestManagerV2.Bots
                         result = entry;
 
                         if (lastuser != result.Requestor.UserName) {
-                            qm.Add($"{result.Requestor.UserName}: ");
+                            _ = qm.Add($"{result.Requestor.UserName}: ");
                         }
 
-                        qm.Add($"{result.SongMetaData["songName"].Value} ({result.ID})", ",");
+                        _ = qm.Add($"{result.SongMetaData["songName"].Value} ({result.ID})", ",");
                         lastuser = result.Requestor.UserName;
                     }
                 }
                 else {
                     if (string.Equals(entry.ID, songId, StringComparison.InvariantCultureIgnoreCase)) {
                         result = entry;
-                        qm.Add($"{result.Requestor.UserName}: {result.SongMetaData["songName"].Value} ({result.ID})");
+                        _ = qm.Add($"{result.Requestor.UserName}: {result.SongMetaData["songName"].Value} ({result.ID})");
                         return entry;
                     }
                 }
@@ -1290,9 +1253,7 @@ namespace SongRequestManagerV2.Bots
             var qm = this._messageFactroy.Create();
 
             var result = this.FindMatch(RequestManager.RequestSongs.OfType<SongRequest>(), state.Parameter, qm);
-            if (result == null) {
-                result = this.FindMatch(RequestManager.HistorySongs.OfType<SongRequest>(), state.Parameter, qm);
-            }
+            result ??= this.FindMatch(RequestManager.HistorySongs.OfType<SongRequest>(), state.Parameter, qm);
 
             //if (result != null) this.ChatManager.QueueChatMessage($"{result.song["songName"].Value} requested by {result.requestor.displayName}.");
             if (result != null) {
@@ -1336,13 +1297,13 @@ namespace SongRequestManagerV2.Bots
             }
 
             if (state.Parameter != "enable" && state.Parameter != "disable") {
-                state.Msg(state._botcmd.ShortHelp);
+                _ = state.Msg(state._botcmd.ShortHelp);
                 yield break;
             }
 
             //System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo($"liv-streamerkit://gamechanger/beat-saber-sabotage/{state.parameter}"));
 
-            System.Diagnostics.Process.Start($"liv-streamerkit://gamechanger/beat-saber-sabotage/{state.Parameter}");
+            _ = System.Diagnostics.Process.Start($"liv-streamerkit://gamechanger/beat-saber-sabotage/{state.Parameter}");
 
             if (PluginManager.GetPlugin("WobbleSaber") != null) {
                 var wobblestate = "off";
@@ -1353,11 +1314,10 @@ namespace SongRequestManagerV2.Bots
                 this.ChatManager.QueueChatMessage($"!wadmin toggle {wobblestate} ");
             }
 
-            state.Msg($"The !bomb command is now {state.Parameter}d.");
+            _ = state.Msg($"The !bomb command is now {state.Parameter}d.");
 
             yield break;
         }
-
 
         public async Task AddsongsFromnewest(ParseState state)
         {
@@ -1398,7 +1358,7 @@ namespace SongRequestManagerV2.Bots
                             this.QueueSong(state, entry);
                         }
 
-                        this.ListCollectionManager.Add("latest.deck", entry["id"].Value);
+                        _ = this.ListCollectionManager.Add("latest.deck", entry["id"].Value);
                         totalSongs++;
                     }
                 }
@@ -1456,7 +1416,7 @@ namespace SongRequestManagerV2.Bots
                             this.QueueSong(state, entry);
                         }
 
-                        this.ListCollectionManager.Add("latest.deck", entry["id"].Value);
+                        _ = this.ListCollectionManager.Add("latest.deck", entry["id"].Value);
                         totalSongs++;
                     }
                 }
@@ -1472,7 +1432,6 @@ namespace SongRequestManagerV2.Bots
                 this.UpdateRequestUI();
                 this.RefreshSongQuere();
                 this.RefreshQueue = true;
-
             }
             Logger.Debug($"Total songs : {totalSongs}");
         }
@@ -1513,7 +1472,7 @@ namespace SongRequestManagerV2.Bots
                             this.QueueSong(state, entry);
                         }
 
-                        this.ListCollectionManager.Add("search.deck", entry["id"].Value);
+                        _ = this.ListCollectionManager.Add("search.deck", entry["id"].Value);
                         totalSongs++;
                     }
                 }
@@ -1551,7 +1510,6 @@ namespace SongRequestManagerV2.Bots
 
             if (resp != null && resp.IsSuccessStatusCode) {
                 result = resp.ConvertToJsonNode();
-
             }
             else {
                 Logger.Debug($"Error {resp.ReasonPhrase} occured when trying to request song {state.Parameter}!");
@@ -1572,10 +1530,10 @@ namespace SongRequestManagerV2.Bots
         public void QueueSong(ParseState state, JSONObject song)
         {
             var req = this._songRequestFactory.Create();
-            req.Init(song, state.User, DateTime.UtcNow, RequestStatus.SongSearch, "search result");
+            _ = req.Init(song, state.User, DateTime.UtcNow, RequestStatus.SongSearch, "search result");
 
-            if ((state.Flags.HasFlag(CmdFlags.MoveToTop))) {
-                var newList = (new List<SongRequest>() { req }).Union(RequestManager.RequestSongs.ToArray());
+            if (state.Flags.HasFlag(CmdFlags.MoveToTop)) {
+                var newList = new List<SongRequest>() { req }.Union(RequestManager.RequestSongs.ToArray());
                 RequestManager.RequestSongs.Clear();
                 RequestManager.RequestSongs.AddRange(newList);
             }
@@ -1602,13 +1560,12 @@ namespace SongRequestManagerV2.Bots
             var moveId = this.GetBeatSaverId(request);
             for (var i = RequestManager.RequestSongs.Count - 1; i >= 0; i--) {
                 var req = RequestManager.RequestSongs.ElementAt(i);
-                var song = req.SongNode;
+                _ = req.SongNode;
                 var songMeta = req.SongMetaData;
-                
 
                 var moveRequest = false;
                 if (string.IsNullOrEmpty(moveId)) {
-                    var terms = new string[] { songMeta["songName"].Value, songMeta["songSubName"].Value, songMeta["songAuthorName"].Value, songMeta["levelAuthorName"].Value, req.ID, (RequestManager.RequestSongs.ToArray()[i]).Requestor.UserName };
+                    var terms = new string[] { songMeta["songName"].Value, songMeta["songSubName"].Value, songMeta["songAuthorName"].Value, songMeta["levelAuthorName"].Value, req.ID, RequestManager.RequestSongs.ToArray()[i].Requestor.UserName };
                     if (this.DoesContainTerms(request, ref terms)) {
                         moveRequest = true;
                     }
@@ -1628,7 +1585,7 @@ namespace SongRequestManagerV2.Bots
 
                     // Then readd it at the appropriate position
                     if (top) {
-                        var tmp = (new List<SongRequest>() { req }).Union(RequestManager.RequestSongs.ToArray());
+                        var tmp = new List<SongRequest>() { req }.Union(RequestManager.RequestSongs.ToArray());
                         RequestManager.RequestSongs.Clear();
                         RequestManager.RequestSongs.AddRange(tmp);
                     }
@@ -1653,8 +1610,6 @@ namespace SongRequestManagerV2.Bots
             this.ChatManager.QueueChatMessage($"{request} was not found in the queue.");
         }
         #endregion
-
-
 
         #region Queue Related
 
@@ -1699,10 +1654,10 @@ namespace SongRequestManagerV2.Bots
 
                 foreach (var req in RequestManager.RequestSongs.ToArray()) {
                     var song = req.SongNode;
-                    queuesummary.Append(this._textFactory.Create().AddSong(song).Parse(StringFormat.QueueTextFileFormat));  // Format of Queue is now user configurable
+                    _ = queuesummary.Append(this._textFactory.Create().AddSong(song).Parse(StringFormat.QueueTextFileFormat));  // Format of Queue is now user configurable
 
                     if (++count > RequestBotConfig.Instance.MaximumQueueTextEntries) {
-                        queuesummary.Append("...\n");
+                        _ = queuesummary.Append("...\n");
                         break;
                     }
                 }
@@ -1737,10 +1692,9 @@ namespace SongRequestManagerV2.Bots
 
         public string QueueLottery(ParseState state)
         {
-            int.TryParse(state.Parameter, out var entrycount);
+            _ = int.TryParse(state.Parameter, out var entrycount);
             var list = RequestManager.RequestSongs.OfType<SongRequest>().ToList();
             this.Shuffle(list);
-
 
             //var list = RequestManager.RequestSongs.OfType<SongRequest>().ToList();
             for (var i = entrycount; i < list.Count; i++) {
@@ -1749,7 +1703,7 @@ namespace SongRequestManagerV2.Bots
                         RequestTracker[list[i].Requestor.Id].numRequests--;
                     }
 
-                    this.ListCollectionManager.Remove(s_duplicatelist, list[i].ID);
+                    _ = this.ListCollectionManager.Remove(s_duplicatelist, list[i].ID);
                 }
                 catch { }
             }
@@ -1813,7 +1767,7 @@ namespace SongRequestManagerV2.Bots
             }
 
             if (s_songremap.ContainsKey(parts[0])) {
-                s_songremap.Remove(parts[0]);
+                _ = s_songremap.Remove(parts[0]);
             }
 
             s_songremap.Add(parts[0], parts[1]);
@@ -1826,7 +1780,7 @@ namespace SongRequestManagerV2.Bots
 
             if (s_songremap.ContainsKey(request)) {
                 this.ChatManager.QueueChatMessage($"Remap entry {request} removed.");
-                s_songremap.Remove(request);
+                _ = s_songremap.Remove(request);
             }
             this.WriteRemapList();
         }
@@ -1842,7 +1796,7 @@ namespace SongRequestManagerV2.Bots
                 var sb = new StringBuilder();
 
                 foreach (var entry in s_songremap) {
-                    sb.Append($"{entry.Key},{entry.Value}\n");
+                    _ = sb.Append($"{entry.Key},{entry.Value}\n");
                 }
                 File.WriteAllText(remapfile, sb.ToString());
             }
@@ -1856,7 +1810,8 @@ namespace SongRequestManagerV2.Bots
             var remapfile = Path.Combine(Plugin.DataPath, "remap.list");
 
             if (!File.Exists(remapfile)) {
-                using (var file = File.Create(remapfile)) { };
+                using (var file = File.Create(remapfile)) {
+                };
             }
 
             try {
@@ -1884,7 +1839,7 @@ namespace SongRequestManagerV2.Bots
                 if (song.Requestor.Id == requestor.Id) {
                     this.ChatManager.QueueChatMessage($"{song.SongMetaData["songName"].Value} ({song.ID}) removed.");
 
-                    this.ListCollectionManager.Remove(s_duplicatelist, song.ID);
+                    _ = this.ListCollectionManager.Remove(s_duplicatelist, song.ID);
                     this.Skip(song, RequestStatus.Wrongsong);
                     return;
                 }
@@ -1913,7 +1868,7 @@ namespace SongRequestManagerV2.Bots
                 default:
                     return s_success;
             }
-            this._textFactory.Create().AddSong(json).QueueMessage(StringFormat.LinkSonglink.ToString());
+            _ = this._textFactory.Create().AddSong(json).QueueMessage(StringFormat.LinkSonglink.ToString());
             return s_success;
         }
 
@@ -1928,7 +1883,7 @@ namespace SongRequestManagerV2.Bots
                     Logger.Error(e);
                 }
             }
-            return $"{total / 60}:{ total % 60:00}";
+            return $"{total / 60}:{total % 60:00}";
         }
 
         public string QueueStatus(ParseState state)
@@ -1945,7 +1900,7 @@ namespace SongRequestManagerV2.Bots
             var msg = this._messageFactroy.Create();
             msg.Header("Loaded lists: ");
             foreach (var entry in this.ListCollectionManager.ListCollection) {
-                msg.Add($"{entry.Key} ({entry.Value.Count()})", ", ");
+                _ = msg.Add($"{entry.Key} ({entry.Value.Count()})", ", ");
             }
 
             msg.End("...", "No lists loaded.");
@@ -1967,9 +1922,8 @@ namespace SongRequestManagerV2.Bots
 
             try {
 
-                this.ListCollectionManager.Add(parts[0], parts[1]);
+                _ = this.ListCollectionManager.Add(parts[0], parts[1]);
                 this.ChatManager.QueueChatMessage($"Added {parts[1]} to {parts[0]}");
-
             }
             catch {
                 this.ChatManager.QueueChatMessage($"list {parts[0]} not found.");
@@ -1983,7 +1937,7 @@ namespace SongRequestManagerV2.Bots
 
                 var msg = this._messageFactroy.Create();
                 foreach (var entry in list.list) {
-                    msg.Add(entry, ", ");
+                    _ = msg.Add(entry, ", ");
                 }
 
                 msg.End("...", $"{request} is empty");
@@ -2004,9 +1958,8 @@ namespace SongRequestManagerV2.Bots
 
             try {
 
-                this.ListCollectionManager.Remove(ref parts[0], ref parts[1]);
+                _ = this.ListCollectionManager.Remove(ref parts[0], ref parts[1]);
                 this.ChatManager.QueueChatMessage($"Removed {parts[1]} from {parts[0]}");
-
             }
             catch {
                 this.ChatManager.QueueChatMessage($"list {parts[0]} not found.");
@@ -2027,7 +1980,7 @@ namespace SongRequestManagerV2.Bots
         public void UnloadList(IChatUser requestor, string request)
         {
             try {
-                this.ListCollectionManager.ListCollection.Remove(request.ToLower());
+                _ = this.ListCollectionManager.ListCollection.Remove(request.ToLower());
                 this.ChatManager.QueueChatMessage($"{request} unloaded.");
             }
             catch {
@@ -2048,10 +2001,12 @@ namespace SongRequestManagerV2.Bots
             try {
                 var list = this.ListCollectionManager.OpenList(state.Parameter);
                 foreach (var entry in list.list) {
-                    this.ProcessSongRequest(this._stateFactory.Create().Setup(state, entry)); // Must use copies here, since these are all threads
+                    _ = this.ProcessSongRequest(this._stateFactory.Create().Setup(state, entry)); // Must use copies here, since these are all threads
                 }
             }
-            catch (Exception ex) { Logger.Error(ex); } // Going to try this form, to reduce code verbosity.              
+            catch (Exception ex) {
+                Logger.Error(ex);
+            } // Going to try this form, to reduce code verbosity.              
             return s_success;
         }
 
@@ -2061,17 +2016,12 @@ namespace SongRequestManagerV2.Bots
             state.Flags |= FlagParameter.Silent;
             foreach (var entry in this.ListCollectionManager.OpenList(state.Parameter).list) {
                 state.Parameter = entry;
-                this.DequeueSong(state);
+                _ = this.DequeueSong(state);
             }
             return s_success;
         }
 
-
-
-
-
         #endregion
-
 
         #region List Manager Related functions ...
         // List types:
@@ -2089,7 +2039,7 @@ namespace SongRequestManagerV2.Bots
 
         public void OpenList(IChatUser requestor, string request)
         {
-            this.ListCollectionManager.OpenList(request.ToLower());
+            _ = this.ListCollectionManager.OpenList(request.ToLower());
         }
 
         public List<JSONObject> ReadJSON(string path)
@@ -2109,7 +2059,7 @@ namespace SongRequestManagerV2.Bots
         public void WriteJSON(string path, List<JSONObject> objs)
         {
             if (!Directory.Exists(Path.GetDirectoryName(path))) {
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                _ = Directory.CreateDirectory(Path.GetDirectoryName(path));
             }
 
             var arr = new JSONArray();
@@ -2132,7 +2082,7 @@ namespace SongRequestManagerV2.Bots
             foreach (var file in source.GetFiles()) {
                 var newFilePath = Path.Combine(target.FullName, file.Name);
                 try {
-                    file.CopyTo(newFilePath);
+                    _ = file.CopyTo(newFilePath);
                 }
                 catch (Exception) {
                 }
@@ -2143,7 +2093,7 @@ namespace SongRequestManagerV2.Bots
         {
             var errormsg = this.Backup();
             if (errormsg == "") {
-                state.Msg("SRManager files backed up.");
+                _ = state.Msg("SRManager files backed up.");
             }
 
             return errormsg;
@@ -2154,7 +2104,7 @@ namespace SongRequestManagerV2.Bots
             var BackupName = Path.Combine(RequestBotConfig.Instance.BackupPath, $"SRMBACKUP-{now:yyyy-MM-dd-HHmm}.zip");
             try {
                 if (!Directory.Exists(RequestBotConfig.Instance.BackupPath)) {
-                    Directory.CreateDirectory(RequestBotConfig.Instance.BackupPath);
+                    _ = Directory.CreateDirectory(RequestBotConfig.Instance.BackupPath);
                 }
 
                 ZipFile.CreateFromDirectory(Plugin.DataPath, BackupName, System.IO.Compression.CompressionLevel.Fastest, true);
@@ -2180,7 +2130,7 @@ namespace SongRequestManagerV2.Bots
                     foreach (var currentSong in downloadedsongs.Children) {
                         var map = this._songMapFactory.Create(currentSong.AsObject, "", "");
                         this.MapDatabase.IndexSong(map);
-                        list.Add(map);
+                        _ = list.Add(map);
                     }
                 }
                 else {
@@ -2191,7 +2141,7 @@ namespace SongRequestManagerV2.Bots
             if (!string.IsNullOrEmpty(searchString)) {
                 var hashSet = this.MapDatabase.Search(searchString);
                 foreach (var map in hashSet) {
-                    list.Add(map);
+                    _ = list.Add(map);
                 }
             }
             var sortorder = sortby.Split(' ');
@@ -2207,8 +2157,8 @@ namespace SongRequestManagerV2.Bots
         }
         public string GetGCCount(ParseState state)
         {
-            state.Msg($"Gc0:{GC.CollectionCount(0)} GC1:{GC.CollectionCount(1)} GC2:{GC.CollectionCount(2)}");
-            state.Msg($"{GC.GetTotalMemory(false)}");
+            _ = state.Msg($"Gc0:{GC.CollectionCount(0)} GC1:{GC.CollectionCount(1)} GC2:{GC.CollectionCount(2)}");
+            _ = state.Msg($"{GC.GetTotalMemory(false)}");
             return s_success;
         }
         public string GenerateIvailedHash(string dir)
@@ -2261,9 +2211,9 @@ namespace SongRequestManagerV2.Bots
                     var maxstar = difficultyNodes["diffs"].AsArray.Linq.Max(x => x.Value["star"].AsFloat);
                     if (maxpp > 0) {
                         //Instance.this.ChatManager.QueueChatMessage($"{id} = {maxpp}");
-                        this.MapDatabase.PPMap.TryAdd(key, maxpp);
+                        _ = this.MapDatabase.PPMap.TryAdd(key, maxpp);
                         if (key != "" && maxpp > 100) {
-                            this.ListCollectionManager.Add("pp.deck", key);
+                            _ = this.ListCollectionManager.Add("pp.deck", key);
                         }
 
                         if (this.MapDatabase.MapLibrary.TryGetValue(key, out var map)) {

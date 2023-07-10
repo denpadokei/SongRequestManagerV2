@@ -9,7 +9,7 @@ namespace SongRequestManagerV2.Extentions
         public static void Clear<T>(this BlockingCollection<T> collection)
         {
             while (collection.Any()) {
-                collection.TryTake(out _);
+                _ = collection.TryTake(out _);
             }
         }
 

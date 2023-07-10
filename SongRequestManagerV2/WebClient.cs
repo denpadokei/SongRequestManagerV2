@@ -1,4 +1,4 @@
-﻿using SongRequestManagerV2.SimpleJSON;
+﻿using SongRequestManagerV2.SimpleJsons;
 using System;
 using System.IO;
 using System.Net;
@@ -73,12 +73,11 @@ namespace SongRequestManagerV2
                 Logger.Error(e);
             }
 
-
             _client = new HttpClient()
             {
                 Timeout = new TimeSpan(0, 0, 15)
             };
-            _client.DefaultRequestHeaders.UserAgent.TryParseAdd($"SongRequestManagerV2/{Plugin.Version}");
+            _ = _client.DefaultRequestHeaders.UserAgent.TryParseAdd($"SongRequestManagerV2/{Plugin.Version}");
         }
 
         internal static async Task<WebResponse> GetAsync(string url, CancellationToken token)
@@ -96,10 +95,7 @@ namespace SongRequestManagerV2
         {
             try {
                 var response = await SendAsync(HttpMethod.Get, url, token);
-                if (response?.IsSuccessStatusCode == true) {
-                    return response.ContentToBytes();
-                }
-                return null;
+                return response?.IsSuccessStatusCode == true ? response.ContentToBytes() : null;
             }
             catch (Exception e) {
                 Logger.Error(e);
@@ -123,10 +119,7 @@ namespace SongRequestManagerV2
             try {
                 var response = await SendAsync(HttpMethod.Get, hash, token, progress: progress);
 
-                if (response?.IsSuccessStatusCode == true) {
-                    return response.ContentToBytes();
-                }
-                return null;
+                return response?.IsSuccessStatusCode == true ? response.ContentToBytes() : null;
             }
             catch (Exception e) {
                 Logger.Error(e);
@@ -159,7 +152,6 @@ namespace SongRequestManagerV2
                         Logger.Error(e);
                     }
                 } while (resp?.StatusCode != HttpStatusCode.NotFound && resp?.IsSuccessStatusCode != true && retryCount <= RETRY_COUNT);
-
 
                 if (token.IsCancellationRequested) {
                     throw new TaskCanceledException();

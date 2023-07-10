@@ -41,12 +41,9 @@ namespace SongRequestManagerV2.Bots
                     File.WriteAllText(listfilename, "");
                 }
                 var fileContent = File.ReadAllText(listfilename);
-                if (listfilename.EndsWith(".script")) {
-                    this.list = fileContent.Split(lineseparator, StringSplitOptions.RemoveEmptyEntries).ToList();
-                }
-                else {
-                    this.list = fileContent.Split(anyseparator, StringSplitOptions.RemoveEmptyEntries).ToList();
-                }
+                this.list = listfilename.EndsWith(".script")
+                    ? fileContent.Split(lineseparator, StringSplitOptions.RemoveEmptyEntries).ToList()
+                    : fileContent.Split(anyseparator, StringSplitOptions.RemoveEmptyEntries).ToList();
 
                 if (ConvertToLower) {
                     this.LowercaseList();
@@ -96,11 +93,7 @@ namespace SongRequestManagerV2.Bots
 
         public bool Contains(string entry)
         {
-            if (this.list.Contains(entry)) {
-                return true;
-            }
-
-            return false;
+            return this.list.Contains(entry);
         }
 
         public bool Add(string entry)
@@ -162,7 +155,7 @@ namespace SongRequestManagerV2.Bots
         public void Outputlist(QueueLongMessage msg, string separator = ", ")
         {
             foreach (var entry in this.list) {
-                msg.Add(entry, separator);
+                _ = msg.Add(entry, separator);
             }
         }
     }

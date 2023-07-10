@@ -93,7 +93,6 @@ namespace SongRequestManagerV2.Models
 
             this.Subparameter = (subcommandsectionend - subcommandend > 0) ? this.Parameter.Substring(subcommandend, subcommandsectionend - subcommandend).Trim(' ') : "";
 
-
             if (!this._commandManager.Aliases.TryGetValue(subcommand, out var subcmd)) {
                 return s_notsubcommand;
             }
@@ -107,15 +106,12 @@ namespace SongRequestManagerV2.Models
                 return this.Error($"No permission to use {subcommand}");
             }
 
-            if (subcmd.Flags.HasFlag(CmdFlags.NoParameter)) {
-                this.Parameter = this.Parameter.Substring(subcommandend).Trim(' ');
-            }
-            else {
-                this.Parameter = this.Parameter.Substring(subcommandsectionend);
-            }
+            this.Parameter = subcmd.Flags.HasFlag(CmdFlags.NoParameter)
+                ? this.Parameter.Substring(subcommandend).Trim(' ')
+                : this.Parameter.Substring(subcommandsectionend);
 
             try {
-                subcmd.Subcommand?.Invoke(this);
+                _ = (subcmd.Subcommand?.Invoke(this));
             }
             catch (Exception ex) {
                 Logger.Error(ex);
@@ -128,7 +124,7 @@ namespace SongRequestManagerV2.Models
         public string Msg(string text, string result = "")
         {
             if (!this.Flags.HasFlag(CmdFlags.SilentResult)) {
-                this._textFactory.Create().AddUser(this.User).AddBotCmd(this._botcmd).QueueMessage(text);
+                _ = this._textFactory.Create().AddUser(this.User).AddBotCmd(this._botcmd).QueueMessage(text);
             }
 
             return result;
@@ -196,7 +192,6 @@ namespace SongRequestManagerV2.Models
 
             var allow = Utility.HasRights(this._botcmd, this.User, this.Flags);
 
-
             // Num is Nani?
             if (!allow && !this._botcmd.Flags.HasFlag(CmdFlags.BypassRights) && !this._listCollectionManager.Contains(this._botcmd.Permittedusers, this.User.UserName.ToLower())) {
                 var twitchpermission = this._botcmd.Flags & CmdFlags.TwitchLevel;
@@ -235,20 +230,15 @@ namespace SongRequestManagerV2.Models
             }
         }
 
-
         public static string GetCommand(ref string request)
         {
             var commandlength = 0;
             // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
-            while (commandlength < request.Length && (request[commandlength] != '=' && request[commandlength] != '/' && request[commandlength] != ' ')) {
+            while (commandlength < request.Length && request[commandlength] != '=' && request[commandlength] != '/' && request[commandlength] != ' ') {
                 commandlength++;  // Command name ends with #... for now, I'll clean up some more later    
             }
 
-            if (commandlength == 0) {
-                return "";
-            }
-
-            return request.Substring(0, commandlength).ToLower();
+            return commandlength == 0 ? "" : request.Substring(0, commandlength).ToLower();
         }
 
         public ParseState ParseCommand()
@@ -261,7 +251,7 @@ namespace SongRequestManagerV2.Models
             var parameterstart = 0;
 
             // This is a replacement for the much simpler Split code. It was changed to support /fakerest parameters, and sloppy users ... ie: !add4334-333 should now work, so should !command/flags
-            while (parameterstart < this.Request.Length && (this.Request[parameterstart] != '=' && this.Request[parameterstart] != '/' && this.Request[parameterstart] != ' ')) {
+            while (parameterstart < this.Request.Length && this.Request[parameterstart] != '=' && this.Request[parameterstart] != '/' && this.Request[parameterstart] != ' ') {
                 parameterstart++;  // Command name ends with #... for now, I'll clean up some more later           
             }
 

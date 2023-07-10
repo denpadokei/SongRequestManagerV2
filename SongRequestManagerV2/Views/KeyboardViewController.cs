@@ -23,16 +23,14 @@ namespace SongRequestManagerV2.Views
                 KeyboardContainer.sizeDelta = new Vector2(60f, 40f);
 
                 var mykeyboard = this._factiry.Create().Setup(KeyboardContainer, "");
-                mykeyboard.AddKeys(Keyboard.QWERTY); // You can replace this with DVORAK if you like
-                mykeyboard.DefaultActions();
+                _ = mykeyboard.AddKeys(Keyboard.QWERTY); // You can replace this with DVORAK if you like
+                _ = mykeyboard.DefaultActions();
                 const string SEARCH = @"
 
 [CLEAR SEARCH]/0 /2 [NEWEST]/0 /2 [RANKED]/0 /2 [UNFILTERED]/30 /2 [SEARCH]/0";
 
-
-
                 mykeyboard.SetButtonType("OkButton"); // Adding this alters button positions??! Why?
-                mykeyboard.AddKeys(SEARCH, 0.75f);
+                _ = mykeyboard.AddKeys(SEARCH, 0.75f);
 
                 mykeyboard.SetAction("CLEAR SEARCH", this._bot.ClearSearch);
                 mykeyboard.SetAction("UNFILTERED", this._bot.UnfilteredSearch);

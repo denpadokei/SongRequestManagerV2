@@ -56,7 +56,7 @@ namespace SongRequestManagerV2.Bases
         public ISRMCommand AddAliases(params string[] aliases)
         {
             foreach (var item in aliases) {
-                this.Aliases.Add(item.ToLower());
+                _ = this.Aliases.Add(item.ToLower());
             }
             return this;
         }
@@ -66,9 +66,6 @@ namespace SongRequestManagerV2.Bases
             this.ChangedParameters |= changed;
             this.ChangedParameters &= ~ChangedFlags.Saved;
         }
-
-
-
 
         public void SetPermittedUsers(string listname)
         {
@@ -100,7 +97,7 @@ namespace SongRequestManagerV2.Bases
                 return this.Subcommand(state); // Recommended.
             }
             else if (this.Subcommand2 != null) {
-                this.Subcommand(state);
+                _ = this.Subcommand(state);
             }
             else if (this.AsyncSubCommand != null) {
                 _ = this.AsyncSubCommand(state);
@@ -112,7 +109,7 @@ namespace SongRequestManagerV2.Bases
         {
             this.Aliases.Clear();
             foreach (var element in alias) {
-                this.Aliases.Add(element.ToLower());
+                _ = this.Aliases.Add(element.ToLower());
             }
             return this;
         }
@@ -122,7 +119,7 @@ namespace SongRequestManagerV2.Bases
             this.UserParameter = reference;
             this.Flags = CmdFlags.Variable | CmdFlags.Broadcaster;
             this.Aliases.Clear();
-            this.Aliases.Add(variablename.ToLower());
+            _ = this.Aliases.Add(variablename.ToLower());
             this.Subcommand = this.Variable;
             this.Regexfilter = _anything;
             this.ShortHelp = "the = operator currently requires a space after it";
@@ -156,7 +153,7 @@ namespace SongRequestManagerV2.Bases
 
         public ISRMCommand User(string userstring)
         {
-            this.UserParameter.Clear().Append(userstring);
+            _ = this.UserParameter.Clear().Append(userstring);
             return this;
         }
 

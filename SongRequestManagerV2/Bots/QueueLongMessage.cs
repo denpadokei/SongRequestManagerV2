@@ -34,7 +34,7 @@ namespace SongRequestManagerV2.Bots
 
         public void Header(string text)
         {
-            this.msgBuilder.Append(text);
+            _ = this.msgBuilder.Append(text);
         }
 
         // BUG: Only works form string < MaximumTwitchMessageLength
@@ -56,12 +56,12 @@ namespace SongRequestManagerV2.Bots
                     return true;
                 }
                 this._chatManager.QueueChatMessage(this.msgBuilder.ToString(0, this.msgBuilder.Length - this.separatorlength));
-                this.msgBuilder.Clear();
+                _ = this.msgBuilder.Clear();
             }
 
             this.Count++;
-            this.msgBuilder.Append(text);
-            this.msgBuilder.Append(separator);
+            _ = this.msgBuilder.Append(text);
+            _ = this.msgBuilder.Append(separator);
             this.separatorlength = separator.Length;
 
             return false;
@@ -83,7 +83,7 @@ namespace SongRequestManagerV2.Bots
             // Reset the class for reuse
             this.maxoverflowpoint = 0;
             this.messageCount = 1;
-            this.msgBuilder.Clear();
+            _ = this.msgBuilder.Clear();
         }
 
         public class QueueLongMessageFactroy : PlaceholderFactory<QueueLongMessage>

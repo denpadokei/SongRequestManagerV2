@@ -1,6 +1,6 @@
 ﻿using CatCore.Models.Shared;
 using SongRequestManagerV2.Interfaces;
-using SongRequestManagerV2.SimpleJSON;
+using SongRequestManagerV2.SimpleJsons;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;
@@ -19,7 +19,6 @@ namespace SongRequestManagerV2.Bots
 
         public bool AllowLinks = true;
 
-
         public DynamicText Add(string key, string value)
         {
             if (this.Dynamicvariables.ContainsKey(key)) {
@@ -31,7 +30,7 @@ namespace SongRequestManagerV2.Bots
         public DynamicText AddUser(IChatUser user)
         {
             try {
-                this.Add("user", user.DisplayName);
+                _ = this.Add("user", user.DisplayName);
             }
             catch {
                 // Don't care. Twitch user doesn't HAVE to be defined.
@@ -42,34 +41,33 @@ namespace SongRequestManagerV2.Bots
         public DynamicText AddLinks()
         {
             if (this.AllowLinks) {
-                this.Add("beatsaver", "https://beatsaver.com");
-                this.Add("beatsaber", "https://beatsaber.com");
-                this.Add("scoresaber", "https://scoresaber.com");
+                _ = this.Add("beatsaver", "https://beatsaver.com");
+                _ = this.Add("beatsaber", "https://beatsaber.com");
+                _ = this.Add("scoresaber", "https://scoresaber.com");
             }
             else {
-                this.Add("beatsaver", "beatsaver site");
-                this.Add("beatsaber", "beatsaber site");
-                this.Add("scoresaber", "scoresaber site");
+                _ = this.Add("beatsaver", "beatsaver site");
+                _ = this.Add("beatsaber", "beatsaber site");
+                _ = this.Add("scoresaber", "scoresaber site");
             }
 
             return this;
         }
-
 
         public DynamicText AddBotCmd(ISRMCommand botcmd)
         {
 
             var aliastext = new StringBuilder();
             foreach (var alias in botcmd.Aliases) {
-                aliastext.Append($"{alias} ");
+                _ = aliastext.Append($"{alias} ");
             }
-            this.Add("alias", aliastext.ToString());
+            _ = this.Add("alias", aliastext.ToString());
 
-            aliastext.Clear();
-            aliastext.Append('[');
-            aliastext.Append(botcmd.Flags & CmdFlags.TwitchLevel).ToString();
-            aliastext.Append(']');
-            this.Add("rights", aliastext.ToString());
+            _ = aliastext.Clear();
+            _ = aliastext.Append('[');
+            _ = aliastext.Append(botcmd.Flags & CmdFlags.TwitchLevel).ToString();
+            _ = aliastext.Append(']');
+            _ = this.Add("rights", aliastext.ToString());
             return this;
         }
 
@@ -79,20 +77,20 @@ namespace SongRequestManagerV2.Bots
             foreach (var element in json.DeepChildren) {
                 foreach (var item in element.Children) {
                     foreach (var ditem in item) {
-                        this.Add(prefix + ditem.Key, ditem.Value);
+                        _ = this.Add(prefix + ditem.Key, ditem.Value);
                     }
                 }
                 foreach (var item in element) {
-                    this.Add(prefix + item.Key, item.Value);
+                    _ = this.Add(prefix + item.Key, item.Value);
                 }
             }
             foreach (var item in json.Children) {
                 foreach (var element in item) {
-                    this.Add(prefix + element.Key, element.Value);
+                    _ = this.Add(prefix + element.Key, element.Value);
                 }
             }
             foreach (var item in json) {
-                this.Add(prefix + item.Key, item.Value);
+                _ = this.Add(prefix + item.Key, item.Value);
             }
             return this;
         }
@@ -100,19 +98,14 @@ namespace SongRequestManagerV2.Bots
         // Alternate call for direct object
         public DynamicText AddSong(JSONObject song, string prefix = "")
         {
-            this.AddJSON(song, prefix); // Add the song JSON
-            if (song["pp"].AsFloat > 0) {
-                this.Add("PP", song["pp"].AsInt.ToString() + " PP");
-            }
-            else {
-                this.Add("PP", "");
-            }
-            this.Add("StarRating", Utility.GetStarRating(song)); // Add additional dynamic properties
-            this.Add("Rating", Utility.GetRating(song));
-            this.Add("BeatsaverLink", $"https://beatsaver.com/maps/{song["id"].Value}");
-            this.Add("BeatsaberLink", $"https://bsaber.com/songs/{song["id"].Value}");
+            _ = this.AddJSON(song, prefix); // Add the song JSON
+            _ = song["pp"].AsFloat > 0 ? this.Add("PP", song["pp"].AsInt.ToString() + " PP") : this.Add("PP", "");
+            _ = this.Add("StarRating", Utility.GetStarRating(song)); // Add additional dynamic properties
+            _ = this.Add("Rating", Utility.GetRating(song));
+            _ = this.Add("BeatsaverLink", $"https://beatsaver.com/maps/{song["id"].Value}");
+            _ = this.Add("BeatsaberLink", $"https://bsaber.com/songs/{song["id"].Value}");
             if (!string.IsNullOrEmpty(song["id"].Value)) {
-                this.Add("key", song["id"].Value);
+                _ = this.Add("key", song["id"].Value);
             }
             return this;
         }
@@ -160,13 +153,13 @@ namespace SongRequestManagerV2.Bots
                             return output.ToString(); // Return at first sepearator on first 1 character code. 
                         }
 
-                        output.Append(substitutetext);
+                        _ = output.Append(substitutetext);
 
                         p += keywordlength + 1; // Reset regular text
                         continue;
                     }
                 }
-                output.Append(c);
+                _ = output.Append(c);
             }
 
             return output.ToString();
@@ -178,25 +171,24 @@ namespace SongRequestManagerV2.Bots
             return this;
         }
 
-
         public class DynamicTextFactory : PlaceholderFactory<DynamicText>
         {
             public override DynamicText Create()
             {
                 var dt = base.Create();
-                dt.Add("|", ""); // This is the official section separator character, its used in help to separate usage from extended help, and because its easy to detect when parsing, being one character long
+                _ = dt.Add("|", ""); // This is the official section separator character, its used in help to separate usage from extended help, and because its easy to detect when parsing, being one character long
 
                 // BUG: Note -- Its my intent to allow sections to be used as a form of conditional. If a result failure occurs within a section, we should be able to rollback the entire section, and continue to the next. Its a better way of handline missing dynamic fields without excessive scripting
                 // This isn't implemented yet.
 
-                dt.AddLinks();
+                _ = dt.AddLinks();
 
                 var now = DateTime.Now; //"MM/dd/yyyy hh:mm:ss.fffffff";         
-                dt.Add("SRM", "Song Request Manager");
-                dt.Add("Time", now.ToString("hh:mm"));
-                dt.Add("LongTime", now.ToString("hh:mm:ss"));
-                dt.Add("Date", now.ToString("yyyy/MM/dd"));
-                dt.Add("LF", "\n"); // Allow carriage return
+                _ = dt.Add("SRM", "Song Request Manager");
+                _ = dt.Add("Time", now.ToString("hh:mm"));
+                _ = dt.Add("LongTime", now.ToString("hh:mm:ss"));
+                _ = dt.Add("Date", now.ToString("yyyy/MM/dd"));
+                _ = dt.Add("LF", "\n"); // Allow carriage return
                 return dt;
             }
         }

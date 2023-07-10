@@ -6,10 +6,9 @@ using HMUI;
 using Newtonsoft.Json;
 using SongCore;
 using SongRequestManagerV2.Bases;
-using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Models;
-using SongRequestManagerV2.SimpleJSON;
+using SongRequestManagerV2.SimpleJsons;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;
@@ -25,7 +24,7 @@ using TMPro;
 using UnityEngine;
 using Zenject;
 
-namespace SongRequestManagerV2
+namespace SongRequestManagerV2.Bots
 {
     public class SongRequest : BindableBase
     {
@@ -102,7 +101,7 @@ namespace SongRequestManagerV2
 
         public SongRequest Init(JSONObject obj)
         {
-            this.Init(
+            _ = this.Init(
                 obj["song"].AsObject,
                 this.CreateRequester(obj),
                 DateTime.FromFileTime(long.Parse(obj["time"].Value)),
@@ -146,14 +145,11 @@ namespace SongRequestManagerV2
         internal void Setup()
         {
             var builder = new StringBuilder();
-            builder.Append(this.IsWIP ? $"<color=\"yellow\">[WIP]</color> {this._songName}" : this._songName);
-            if (RequestBotConfig.Instance.PPSearch && this._mapDatabase.PPMap.TryGetValue(this.ID, out var pp) && 0 < pp) {
-                this._rating = $" <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>";
-            }
-            else {
-                this._rating = $" <size=50%>{Utility.GetRating(this.SongNode)}</size>";
-            }
-            builder.Append(this._rating);
+            _ = builder.Append(this.IsWIP ? $"<color=\"yellow\">[WIP]</color> {this._songName}" : this._songName);
+            this._rating = RequestBotConfig.Instance.PPSearch && this._mapDatabase.PPMap.TryGetValue(this.ID, out var pp) && 0 < pp
+                ? $" <size=50%>{Utility.GetRating(this.SongNode)} <color=#4169e1>{pp:0.00} PP</color></size>"
+                : $" <size=50%>{Utility.GetRating(this.SongNode)}</size>";
+            _ = builder.Append(this._rating);
             this.SongName = builder.ToString();
             this.SetCover();
         }
@@ -177,46 +173,40 @@ namespace SongRequestManagerV2
 
         public void SetCover()
         {
-            Dispatcher.RunOnMainThread((Action)(async () =>
+            Dispatcher.RunOnMainThread(async () =>
             {
                 try {
                     this._coverImage.enabled = false;
                     var dt = this._textFactory.Create().AddSong(this.SongNode).AddUser(this.Requestor); // Get basic fields
-                    dt.Add("Status", this.Status.ToString());
-                    dt.Add("Info", (this.RequestInfo != "") ? " / " + this.RequestInfo : "");
-                    dt.Add("RequestTime", this.RequestTime.ToLocalTime().ToString("hh:mm"));
+                    _ = dt.Add("Status", this.Status.ToString());
+                    _ = dt.Add("Info", this.RequestInfo != "" ? " / " + this.RequestInfo : "");
+                    _ = dt.Add("RequestTime", this.RequestTime.ToLocalTime().ToString("hh:mm"));
                     this.AuthorName = dt.Parse(StringFormat.QueueListRow2);
                     this.Hint = dt.Parse(StringFormat.SongHintText);
 
                     var imageSet = false;
 
-                    if (SongCore.Loader.AreSongsLoaded) {
+                    if (Loader.AreSongsLoaded) {
                         var level = this.GetCustomLevel();
                         if (level != null) {
                             //Logger.Debug("custom level found");
                             // set image from song's cover image
-                            var tex = await level.GetCoverImageAsync(System.Threading.CancellationToken.None);
+                            var tex = await level.GetCoverImageAsync(CancellationToken.None);
                             this._coverImage.sprite = tex;
                             imageSet = true;
                         }
                     }
 
                     if (!imageSet) {
-                        var url = "";
-                        if (!string.IsNullOrEmpty(this._coverURL)) {
-                            url = this._coverURL;
-                        }
-                        else {
-                            url = $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{this._hash.ToLower()}.jpg";
-                        }
+                        var url = !string.IsNullOrEmpty(this._coverURL) ? this._coverURL : $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{this._hash.ToLower()}.jpg";
                         if (!_cachedTextures.TryGetValue(url, out var tex)) {
-                            var b = await WebClient.DownloadImage(url, System.Threading.CancellationToken.None).ConfigureAwait(true);
+                            var b = await WebClient.DownloadImage(url, CancellationToken.None).ConfigureAwait(true);
 
                             tex = new Texture2D(2, 2);
-                            tex.LoadImage(b);
+                            _ = tex.LoadImage(b);
 
                             try {
-                                _cachedTextures.AddOrUpdate(url, tex, (s, v) => tex);
+                                _ = _cachedTextures.AddOrUpdate(url, tex, (s, v) => tex);
                             }
                             catch (Exception e) {
                                 Logger.Error(e);
@@ -231,7 +221,7 @@ namespace SongRequestManagerV2
                 finally {
                     this._coverImage.enabled = true;
                 }
-            }));
+            });
         }
 
         public JSONObject ToJson()
@@ -284,19 +274,12 @@ namespace SongRequestManagerV2
         public async Task<byte[]> DownloadZip(CancellationToken token = default(CancellationToken), IProgress<double> progress = null)
         {
             try {
-                var url = "";
-                if (!string.IsNullOrEmpty(this._downloadURL)) {
-                    url = this._downloadURL;
-                }
-                else {
-                    url = $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{this._hash.ToLower()}.zip";
-                }
+                var url = !string.IsNullOrEmpty(this._downloadURL)
+                    ? this._downloadURL
+                    : $"{RequestBot.BEATMAPS_CDN_ROOT_URL}/{this._hash.ToLower()}.zip";
                 var response = await WebClient.SendAsync(HttpMethod.Get, url, token, progress);
 
-                if (response?.IsSuccessStatusCode == true) {
-                    return response.ContentToBytes();
-                }
-                return null;
+                return response?.IsSuccessStatusCode == true ? response.ContentToBytes() : null;
             }
             catch (Exception e) {
                 Logger.Error(e);

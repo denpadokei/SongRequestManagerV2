@@ -24,7 +24,7 @@ namespace SongRequestManagerV2.Utils
             var o = new StringBuilder(text.Length);
             foreach (var c in text) {
                 if (c > 127 || mask[c] != ' ') {
-                    o.Append(c);
+                    _ = o.Append(c);
                 }
             }
             return o.ToString();
@@ -37,7 +37,7 @@ namespace SongRequestManagerV2.Utils
 
             foreach (var c in text) {
                 if (c > 127 || mask[c] != '\0') {
-                    o.Append(c);
+                    _ = o.Append(c);
                 }
             }
             return o.ToString();
@@ -57,18 +57,13 @@ namespace SongRequestManagerV2.Utils
                     continue;
                 }
 
-                result.Append(word);
-                result.Append(' ');
+                _ = result.Append(word);
+                _ = result.Append(' ');
             }
 
             //RequestBot.Instance.QueueChatMessage($"Search string: {result.ToString()}");
 
-
-            if (result.Length == 0) {
-                return "qwesartysasasdsdaa";
-            }
-
-            return result.ToString().Trim();
+            return result.Length == 0 ? "qwesartysasasdsdaa" : result.ToString().Trim();
         }
 
         public string[] Split(string text)
@@ -124,7 +119,7 @@ namespace SongRequestManagerV2.Utils
 
             // Incomplete list of words that BeatSaver.com filters out for no good reason. No longer applies!
             foreach (var word in new string[] { "pp" }) {
-                BeatsaverBadWords.Add(word.ToLower());
+                _ = BeatsaverBadWords.Add(word.ToLower());
             }
         }
     }

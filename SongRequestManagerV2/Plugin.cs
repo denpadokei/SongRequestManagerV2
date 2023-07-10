@@ -3,7 +3,6 @@ using IPA.Config.Stores;
 using IPA.Loader;
 using SiraUtil.Zenject;
 using SongRequestManagerV2.Configuration;
-using SongRequestManagerV2.Installers;
 using SongRequestManagerV2.Installes;
 using System;
 using System.IO;
@@ -17,10 +16,9 @@ namespace SongRequestManagerV2
     {
         public string Name => "Song Request ManagerV2";
 
-        public static string Version => s_meta.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static string Version => MetaData.HVersion.ToString() ?? Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-        private static PluginMetadata s_meta;
-        public static PluginMetadata MetaData => s_meta;
+        public static PluginMetadata MetaData { get; private set; }
         public static IPALogger Logger { get; private set; }
         public bool IsApplicationExiting { get; set; } = false;
         public static Plugin Instance { get; private set; }
@@ -30,7 +28,7 @@ namespace SongRequestManagerV2
         public void Init(IPALogger log, IPA.Config.Config config, PluginMetadata meta, Zenjector zenjector)
         {
             Instance = this;
-            s_meta = meta;
+            MetaData = meta;
             Logger = log;
             Logger.Debug("Logger initialized.");
             RequestBotConfig.Instance = config.Generated<RequestBotConfig>();
@@ -43,7 +41,7 @@ namespace SongRequestManagerV2
         public void OnStart()
         {
             if (!Directory.Exists(DataPath)) {
-                Directory.CreateDirectory(DataPath);
+                _ = Directory.CreateDirectory(DataPath);
             }
         }
 

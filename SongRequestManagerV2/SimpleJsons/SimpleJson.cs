@@ -40,7 +40,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace SongRequestManagerV2.SimpleJSON
+namespace SongRequestManagerV2.SimpleJsons
 {
     public enum JSONNodeType
     {

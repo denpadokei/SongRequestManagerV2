@@ -1,6 +1,6 @@
 ﻿using CatCore.Models.Shared;
 using SongRequestManagerV2.Interfaces;
-using SongRequestManagerV2.SimpleJSON;
+using SongRequestManagerV2.SimpleJsons;
 using System;
 
 namespace SongRequestManagerV2.Models
