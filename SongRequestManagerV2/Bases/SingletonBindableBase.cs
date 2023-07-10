@@ -1,16 +1,14 @@
-﻿using BeatSaberMarkupLanguage.Components;
+﻿using BeatSaberMarkupLanguage.Util;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using UnityEngine;
 
 namespace SongRequestManagerV2.Bases
 {
-    public abstract class SingletonBindableBase<TController> : NotifiableSingleton<TController> where TController : MonoBehaviour
+    public abstract class SingletonBindableBase<TController> : NotifiableSingleton<TController> where TController : class, new()
     {
         private static SynchronizationContext context;
-
 
         protected virtual void Awake()
         {

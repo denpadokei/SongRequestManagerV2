@@ -1,5 +1,6 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using SongRequestManagerV2.Utils;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -49,7 +50,7 @@ namespace SongRequestManagerV2.Bases
         /// <param name="args">The PropertyChangedEventArgs</param>
         protected virtual void OnPropertyChanged(PropertyChangedEventArgs args)
         {
-            HMMainThreadDispatcher.instance?.Enqueue(() => { this.NotifyPropertyChanged(args.PropertyName); });
+            MainThreadInvoker.Instance.Enqueue(() => { this.NotifyPropertyChanged(args.PropertyName); });
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using CatCore.Models.Shared;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Models;
-using SongRequestManagerV2.SimpleJSON;
+using SongRequestManagerV2.SimpleJsons;
 using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;

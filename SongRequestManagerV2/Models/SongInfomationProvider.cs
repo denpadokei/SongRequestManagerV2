@@ -1,5 +1,5 @@
 ﻿using SongRequestManagerV2.Bots;
-using SongRequestManagerV2.SimpleJSON;
+using SongRequestManagerV2.SimpleJsons;
 using System.Threading;
 using Zenject;
 

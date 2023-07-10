@@ -9,6 +9,7 @@ using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Localizes;
+using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -163,18 +164,7 @@ namespace SongRequestManagerV2.Views
         [UIValue("version")]
         public string Version { get => $"<size=120%>Version - {Plugin.Version}"; set { } }
 
-        private int SelectedRow
-        {
-            get
-            {
-                if (this._bot.CurrentSong == null) {
-                    return -1;
-                }
-                else {
-                    return this.Songs.IndexOf(this._bot.CurrentSong);
-                }
-            }
-        }
+        private int SelectedRow => this._bot.CurrentSong == null ? -1 : this.Songs.IndexOf(this._bot.CurrentSong);
 
         /// <summary>説明 を取得、設定</summary>
         private bool _isActiveButton;
@@ -285,7 +275,7 @@ namespace SongRequestManagerV2.Views
         #region // パブリックメソッド
         public void ChangeProgressText(double progress)
         {
-            HMMainThreadDispatcher.instance?.Enqueue(() =>
+            MainThreadInvoker.Instance.Enqueue(() =>
             {
                 this.ProgressText = $"{ResourceWrapper.Get("TEXT_DOWNLOAD_PROGRESS")} - {progress * 100:0.00} %";
             });
@@ -599,7 +589,7 @@ namespace SongRequestManagerV2.Views
                 catch (Exception e) {
                     Logger.Error(e);
                 }
-                this._centerKeys.DefaultActions();
+                _ = this._centerKeys.DefaultActions();
                 try {
                     #region History button
                     // History button

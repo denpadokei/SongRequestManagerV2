@@ -144,7 +144,7 @@ namespace SongRequestManagerV2.Views
                 (this._rootScreenGo.transform as RectTransform).anchoredPosition = new Vector2(70f, 80f);
                 this._rootScreenGo.transform.localScale = Vector3.one * 2;
                 if (this._button == null) {
-                    this._button = UIHelper.CreateUIButton((this._rootScreenGo.transform as RectTransform), "CancelButton", Vector2.zero, Vector2.zero, this.Action, "OPEN", null) as NoTransitionsButton;
+                    this._button = UIHelper.CreateUIButton(this._rootScreenGo.transform as RectTransform, "CancelButton", Vector2.zero, Vector2.zero, this.Action, "OPEN", null) as NoTransitionsButton;
                 }
             }
             catch (Exception e) {
@@ -195,12 +195,7 @@ namespace SongRequestManagerV2.Views
                 var externalComponents = this._button.gameObject.GetComponentsInChildren<ExternalComponents>(true).FirstOrDefault();
                 var textMesh = externalComponents.components.FirstOrDefault(x => x as TextMeshProUGUI) as TextMeshProUGUI;
                 if (textMesh != null) {
-                    if (RequestBotConfig.Instance.RequestQueueOpen) {
-                        textMesh.text = "OPEN";
-                    }
-                    else {
-                        textMesh.text = "CLOSE";
-                    }
+                    textMesh.text = RequestBotConfig.Instance.RequestQueueOpen ? "OPEN" : "CLOSE";
                 }
             }
             catch (Exception e) {
@@ -276,7 +271,7 @@ namespace SongRequestManagerV2.Views
                     request.IsWIP));
                     if (!request.SongNode.IsNull) {
                         // Display next song message
-                        this._textFactory.Create().AddUser(request.Requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
+                        _ = this._textFactory.Create().AddUser(request.Requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
                     }
                 }
             }
@@ -284,7 +279,7 @@ namespace SongRequestManagerV2.Views
                 Logger.Error(e);
             }
             finally {
-                s_downloadSemaphore.Release();
+                _ = s_downloadSemaphore.Release();
             }
         }
 
@@ -334,7 +329,7 @@ namespace SongRequestManagerV2.Views
                 ((IProgress<double>)this.DownloadProgress).Report(0d);
                 if (!request.SongNode.IsNull) {
                     // Display next song message
-                    this._textFactory.Create().AddUser(request.Requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
+                    _ = this._textFactory.Create().AddUser(request.Requestor).AddSong(request.SongNode).QueueMessage(StringFormat.NextSonglink.ToString());
                 }
             }
         }

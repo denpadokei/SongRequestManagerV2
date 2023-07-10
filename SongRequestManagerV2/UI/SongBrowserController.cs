@@ -25,17 +25,17 @@ namespace SongRequestManagerV2.UI
                     return;
                 }
                 var configType = Type.GetType("SongBrowser.Configuration.PluginConfig, SongBrowser");
-                var configInstance = configType.GetProperty("Instance", (BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)).GetValue(configType);
+                var configInstance = configType.GetProperty("Instance", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public).GetValue(configType);
                 var filterModeProp = configType.GetProperty("FilterMode");
                 var sortModeProp = configType.GetProperty("SortMode");
                 var sbAppInfo = Type.GetType("SongBrowser.SongBrowserApplication, SongBrowser");
-                var sbAppInstance = sbAppInfo.GetField("Instance", (BindingFlags.Static | BindingFlags.Public)).GetValue(sbAppInfo);
+                var sbAppInstance = sbAppInfo.GetField("Instance", BindingFlags.Static | BindingFlags.Public).GetValue(sbAppInfo);
                 var songBrowserUIType = Type.GetType("SongBrowser.UI.SongBrowserUI, SongBrowser"); //SongBrowserApplication.Instance.Ui;
                 var songBrowserUI = sbAppInfo.GetProperty("Ui", BindingFlags.Public | BindingFlags.Instance).GetValue(sbAppInstance);
                 if (filterModeProp != null && sortModeProp != null && songBrowserUI != null) {
                     var filter = (int)filterModeProp.GetValue(configInstance);
                     if (filter != 0) {
-                        songBrowserUIType.GetMethod("CancelFilter").Invoke(songBrowserUI, null);
+                        _ = songBrowserUIType.GetMethod("CancelFilter").Invoke(songBrowserUI, null);
                     }
                 }
                 else {

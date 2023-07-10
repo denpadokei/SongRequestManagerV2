@@ -1,6 +1,6 @@
 ﻿using SongRequestManagerV2.Extentions;
 using SongRequestManagerV2.Interfaces;
-using SongRequestManagerV2.SimpleJSON;
+using SongRequestManagerV2.SimpleJsons;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Concurrent;
@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using Zenject;
 
-namespace SongRequestManagerV2
+namespace SongRequestManagerV2.Bots
 {
     public class RequestManager
     {
@@ -48,7 +48,7 @@ namespace SongRequestManagerV2
         {
             try {
                 if (!Directory.Exists(Path.GetDirectoryName(path))) {
-                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    _ = Directory.CreateDirectory(Path.GetDirectoryName(path));
                 }
 
                 var arr = new JSONArray();

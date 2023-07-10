@@ -23,7 +23,7 @@ namespace SongRequestManagerV2.UI
         public static Button CreateUIButton(Transform parent, string buttonTemplate, Vector2 _, Vector2 _1, UnityAction onClick, string buttonText = "BUTTON", Sprite _2 = null, Button _3 = null)
         {
 
-            var button = MonoBehaviour.Instantiate(Resources.FindObjectsOfTypeAll<Button>().Last(x => (x.name == buttonTemplate)), parent, false);
+            var button = MonoBehaviour.Instantiate(Resources.FindObjectsOfTypeAll<Button>().Last(x => x.name == buttonTemplate), parent, false);
             button.name = "BSMLButton";
             button.interactable = true;
             button.onClick.RemoveAllListeners();

@@ -3,7 +3,7 @@ using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
 using System;
 
-namespace SongRequestManagerV2
+namespace SongRequestManagerV2.Bots
 {
     public class RequestInfo
     {

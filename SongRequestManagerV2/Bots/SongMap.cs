@@ -1,4 +1,4 @@
-﻿using SongRequestManagerV2.SimpleJSON;
+﻿using SongRequestManagerV2.SimpleJsons;
 using SongRequestManagerV2.Statics;
 using System;
 using System.Linq;
@@ -21,18 +21,10 @@ namespace SongRequestManagerV2.Bots
         {
             this.SongObject = song;
             var versions = this.SongObject["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString());
-            if (versions == null) {
-                this.SongVersion = this.SongObject["versions"].AsArray.Children.OrderBy(x => DateTime.Parse(x["createdAt"])).LastOrDefault().AsObject;
-            }
-            else {
-                this.SongVersion = this.SongObject["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString()).AsObject;
-            }
-            if (string.IsNullOrEmpty(levelId)) {
-                this.LevelId = this.SongObject["id"].Value;
-            }
-            else {
-                this.LevelId = levelId;
-            }
+            this.SongVersion = versions == null
+                ? this.SongObject["versions"].AsArray.Children.OrderBy(x => DateTime.Parse(x["createdAt"])).LastOrDefault().AsObject
+                : this.SongObject["versions"].AsArray.Children.FirstOrDefault(x => x["state"].Value == MapStatus.Published.ToString()).AsObject;
+            this.LevelId = string.IsNullOrEmpty(levelId) ? this.SongObject["id"].Value : levelId;
             this.Path = path;
 
             if (!this.SongObject["srm_info"].IsObject) {
@@ -89,10 +81,8 @@ namespace SongRequestManagerV2.Bots
         }
         public bool Equals(SongMap other)
         {
-            if (other == null) {
-                return false;
-            }
-            return string.Equals(other.SongVersion["hash"].Value, this.SongVersion["hash"].Value, StringComparison.InvariantCultureIgnoreCase);
+            return other != null
+&& string.Equals(other.SongVersion["hash"].Value, this.SongVersion["hash"].Value, StringComparison.InvariantCultureIgnoreCase);
         }
         public int CompareTo(SongMap other)
         {
@@ -104,12 +94,7 @@ namespace SongRequestManagerV2.Bots
         }
         public override bool Equals(object obj)
         {
-            if (obj is SongMap map) {
-                return this.Equals(map);
-            }
-            else {
-                return base.Equals(obj);
-            }
+            return obj is SongMap map ? this.Equals(map) : base.Equals(obj);
         }
         public class SongMapFactory : PlaceholderFactory<JSONObject, string, string, SongMap>
         {

@@ -29,7 +29,7 @@ namespace SongRequestManagerV2.Models
         {
             this.audioSource = this.gameObject.AddComponent<AudioSource>();
             if (!Directory.Exists(SOUNDFOLDER)) {
-                Directory.CreateDirectory(SOUNDFOLDER);
+                _ = Directory.CreateDirectory(SOUNDFOLDER);
             }
             var soundPath = Directory.EnumerateFiles(SOUNDFOLDER, "*.wav", SearchOption.TopDirectoryOnly).FirstOrDefault();
             if (string.IsNullOrEmpty(soundPath)) {

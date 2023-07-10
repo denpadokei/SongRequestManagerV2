@@ -27,7 +27,7 @@ namespace SongRequestManagerV2.Bots
 
             if (this._bot.GetBeatSaverId(searchKey) != "") {
                 if (this.MapLibrary.TryGetValue(this._normalize.RemoveSymbols(searchKey, this._normalize.SymbolsNoDash), out var song)) {
-                    result.Add(song);
+                    _ = result.Add(song);
                     return result;
                 }
             }
@@ -61,7 +61,7 @@ namespace SongRequestManagerV2.Bots
                     continue;
                 }
                 try {
-                    result.Add(this.MapLibrary[map]);
+                    _ = result.Add(this.MapLibrary[map]);
                 }
                 catch {
                     this._chatManager.QueueChatMessage($"map fail = {map}");
@@ -83,7 +83,7 @@ namespace SongRequestManagerV2.Bots
                 this.IndexFields(true, id, info["songName"].Value, info["songSubName"].Value, info["songAuthorName"].Value, info["levelAuthorName"].Value, indexpp, info["maptype"].Value);
 
                 if (!string.IsNullOrEmpty(info["id"].Value)) {
-                    this.MapLibrary.AddOrUpdate(info["id"].Value, map, (key, value) => map);
+                    _ = this.MapLibrary.AddOrUpdate(info["id"].Value, map, (key, value) => map);
                 }
             }
             catch (Exception ex) {
@@ -97,7 +97,7 @@ namespace SongRequestManagerV2.Bots
             var srmInfo = map.SRMInfo;
             var indexpp = (song["pp"].AsFloat > 0) ? "PP" : "";
             this.IndexFields(false, song["id"].Value, srmInfo["songName"].Value, srmInfo["songSubName"].Value, srmInfo["songAuthorName"].Value, srmInfo["levelAuthorName"].Value, indexpp, srmInfo["maptype"].Value);
-            this.MapLibrary.TryRemove(song["id"].Value, out _);
+            _ = this.MapLibrary.TryRemove(song["id"].Value, out _);
         }
 
         private void IndexFields(bool Add, string id, params string[] parameters)
@@ -125,7 +125,7 @@ namespace SongRequestManagerV2.Bots
             }
 
             if (Add) {
-                this.SearchDictionary.AddOrUpdate(key, (k) =>
+                _ = this.SearchDictionary.AddOrUpdate(key, (k) =>
                 {
                     var va = new HashSet<string>
                     {
@@ -135,13 +135,13 @@ namespace SongRequestManagerV2.Bots
                 },
                 (k, va) =>
                 {
-                    va.Add(id);
+                    _ = va.Add(id);
                     return va;
                 });
             }
             else {
                 if (this.SearchDictionary.TryRemove(key, out var result)) {
-                    result?.Remove(id); // An empty keyword is fine, and actually uncommon
+                    _ = (result?.Remove(id)); // An empty keyword is fine, and actually uncommon
                 }
             }
         }

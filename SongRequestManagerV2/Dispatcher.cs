@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SongRequestManagerV2.Utils;
+using System;
 using System.Collections;
 
 namespace SongRequestManagerV2
@@ -7,17 +8,17 @@ namespace SongRequestManagerV2
     {
         public static void RunCoroutine(IEnumerator enumerator)
         {
-            HMMainThreadDispatcher.instance.Enqueue(enumerator);
+            MainThreadInvoker.Instance.Enqueue(enumerator);
         }
 
         public static void RunOnMainThread(Action action)
         {
-            HMMainThreadDispatcher.instance.Enqueue(action);
+            MainThreadInvoker.Instance.Enqueue(action);
         }
 
         public static void RunOnMainThread<T>(Action<T> action, T value)
         {
-            HMMainThreadDispatcher.instance.Enqueue(() =>
+            MainThreadInvoker.Instance.Enqueue(() =>
             {
                 try {
                     action?.Invoke(value);

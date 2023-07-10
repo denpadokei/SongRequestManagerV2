@@ -9,21 +9,11 @@ namespace SongRequestManagerV2.Localizes
         {
             if (Utility.IsAprilFool()) {
                 var resourceType = typeof(Properties.Resource_kansai).GetProperty(key, BindingFlags.NonPublic | BindingFlags.Static);
-                if (resourceType == null) {
-                    return string.Empty;
-                }
-                else {
-                    return (string)resourceType.GetValue(resourceType, null);
-                }
+                return resourceType == null ? string.Empty : (string)resourceType.GetValue(resourceType, null);
             }
             else {
                 var resourceType = typeof(Properties.Resource).GetProperty(key, BindingFlags.NonPublic | BindingFlags.Static);
-                if (resourceType == null) {
-                    return string.Empty;
-                }
-                else {
-                    return (string)resourceType.GetValue(resourceType, null);
-                }
+                return resourceType == null ? string.Empty : (string)resourceType.GetValue(resourceType, null);
             }
         }
     }

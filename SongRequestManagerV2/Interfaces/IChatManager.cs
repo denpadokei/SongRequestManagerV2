@@ -2,6 +2,7 @@
 using CatCore.Models.Twitch.IRC;
 using CatCore.Services.Multiplexer;
 using CatCore.Services.Twitch.Interfaces;
+using SongRequestManagerV2.Bots;
 using System.Collections.Concurrent;
 
 namespace SongRequestManagerV2.Interfaces

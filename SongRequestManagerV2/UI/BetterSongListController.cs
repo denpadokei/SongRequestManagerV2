@@ -28,11 +28,11 @@ namespace SongRequestManagerV2.UI
                     return;
                 }
                 var filerUI = Type.GetType("BetterSongList.UI.FilterUI, BetterSongList");
-                var filterUIInstance = filerUI.GetField("persistentNuts", (BindingFlags.NonPublic | BindingFlags.Static)).GetValue(filerUI);
-                var filterDorpDown = (DropdownWithTableView)filerUI.GetField("_filterDropdown", (BindingFlags.NonPublic | BindingFlags.Instance)).GetValue(filterUIInstance);
+                var filterUIInstance = filerUI.GetField("persistentNuts", BindingFlags.NonPublic | BindingFlags.Static).GetValue(filerUI);
+                var filterDorpDown = (DropdownWithTableView)filerUI.GetField("_filterDropdown", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(filterUIInstance);
                 if (filterDorpDown.selectedIndex != 6) {
-                    var setFilterMethod = filerUI.GetMethod("SetFilter", (BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
-                    setFilterMethod.Invoke(filerUI, new object[] { "All", true, false });
+                    var setFilterMethod = filerUI.GetMethod("SetFilter", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+                    _ = setFilterMethod.Invoke(filerUI, new object[] { "All", true, false });
                     ResetLevelCollectionTableSet();
                 }
             }
@@ -55,8 +55,8 @@ namespace SongRequestManagerV2.UI
             }
             try {
                 var levelCollectionTableSet = Type.GetType("BetterSongList.HarmonyPatches.HookLevelCollectionTableSet, BetterSongList");
-                var setFilterMethod = levelCollectionTableSet.GetMethod("Refresh", (BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
-                setFilterMethod.Invoke(levelCollectionTableSet, new object[] { asyncProcess, clearAsyncResult });
+                var setFilterMethod = levelCollectionTableSet.GetMethod("Refresh", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+                _ = setFilterMethod.Invoke(levelCollectionTableSet, new object[] { asyncProcess, clearAsyncResult });
             }
             catch (Exception e) {
                 Logger.Error(e);

@@ -21,7 +21,7 @@ namespace SongRequestManagerV2.Extentions
             if (method == null) {
                 throw new MissingMethodException("Method " + methodName + " does not exist", "methodName");
             }
-            method?.Invoke(obj, args);
+            _ = (method?.Invoke(obj, args));
         }
     }
 }

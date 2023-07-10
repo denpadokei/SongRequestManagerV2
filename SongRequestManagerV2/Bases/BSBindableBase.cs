@@ -10,7 +10,6 @@ namespace SongRequestManagerV2.Bases
     {
         private static SynchronizationContext context;
 
-
         protected virtual void Awake()
         {
             context = SynchronizationContext.Current;

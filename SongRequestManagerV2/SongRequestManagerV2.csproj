@@ -2,9 +2,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9</LangVersion>
-    <Version>9.0.0</Version>
+    <Version>10.0.0</Version>
     <Platforms>AnyCPU</Platforms>
-	<AssemblySearchPaths>$(ReferencePath)</AssemblySearchPaths>
+    <AssemblySearchPaths>$(ReferencePath)</AssemblySearchPaths>
     <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
     <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
   </PropertyGroup>
@@ -81,6 +81,11 @@
     </Reference>
     <Reference Include="Unity.ProBuilder">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.ProBuilder.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Unity.ResourceManager">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.ResourceManager.dll</HintPath>
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -189,15 +194,15 @@
     <EmbeddedResource Include="Views\RequestBotListView.bsml" />
   </ItemGroup>
   <ItemGroup>
-	  <OutputCopy Include="$(OutputPath)SongRequestManagerV2.dll" OutputPath="Plugins\SongRequestManagerV2.dll" />
-	  <OutputCopy Include="Sound\NotifySound.wav" OutputPath="UserData\Song Request ManagerV2\NotifySound\NotifySound.wav" />
+    <OutputCopy Include="$(OutputPath)SongRequestManagerV2.dll" OutputPath="Plugins\SongRequestManagerV2.dll" />
+    <OutputCopy Include="Sound\NotifySound.wav" OutputPath="UserData\Song Request ManagerV2\NotifySound\NotifySound.wav" />
   </ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="BeatSaberModdingTools.Tasks" Version="2.0.0-beta4">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BeatSaberModdingTools.Tasks" Version="2.0.0-beta4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resource.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -220,5 +225,9 @@
       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

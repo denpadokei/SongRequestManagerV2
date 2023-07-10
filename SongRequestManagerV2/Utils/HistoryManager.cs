@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Statics;
 using System;
@@ -26,7 +27,7 @@ namespace SongRequestManagerV2.Utils
             }
             var fileInfo = new FileInfo(PlaylistPath);
             if (!Directory.Exists(fileInfo.Directory.FullName)) {
-                Directory.CreateDirectory(fileInfo.Directory.FullName);
+                _ = Directory.CreateDirectory(fileInfo.Directory.FullName);
             }
             var songObject = song.SongMetaData;
             var version = song.SongVersion;

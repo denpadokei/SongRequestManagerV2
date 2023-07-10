@@ -2,7 +2,7 @@
 using CatCore.Models.Twitch.IRC;
 using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Interfaces;
-using SongRequestManagerV2.SimpleJSON;
+using SongRequestManagerV2.SimpleJsons;
 using SongRequestManagerV2.Statics;
 using System;
 using System.IO;
@@ -54,23 +54,10 @@ namespace SongRequestManagerV2.Utils
                 return true;
             }
 
-            if (user.IsBroadcaster & botcmd.Flags.HasFlag(CmdFlags.Broadcaster)) {
-                return true;
-            }
-
-            if (user.IsModerator & botcmd.Flags.HasFlag(CmdFlags.Mod)) {
-                return true;
-            }
-
-            if (user is TwitchUser twitchUser && twitchUser.IsSubscriber & botcmd.Flags.HasFlag(CmdFlags.Sub)) {
-                return true;
-            }
-
-            if (user is TwitchUser twitchUser1 && twitchUser1.IsVip & botcmd.Flags.HasFlag(CmdFlags.VIP)) {
-                return true;
-            }
-
-            return false;
+            return user.IsBroadcaster & botcmd.Flags.HasFlag(CmdFlags.Broadcaster)
+|| user.IsModerator & botcmd.Flags.HasFlag(CmdFlags.Mod)
+|| (user is TwitchUser twitchUser && twitchUser.IsSubscriber & botcmd.Flags.HasFlag(CmdFlags.Sub))
+|| (user is TwitchUser twitchUser1 && twitchUser1.IsVip & botcmd.Flags.HasFlag(CmdFlags.VIP));
         }
 
         public static string GetStarRating(JSONObject song, bool mode = true)
@@ -106,11 +93,7 @@ namespace SongRequestManagerV2.Utils
             }
 
             var rating = song["stats"]["score"].AsFloat * 100f;
-            if (rating == 0) {
-                return "";
-            }
-
-            return $"{rating:0.0}%";
+            return rating == 0 ? "" : $"{rating:0.0}%";
         }
 
         public static bool IsAprilFool()

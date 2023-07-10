@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SongRequestManagerV2
+namespace SongRequestManagerV2.Bots
 {
     public class RequestUserTracker
     {

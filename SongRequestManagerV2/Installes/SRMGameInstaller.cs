@@ -6,7 +6,7 @@ namespace SongRequestManagerV2.Installes
     {
         public override void InstallBindings()
         {
-            this.Container.BindInterfacesAndSelfTo<SongInfomationProvider>().AsCached().NonLazy();
+            _ = this.Container.BindInterfacesAndSelfTo<SongInfomationProvider>().AsCached().NonLazy();
         }
     }
 }
