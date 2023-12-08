@@ -50,14 +50,11 @@ namespace SongRequestManagerV2.Utils
                 return true; // Not sure if this is the best approach actually, not worth thinking about right now
             }
 
-            if (user.IsModerator & RequestBotConfig.Instance.ModFullRights) {
-                return true;
-            }
-
-            return user.IsBroadcaster & botcmd.Flags.HasFlag(CmdFlags.Broadcaster)
-|| user.IsModerator & botcmd.Flags.HasFlag(CmdFlags.Mod)
-|| (user is TwitchUser twitchUser && twitchUser.IsSubscriber & botcmd.Flags.HasFlag(CmdFlags.Sub))
-|| (user is TwitchUser twitchUser1 && twitchUser1.IsVip & botcmd.Flags.HasFlag(CmdFlags.VIP));
+            return (user.IsModerator && RequestBotConfig.Instance.ModFullRights)
+                || (user.IsBroadcaster && botcmd.Flags.HasFlag(CmdFlags.Broadcaster))
+                || (user.IsModerator && botcmd.Flags.HasFlag(CmdFlags.Mod))
+                || (user is TwitchUser twitchUser && twitchUser.IsSubscriber && botcmd.Flags.HasFlag(CmdFlags.Sub))
+                || (user is TwitchUser twitchUser1 && twitchUser1.IsVip && botcmd.Flags.HasFlag(CmdFlags.VIP));
         }
 
         public static string GetStarRating(JSONObject song, bool mode = true)
