@@ -19,6 +19,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Web;
@@ -125,7 +126,7 @@ namespace SongRequestManagerV2.Bots
             }
             this.Setup();
             if (CurrentUser == null) {
-                platformUserModel.GetUserInfo().Await(r =>
+                platformUserModel.GetUserInfo(CancellationToken.None).Await(r =>
                 {
                     CurrentUser = r;
                 });
