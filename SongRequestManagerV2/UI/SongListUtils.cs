@@ -48,8 +48,8 @@ namespace SongRequestManagerV2.UI
                 var gridView = this._annotatedBeatmapLevelCollectionsViewController.GetField<AnnotatedBeatmapLevelCollectionsGridView, AnnotatedBeatmapLevelCollectionsViewController>("_annotatedBeatmapLevelCollectionsGridView");
                 gridView.SelectAndScrollToCellWithIdx(isWip ? 1 : 0);
                 var customSong = isWip
-                    ? gridView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsGridView>("_annotatedBeatmapLevelCollections").ElementAt(1)
-                    : gridView.GetField<IReadOnlyList<IAnnotatedBeatmapLevelCollection>, AnnotatedBeatmapLevelCollectionsGridView>("_annotatedBeatmapLevelCollections").FirstOrDefault();
+                    ? gridView._annotatedBeatmapLevelCollections.ElementAt(1)
+                    : gridView._annotatedBeatmapLevelCollections.FirstOrDefault();
                 method = typeof(AnnotatedBeatmapLevelCollectionsViewController).GetMethod("HandleDidSelectAnnotatedBeatmapLevelCollection", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
                 _ = (method?.Invoke(this._annotatedBeatmapLevelCollectionsViewController, new object[] { customSong }));
                 var song = isWip ? Loader.GetLevelById($"custom_level_{levelID.Split('_').Last().ToUpper()} WIP") : Loader.GetLevelByHash(levelID.Split('_').Last());

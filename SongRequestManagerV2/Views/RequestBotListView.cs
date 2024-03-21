@@ -505,7 +505,7 @@ namespace SongRequestManagerV2.Views
             }
             this.SetUIInteractivity();
         }
-        private void SongLoader_SongsLoadedEvent(Loader arg1, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> arg2)
+        private void SongLoader_SongsLoadedEvent(Loader arg1, System.Collections.Concurrent.ConcurrentDictionary<string, BeatmapLevel> arg2)
         {
             this._requestTable?.tableView?.ReloadData();
         }

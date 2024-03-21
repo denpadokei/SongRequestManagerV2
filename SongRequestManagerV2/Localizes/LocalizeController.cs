@@ -18,7 +18,7 @@ namespace SongRequestManagerV2.Localizes
         public void Initialize()
         {
             Logger.Debug($"{this._localizer}:{this._localizer.GetType()}");
-            _ = (this._localizer?.AddLocalizationSheetFromAssembly("SongRequestManagerV2.Resources.localize.csv", Polyglot.GoogleDriveDownloadFormat.CSV));
+            _ = (this._localizer?.AddLocalizationSheetFromAssembly("SongRequestManagerV2.Resources.localize.csv", BGLib.Polyglot.GoogleDriveDownloadFormat.CSV));
         }
     }
 }
