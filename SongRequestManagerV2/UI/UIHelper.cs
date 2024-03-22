@@ -28,7 +28,7 @@ namespace SongRequestManagerV2.UI
             button.interactable = true;
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(onClick);
-            var localizer = button.GetComponentInChildren<Polyglot.LocalizedTextMeshProUGUI>();
+            var localizer = button.GetComponentInChildren<BGLib.Polyglot.LocalizedTextMeshProUGUI>();
             if (localizer != null) {
                 GameObject.Destroy(localizer);
             }
@@ -68,7 +68,7 @@ namespace SongRequestManagerV2.UI
             btn.onClick = new Button.ButtonClickedEvent();
             btn.name = string.IsNullOrEmpty(name) ? "CustomUIButton" : name;
             btn.interactable = true;
-            var localizer = btn.GetComponentInChildren<Polyglot.LocalizedTextMeshProUGUI>();
+            var localizer = btn.GetComponentInChildren<BGLib.Polyglot.LocalizedTextMeshProUGUI>();
             if (localizer != null) {
                 GameObject.Destroy(localizer);
             }

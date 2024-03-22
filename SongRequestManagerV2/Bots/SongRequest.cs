@@ -166,7 +166,7 @@ namespace SongRequestManagerV2.Bots
         /// lookup song from level id
         /// </summary>
         /// <returns></returns>
-        private IPreviewBeatmapLevel GetCustomLevel()
+        private BeatmapLevel GetCustomLevel()
         {
             return Loader.GetLevelByHash(this._hash.ToUpper());
         }
@@ -191,7 +191,7 @@ namespace SongRequestManagerV2.Bots
                         if (level != null) {
                             //Logger.Debug("custom level found");
                             // set image from song's cover image
-                            var tex = await level.GetCoverImageAsync(CancellationToken.None);
+                            var tex = await level.previewMediaData.GetCoverSpriteAsync(CancellationToken.None);
                             this._coverImage.sprite = tex;
                             imageSet = true;
                         }
