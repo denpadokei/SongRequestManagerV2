@@ -371,11 +371,11 @@ namespace SongRequestManagerV2.Views
                     }
                     Dispatcher.RunOnMainThread(() =>
                     {
-                        this._requestTable?.tableView?.ReloadData();
-                        if (!selectRowCallback || this._requestTable?.tableView?.numberOfCells > (uint)this.SelectedRow) {
+                        this._requestTable?.TableView?.ReloadData();
+                        if (!selectRowCallback || this._requestTable?.TableView?.numberOfCells > (uint)this.SelectedRow) {
                             try {
-                                this._requestTable?.tableView?.SelectCellWithIdx(this.SelectedRow, selectRowCallback);
-                                this._requestTable?.tableView?.ScrollToCellWithIdx(this.SelectedRow, TableView.ScrollPositionType.Center, true);
+                                this._requestTable?.TableView?.SelectCellWithIdx(this.SelectedRow, selectRowCallback);
+                                this._requestTable?.TableView?.ScrollToCellWithIdx(this.SelectedRow, TableView.ScrollPositionType.Center, true);
                             }
                             catch (Exception e) {
                                 Logger.Error(e);
@@ -507,7 +507,7 @@ namespace SongRequestManagerV2.Views
         }
         private void SongLoader_SongsLoadedEvent(Loader arg1, System.Collections.Concurrent.ConcurrentDictionary<string, BeatmapLevel> arg2)
         {
-            this._requestTable?.tableView?.ReloadData();
+            this._requestTable?.TableView?.ReloadData();
         }
         [UIAction("update")]
         private void UpdateSRM()
