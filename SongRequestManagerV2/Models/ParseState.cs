@@ -148,7 +148,13 @@ namespace SongRequestManagerV2.Models
         private static readonly string s_done = "X";
         public void ExecuteCommand()
         {
+#if DEBUG
+            Logger.Debug($"ExecuteCommand:{this.Command}");
+#endif
             if (!this._commandManager.Aliases.TryGetValue(this.Command, out this._botcmd)) {
+#if DEBUG
+                Logger.Debug($"ExecuteCommand:Unknown command");
+#endif
                 return; // Unknown command
             }
 
@@ -243,6 +249,9 @@ namespace SongRequestManagerV2.Models
 
         public ParseState ParseCommand()
         {
+#if DEBUG
+            Logger.Debug("ParseCommand");
+#endif
             // Notes for later.
             //var match = Regex.Match(request, "^!(?<command>[^ ^/]*?<parameter>.*)");
             //string username = match.Success ? match.Groups["command"].Value : null;
@@ -263,19 +272,32 @@ namespace SongRequestManagerV2.Models
             if (commandlength == 0) {
                 return this;
             }
-
+#if DEBUG
+            Logger.Debug("ParseCommand:1");
+#endif
             this.Command = this.Request.Substring(commandstart, commandlength).ToLower();
+#if DEBUG
+            Logger.Debug($"Command:{Command}");
+            foreach (var command in this._commandManager.Aliases.Keys) {
+                Logger.Debug($"command:{command}");
+            }
+#endif
 
             if (this._commandManager.Aliases.ContainsKey(this.Command)) {
                 this.Parameter = this.Request.Substring(parameterstart);
                 try {
+#if DEBUG
+                    Logger.Debug("ParseCommand:3");
+#endif
                     this.ExecuteCommand();
                 }
                 catch (Exception ex) {
                     Logger.Error(ex);
                 }
             }
-
+#if DEBUG
+            Logger.Debug("ParseCommand:2");
+#endif
             return this;
         }
 

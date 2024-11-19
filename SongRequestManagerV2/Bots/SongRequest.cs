@@ -191,7 +191,7 @@ namespace SongRequestManagerV2.Bots
                         if (level != null) {
                             //Logger.Debug("custom level found");
                             // set image from song's cover image
-                            var tex = await level.previewMediaData.GetCoverSpriteAsync(CancellationToken.None);
+                            var tex = await level.previewMediaData.GetCoverSpriteAsync();
                             this._coverImage.sprite = tex;
                             imageSet = true;
                         }

@@ -5,6 +5,8 @@ using CatCore.Services.Twitch.Interfaces;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Interfaces;
+using SongRequestManagerV2.Models;
+using SongRequestManagerV2.Models.Streamer.bot;
 using System;
 using System.Collections.Concurrent;
 using Zenject;
@@ -20,11 +22,13 @@ namespace SongRequestManagerV2.Utils
         public ITwitchService TwitchService { get; private set; }
         public MultiplexedChannel Channel { get; private set; }
         public ConcurrentQueue<MultiplexedMessage> RecieveChatMessage { get; } = new ConcurrentQueue<MultiplexedMessage>();
+        public ConcurrentQueue<IChatMessage> RecieveGenelicChatMessage { get; } = new ConcurrentQueue<IChatMessage>();
         public ConcurrentQueue<RequestInfo> RequestInfos { get; } = new ConcurrentQueue<RequestInfo>();
         public ConcurrentQueue<string> SendMessageQueue { get; } = new ConcurrentQueue<string>();
         public ITwitchChannelManagementService TwitchChannelManagementService { get; private set; }
         public ITwitchUserStateTrackerService TwitchUserStateTrackerService { get; private set; }
         public TwitchUserState OwnUserData { get; private set; }
+        public WebSocketClient WebSocketClient { get; private set; } = new WebSocketClient();
 
         public void Initialize()
         {
@@ -37,6 +41,10 @@ namespace SongRequestManagerV2.Utils
                 this.TwitchService = this.MultiplexerInstance.GetTwitchPlatformService();
                 this.TwitchChannelManagementService = this.TwitchService?.GetChannelManagementService();
                 this.TwitchUserStateTrackerService = this.TwitchService?.GetUserStateTrackerService();
+                this.WebSocketClient.OnReceivedMessage += this.OnWebsocketMessageReceived;
+                if (RequestBotConfig.Instance.EnableStreamerBot) {
+                    this.WebSocketClient.StartClient();
+                }
             }
             catch (Exception e) {
                 Logger.Error(e);
@@ -45,8 +53,13 @@ namespace SongRequestManagerV2.Utils
 
         private void MultiplexerInstance_OnChatConnected(MultiplexedPlatformService obj)
         {
-            this.Channel = obj.DefaultChannel;
-            this.OwnUserData = this.TwitchUserStateTrackerService?.GetUserState(this.Channel.Id);
+            try {
+                this.Channel = obj.DefaultChannel;
+                this.OwnUserData = this.TwitchUserStateTrackerService?.GetUserState(this.Channel?.Id);
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
         }
 
         private void MultiplexerInstance_OnTextMessageReceived(MultiplexedPlatformService arg1, MultiplexedMessage arg2)
@@ -84,6 +97,12 @@ namespace SongRequestManagerV2.Utils
         //    }
         //}
 
+        private void OnWebsocketMessageReceived(object sender, string message)
+        {
+            var chatEntity = StreamerbotMessageParser.MessagePaese(message);
+            this.RecieveGenelicChatMessage.Enqueue(chatEntity);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!this._disposedValue) {
@@ -91,6 +110,8 @@ namespace SongRequestManagerV2.Utils
                     // TODO: マネージド状態を破棄します (マネージド オブジェクト)
                     Logger.Debug("Dispose call");
                     this.MultiplexerInstance.OnTextMessageReceived -= this.MultiplexerInstance_OnTextMessageReceived;
+                    this.WebSocketClient.OnReceivedMessage -= this.OnWebsocketMessageReceived;
+                    this.WebSocketClient.StopClient();
                 }
 
                 // TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします

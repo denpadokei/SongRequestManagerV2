@@ -20,9 +20,9 @@ namespace SongRequestManagerV2.Models
         public string Message { get; set; }
 
         public IChatUser Sender { get; set; }
-        public IChatEmote[] Emotes { get; private set; }
+        public IChatEmote[] Emotes { get; set; }
 
-        public bool IsMentioned => throw new NotImplementedException();
+        public bool IsMentioned { get; set; }
 
         public MessageEntity()
         {
@@ -36,7 +36,7 @@ namespace SongRequestManagerV2.Models
 
         public JSONObject ToJson()
         {
-            throw new NotImplementedException();
+            return new JSONObject();
         }
     }
 }

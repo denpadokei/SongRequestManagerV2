@@ -193,7 +193,7 @@ namespace SongRequestManagerV2.Views
         {
             try {
                 var externalComponents = this._button.gameObject.GetComponentsInChildren<ExternalComponents>(true).FirstOrDefault();
-                var textMesh = externalComponents.components.FirstOrDefault(x => x as TextMeshProUGUI) as TextMeshProUGUI;
+                var textMesh = externalComponents.Components.FirstOrDefault(x => x as TextMeshProUGUI) as TextMeshProUGUI;
                 if (textMesh != null) {
                     textMesh.text = RequestBotConfig.Instance.RequestQueueOpen ? "OPEN" : "CLOSE";
                 }
