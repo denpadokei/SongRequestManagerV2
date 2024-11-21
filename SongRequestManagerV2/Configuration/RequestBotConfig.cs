@@ -48,6 +48,7 @@ namespace SongRequestManagerV2.Configuration
 
         public virtual bool EnableStreamerBot { get; set; } = false;
         public virtual int StreamerBotWebSocketPort { get; set; } = 8080;
+        public virtual string StreamerBotWebSocketEndpoint { get; set; } = "/";
 
 
         // 使ってない設定達 R.I.P

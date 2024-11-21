@@ -44,7 +44,7 @@ namespace SongRequestManagerV2.Models
             }
         }
 
-        public void StopClient()
+        public async Task StopClient(string message = "OK")
         {
             _semaphore.Wait();
             try {
@@ -54,6 +54,12 @@ namespace SongRequestManagerV2.Models
                 }
                 this._cts.Cancel();
                 this._cts = null;
+                if (this._clientWebSocket.State == WebSocketState.Open) {
+
+                    await this._clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, message, CancellationToken.None);
+                }
+                this._clientWebSocket.Dispose();
+                this._clientWebSocket = null;
                 //_wokerThread.Wait();
                 _wokerThread = null;
             }
@@ -64,6 +70,13 @@ namespace SongRequestManagerV2.Models
                 _semaphore.Release();
             }
         }
+
+        public async Task ReConnect(int millsec = 1000)
+        {
+            await this.StopClient();
+            await Task.Delay(millsec);
+            this.StartClient();
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
@@ -71,22 +84,21 @@ namespace SongRequestManagerV2.Models
         {
             Logger.Info("Start websocket");
             //クライアント側のWebSocketを定義
-            ClientWebSocket ws = new ClientWebSocket();
+            if (_clientWebSocket != null) {
+                await this.StopClient();
+            }
+            _clientWebSocket = new ClientWebSocket();
 
             //接続先エンドポイントを指定
-            var uri = new Uri($"ws://127.0.0.1:{RequestBotConfig.Instance.StreamerBotWebSocketPort}/");
-            if (_cts != null) {
-                _cts.Cancel();
-                _cts = null;
-            }
+            var uri = new Uri($"ws://127.0.0.1:{RequestBotConfig.Instance.StreamerBotWebSocketPort}{RequestBotConfig.Instance.StreamerBotWebSocketEndpoint}");
             _cts = new CancellationTokenSource();
 
             //サーバに対し、接続を開始
-            await ws.ConnectAsync(uri, _cts.Token);
+            await _clientWebSocket.ConnectAsync(uri, _cts.Token);
             Logger.Info("Connected websocket");
-            await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(SubRequestMessage)), WebSocketMessageType.Text, true, _cts.Token);
+            await _clientWebSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(SubRequestMessage)), WebSocketMessageType.Text, true, _cts.Token);
             var requestWait = true;
-            var buffer = new byte[1024];
+            var buffer = new byte[1024 * 10];
 
             //情報取得待ちループ
             while (true) {
@@ -94,57 +106,61 @@ namespace SongRequestManagerV2.Models
                 var segment = new ArraySegment<byte>(buffer);
 
                 //サーバからのレスポンス情報を取得
-                var result = await ws.ReceiveAsync(segment, _cts.Token);
+                var result = await _clientWebSocket.ReceiveAsync(segment, _cts.Token);
 
                 if (_cts.IsCancellationRequested) {
-                    await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "OK",
-                      CancellationToken.None);
+                    await this.StopClient();
                     Logger.Info("Close websoket:1");
-                    return;
+                    break;
                 }
 
                 //エンドポイントCloseの場合、処理を中断
                 if (result.MessageType == WebSocketMessageType.Close) {
-                    await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "OK",
-                      CancellationToken.None);
+                    await this.StopClient();
                     Logger.Info("Close websoket:2");
-                    return;
+                    break;
                 }
 
                 //バイナリの場合は、当処理では扱えないため、処理を中断
                 if (result.MessageType == WebSocketMessageType.Binary) {
-                    await ws.CloseAsync(WebSocketCloseStatus.InvalidMessageType,
-                      "I don't do binary", CancellationToken.None);
+                    await this.StopClient("I don't do binary");
                     Logger.Info("Close websoket:3");
-                    return;
+                    break;
                 }
 
                 //メッセージの最後まで取得
                 int count = result.Count;
+                var fail = false;
                 while (!result.EndOfMessage) {
                     if (count >= buffer.Length) {
-                        await ws.CloseAsync(WebSocketCloseStatus.InvalidPayloadData,
-                          "That's too long", CancellationToken.None);
-                        Logger.Info("Close websoket:4");
-                        return;
+                        fail = true;
+                        break;
                     }
                     segment = new ArraySegment<byte>(buffer, count, buffer.Length - count);
-                    result = await ws.ReceiveAsync(segment, CancellationToken.None);
+                    result = await _clientWebSocket.ReceiveAsync(segment, CancellationToken.None);
 
                     count += result.Count;
                 }
-
+                if (fail) {
+                    await this.StopClient("That's too long");
+                    Logger.Info("Close websoket:4");
+                    break;
+                }
                 //メッセージを取得
                 var message = Encoding.UTF8.GetString(buffer, 0, count);
-                //Logger.Info(message);
+                Logger.Info(message);
                 var jsonObj = JSON.Parse(message);
                 if (requestWait && jsonObj.HasKey("status") && string.Equals(jsonObj["status"].Value, "ok", StringComparison.OrdinalIgnoreCase)) {
 
                     requestWait = false;
                     continue;
                 }
+                if (jsonObj.HasKey("event") && jsonObj["event"].HasKey("type") && string.Equals(jsonObj["event"]["type"].Value, "ChatMessage")) {
+                    Logger.Info("Receive message");
+                }
                 this.OnReceivedMessage?.Invoke(this, message);
             }
+            _ = this.ReConnect();
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -166,6 +182,7 @@ namespace SongRequestManagerV2.Models
         private Task _wokerThread;
         private CancellationTokenSource _cts;
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        private ClientWebSocket _clientWebSocket;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄
@@ -174,7 +191,7 @@ namespace SongRequestManagerV2.Models
             if (!_disposedValue) {
                 if (disposing) {
                     // TODO: マネージド状態を破棄します (マネージド オブジェクト)
-                    this.StopClient();
+                    _ = this.StopClient();
                 }
 
                 // TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします

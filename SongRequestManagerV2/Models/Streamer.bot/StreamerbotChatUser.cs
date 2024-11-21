@@ -23,12 +23,12 @@ namespace SongRequestManagerV2.Models.Streamer.bot
         {
             try {
                 var jsonNode = JSON.Parse(json);
-                this.Id = jsonNode["userId"].Value;
-                this.UserName = jsonNode["username"].Value;
-                this.DisplayName = jsonNode["displayName"].Value;
-                this.Color = jsonNode["color"].Value;
-                this.IsBroadcaster = jsonNode["role"].AsInt == 4;
-                this.IsModerator = jsonNode["role"].AsInt == 3;
+                this.Id = jsonNode["userId"]?.Value;
+                this.UserName = jsonNode["username"]?.Value;
+                this.DisplayName = jsonNode["displayName"]?.Value;
+                this.Color = jsonNode["color"]?.Value;
+                this.IsBroadcaster = jsonNode["role"]?.AsInt == 4;
+                this.IsModerator = jsonNode["role"]?.AsInt == 3;
             }
             catch (Exception e) {
                 Logger.Error(e);
