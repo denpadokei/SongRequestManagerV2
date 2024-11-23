@@ -52,6 +52,7 @@ namespace SongRequestManagerV2.Configuration
         public virtual string StreamerBotWebSocketEndpoint { get; set; } = "/";
         public virtual string SendChatActionGUID { get; set; } = "";
         public virtual string SendChatActionName { get; set; } = "";
+        [UseConverter(typeof(ListConverter<StreamerbotPlatform>))]
         public virtual List<StreamerbotPlatform>  UsePlatform { get; set; } = new List<StreamerbotPlatform> { StreamerbotPlatform.Twitch };
 
         // 使ってない設定達 R.I.P

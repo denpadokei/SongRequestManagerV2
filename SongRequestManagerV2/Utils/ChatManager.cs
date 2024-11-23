@@ -135,8 +135,10 @@ namespace SongRequestManagerV2.Utils
 
         public void SendMessageToStreamerbotServer(string message)
         {
-            var json = StreamerbotMessageParser.CreateSendCommentActionJson(message);
-            _ = this.WebSocketClient?.SendAsync(json.ToString());
+            var jsons = StreamerbotMessageParser.CreateSendCommentActionJson(message);
+            foreach (var json in jsons) {
+                _ = this.WebSocketClient?.SendAsync(json.ToString());
+            }
         }
     }
 }
