@@ -102,7 +102,7 @@ namespace SongRequestManagerV2.Utils
             this.RecieveGenelicChatMessage.Enqueue(chatEntity);
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected virtual async void Dispose(bool disposing)
         {
             if (!this._disposedValue) {
                 if (disposing) {
@@ -110,7 +110,7 @@ namespace SongRequestManagerV2.Utils
                     Logger.Debug("Dispose call");
                     this.MultiplexerInstance.OnTextMessageReceived -= this.MultiplexerInstance_OnTextMessageReceived;
                     this.WebSocketClient.OnReceivedMessage -= this.OnWebsocketMessageReceived;
-                    this.WebSocketClient.StopClient();
+                    await this.WebSocketClient.StopClient();
                 }
 
                 // TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
