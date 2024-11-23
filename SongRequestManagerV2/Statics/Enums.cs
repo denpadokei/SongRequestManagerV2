@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace SongRequestManagerV2.Statics
 {
@@ -214,5 +215,15 @@ namespace SongRequestManagerV2.Statics
     {
         OnlyRequest,
         All
+    }
+
+    public enum StreamerbotPlatform
+    {
+        [Description("twitch")]
+        Twitch,
+        [Description("youtube")]
+        Youtube,
+        [Description("trovo")]
+        Trovo
     }
 }

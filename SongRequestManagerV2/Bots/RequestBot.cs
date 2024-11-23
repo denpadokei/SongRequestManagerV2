@@ -375,6 +375,14 @@ namespace SongRequestManagerV2.Bots
             catch (Exception e) {
                 Logger.Error(e);
             }
+            try {
+                if (RequestBotConfig.Instance.EnableStreamerBot && !string.IsNullOrEmpty(RequestBotConfig.Instance.SendChatActionGUID)) {
+                    this.ChatManager.SendMessageToStreamerbotServer(message);
+                }
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
         }
 
         private int CompareSong(JSONObject song2, JSONObject song1, ref string[] sortorder)

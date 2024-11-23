@@ -1,4 +1,5 @@
-﻿using SongRequestManagerV2.Interfaces;
+﻿using SongRequestManagerV2.Configuration;
+using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.SimpleJsons;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,27 @@ namespace SongRequestManagerV2.Models.Streamer.bot
             }
             result.Emotes = emoteList.ToArray(); 
             return result;
+        }
+
+
+        public static IEnumerable<JSONObject> CreateSendCommentActionJson(string comment)
+        {
+            foreach (var p in RequestBotConfig.Instance.UsePlatform) {
+                var json = new JSONObject();
+                json["request"] = "DoAction";
+
+                var actionNode = new JSONObject();
+                actionNode["id"] = RequestBotConfig.Instance.SendChatActionGUID;
+                actionNode["name"] = RequestBotConfig.Instance.SendChatActionName;
+                json.Add("action", actionNode);
+
+                var argsNode = new JSONObject();
+                argsNode["userType"] = p.ToString().ToLower();
+                argsNode["messageOutput"] = comment;
+                json.Add("args", argsNode);
+                yield return json;
+            }
+            
         }
     }
 }

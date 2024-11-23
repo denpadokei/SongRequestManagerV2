@@ -5,7 +5,6 @@ using CatCore.Services.Twitch.Interfaces;
 using SongRequestManagerV2.Bots;
 using SongRequestManagerV2.Configuration;
 using SongRequestManagerV2.Interfaces;
-using SongRequestManagerV2.Models;
 using SongRequestManagerV2.Models.Streamer.bot;
 using System;
 using System.Collections.Concurrent;
@@ -28,7 +27,7 @@ namespace SongRequestManagerV2.Utils
         public ITwitchChannelManagementService TwitchChannelManagementService { get; private set; }
         public ITwitchUserStateTrackerService TwitchUserStateTrackerService { get; private set; }
         public TwitchUserState OwnUserData { get; private set; }
-        public WebSocketClient WebSocketClient { get; private set; } = new WebSocketClient();
+        public StreamerBotWebSocketClient WebSocketClient { get; private set; } = new StreamerBotWebSocketClient();
 
         public void Initialize()
         {
@@ -132,6 +131,12 @@ namespace SongRequestManagerV2.Utils
             // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
             this.Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        public void SendMessageToStreamerbotServer(string message)
+        {
+            var json = StreamerbotMessageParser.CreateSendCommentActionJson(message);
+            _ = this.WebSocketClient?.SendAsync(json.ToString());
         }
     }
 }

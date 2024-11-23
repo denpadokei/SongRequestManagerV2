@@ -3,7 +3,7 @@ using CatCore.Models.Twitch.IRC;
 using CatCore.Services.Multiplexer;
 using CatCore.Services.Twitch.Interfaces;
 using SongRequestManagerV2.Bots;
-using SongRequestManagerV2.Models;
+using SongRequestManagerV2.Models.Streamer.bot;
 using System.Collections.Concurrent;
 
 namespace SongRequestManagerV2.Interfaces
@@ -20,8 +20,9 @@ namespace SongRequestManagerV2.Interfaces
         ITwitchChannelManagementService TwitchChannelManagementService { get; }
         ITwitchUserStateTrackerService TwitchUserStateTrackerService { get; }
         TwitchUserState OwnUserData { get; }
-        WebSocketClient WebSocketClient { get; }
+        StreamerBotWebSocketClient WebSocketClient { get; }
 
         void QueueChatMessage(string message);
+        void SendMessageToStreamerbotServer(string message);
     }
 }

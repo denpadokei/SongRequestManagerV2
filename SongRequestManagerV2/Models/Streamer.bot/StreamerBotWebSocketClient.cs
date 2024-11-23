@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SongRequestManagerV2.Models
+namespace SongRequestManagerV2.Models.Streamer.bot
 {
-    public class WebSocketClient : IDisposable
+    public class StreamerBotWebSocketClient : IDisposable
     {
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プロパティ
@@ -77,6 +77,22 @@ namespace SongRequestManagerV2.Models
             await Task.Delay(millsec);
             this.StartClient();
         }
+
+        public async Task SendAsync(string message)
+        {
+            await SendAsync(message, CancellationToken.None);
+        }
+
+        public async Task SendAsync(string message, CancellationToken token)
+        {
+            if (this._clientWebSocket?.State != WebSocketState.Open || string.IsNullOrEmpty(message)) {
+                return;
+            }
+            var json = JSON.Parse(message);
+            json["id"] = IndentfyID;
+            var seg = new ArraySegment<byte>(Encoding.UTF8.GetBytes(json.ToString()));
+            await this._clientWebSocket.SendAsync(seg, WebSocketMessageType.Text, true, token);
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
@@ -129,7 +145,7 @@ namespace SongRequestManagerV2.Models
                 }
 
                 //メッセージの最後まで取得
-                int count = result.Count;
+                var count = result.Count;
                 var fail = false;
                 while (!result.EndOfMessage) {
                     if (count >= buffer.Length) {
