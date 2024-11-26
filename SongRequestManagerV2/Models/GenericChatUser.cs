@@ -5,17 +5,17 @@ namespace SongRequestManagerV2.Models
 {
     internal class GenericChatUser : IChatUser
     {
-        public string Id => throw new NotImplementedException();
+        public string Id {  get; set; }
 
-        public string UserName => throw new NotImplementedException();
+        public string UserName { get; set; }
 
-        public string DisplayName => throw new NotImplementedException();
+        public string DisplayName { get; set; }
 
-        public string Color => throw new NotImplementedException();
+        public string Color { get; set; }
 
-        public bool IsBroadcaster => throw new NotImplementedException();
+        public bool IsBroadcaster { get; set; }
 
-        public bool IsModerator => throw new NotImplementedException();
+        public bool IsModerator { get; set; }
         public GenericChatUser(string json)
         {
 

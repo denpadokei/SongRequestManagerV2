@@ -241,6 +241,20 @@ namespace SongRequestManagerV2.Bots
 #endif
         }
 
+        internal void RecievedMessages(IChatMessage msg)
+        {
+            Logger.Debug($"Received Message : {msg.Message}");
+#if DEBUG
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+#endif
+            this.Parse(msg.Sender, msg.Message.Replace("！", "!"));
+#if DEBUG
+            stopwatch.Stop();
+            Logger.Debug($"{stopwatch.ElapsedMilliseconds} ms");
+#endif
+        }
+
         internal void OnConfigChangedEvent(RequestBotConfig config)
         {
             this.UpdateRequestUI();
@@ -283,6 +297,9 @@ namespace SongRequestManagerV2.Bots
                 }
                 else if (this.ChatManager.RecieveChatMessage.TryDequeue(out var chatMessage)) {
                     this.RecievedMessages(chatMessage);
+                }
+                else if (this.ChatManager.RecieveGenelicChatMessage.TryDequeue(out var genelicChatMessage)) {
+                    this.RecievedMessages(genelicChatMessage);
                 }
                 else if (this.ChatManager.SendMessageQueue.TryDequeue(out var message)) {
                     this.SendChatMessage(message);
@@ -353,6 +370,14 @@ namespace SongRequestManagerV2.Bots
                     foreach (var channel in this.ChatManager.TwitchChannelManagementService.GetAllActiveChannels()) {
                         channel.SendMessage($"{message}");
                     }
+                }
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
+            try {
+                if (RequestBotConfig.Instance.EnableStreamerBot && !string.IsNullOrEmpty(RequestBotConfig.Instance.SendChatActionGUID)) {
+                    this.ChatManager.SendMessageToStreamerbotServer(message);
                 }
             }
             catch (Exception e) {
@@ -798,7 +823,9 @@ namespace SongRequestManagerV2.Bots
             if (!string.IsNullOrEmpty(user.Id) && this.ListCollectionManager.Contains(s_blockeduser, user.Id.ToLower())) {
                 return;
             }
-
+#if DEBUG
+            Logger.Debug("Start parse");
+#endif
             // This will be used for all parsing type operations, allowing subcommands efficient access to parse state logic
             _ = this._stateFactory.Create().Setup(user, request, flags, info).ParseCommand();
         }

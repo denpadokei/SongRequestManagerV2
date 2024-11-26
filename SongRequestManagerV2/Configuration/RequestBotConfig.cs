@@ -3,6 +3,7 @@ using IPA.Config.Stores.Attributes;
 using IPA.Config.Stores.Converters;
 using SongRequestManagerV2.Statics;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -45,6 +46,15 @@ namespace SongRequestManagerV2.Configuration
         public virtual bool EnableAprilFool { get; set; } = true;
         [UseConverter(typeof(EnumConverter<LinkType>))]
         public virtual LinkType LinkType { get; set; } = LinkType.All;
+
+        public virtual bool EnableStreamerBot { get; set; } = false;
+        public virtual int StreamerBotWebSocketPort { get; set; } = 8080;
+        public virtual string StreamerBotWebSocketEndpoint { get; set; } = "/";
+        public virtual string SendChatActionGUID { get; set; } = "";
+        public virtual string SendChatActionName { get; set; } = "";
+        [UseConverter(typeof(ListConverter<StreamerbotPlatform>))]
+        public virtual List<StreamerbotPlatform>  UsePlatform { get; set; } = new List<StreamerbotPlatform> { StreamerbotPlatform.Twitch };
+
         // 使ってない設定達 R.I.P
 #if false
         public virtual bool OfflineMode { get; set; } = false;
