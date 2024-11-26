@@ -468,7 +468,7 @@ namespace SongRequestManagerV2.Views
         private void PlayButtonClick()
 #pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
-            if (this._requestTable.NumberOfCells() > 0) {
+            if (this._requestTable?.NumberOfCells() > 0) {
                 RequestBot.Played.Add(this._bot.CurrentSong.SongNode);
                 this._bot.WriteJSON(RequestBot.playedfilename, RequestBot.Played);
                 this.SetUIInteractivity(false);
