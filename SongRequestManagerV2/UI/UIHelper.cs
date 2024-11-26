@@ -38,7 +38,7 @@ namespace SongRequestManagerV2.UI
             textMesh.richText = true;
             textMesh.text = buttonText;
             //textMesh.fontSize = 0.1f;
-            externalComponents.components.Add(textMesh);
+            externalComponents.Components.Add(textMesh);
 
             GameObject.Destroy(button.transform.Find("Content").GetComponent<LayoutElement>());
 
@@ -48,7 +48,7 @@ namespace SongRequestManagerV2.UI
 
             var stackLayoutGroup = button.GetComponentInChildren<LayoutGroup>();
             if (stackLayoutGroup != null) {
-                externalComponents.components.Add(stackLayoutGroup);
+                externalComponents.Components.Add(stackLayoutGroup);
             }
 
             return button;
