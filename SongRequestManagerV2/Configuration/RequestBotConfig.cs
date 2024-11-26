@@ -36,17 +36,12 @@ namespace SongRequestManagerV2.Configuration
         public virtual string LastBackup { get; set; } = DateTime.MinValue.ToString();
         public virtual string BackupPath { get; set; } = Path.Combine(Environment.CurrentDirectory, "userdata", "backup");
         public virtual bool PPSearch { get; set; } = true;
-        public virtual bool IsStartServer { get; set; } = false;
-        public virtual int ReceivePort { get; set; } = 50001;
-        public virtual bool IsSendBouyomi { get; set; } = false;
-        public virtual int SendPort { get; set; } = 50005;
         public virtual bool PerformanceMode { get; set; } = false;
         public virtual bool NotifySound { get; set; } = false;
         public virtual int SoundVolume { get; set; } = 50;
-        public virtual bool EnableAprilFool { get; set; } = true;
+        public virtual bool EnableAprilFool { get; set; } = false;
         [UseConverter(typeof(EnumConverter<LinkType>))]
         public virtual LinkType LinkType { get; set; } = LinkType.All;
-
         public virtual bool EnableStreamerBot { get; set; } = false;
         public virtual int StreamerBotWebSocketPort { get; set; } = 8080;
         public virtual string StreamerBotWebSocketEndpoint { get; set; } = "/";
