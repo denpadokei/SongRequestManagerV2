@@ -5,8 +5,9 @@
   "gameVersion": "1.39.1",
   "id": "SongRequestManagerV2",
   "name": "Song Request Manager V2",
-  "version": "14.0.0",
+  "version": "14.0.1",
   "dependsOn": {
+    "SongCore": "^3.14.15",
     "BSIPA": "^4.3.5",
     "CatCore": "^1.1.0",
     "SiraUtil": "^3.1.14",
