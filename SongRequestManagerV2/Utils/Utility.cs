@@ -6,6 +6,7 @@ using SongRequestManagerV2.SimpleJsons;
 using SongRequestManagerV2.Statics;
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 
 namespace SongRequestManagerV2.Utils
@@ -30,6 +31,26 @@ namespace SongRequestManagerV2.Utils
             }
         }
 
+        /// <summary>
+        /// Extracts an archive after verifying that every entry stays inside <paramref name="destinationDirectory"/>.
+        /// </summary>
+        public static void ExtractZipSafely(ZipArchive archive, string destinationDirectory)
+        {
+            var destinationRoot = Path.GetFullPath(destinationDirectory);
+            if (!destinationRoot.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)) {
+                destinationRoot += Path.DirectorySeparatorChar;
+            }
+
+            foreach (var entry in archive.Entries) {
+                var entryPath = Path.GetFullPath(Path.Combine(destinationRoot, entry.FullName));
+                if (!entryPath.StartsWith(destinationRoot, StringComparison.OrdinalIgnoreCase)) {
+                    throw new IOException($"ZIP entry is outside the destination directory: {entry.FullName}");
+                }
+            }
+
+            archive.ExtractToDirectory(destinationDirectory);
+        }
+
         public static TimeSpan GetFileAgeDifference(string filename)
         {
             var lastModified = File.GetLastWriteTime(filename);
@@ -38,12 +59,13 @@ namespace SongRequestManagerV2.Utils
 
         public static bool HasRights(ISRMCommand botcmd, IChatUser user, CmdFlags flags)
         {
-            if (flags.HasFlag(CmdFlags.Local)) {
-                return true;
-            }
-
+            // Disabled must win over Local, otherwise scripts and local UI entry points can still run disabled commands.
             if (botcmd.Flags.HasFlag(CmdFlags.Disabled)) {
                 return false;
+            }
+
+            if (flags.HasFlag(CmdFlags.Local)) {
+                return true;
             }
 
             if (botcmd.Flags.HasFlag(CmdFlags.Everyone)) {

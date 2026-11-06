@@ -63,6 +63,7 @@ namespace SongRequestManagerV2
         }
 
         private static readonly int RETRY_COUNT = 5;
+        private const long MAX_RESPONSE_BYTES = 256L * 1024 * 1024;
 
         private static void Connect()
         {
@@ -163,6 +164,9 @@ namespace SongRequestManagerV2
                     var bytesRead = 0;
 
                     var contentLength = resp?.Content.Headers.ContentLength;
+                    if (contentLength > MAX_RESPONSE_BYTES) {
+                        throw new InvalidDataException($"Response exceeds the maximum allowed size: {contentLength} bytes.");
+                    }
                     var totalRead = 0;
 
                     // send report
@@ -179,6 +183,9 @@ namespace SongRequestManagerV2
 
                         await memoryStream.WriteAsync(buffer, 0, bytesRead).ConfigureAwait(false);
                         totalRead += bytesRead;
+                        if (totalRead > MAX_RESPONSE_BYTES) {
+                            throw new InvalidDataException($"Response exceeds the maximum allowed size: more than {MAX_RESPONSE_BYTES} bytes.");
+                        }
                     }
 
                     progress?.Report(1);

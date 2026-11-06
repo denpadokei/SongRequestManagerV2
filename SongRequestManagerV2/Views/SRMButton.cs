@@ -252,7 +252,7 @@ namespace SongRequestManagerV2.Views
                     using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
                         try {
                             // open zip archive from memory stream
-                            archive.ExtractToDirectory(currentSongDirectory);
+                            Utility.ExtractZipSafely(archive, currentSongDirectory);
                         }
                         catch (Exception e) {
                             this._chatManager.QueueChatMessage($"Oops! Sorry unable to extract ZIP!");

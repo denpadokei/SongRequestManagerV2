@@ -164,7 +164,7 @@ namespace SongRequestManagerV2.Models.Streamer.bot
                 }
                 //メッセージを取得
                 var message = Encoding.UTF8.GetString(buffer, 0, count);
-                Logger.Info(message);
+                Logger.Debug($"Received websocket message ({count} bytes).");
                 var jsonObj = JSON.Parse(message);
                 if (requestWait && jsonObj.HasKey("status") && string.Equals(jsonObj["status"].Value, "ok", StringComparison.OrdinalIgnoreCase)) {
 
