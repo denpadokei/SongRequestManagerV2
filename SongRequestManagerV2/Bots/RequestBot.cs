@@ -354,7 +354,7 @@ namespace SongRequestManagerV2.Bots
             }
             catch (Exception ex) {
                 Logger.Error(ex);
-                this.ChatManager.QueueChatMessage(ex.ToString());
+                this.ChatManager.QueueChatMessage("Song Request Manager failed to start. Check the log for details.");
             }
 
             this.WriteQueueSummaryToFile();
@@ -478,7 +478,7 @@ namespace SongRequestManagerV2.Bots
                     resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
                 }
                 if (resp == null || resp.StatusCode == System.Net.HttpStatusCode.NotFound) {
-                    requestUrl = $"{BEATMAPS_API_ROOT_URL}/search/text/0?sortOrder=Latest&q={normalrequest}";
+                    requestUrl = $"{BEATMAPS_API_ROOT_URL}/search/text/0?sortOrder=Latest&q={Uri.EscapeDataString(normalrequest)}";
                     resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
                 }
 #if DEBUG
@@ -769,7 +769,7 @@ namespace SongRequestManagerV2.Bots
             }
             catch (Exception ex) {
                 Logger.Error(ex);
-                return ex.ToString();
+                return "An error occurred while processing the request.";
             }
             finally {
                 ReceviedRequest?.Invoke();
@@ -852,7 +852,7 @@ namespace SongRequestManagerV2.Bots
 
         public void RunScript(IChatUser requestor, string request)
         {
-            this.ListCollectionManager.Runscript(request);
+            this.ListCollectionManager.Runscript(request, requestor);
         }
         #endregion
 

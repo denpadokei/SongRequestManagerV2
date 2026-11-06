@@ -49,6 +49,11 @@ jobs:
         run: |
           $manifest = Get-Content 'SongRequestManagerV2/manifest.json' -Raw | ConvertFrom-Json
 
+          # これらの値はリリースジョブのシェルに渡るため、許可した形式のみ受け付ける。
+          if ($manifest.id -notmatch '^[A-Za-z0-9_]+$') { throw "manifest id is invalid: '$($manifest.id)'" }
+          if ($manifest.version -notmatch '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$') { throw "manifest version is invalid: '$($manifest.version)'" }
+          if ($manifest.gameVersion -notmatch '^[0-9]+(\.[0-9]+)+$') { throw "manifest gameVersion is invalid: '$($manifest.gameVersion)'" }
+
           # タグは X.X.X (manifest の version) で、リリース名は過去のリリースと同じ
           # <ModName>-<version>-bs<GameVersion> にする。
           $releaseName = '{0}-{1}-bs{2}' -f $manifest.id, $manifest.version, $manifest.gameVersion
@@ -142,19 +147,27 @@ jobs:
 
       - name: Attach artifact and set release name
         shell: bash
+        env:
+          REPO: ${{ github.repository }}
+          TAG: ${{ needs.build.outputs.tag }}
+          RELEASE_NAME: ${{ needs.build.outputs.release-name }}
+          COMMIT: ${{ needs.build.outputs.commit }}
+          ZIP_NAME: ${{ needs.build.outputs.zip-name }}
+          VERSION: ${{ needs.build.outputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          repo='${{ github.repository }}'
-          tag='${{ needs.build.outputs.tag }}'
-          release_name='${{ needs.build.outputs.release-name }}'
-          sha='${{ needs.build.outputs.commit }}'
-          zip="release/${{ needs.build.outputs.zip-name }}.zip"
+          repo="$REPO"
+          tag="$TAG"
+          release_name="$RELEASE_NAME"
+          sha="$COMMIT"
+          zip="release/${ZIP_NAME}.zip"
           notes="${release_name} ($(printf '%s' "$sha" | cut -c1-7))."
 
           if [ ! -f "$zip" ]; then
             echo "::error::release asset '$zip' not found"; exit 1
           fi
 
-          version='${{ needs.build.outputs.version }}'
+          version="$VERSION"
 
           # セマンティックバージョンのプレリリースは prerelease として作成し、
           # Latest バッジを通常リリースから奪わないようにする。
@@ -180,5 +193,3 @@ jobs:
             gh release create "$tag" --repo "$repo" --title "$release_name" --notes "$notes" --verify-tag "${pre[@]}"
           fi
           gh release upload "$tag" "$zip" --repo "$repo" --clobber
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

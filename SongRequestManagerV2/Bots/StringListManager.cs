@@ -1,4 +1,5 @@
-﻿using SongRequestManagerV2.Interfaces;
+﻿using CatCore.Models.Shared;
+using SongRequestManagerV2.Interfaces;
 using SongRequestManagerV2.Statics;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,33 @@ namespace SongRequestManagerV2.Bots
             this.flags = flag;
         }
 
+        /// <summary>
+        /// Resolves a list name to a file inside the plugin data directory. List names come from chat input,
+        /// so anything that could escape the data directory is rejected.
+        /// </summary>
+        private static bool TryResolveListPath(string filename, out string path)
+        {
+            path = null;
+            if (string.IsNullOrWhiteSpace(filename)
+                || Path.IsPathRooted(filename)
+                || filename.IndexOfAny(new[] { '/', '\\', ':' }) >= 0) {
+                return false;
+            }
+
+            var dataRoot = Path.GetFullPath(Plugin.DataPath);
+            if (!dataRoot.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)) {
+                dataRoot += Path.DirectorySeparatorChar;
+            }
+
+            var candidate = Path.GetFullPath(Path.Combine(dataRoot, filename));
+            if (candidate.Length <= dataRoot.Length || !candidate.StartsWith(dataRoot, StringComparison.OrdinalIgnoreCase)) {
+                return false;
+            }
+
+            path = candidate;
+            return true;
+        }
+
         public bool Readfile(string filename, bool ConvertToLower = false)
         {
             if (this.flags.HasFlag(ListFlags.InMemory)) {
@@ -36,7 +64,10 @@ namespace SongRequestManagerV2.Bots
             }
 
             try {
-                var listfilename = Path.Combine(Plugin.DataPath, filename);
+                if (!TryResolveListPath(filename, out var listfilename)) {
+                    Logger.Error($"Invalid list name: {filename}");
+                    return false;
+                }
                 if (!File.Exists(listfilename)) {
                     File.WriteAllText(listfilename, "");
                 }
@@ -59,13 +90,17 @@ namespace SongRequestManagerV2.Bots
             return false;
         }
 
-        public void Runscript()
+        public void Runscript(IChatUser user, CmdFlags flags = 0)
         {
             try {
                 // BUG: A DynamicText context needs to be applied to each command to allow use of dynamic variables
+                if (this._bot == null) {
+                    Logger.Error("Script execution is unavailable because the bot is not attached.");
+                    return;
+                }
 
                 foreach (var line in this.list) {
-                    this._bot.Parse(null, line, CmdFlags.Local);
+                    this._bot.Parse(user, line, flags); // Scripts run with the privileges of the caller, never with CmdFlags.Local.
                 }
             }
             catch (Exception ex) {
@@ -78,7 +113,10 @@ namespace SongRequestManagerV2.Bots
             var separator = filename.EndsWith(".script") ? "\r\n" : ",";
 
             try {
-                var listfilename = Path.Combine(Plugin.DataPath, filename);
+                if (!TryResolveListPath(filename, out var listfilename)) {
+                    Logger.Error($"Invalid list name: {filename}");
+                    return false;
+                }
 
                 var output = string.Join(separator, this.list.ToArray());
                 File.WriteAllText(listfilename, output);

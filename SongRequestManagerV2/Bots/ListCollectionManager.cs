@@ -1,4 +1,5 @@
-﻿using SongRequestManagerV2.Statics;
+﻿using CatCore.Models.Shared;
+using SongRequestManagerV2.Statics;
 using SongRequestManagerV2.Utils;
 using System;
 using System.Collections.Generic;
@@ -117,10 +118,10 @@ namespace SongRequestManagerV2.Bots
             return false;
         }
 
-        public void Runscript(string listname, ListFlags flags = ListFlags.Unchanged)
+        public void Runscript(string listname, IChatUser user, CmdFlags cmdFlags = 0, ListFlags flags = ListFlags.Unchanged)
         {
             try {
-                this.OpenList(listname, flags).Runscript();
+                this.OpenList(listname, flags).Runscript(user, cmdFlags);
             }
             catch (Exception ex) {
                 Logger.Error(ex);

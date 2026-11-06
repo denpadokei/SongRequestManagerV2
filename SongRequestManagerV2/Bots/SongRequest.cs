@@ -99,6 +99,14 @@ namespace SongRequestManagerV2.Bots
 
         private static readonly ConcurrentDictionary<string, Texture2D> _cachedTextures = new ConcurrentDictionary<string, Texture2D>();
 
+        private static bool IsBeatSaverCdnUrl(string url)
+        {
+            return Uri.TryCreate(url, UriKind.Absolute, out var uri)
+                && uri.Scheme == Uri.UriSchemeHttps
+                && (string.Equals(uri.Host, "beatsaver.com", StringComparison.OrdinalIgnoreCase)
+                    || uri.Host.EndsWith(".beatsaver.com", StringComparison.OrdinalIgnoreCase));
+        }
+
         public SongRequest Init(JSONObject obj)
         {
             _ = this.Init(
@@ -132,9 +140,11 @@ namespace SongRequestManagerV2.Bots
             this._hash = this.SongVersion["hash"].Value;
             this._coverURL = this.SongVersion["coverURL"].Value;
             // as.だのna.だの指定されると重くなるっぽい？
-            this._downloadURL = this.SongVersion["downloadURL"].Value
+            var downloadUrl = this.SongVersion["downloadURL"].Value
                 .Replace(RequestBot.BEATMAPS_AS_CDN_ROOT_URL, RequestBot.BEATMAPS_CDN_ROOT_URL)
                 .Replace(RequestBot.BEATMAPS_NA_CDN_ROOT_URL, RequestBot.BEATMAPS_CDN_ROOT_URL);
+            // The download URL comes from the BeatSaver API; only follow it when it points at the BeatSaver CDN.
+            this._downloadURL = IsBeatSaverCdnUrl(downloadUrl) ? downloadUrl : "";
             if (this._mapDatabase.PPMap.TryGetValue(this.ID, out var pp)) {
                 this.SongNode.Add("pp", new JSONNumber(pp));
             }

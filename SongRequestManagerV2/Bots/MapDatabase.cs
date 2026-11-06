@@ -87,7 +87,8 @@ namespace SongRequestManagerV2.Bots
                 }
             }
             catch (Exception ex) {
-                this._chatManager.QueueChatMessage(ex.ToString());
+                Logger.Error(ex);
+                this._chatManager.QueueChatMessage("Failed to index the song.");
             }
         }
 

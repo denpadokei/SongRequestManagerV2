@@ -747,7 +747,7 @@ namespace SongRequestManagerV2.Models
             var id = this.Bot.GetBeatSaverId(state.Parameter);
 
             JSONNode result = null;
-            var requestUrl = (id != "") ? $"{RequestBot.BEATMAPS_API_ROOT_URL}/maps/id/{id}" : $"{RequestBot.BEATMAPS_API_ROOT_URL}/search/text/0?q={this._normalize.NormalizeBeatSaverString(state.Parameter)}&sortOrder=Relevance";
+            var requestUrl = (id != "") ? $"{RequestBot.BEATMAPS_API_ROOT_URL}/maps/id/{id}" : $"{RequestBot.BEATMAPS_API_ROOT_URL}/search/text/0?q={Uri.EscapeDataString(this._normalize.NormalizeBeatSaverString(state.Parameter))}&sortOrder=Relevance";
             var resp = await WebClient.GetAsync(requestUrl, System.Threading.CancellationToken.None);
 
             if (resp.IsSuccessStatusCode) {
