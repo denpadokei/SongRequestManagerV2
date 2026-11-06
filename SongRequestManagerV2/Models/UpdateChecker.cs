@@ -67,10 +67,11 @@ namespace SongRequestManagerV2.Models
                 }
                 var asaets = releseJson["assets"].AsArray;
                 foreach (var asset in asaets.Children) {
-                    if (asset["content_type"].Value != "application/x-zip-compressed") {
+                    var assetName = asset["name"].Value;
+                    if (!IsZipAsset(asset["content_type"].Value, assetName)) {
                         continue;
                     }
-                    var fileVersion = s_zipFileRegex.Match(asset["name"].Value).Value.Replace("bs", "");
+                    var fileVersion = s_zipFileRegex.Match(assetName).Value.Replace("bs", "");
                     if (string.IsNullOrEmpty(fileVersion)) {
                         continue;
                     }
@@ -105,8 +106,12 @@ namespace SongRequestManagerV2.Models
 
         public async Task<bool> UpdateMod()
         {
-            if (!this.AnyUpdate || string.IsNullOrEmpty(this.DownloadURL)) {
+            if (!this.AnyUpdate) {
                 return true;
+            }
+            if (string.IsNullOrEmpty(this.DownloadURL)) {
+                Logger.Error("No compatible update archive was found for this game version.");
+                return false;
             }
             var zip = await WebClient.GetAsync(this.DownloadURL, CancellationToken.None);
             if (zip == null || !zip.IsSuccessStatusCode) {
@@ -143,6 +148,14 @@ namespace SongRequestManagerV2.Models
             }
             this.AnyUpdate = false;
             return true;
+        }
+
+        private static bool IsZipAsset(string contentType, string name)
+        {
+            return string.Equals(contentType, "application/zip", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(contentType, "application/x-zip-compressed", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(contentType, "application/octet-stream", StringComparison.OrdinalIgnoreCase)
+                || (name != null && name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase));
         }
 
         private static bool IsTrustedDownloadUrl(string url)
