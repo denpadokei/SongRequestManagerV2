@@ -76,8 +76,8 @@ jobs:
       # BeatMods から参照アセンブリと依存 MOD を取得する。
       # このプロジェクトは依存を csproj の DependsOn ではなく manifest.json に持つため、
       # アクションが読む game-version と additional-dependencies を明示する。
-      # アクションは範囲内で最も低いバージョンを選ぶので、対象の GameVersion に
-      # 対応した最小を指定する (BSIPA 4.3.5 は 1.40.8 非対応、4.3.6 が対応済み)。
+      # アクションは範囲内で対象 GameVersion に対応した最も低いバージョンを選ぶ。
+      # CatCore 2.0.0-alpha2 は BeatMods 未登録のため、この一覧には含めず次のステップで取得する。
       - name: Set up Beat Saber
         uses: nicoco007/setup-beat-saber@v1
         with:
@@ -85,12 +85,25 @@ jobs:
           game-version: ${{ steps.manifest.outputs.game-version }}
           additional-dependencies: |
             {
-              "BSIPA": "^4.3.5",
-              "SiraUtil": "^3.1.14",
-              "BeatSaberMarkupLanguage": "^1.12.3",
-              "SongCore": "^3.14.15",
-              "CatCore": "^1.1.0"
+              "BSIPA": "^4.3.6",
+              "SiraUtil": "^3.2.1",
+              "BeatSaberMarkupLanguage": "^1.12.5",
+              "SongCore": "^3.15.3"
             }
+
+      # manifest が要求する CatCore 2.0.0-alpha2 は BeatMods に無いため、
+      # フォークの GitHub Releases から取得して参照用 Libs に置く。
+      # CatCore のバージョンを上げるときは、ここと manifest.json を揃える。
+      - name: Fetch CatCore prerelease
+        shell: pwsh
+        run: |
+          $version = '2.0.0-alpha2'
+          $url = "https://github.com/denpadokei/CatCore/releases/download/${version}/CatCore-${version}-4868e41.zip"
+          $zip = Join-Path $env:RUNNER_TEMP "CatCore-${version}.zip"
+          $extract = Join-Path $env:RUNNER_TEMP "CatCore-${version}"
+          Invoke-WebRequest $url -OutFile $zip
+          Expand-Archive $zip -DestinationPath $extract -Force
+          Copy-Item (Join-Path $extract 'Libs\CatCore.dll') (Join-Path $env:BeatSaberDir 'Libs\CatCore.dll') -Force
 
       - name: Build Release
         shell: pwsh

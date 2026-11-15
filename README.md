@@ -23,16 +23,16 @@ Twitch のチャットから曲のリクエストを受け付け、ゲーム内�
 
 | 項目 | 内容 |
 | --- | --- |
-| Beat Saber | 1.39.1 |
-| 依存 MOD | SongCore 3.14.15 / BSIPA 4.3.5 / CatCore 1.1.0 / SiraUtil 3.1.14 / BeatSaberMarkupLanguage 1.12.3 |
+| Beat Saber | 1.40.8 |
+| 依存 MOD | SongCore 3.15.3 / BSIPA 4.3.6 / CatCore 2.0.0-alpha2 / SiraUtil 3.2.1 / BeatSaberMarkupLanguage 1.12.5 |
 
 ## インストール
 
-1. Beat Saber を 1.39.1 に合わせる (BSManager などのバージョン管理ツールを推奨)
+1. Beat Saber を 1.40.8 に合わせる (BSManager などのバージョン管理ツールを推奨)
 2. BSIPA と上記の依存 MOD をインストールする
-3. [Releases](https://github.com/denpadokei/SongRequestManagerV2/releases) から `SongRequestManagerV2-14.0.3-bs1.39.1.zip` をダウンロードし、`Plugins` と `UserData` フォルダをゲームフォルダへ上書きコピーする
+3. [Releases](https://github.com/denpadokei/SongRequestManagerV2/releases) から `SongRequestManagerV2-14.0.4-rc1-bs1.40.8.zip` をダウンロードし、`Plugins` と `UserData` フォルダをゲームフォルダへ上書きコピーする
 
-Twitch のチャットへ接続するには CatCore が必要です。
+Twitch のチャットへ接続するには CatCore が必要です。CatCore 2.0.0-alpha2 は BeatMods に未登録のため、[CatCore の Releases](https://github.com/denpadokei/CatCore/releases/tag/2.0.0-alpha2) からダウンロードし、`Libs` と `Plugins` へ配置してください。アップグレード後は初回のみ Twitch への再ログインが必要です。
 
 ## 使い方
 
