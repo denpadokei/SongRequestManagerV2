@@ -32,7 +32,9 @@ Twitch のチャットから曲のリクエストを受け付け、ゲーム内�
 2. BSIPA と上記の依存 MOD をインストールする
 3. [Releases](https://github.com/denpadokei/SongRequestManagerV2/releases) から `SongRequestManagerV2-14.0.4-rc1-bs1.40.8.zip` をダウンロードし、`Plugins` と `UserData` フォルダをゲームフォルダへ上書きコピーする
 
-Twitch のチャットへ接続するには CatCore が必要です。CatCore 2.0.0-alpha2 は BeatMods に未登録のため、[CatCore の Releases](https://github.com/denpadokei/CatCore/releases/tag/2.0.0-alpha2) からダウンロードし、`Libs` と `Plugins` へ配置してください。アップグレード後は初回のみ Twitch への再ログインが必要です。
+Twitch のチャットへ接続するには CatCore が必要です。CatCore 2.0.0-alpha2 は BeatMods に未登録のため、[CatCore の Releases](https://github.com/denpadokei/CatCore/releases/tag/2.0.0-alpha2) からダウンロードし、`Libs` と `Plugins` へ配置してください。
+
+CatCore 2.0 では認証情報の保存先が `%LOCALAPPDATA%\.datcore` に変わり、必須スコープ（`user:read:chat` / `user:write:chat` / `user:bot` / `channel:bot` など）も増えています。旧バージョンのトークンはそのままでは使えないため、ゲーム起動時に開く CatCore のポータル（http://localhost:8338）で Twitch へログインし直してください。また、CatCore 1.1.0 系を要求する他の MOD（EnhancedStreamChat など）も 2.0 対応版へ更新する必要があります。
 
 ## 使い方
 

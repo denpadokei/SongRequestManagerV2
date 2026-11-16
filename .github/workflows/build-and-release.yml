@@ -74,8 +74,9 @@ jobs:
           "commit=$($env:GITHUB_SHA)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       # BeatMods から参照アセンブリと依存 MOD を取得する。
-      # このプロジェクトは依存を csproj の DependsOn ではなく manifest.json に持つため、
-      # アクションが読む game-version と additional-dependencies を明示する。
+      # このプロジェクトは csproj に DependsOn item を持たず、依存は manifest.json にある。
+      # setup-beat-saber が読むのは csproj の DependsOn だけなので、
+      # game-version と additional-dependencies をここで明示する。
       # アクションは範囲内で対象 GameVersion に対応した最も低いバージョンを選ぶ。
       # CatCore 2.0.0-alpha2 は BeatMods 未登録のため、この一覧には含めず次のステップで取得する。
       - name: Set up Beat Saber
@@ -94,14 +95,20 @@ jobs:
       # manifest が要求する CatCore 2.0.0-alpha2 は BeatMods に無いため、
       # フォークの GitHub Releases から取得して参照用 Libs に置く。
       # CatCore のバージョンを上げるときは、ここと manifest.json を揃える。
+      # $sha256 はリリースアセットの digest (sha256:) と一致させる。
       - name: Fetch CatCore prerelease
         shell: pwsh
         run: |
           $version = '2.0.0-alpha2'
+          $sha256 = '89a09b679b733cf15e9a1e82c7990aac3f1bf31210342204c8bdebb1becac3e2'
           $url = "https://github.com/denpadokei/CatCore/releases/download/${version}/CatCore-${version}-4868e41.zip"
           $zip = Join-Path $env:RUNNER_TEMP "CatCore-${version}.zip"
           $extract = Join-Path $env:RUNNER_TEMP "CatCore-${version}"
           Invoke-WebRequest $url -OutFile $zip
+          $actual = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $sha256) {
+            throw "CatCore archive hash mismatch: expected $sha256, got $actual"
+          }
           Expand-Archive $zip -DestinationPath $extract -Force
           Copy-Item (Join-Path $extract 'Libs\CatCore.dll') (Join-Path $env:BeatSaberDir 'Libs\CatCore.dll') -Force
 

@@ -9,7 +9,7 @@
   "dependsOn": {
     "SongCore": "^3.15.3",
     "BSIPA": "^4.3.6",
-    "CatCore": "^2.0.0-alpha2",
+    "CatCore": "2.0.0-alpha2",
     "SiraUtil": "^3.2.1",
     "BeatSaberMarkupLanguage": "^1.12.5"
   },
